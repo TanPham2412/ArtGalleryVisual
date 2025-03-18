@@ -1,0 +1,229 @@
+@using Microsoft.Extensions.DependencyInjection
+@inject ArtGalleryContext DbContext
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
+
+@{
+    var token = Antiforgery.GetAndStoreTokens(Context).RequestToken;
+    var userId = User.FindFirst("UserId")?.Value;
+    var defaultAvatar = "/images/authors/default/default-image.png";
+    var userAvatar = defaultAvatar;
+    var currentUser = userId != null ? DbContext.NguoiDungs.FirstOrDefault(u => u.MaNguoiDung == int.Parse(userId)) : null;
+
+    var followersCount = 0;
+    var followingCount = 0;
+
+    if (currentUser != null)
+    {
+        followersCount = DbContext.TheoDois.Count(t => t.MaNguoiDuocTheoDoi == currentUser.MaNguoiDung);
+        followingCount = DbContext.TheoDois.Count(t => t.MaNguoiTheoDoi == currentUser.MaNguoiDung);
+
+        userAvatar = currentUser.GetAvatarPath();
+    }
+}
+
+<input type="hidden" name="__RequestVerificationToken" value="@token" />
+
+<nav class="navbar fixed-top bg-white">
+    <div class="container-fluid">
+        <button class="navbar-toggler border-0" type="button">
+            <i class="fas fa-bars"></i>
+        </button>
+
+        <a class="navbar-brand ms-2" asp-controller="Home" asp-action="Index">
+            <span class="logo-text">Piao<span class="logo-highlight">Yue</span></span>
+        </a>
+
+        <div class="d-flex align-items-center flex-grow-1 justify-content-end">
+            <!-- Search box -->
+            <div class="search-box mx-3 position-relative">
+                <input type="text" class="form-control" id="searchInput" placeholder="Tìm kiếm người dùng">
+                <div class="search-results" id="searchResults"></div>
+            </div>
+
+            <!-- Upload button -->
+            <div class="me-3">
+                <button class="btn btn-primary" onclick="location.href='@Url.Action("Add", "Home")'">
+                    <i class=""></i> Đăng tranh ảnh
+                </button>
+            </div>
+
+            <!-- Nav icons (avatar) -->
+            @if (currentUser != null)
+            {
+                <div class="nav-icons">
+                    <a href="#" class="icon-link"><i class="far fa-envelope"></i></a>
+                    <a href="#" class="icon-link"><i class="far fa-bell"></i></a>
+                    <div class="user-dropdown">
+                        <a href="#" class="icon-link user-avatar" id="userDropdown">
+                            <img src="@userAvatar" alt="User Avatar" class="w-100 h-100 rounded-circle">
+                        </a>
+                        <div class="dropdown-menu" id="userDropdownMenu">
+                            <div class="user-profile-header">
+                                <img src="@userAvatar" alt="User Avatar" class="user-profile-avatar">
+                                <div class="user-profile-info">
+                                    <div class="user-profile-name">@currentUser.TenNguoiDung</div>
+                                    <div class="user-profile-id">ID: @currentUser.MaNguoiDung</div>
+                                </div>
+                            </div>
+                            <div class="follow-stats">
+                                <div class="follow-stat">
+                                    <div class="stat-number">@followersCount</div>
+                                    <div class="stat-label">Người theo dõi</div>
+                                </div>
+                                <div class="follow-stat">
+                                    <div class="stat-number">@followingCount</div>
+                                    <div class="stat-label">Đang theo dõi</div>
+                                </div>
+                            </div>
+                            <div class="dropdown-menu-items">
+                                <a asp-controller="User" asp-action="Profile" asp-route-id="@currentUser.MaNguoiDung" class="dropdown-item">
+                                    <i class="fas fa-user"></i>
+                                    Trang cá nhân
+                                </a>
+                                <a href="#" class="dropdown-item">
+                                    <i class="fas fa-cog"></i>
+                                    Cài đặt
+                                </a>
+                                <a asp-controller="Profile" asp-action="Gallery" asp-route-id="@currentUser.MaNguoiDung" class="dropdown-item">
+                                    <i class="fas fa-palette"></i>
+                                    Tác phẩm của tôi
+                                </a>
+                                <a href="#" class="dropdown-item">
+                                    <i class="fas fa-heart"></i>
+                                    Yêu thích
+                                </a>
+                                <a asp-controller="Account" asp-action="Logout" class="dropdown-item">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                    Đăng xuất
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="nav-icons">
+                    <a asp-controller="Account" asp-action="Login" class="btn btn-outline-primary me-2">Đăng nhập</a>
+                    <a asp-controller="Account" asp-action="Register" class="btn btn-primary">Đăng ký</a>
+                </div>
+            }
+
+            <!-- Grid menu -->
+            <a href="#" class="icon-link ms-3">
+                <i class="fas fa-th"></i>
+            </a>
+        </div>
+    </div>
+</nav>
+
+<script>
+    // Dropdown menu
+    document.getElementById('userDropdown')?.addEventListener('click', function(e) {
+        e.preventDefault();
+        document.getElementById('userDropdownMenu').classList.toggle('show');
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.user-dropdown')) {
+            document.getElementById('userDropdownMenu')?.classList.remove('show');
+        }
+    });
+
+    // Search functionality
+    let searchTimeout;
+    const searchInput = document.getElementById('searchInput');
+    const searchResults = document.getElementById('searchResults');
+
+    searchInput?.addEventListener('input', function() {
+    clearTimeout(searchTimeout);
+    const query = this.value.trim();
+
+    if (query.length === 0) {
+        searchResults.style.display = 'none';
+        return;
+    }
+
+    searchTimeout = setTimeout(() => {
+        fetch(`/Home/SearchUsers?query=${encodeURIComponent(query)}`)
+        .then(response => response.json())
+        .then(users => {
+            console.log('Users data:', users); // Kiểm tra dữ liệu
+            if (users.length > 0) {
+                searchResults.innerHTML = users.map(user => {
+                    // Xây dựng đường dẫn avatar
+                    const avatarPath = user.anhDaiDien 
+                        ? `/images/authors/avatars/${user.tenDangNhap}/${user.anhDaiDien}`
+                        : '/images/authors/default/default-image.png';
+                    
+                    console.log('User:', user); // Kiểm tra thông tin user
+                    console.log('Avatar path:', avatarPath); // Kiểm tra đường dẫn
+
+                    return `
+                    <a href="/User/Profile/${user.maNguoiDung}" class="search-result-item">
+                        <div class="search-result-avatar">
+                            <img src="${avatarPath}" 
+                                 alt="${user.tenNguoiDung}"
+                                 onerror="this.src='/images/authors/default/default-image.png'">
+                        </div>
+                        <div class="search-result-info">
+                            <div class="search-result-name">${user.tenNguoiDung}</div>
+                            <div class="search-result-username">${user.tenDangNhap}</div>
+                        </div>
+                        <button class="follow-button ${user.daTheoDoi ? 'following' : ''}"
+                                onclick="toggleFollow(event, ${user.maNguoiDung})"
+                                data-user-id="${user.maNguoiDung}">
+                            <span>${user.daTheoDoi ? 'Đang theo dõi' : 'Theo dõi'}</span>
+                        </button>
+                    </a>
+                `}).join('');
+                searchResults.style.display = 'block';
+            } else {
+                searchResults.innerHTML = '<div class="p-3">Không tìm thấy kết quả</div>';
+                searchResults.style.display = 'block';
+            }
+        });
+    }, 300);
+});
+
+    // Follow functionality
+    function toggleFollow(event, userId) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        fetch('/Home/ToggleFollow', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+            },
+            body: JSON.stringify(userId)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const button = event.target.closest('.follow-button');
+                button.classList.toggle('following');
+                button.innerHTML = `<span>${button.classList.contains('following') ? 'Đang theo dõi' : 'Theo dõi'}</span>`;
+
+                const followerCountElements = document.querySelectorAll('.follow-stats .follow-stat:first-child .stat-number');
+                followerCountElements.forEach(element => {
+                    element.textContent = data.followerCount;
+                });
+            } else {
+                console.error('Lỗi:', data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }
+
+    // Close search results when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.search-box')) {
+            document.getElementById('searchResults').style.display = 'none';
+        }
+    });
+</script>

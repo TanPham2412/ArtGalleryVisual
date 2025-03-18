@@ -1,0 +1,300 @@
+﻿/* Layout */
+.art-detail {
+    padding-top: 40px;
+}
+
+/* Art Image Section */
+.art-image {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+    .art-image img {
+        width: 100%;
+        height: auto;
+        display: block;
+    }
+
+/* Artist Profile Section */
+.artist-profile {
+    display: flex;
+    align-items: flex-start; 
+    margin-bottom: 30px;
+}
+
+.artist-avatar {
+    width: 60px !important;
+    height: 60px !important;
+    border-radius: 50% !important;
+    object-fit: cover !important;
+}
+
+.artist-details {
+    display: flex;
+    flex-direction: column;
+    margin-left: 10px; 
+    gap: 8px;
+}
+
+.artist-name {
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    color: #333 !important;
+}
+
+.follow-btn {
+    display: inline-block;
+    padding: 4px 120px;
+    background: #0096fa;
+    color: #fff;
+    border-radius: 20px;
+    font-size: 16px;
+    text-decoration: none;
+    transition: background-color 0.3s;
+    width: fit-content;
+}
+
+    .follow-btn:hover {
+        background: #0077cc;
+        color: #fff;
+    }
+
+
+/* Art Info Section */
+.art-info {
+    padding: 24px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.art-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 16px;
+}
+
+.art-price {
+    font-size: 20px;
+    margin-bottom: 24px;
+}
+
+.price-label {
+    color: #666;
+    margin-right: 10px;
+}
+
+.price-amount {
+    font-weight: 600;
+    color: #ff4b2b;
+}
+
+/* Action Buttons */
+.action-buttons {
+    margin-bottom: 32px;
+}
+
+    .action-buttons .btn {
+        padding: 12px 20px;
+        font-weight: 600;
+    }
+
+.btn-outline-primary {
+    border-color: #0096fa;
+    color: #0096fa;
+}
+
+    .btn-outline-primary:hover {
+        background: #0096fa;
+        color: #fff;
+    }
+
+/* Other Works Section */
+.other-works {
+    margin-top: 40px;
+}
+
+.section-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 24px;
+}
+
+.other-work-item {
+    display: block;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: transform 0.3s;
+}
+
+    .other-work-item:hover {
+        transform: translateY(-5px);
+    }
+
+    .other-work-item img {
+        width: 100%;
+        height: 100px;
+        object-fit: cover;
+    }
+
+.view-all-link {
+    display: block;
+    text-align: center;
+    color: #0096fa;
+    text-decoration: none;
+    margin-top: 15px;
+    font-weight: 500;
+}
+
+    .view-all-link:hover {
+        text-decoration: underline;
+    }
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .other-work-item img {
+        height: 80px;
+    }
+
+    .artwork-title {
+        font-size: 20px;
+    }
+
+    .artwork-price {
+        font-size: 18px;
+    }
+}
+    
+.other-work-item {
+    text-decoration: none;
+    color: inherit;
+}
+  
+.work-name {
+    margin-top: 4px;
+    font-size: 16px;
+    font-weight: bold;
+    text-align: center;
+}
+
+/* Category and Tags */
+.category-tags {
+    padding: 20px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.category-label, .tags-label {
+    font-weight: 600;
+    color: #333;
+    font-size: 16px;
+    margin-right: 10px;
+    min-width: fit-content; /* Đảm bảo label không bị wrap */
+}
+
+.category-name {
+    color: #666;
+    font-weight: 500;
+    text-decoration: none;
+    transition: color 0.2s ease;
+
+}
+    .category-name:hover {
+        color: #000;
+    }
+
+.tags {
+    display: flex;
+    align-items: center;
+}
+
+.tags-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+.tag-link {
+    display: inline-block;
+    padding: 4px 12px;
+    background: #f0f2f5;
+    border-radius: 20px;
+    color: #1a73e8;
+    text-decoration: none;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+    .tag-link:hover {
+        background: #e3e9ff;
+        color: #1557b0;
+        text-decoration: none;
+    }
+
+/* Owner Actions */
+.art-image {
+    position: relative;
+}
+
+.owner-actions {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    display: flex;
+    gap: 8px;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.art-image:hover .owner-actions {
+    opacity: 1;
+}
+
+.edit-btn, .delete-btn {
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: none;
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+}
+
+.edit-btn {
+    background-color: #0096fa;
+    text-decoration: none;
+}
+
+    .edit-btn:hover {
+        background-color: #0077cc;
+        color: white;
+    }
+
+.delete-btn {
+    background-color: #dc3545;
+}
+
+    .delete-btn:hover {
+        background-color: #bb2d3b;
+    }
+
+/* Modal styles */
+.modal-content {
+    border-radius: 12px;
+}
+
+.modal-header {
+    border-bottom: 1px solid #eee;
+}
+
+.modal-footer {
+    border-top: 1px solid #eee;
+}

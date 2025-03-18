@@ -1,0 +1,177 @@
+﻿@model IEnumerable<ArtGallery.Models.Tranh>
+
+@using Microsoft.Extensions.DependencyInjection
+@inject ArtGalleryContext DbContext
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+<!-- CSS-->
+<link rel="stylesheet" href="~/css/style.css">
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+@await Html.PartialAsync("_NavigationPartial")
+
+@{  
+    var token = Antiforgery.GetAndStoreTokens(Context).RequestToken;
+}
+
+<input type="hidden" name="__RequestVerificationToken" value="@token" />
+
+
+
+<div class="container mt-5 pt-5">
+    <!-- Tags -->
+    <div class="tag container">
+        <a href="#" class="tag-items illustration">Tranh minh họa (Illustration Art)</a>
+        <a href="#" class="tag-items concept">Tranh concept (Concept Art)</a>
+        <a href="#" class="tag-items anime">Tranh anime/manga (Anime/Manga Art)</a>
+        <a href="#" class="tag-items pixel">Tranh pixel (Pixel Art)</a>
+        <a href="#" class="tag-items vector">Tranh vector (Vector Art)</a>
+        <a href="#" class="tag-items lowpoly">Tranh low-poly (Low-Poly Art)</a>
+    </div>
+    <!-- Swiper -->
+    <div class="swiper mySwiper">
+        <div class="swiper-wrapper">
+            <!-- Chứa các slide bên trong, giúp SwiperJS nhận diện và xử lý hiệu ứng trượt. -->
+            <!-- Slide 1 -->
+            <div class="swiper-slide">
+                <!-- Xác định một slide trong swiper-wrapper, giúp SwiperJS hiểu và xử lý hiệu ứng trượt. -->
+                <div class="work-card">
+                    <div class="card-img-wrapper">
+                        <img src="~/images/introduce/amano2.jpg" alt="Art1">
+                    </div>
+                </div>
+            </div>
+            <!-- Slide 2 -->
+            <div class="swiper-slide">
+                <div class="work-card">
+                    <div class="card-img-wrapper">
+                        <img src="~/images/introduce/Ambassador.jpg" alt="Art2">
+                    </div>
+                </div>
+            </div>
+            <!-- Slide 3 -->
+            <div class="swiper-slide">
+                <div class="work-card">
+                    <div class="card-img-wrapper">
+                        <img src="~/images/introduce/diamond-city.jpg" alt="Art3">
+                    </div>
+                </div>
+            </div>
+            <!-- Slide 4 -->
+            <div class="swiper-slide">
+                <div class="work-card">
+                    <div class="card-img-wrapper">
+                        <img src="~/images/introduce/eboywp1.jpg" alt="Art4">
+                    </div>
+                </div>
+            </div>
+            <!-- Slide 5 -->
+            <div class="swiper-slide">
+                <div class="work-card">
+                    <div class="card-img-wrapper">
+                        <img src="~/images/introduce/green_source.jpg" alt="Art5">
+                    </div>
+                </div>
+            </div>
+            <!-- Slide 6 -->
+            <div class="swiper-slide">
+                <div class="work-card">
+                    <div class="card-img-wrapper">
+                        <img src="~/images/introduce/pxfuel.jpg" alt="Art6">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Nút điều hướng -->
+        <div class="swiper-button-next"></div>
+        <div class="swiper-button-prev"></div>
+    </div>
+
+    <!-- Recommended pics -->
+    <div class="recommended-pics">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3 class="section-title">Được đề xuất</h3>
+        </div>
+
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-4">
+            @foreach (var item in Model)
+            {
+                <div>
+                    <div class="pic-item">
+                        <div class="image-wrapper">
+                            <a asp-controller="Artwork" asp-action="Display" asp-route-id="@item.MaTranh" class="art-link">
+                                <img src="@item.DuongDanAnh" alt="@item.TieuDe">
+                            </a>
+                            <button class="like-button" onclick="toggleLike(this)">
+                                <i class="far fa-heart"></i>
+                            </button>
+                        </div>
+
+                        <div class="img-info mt-2">
+                            <a asp-controller="Artwork" asp-action="Display" asp-route-id="@item.MaTranh" class="art-link">
+                                <h6 class="artwork-title">@item.TieuDe</h6>
+                            </a>
+                            <div class="artist-info d-flex align-items-center">
+                                <div class="artist-avatar">
+                                    <img src="@item.MaNguoiDungNavigation.GetAvatarPath()" alt="@item.MaNguoiDungNavigation.TenNguoiDung">
+                                </div>
+                                <span class="artist-name">@item.MaNguoiDungNavigation.TenNguoiDung</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>  
+            }
+        </div>
+    </div>
+ </div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script>
+        const swiper = new Swiper('.mySwiper', {
+            slidesPerView: 3,        // Hiển thị chính xác 3 slides
+            spaceBetween: 30,       // Khoảng cách nhỏ giữa các slides
+            loop: true,             // Lặp vô tận
+            autoplay: {
+                delay: 2000,
+                disableOnInteraction: false,
+            },
+            navigation: {
+                nextEl: '.swiper-button-next',
+                prevEl: '.swiper-button-prev',
+            },
+            breakpoints: {
+                320: {
+                    slidesPerView: 1,
+                    spaceBetween: 20
+                },
+                768: {
+                    slidesPerView: 2,
+                    spaceBetween: 30
+                },
+                1024: {
+                    slidesPerView: 3,
+                    spaceBetween: 30
+                }
+            }
+        });
+    </script>
+
+    <script>
+        function toggleLike(button) {
+            // Toggle class active
+            button.classList.toggle('active');
+
+            // Thay đổi icon
+            const icon = button.querySelector('i');
+            if (button.classList.contains('active')) {
+                icon.classList.remove('far');
+                icon.classList.add('fas');
+            } else {
+                icon.classList.remove('fas');
+                icon.classList.add('far');
+            }
+        }
+    </script>

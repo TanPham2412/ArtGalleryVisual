@@ -1,0 +1,244 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: #fff;
+    overflow: hidden;
+}
+
+/*Slide chuyển động*/
+.slideshow-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+}
+
+.slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    opacity: 0;
+    transition: opacity 1s ease-in-out;
+}
+
+    .slide.active {
+        opacity: 1;
+    }
+
+/*Register container*/
+.register-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.register-box {
+    width: 360px;
+    background: #fff;
+    border-radius: 16px;
+    padding: 40px;
+    text-align: center;
+} 
+
+/* Logo */
+.logo-text {
+    font-size: 48px;
+    font-weight: bold;
+    margin: 0 0 8px;
+    color: #3da0e1;
+}
+
+.logo-highlight {
+    font-size: 48px;
+    font-weight: bold;
+    margin: 0 0 8px;
+    color: #70a8d2;
+}
+
+.register-text {
+    padding-top: 20px;
+    color: #1F1F1F;
+    font-size: 24px;
+    font-weight: bold;
+    margin: 0 0 32px;
+}
+
+. /* Form styles */
+.form-group {
+    position: relative;
+    margin-bottom: 16px;
+}
+
+.form-input {
+    width: 100%;
+    height: 48px;
+    padding: 0 45px 0 16px;
+    background-color: #F8F8F8;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    box-sizing: border-box;
+}
+
+/*Icon mắt*/
+.toggle-password {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #666;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+}
+
+/* Ẩn icon mắt mặc định của trình duyệt */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+    display: none;
+}
+
+input[type="password"]::-webkit-contacts-auto-fill-button,
+input[type="password"]::-webkit-credentials-auto-fill-button {
+    visibility: hidden;
+    display: none !important;
+    pointer-events: none;
+    position: absolute;
+    right: 0;
+}
+
+.form-group input[type="password"],
+.form-group input[type="text"] {
+    width: 100%;
+    position: relative;
+}
+
+/* Terms checkbox */
+.terms-group {
+    margin: 24px 0;
+}
+
+.terms-label {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 14px;
+    color: #1F1F1F;
+}
+
+    .terms-label input[type="checkbox"] {
+        margin-top: 3px;
+    }
+
+
+.next-button {
+    width: 100%;
+    height: 48px;
+    background-color: #75B8FF;
+    color: white;
+    border: none;
+    border-radius: 200px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    margin: 16px 0;
+}
+
+    .next-button:hover {
+        background-color: #0096FA;
+    }
+
+/* Validation messages */
+.validation-message {
+    color: #dc3545;
+    font-size: 12px;
+    margin-top: 4px;
+    display: block;
+}
+
+.login-link a {
+    color: #0096FA;
+    text-decoration: none;
+    text-align: center;
+}
+
+.login-divider {
+    position: relative;
+    text-align: center;
+    margin: 32px 0;
+}
+
+    .login-divider span {
+        background: #fff;
+        color: #86868B;
+        font-size: 12px;
+        padding: 0 12px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .login-divider::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: #E5E5E5;
+        z-index: 0;
+    }
+
+/* Social login styles */
+.social-login {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 32px;
+}
+
+.social-btn {
+    width: 40px;
+    height: 40px;
+    border: 1px solid #E5E5E5;
+    border-radius: 50%;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+}
+
+    .social-btn img {
+        width: 20px;
+        height: 20px;
+    }
+
+/* Footer */
+.register-footer {
+    margin-top: 24px;
+    text-align: center;
+    font-size: 12px;
+    color: #86868B;
+    line-height: 1.5;
+}
+
+    .register-footer a {
+        color: #0096FA;
+        text-decoration: none;
+    }

@@ -1,0 +1,80 @@
+﻿@model ArtGallery.Models.Account.LoginViewModel
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập - PiaoYue</title>
+    <link rel="stylesheet" href="~/css/login1_register.css">
+    <script src="~/js/login_register.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="slideshow-container">
+        <div class="slide active" style="background-image: url('/images/backgrounds/Ambassador.jpg')"></div>
+        <div class="slide" style="background-image: url('/images/backgrounds/amano2.jpg')"></div>
+    </div>
+
+    <div class="register-container">
+        <div class="register-box">
+            <!-- Logo -->
+            <div class="register-header">
+                <span class="logo-text">Piao<span class="logo-highlight">Yue</span></span>
+                <p class="register-text">Đăng nhập</p>
+            </div>
+            
+            <form asp-action="Login1" asp-controller="Account" method="post">
+                <!-- Tên đăng nhập -->
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="validation-message">
+                        @Html.ValidationSummary(true)
+                    </div>
+                }
+                <div class="form-group">
+                    <input asp-for="TenDangNhap" class="form-input" placeholder="Tên đăng nhập hoặc email">
+                    <span asp-validation-for="TenDangNhap" class="validation-message"></span>
+                </div>
+
+                <!-- Email -->
+                <div class="form-group">
+                    <div style="position: relative; width: 100%;">
+                        <input asp-for="MatKhau" type="password" class="form-input" placeholder="Mật khẩu">
+                        <button type="button" class="toggle-password" onclick="togglePassword(this)">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <span asp-validation-for="MatKhau" class="validation-message"></span>
+                </div>
+
+                <!-- Xác nhận -->
+                <button type="submit" class="next-button">Đăng nhập</button>
+            </form>
+
+            <div class="login-divider">
+                <span>Đăng nhập với tài khoản hiện có</span>
+            </div>
+            <!-- Đăng nhập bằng mạng xã hội -->
+            <div class="social-login">
+                <div class="social-login">
+                    <a href="@Url.Action("GoogleLogin", "Account")" class="social-btn google">
+                        <img src="~/images/icons/google.png" alt="Google">
+                    </a>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="register-footer">
+                <p>
+                    Trang web này được bảo vệ bởi reCAPTCHA Enterprise và Google
+                    <a href="#">Chính sách bảo mật</a> và <a href="#">Điều khoản dịch vụ</a> được áp dụng.
+                </p>
+            </div>
+            <div class="login-link">
+                Chưa có tài khoản? <a href="@Url.Action("Register", "Account")">Đăng Ký</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

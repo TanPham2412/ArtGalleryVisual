@@ -1,0 +1,184 @@
+﻿body {
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: #fff;
+    overflow: hidden;
+}
+
+.slideshow-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+}
+
+.slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    opacity: 0;
+    transition: opacity 1s ease-in-out;
+}
+
+    .slide.active {
+        opacity: 1;
+    }
+
+
+
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.login-box {
+    width: 360px; 
+    background: #fff;
+    border-radius: 16px;
+    padding: 40px;
+    text-align: center;
+}
+
+/* Logo */
+.logo-text {
+    font-size: 48px;
+    font-weight: bold;
+    margin: 0 0 8px;
+    color: #3da0e1;
+}
+
+.logo-highlight {
+    font-size: 48px;
+    font-weight: bold;
+    margin: 0 0 8px;
+    color: #70a8d2;
+}
+
+.journey-text {
+    color: #1F1F1F;
+    font-size: 14px;
+    margin: 0 0 32px;
+}
+
+/* Button styles */
+.button-group {
+    margin-bottom: 32px;
+}
+
+/*Button đăng ký*/
+.btn-create-account {
+    width: 100%;
+    height: 40px;
+    background-color: #0096FA;
+    color: white;
+    border: none;
+    border-radius: 200px;
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 8px;
+    cursor: pointer;
+}
+
+/*Button đăng nhập*/
+.btn-login {
+    width: 100%;
+    height: 40px;
+    background-color: #F2F2F2;
+    color: #1F1F1F;
+    border: none;
+    border-radius: 200px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* Divider styles */
+.login-divider {
+    position: relative;
+    text-align: center;
+    margin: 32px 0;
+}
+
+    .login-divider span {
+        background: #fff;
+        color: #86868B;
+        font-size: 12px;
+        padding: 0 12px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .login-divider::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: #E5E5E5;
+        z-index: 0;
+    }
+
+/* Social login styles */
+.social-login {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 32px;
+}
+
+.social-btn {
+    width: 40px;
+    height: 40px;
+    border: 1px solid #E5E5E5;
+    border-radius: 50%;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+}
+
+    .social-btn img {
+        width: 20px;
+        height: 20px;
+    }
+
+/* Footer styles */
+.login-footer {
+    color: #86868B;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+    .login-footer p {
+        margin: 0;
+    }
+
+    .login-footer a {
+        color: #0096FA;
+        text-decoration: none;
+    }
+
+/* Hover effects */
+.btn-create-account:hover {
+    background-color: #0084E0;
+}
+
+.btn-login:hover {
+    background-color: #E5E5E5;
+}
+
+.social-btn:hover {
+    background-color: #F8F8F8;
+}

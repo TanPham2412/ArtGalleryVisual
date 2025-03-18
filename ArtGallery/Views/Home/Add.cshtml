@@ -1,0 +1,142 @@
+﻿@model ArtGallery.Models.Tranh
+
+<link rel="stylesheet" href="~/css/add.css">
+@await Html.PartialAsync("_NavigationPartial")
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-5" role="alert" style="z-index: 1050;">
+        <i class="fas fa-check-circle me-2"></i>
+        @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="upload-form">
+                <h3 class="text-center mb-4 pt-4">Đăng tranh mới</h3>
+
+                <form id="addForm" asp-controller="Home" asp-action="Add" method="post" enctype="multipart/form-data">
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="TieuDe" class="form-label required">Tiêu đề</label>
+                        <input asp-for="TieuDe" class="form-control" required />
+                        <span asp-validation-for="TieuDe" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="MoTa" class="form-label">Mô tả</label>
+                        <textarea asp-for="MoTa" class="form-control" rows="3"></textarea>
+                        <span asp-validation-for="MoTa" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Gia" class="form-label required">Giá (VNĐ)</label>
+                        <input asp-for="Gia" class="form-control" type="number" min="0" required />
+                        <span asp-validation-for="Gia" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="SoLuongTon" class="form-label required">Số lượng</label>
+                        <input asp-for="SoLuongTon" class="form-control" type="number" min="1" value="1" required />
+                        <span asp-validation-for="SoLuongTon" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label required">Thể loại</label>
+                        <select name="SelectedCategories" class="form-select" multiple required>
+                            @foreach (var category in ViewBag.Categories)
+                            {
+                                <option value="@category.Value">@category.Text</option>
+                            }
+                        </select>
+                        <small class="text-muted">Giữ Ctrl để chọn nhiều thể loại</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Tags</label>
+                        <div class="tags-input">
+                            <input name="TagsInput" class="form-control" placeholder="Nhập tags" />
+                        </div>
+                        <div class="recommended-tags">
+                            <label>Recommended tags</label>
+                            <div class="tag-suggestions pt-2">
+                                <span class="tag-item">#fantasy</span>
+                                <span class="tag-item">#digital</span>
+                                <span class="tag-item">#illustration</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label required">Hình ảnh</label>
+                        <input type="file" name="ImageFile" class="form-control" accept="image/*" required />
+                    </div>
+                    <!-- Warning Section -->
+                    <div class="warning-section">
+                        <div class="warning-title">Lưu ý khi đăng tác phẩm:</div>
+                        <ul class="warning-list">
+                            <li>Không đăng tải nội dung phản cảm, bạo lực, máu me</li>
+                            <li>Không đăng tải hình ảnh vi phạm bản quyền hoặc sở hữu trí tuệ</li>
+                            <li>Không đăng tải nội dung chính trị, tôn giáo nhạy cảm</li>
+                            <li>Không đăng tải nội dung quảng cáo, spam</li>
+                        </ul>
+                        <div class="terms-note">
+                            Vi phạm các điều khoản trên có thể dẫn đến việc tài khoản bị khóa. Xem thêm
+                            <a href="#" class="terms-link">Điều khoản sử dụng</a>
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-upload me-2"></i>Đăng tranh
+                        </button>
+                        <a asp-action="Index" class="btn btn-secondary ms-2">
+                            <i class="fas fa-arrow-left me-2"></i>Quay lại
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        $(document).ready(function () {
+            $('#addForm').on('submit', function (e) {
+                e.preventDefault();
+                var formData = new FormData(this);
+
+                $.ajax({
+                    url: '@Url.Action("Add", "Home")',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        // Reload trang để hiển thị thông báo
+                        location.reload();
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Error:', error);
+                        alert('Có lỗi xảy ra khi đăng tranh');
+                    }
+                });
+            });
+
+            // Tự động ẩn thông báo sau 3 giây
+            setTimeout(function() {
+                $('.alert').alert('close');
+            }, 3000);
+        });
+    </script>
+}

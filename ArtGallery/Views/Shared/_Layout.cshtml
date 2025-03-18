@@ -1,0 +1,103 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Piao Yue Art Gallery</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <!-- CSS-->
+    <link rel="stylesheet" href="~/css/style.css">
+    <!-- Swiper CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    
+</head>
+<body>
+
+
+    @RenderBody()
+    
+    <footer class="footer">
+        <div class="container-fluid">
+            <div class="row">
+                <!-- Logo -->
+                <div class="col-md-3">
+                    <div class="footer-brand">
+                        <img src="~/images/introduce/piaoyuelogo.png" alt="PiaoYue Art" class="footer-logo">
+                        <h2 class="web-name">PIAOYUE<br>ART<br>GALLERY</h2>
+                    </div>
+                </div>
+
+                <!-- Ve PiaoYue -->
+                <div class="col-md-3">
+                    <h5 class="footer-title">VỀ PIAOYUE</h5>
+                    <ul class="footer-links">
+                        <li><a href="#">Giới thiệu</a></li>
+                        <li><a href="#">Tất cả tác phẩm</a></li>
+                        <li><a href="#">Thư viện hình ảnh</a></li>
+                        <li><a href="#">Tin tức - thông báo</a></li>
+                        <li><a href="#">Liên hệ</a></li>
+                    </ul>
+                </div>
+
+                <!-- Chinh sach -->
+                <div class="col-md-3">
+                    <h5 class="footer-title">CHÍNH SÁCH</h5>
+                    <ul class="footer-links">
+                        <li><a href="#">Chính sách bảo mật</a></li>
+                        <li><a href="#">Chính sách mua hàng & thanh toán</a></li>
+                        <li><a href="#">Chính sách giao hàng & vận chuyển</a></li>
+                        <li><a href="#">Chính sách đổi trả & hoàn tiền</a></li>
+                        <li><a href="#">Chính sách bản quyền & sở hữu trí tuệ</a></li>
+                        <li><a href="#">Chính sách khách hàng & hỗ trợ</a></li>
+                    </ul>
+                </div>
+
+                <!-- Social -->
+                <div class="col-md-3">
+                    <div class="social-links">
+                        <a href="http://facebook.com/minhtan.pham.127201/" class="social-link facebook"><i class="fab fa-facebook-f"></i> Like on Facebook</a>
+                        <a href="#" class="social-link instagram"><i class="fab fa-instagram"></i> Follow on Instagram</a>
+                        <a href="#" class="social-link youtube"><i class="fab fa-youtube"></i> Subscribe on Youtube</a>
+                        <a href="#" class="social-link tiktok"><i class="fab fa-tiktok"></i> Follow on Tiktok</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact -->
+            <div class="footer-contact">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="contact-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>XX Bùi Quang Là, Phường XX, QX, TPHCM</span>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="contact-item">
+                            <i class="fas fa-phone"></i>
+                            <span>Viettel: 0336499431</span>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="contact-item">
+                            <i class="fas fa-barcode"></i>
+                            <span>MST: 111111111</span>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="contact-item">
+                            <i class="fas fa-envelope"></i>
+                            <span>info@piaoyue.art</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

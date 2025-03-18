@@ -1,0 +1,124 @@
+@model ArtGallery.Models.Tranh
+
+<link rel="stylesheet" href="~/css/add.css">
+@await Html.PartialAsync("_NavigationPartial")
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-5" role="alert" style="z-index: 1050;">
+        <i class="fas fa-check-circle me-2"></i>
+        @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="upload-form">
+                <h3 class="text-center mb-4 pt-4">Chỉnh sửa tranh</h3>
+
+                <form id="editForm" asp-controller="Artwork" asp-action="Edit" method="post" enctype="multipart/form-data">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="MaTranh" />
+                    <input type="hidden" asp-for="MaNguoiDung" />
+                    <input type="hidden" asp-for="DuongDanAnh" />
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="TieuDe" class="form-label required">Tiêu đề</label>
+                        <input asp-for="TieuDe" class="form-control" required />
+                        <span asp-validation-for="TieuDe" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="MoTa" class="form-label">Mô tả</label>
+                        <textarea asp-for="MoTa" class="form-control" rows="3"></textarea>
+                        <span asp-validation-for="MoTa" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Gia" class="form-label required">Giá (VNĐ)</label>
+                        <input asp-for="Gia" class="form-control" type="number" min="0" required />
+                        <span asp-validation-for="Gia" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="SoLuongTon" class="form-label required">Số lượng</label>
+                        <input asp-for="SoLuongTon" class="form-control" type="number" min="1" required />
+                        <span asp-validation-for="SoLuongTon" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label required">Thể loại</label>
+                        <select name="SelectedCategories" class="form-select" multiple required>
+                            @foreach (var category in ViewBag.Categories)
+                            {
+                                var isSelected = Model.MaTheLoais.Any(c => c.MaTheLoai == int.Parse(category.Value));
+                                <option value="@category.Value" selected="@isSelected">@category.Text</option>
+                            }
+                        </select>
+                        <small class="text-muted">Giữ Ctrl để chọn nhiều thể loại</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Tags</label>
+                        <div class="tags-input">
+                            <input name="TagsInput" class="form-control" placeholder="Nhập tags"
+                                   value="@string.Join(",", Model.MaTags.Select(t => t.TenTag))" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Hình ảnh mới (không bắt buộc)</label>
+                        <input type="file" name="ImageFile" class="form-control" accept="image/*" />
+                        <small class="text-muted">Để trống nếu không muốn thay đổi ảnh</small>
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Lưu thay đổi
+                        </button>
+                        <a href="@Url.Action("Display", "Artwork", new { id = Model.MaTranh })" class="btn btn-secondary ms-2">
+                            <i class="fas fa-arrow-left me-2"></i>Quay lại
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        $(document).ready(function () {
+            $('#editForm').on('submit', function (e) {
+                e.preventDefault();
+                var formData = new FormData(this);
+
+                $.ajax({
+                    url: '@Url.Action("Edit", "Artwork")',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        if (response.success) {
+                            window.location.href = '@Url.Action("Profile", "User", new { id = Model.MaNguoiDung })';
+                        } else {
+                            alert('Có lỗi xảy ra khi cập nhật');
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Error:', error);
+                        alert('Có lỗi xảy ra khi cập nhật');
+                    }
+                });
+            });
+        });
+    </script>
+}

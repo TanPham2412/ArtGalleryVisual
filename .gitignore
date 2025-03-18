@@ -1,0 +1,19 @@
+ # Build results
+[Bb]in/
+[Oo]bj/
+.vs/
+
+# Settings
+appsettings.Development.json
+*.Development.json
+.env
+
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Visual Studio cache/options directory
+.vs/

@@ -1,0 +1,752 @@
+﻿﻿body {
+    background-color: #f8f9fa;
+    font-family: Arial, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+/* Navbar */
+.navbar {
+    box-shadow: 0 1px 2px rgba(255, 255, 255, 0.1);
+    padding: 8px 16px;
+    height: 56px;
+}
+
+/* Logo */
+.logo-text {
+    font-size: 24px;
+    font-weight: bold;
+    color: #3da0e1;
+}
+
+.logo-highlight {
+    color: #70a8d2;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+/* Search box */
+.search-box {
+    margin-left: 24px !important;
+    margin-right: 24px !important;
+}
+
+    .search-box input {
+        width: 500px !important;
+        height: 40px !important;
+        border-radius: 10px !important;
+        padding: 8px 16px !important;
+        background-color: #f8f9fa !important;
+        border: 1px solid #ffffff !important;
+    }   
+/* Search Results */
+.search-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    max-height: 400px;
+    overflow-y: auto;
+    z-index: 1000;
+    display: none;
+}
+
+.search-result-item {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+}
+
+    .search-result-item:hover {
+        background-color: #f8f9fa;
+    }
+
+.search-result-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 12px;
+    overflow: hidden;
+}
+
+    .search-result-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+.search-result-info {
+    flex: 1;
+    text-decoration: none;
+}
+
+.search-result-name {
+    font-weight: bold;
+    margin-bottom: 2px;
+    text-decoration: none;
+}
+
+.search-result-username {
+    color: #666;
+    font-size: 14px;
+    text-decoration: none;
+}
+/*Follow Button*/
+.follow-button {
+    padding: 6px 16px;
+    border-radius: 20px;
+    border: none;
+    background: #0096fa;
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+    .follow-button.following {
+        background: #e0e0e0;
+        color: #333;
+    }
+
+    .follow-button:hover {
+        opacity: 0.9;
+    }
+
+    .follow-button.following:hover {
+        background: #ff4444;
+        color: white;
+    }
+
+        .follow-button.following:hover::before {
+            content: "Hủy theo dõi";
+            display: inline;
+        }
+
+        .follow-button.following:hover span {
+            display: none;
+        }
+
+/* Upload button */
+.btn-primary {
+    width: 200px;
+    height: 40px;
+    background-color: #0096fa;
+    border: none;
+    border-radius: 500px;
+    padding: 8px 16px;
+    margin-right: 24px; /* Khoảng cách đều với các icon */
+    margin-left: 24px; /* Khoảng cách với search box */
+}
+
+/* Nav icons container */
+.nav-icons {
+    display: flex;
+    align-items: center;
+    gap: 24px; /* Khoảng cách đều giữa các icon */
+    margin-right: 24px; /* Khoảng cách với grid menu */
+}
+
+/* Icon links */
+.icon-link {
+    color: #777;
+    font-size: 20px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+}
+
+/* Grid menu icon */
+.grid-menu {
+    margin-left: 24px; /* Khoảng cách với nav icons */
+}
+
+/* User avatar */
+.user-avatar {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    border-radius: 50%;
+    overflow: hidden;
+    display: block;
+}
+
+    .user-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+    }
+
+/* swiper */
+.swiper {
+    width: 100%;
+    max-width: 1250px;
+    margin: 0 auto;
+    padding: 0 30px; /* Giảm padding container */
+    margin-bottom: 60px;
+    margin-top: 30px;
+}
+
+/* Slide */
+.swiper-slide {
+    width: calc(100% / 3); /* Giảm khoảng cách giữa slides */
+    height: auto;
+    padding: 0 5px; /* Giảm padding của slide */
+}
+
+/* Work card */
+.work-card {
+    width: 100%;
+    max-width: 380px; /* Tăng kích thước tối đa của card */
+    margin: 0 auto; /* Căn giữa card */
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+/* Card image */
+.card-img-wrapper {
+    position: relative;
+    width: 100%;
+    padding-top: 75%; /* Giữ tỷ lệ 4:3 */
+}
+
+    .card-img-wrapper img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+/* Navigation buttons */
+.swiper-button-next,
+.swiper-button-prev {
+    /* Thiết lập kích thước và hình dạng cơ bản */
+    width: 50px;
+    height: 50px;
+    background: rgba(128, 128, 128, 0.5);
+    border-radius: 50%;
+    /* Đảm bảo vị trí tuyệt đối */
+    position: absolute;
+    top: 50%;
+    transform: translateY(0%);
+    /* Ẩn mặc định */
+    opacity: 0;
+    transition: opacity 0.3s;
+    /* Đảm bảo nút luôn tròn */
+    box-sizing: border-box;
+    min-width: 50px;
+    min-height: 50px;
+    max-width: 50px;
+    max-height: 50px;
+}
+
+    /* Xóa mũi tên mặc định */
+    .swiper-button-next::after,
+    .swiper-button-prev::after {
+        display: none;
+    }
+
+    /* Tạo mũi tên custom */
+    .swiper-button-next::before,
+    .swiper-button-prev::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 12px;
+        height: 12px;
+        border-right: 4px solid rgba(255, 255, 255, 0.8);
+        border-top: 4px solid rgba(255, 255, 255, 0.8);
+    }
+
+    /* Xoay mũi tên */
+    .swiper-button-next::before {
+        transform: translate(-60%, -50%) rotate(45deg);
+    }
+
+    .swiper-button-prev::before {
+        transform: translate(-40%, -50%) rotate(-135deg);
+    }
+
+/* Hiện nút khi hover */
+.swiper:hover .swiper-button-next,
+.swiper:hover .swiper-button-prev {
+    opacity: 1;
+}
+
+/* Vị trí nút */
+.swiper-button-prev {
+    left: 35px;
+}
+
+.swiper-button-next {
+    right: 35px;
+}
+
+/* Tags container */
+.tag {
+    display: flex;
+    justify-content: center;
+    align-items: center; /* Căn giữa theo chiều dọc */
+    gap: 12px; /* Giảm khoảng cách giữa các tag */
+    flex-wrap: nowrap; /* Ngăn không cho wrap xuống dòng */
+    margin-bottom: 40px;
+    width: 100%;
+    overflow-x: auto; /* Cho phép scroll ngang nếu không đủ chỗ */
+    padding: 10px 0; /* Thêm padding để thanh scroll không che mất nội dung */
+}
+
+
+/* Tag items chung */
+.tag-items {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 16px; /* Giảm padding để tag nhỏ hơn */
+    border-radius: 100px;
+    text-decoration: none;
+    font-size: 13px;
+    color: #fff;
+    transition: all 0.2s ease;
+    white-space: nowrap; /* Ngăn text wrap xuống dòng */
+    flex-shrink: 0; /* Ngăn các tag bị co lại */
+}
+
+/* Ẩn thanh scrollbar nhưng vẫn cho phép scroll */
+.tag::-webkit-scrollbar {
+    display: none;
+}
+
+.tag {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+}
+
+/* Màu riêng cho từng tag */
+.tag-items.illustration {
+    background-color: #8CB4C5;
+}
+
+.tag-items.concept {
+    background-color: #8BC34A;
+}
+
+.tag-items.anime {
+    background-color: #CE93D8;
+}
+
+.tag-items.pixel {
+    background-color: #E091B1;
+}
+
+.tag-items.vector {
+    background-color: #7986CB;
+}
+
+.tag-items.lowpoly {
+    background-color: #81C784;
+}
+
+/* Recommended Section */
+.recommended-pics {
+    padding: 0 15px;
+}
+
+.section-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+/* Pic Item */
+.pic-item {
+    position: relative;
+    transition: transform 0.2s;
+}
+
+    .pic-item:hover {
+        transform: translateY(-2px);
+    }
+
+/* Image Wrapper */
+.image-wrapper {
+    position: relative;
+    width: 100%;
+    padding-top: 75%; /* Tỷ lệ 4:3 */
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+    .image-wrapper img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+/* Like Button */
+.like-button {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+    .like-button:hover {
+        background: #fff;
+        transform: scale(1.1);
+    }
+
+    .like-button i {
+        color: #666;
+        font-size: 16px;
+    }
+
+    /* Trạng thái đã like */
+    .like-button.active i {
+        color: #ff4444;
+        /* Thêm hiệu ứng rung nhẹ khi like */
+        animation: likeEffect 0.3s ease;
+    }
+
+@keyframes likeEffect {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.2);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+/* Image Info */
+.img-info {
+    padding: 8px 0;
+}
+
+.img-title {
+    font-size: 14px;
+    margin-bottom: 8px;
+    color: #333;
+}
+
+.artist-info {
+    display: flex;
+    align-items: center;
+}
+
+.artist-avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    margin-right: 8px;
+    overflow: hidden;
+}
+
+    .artist-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+.artist-name {
+    font-size: 12px;
+    color: #666;
+}
+
+/* Xoa dau gach chan vi gan linklink*/
+.art-link {
+    text-decoration: none;
+    color: inherit;
+}
+
+    .art-link:hover {
+        text-decoration: none;
+        color: inherit;
+    }
+
+        .art-link:hover .img-title {
+            text-decoration: none;
+            color: inherit;
+        }
+
+/* Footer */
+.footer {
+    background-color: #000;
+    color: #fff;
+    padding: 60px 0 30px;
+    margin-top: 200px;
+}
+
+/* Footer Brand */
+.footer-brand {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.footer-logo {
+    width: 90px;
+    height: 90px;
+}
+
+.web-name {
+    font-size: 26px;
+    font-weight: bold;
+    line-height: 1.2;
+    margin: 0;
+    color: #fff;
+}
+
+/* footer title */
+.footer-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #ffffff;
+    margin-bottom: 20px;
+}
+
+/* Footer links */
+.footer-links {
+    list-style: none;
+    padding: 0;
+}
+
+    .footer-links li {
+        margin-bottom: 10px;
+    }
+
+    .footer-links a {
+        color: #999;
+        text-decoration: none;
+        font-size: 14px;
+        transition: color 0.3s;
+    }
+
+
+        .footer-links a:hover {
+            color: #fff;
+        }
+
+/* Social links */
+.social-links {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.social-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #fff;
+    text-decoration: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    font-size: 14px;
+    transition: opacity 0.3s;
+}
+
+    .social-link:hover {
+        opacity: 0.8;
+    }
+
+    .social-link.facebook {
+        background: #1877f2;
+    }
+
+    .social-link.instagram {
+        background: linear-gradient(45deg, #405de6, #5851db, #833ab4, #c13584, #e1306c, #fd1d1d);
+    }
+
+    .social-link.youtube {
+        background: #ff0000;
+    }
+
+    .social-link.tiktok {
+        background: #000;
+    }
+
+/* Contact info */
+.footer-contact {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 30px;
+}
+
+.contact-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #999;
+    font-size: 14px;
+}
+
+    .contact-item i {
+        color: #ff4b2b;
+    }
+
+/* Certifications */
+.certifications {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin-top: 30px;
+    padding-top: 30px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.cert-img {
+    height: 40px;
+    opacity: 0.7;
+    transition: opacity 0.3s;
+}
+
+    .cert-img:hover {
+        opacity: 1;
+    }
+
+/* Responsive */
+@media (max-width: 992px) {
+    .footer-logo, .footer-title {
+        text-align: center;
+    }
+
+    .footer-links {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .social-links {
+        align-items: center;
+    }
+
+    .contact-item {
+        justify-content: center;
+        margin-bottom: 15px;
+    }
+}
+
+/* User Dropdown Menu */
+.user-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    width: 300px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    display: none;
+    z-index: 1000;
+}
+
+/* User profile header trong dropdown */
+.user-profile-header {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+}
+
+.user-profile-avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    margin-right: 12px;
+    margin-left: 12px;
+    overflow: hidden;
+    object-fit: cover;
+}
+
+    .user-profile-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+.user-profile-info {
+    flex: 1;
+}
+
+.user-profile-name {
+    font-weight: bold;
+    font-size: 16px;
+    margin-bottom: 4px;
+}
+
+.user-profile-id {
+    color: #666;
+    font-size: 14px;
+}
+
+.follow-stats {
+    display: flex;
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+}
+
+.follow-stat {
+    flex: 1;
+    text-align: center;
+}
+
+.stat-number {
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.stat-label {
+    color: #666;
+    font-size: 14px;
+}
+
+.dropdown-menu-items {
+    padding: 8px 0;
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    padding: 8px 16px;
+    color: #333;
+    text-decoration: none;
+    transition: background-color 0.2s;
+}
+
+    .dropdown-item:hover {
+        background-color: #f8f9fa;
+    }
+
+    .dropdown-item i {
+        margin-right: 12px;
+        width: 20px;
+        text-align: center;
+    }

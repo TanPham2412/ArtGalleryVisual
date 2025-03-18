@@ -1,0 +1,158 @@
+@model ArtGallery.Models.Tranh
+@{
+    var currentUserId = User.FindFirst("UserId")?.Value;
+    var isOwner = currentUserId != null && Model.MaNguoiDung == int.Parse(currentUserId);
+}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="~/css/style.css">
+<link rel="stylesheet" href="~/css/display.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+@await Html.PartialAsync("_NavigationPartial")
+
+<div class="container art-detail mt-5 pt-5">
+    <div class="row g-0">
+        <!-- Art Image -->
+        <div class="col-lg-8">
+            <div class="art-image">
+                <img src="@Model.DuongDanAnh" alt="@Model.TieuDe">
+                @if (isOwner)
+                {
+                    <div class="owner-actions">
+                        <a href="@Url.Action("Edit", "Artwork", new { id = Model.MaTranh })" class="edit-btn">
+                            <i class="fas fa-edit"></i> Sửa
+                        </a>
+                        <button type="button" class="delete-btn" onclick="confirmDelete(@Model.MaTranh)">
+                            <i class="fas fa-trash"></i> Xóa
+                        </button>
+                    </div>
+                }
+            </div>
+            <!-- Category and Tags -->
+            <div class="category-tags">
+                <div class="category mb-3">
+                    <span class="category-label">Thể loại:</span>
+                    @foreach (var category in Model.MaTheLoais)
+                    {
+                        <a asp-controller="Artwork" asp-action="ByCategory" asp-route-id="@category.MaTheLoai" class="category-name me-2">
+                            @category.TenTheLoai
+                        </a>
+                    }
+                </div>
+                <div class="tags d-flex align-items-center">
+                    <span class="tags-label">Tags:</span>
+                    <div class="tags-container">
+                        @foreach (var tag in Model.MaTags)
+                        {
+                            <a asp-controller="Artwork" asp-action="ByTag" asp-route-id="@tag.MaTag" class="tag-link">
+                                #@tag.TenTag
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Art Info -->
+        <div class="col-lg-4">
+            <div class="art-info">
+                <!-- Artist Info -->
+                <div class="artist-profile d-flex align-items-center mb-4">
+                    <img src="@Model.MaNguoiDungNavigation.GetAvatarPath()" alt="Artist" class="artist-avatar">
+                    <div class="artist-details ms-3">
+                        <h5 class="artist-name mb-0">@Model.MaNguoiDungNavigation.TenNguoiDung</h5>
+                        <a href="#" class="follow-btn">Follow</a>
+                    </div>
+                </div>
+
+                <!-- Art Details -->
+                <h2 class="art-title mb-3">@Model.TieuDe</h2>
+                <div class="art-price mb-4">
+                    <span class="price-label">Giá:</span>
+                    <span class="price-amount">@Model.Gia.ToString("N0") VND</span>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <button class="btn btn-outline-primary btn-lg w-100 mb-3">
+                        <i class="fas fa-shopping-cart me-2"></i>Thêm vào giỏ hàng
+                    </button>
+                    <button class="btn btn-outline-primary btn-lg w-100">
+                        <i class="far fa-heart me-2"></i>Yêu thích
+                    </button>
+                </div>
+
+                @if (ViewBag.OtherWorks != null && ViewBag.OtherWorks.Count > 0)
+                {
+                    <div class="other-works mt-5">
+                        <h5 class="section-title">Các tác phẩm khác của @Model.MaNguoiDungNavigation.TenNguoiDung</h5>
+                        <div class="row g-3">
+                            @foreach (var work in ViewBag.OtherWorks)
+                            {
+                                <div class="col-4">
+                                    <a asp-action="Display" asp-route-id="@work.MaTranh" class="other-work-item">
+                                        <img src="@work.DuongDanAnh" alt="@work.TieuDe" class="img-fluid rounded">
+                                        <div class="work-info">
+                                            <p class="work-name">@work.TieuDe</p>
+                                        </div>
+                                    </a>
+                                </div>
+                            }
+                        </div>
+                        <a asp-controller="Profile" asp-action="Gallery" asp-route-id="@Model.MaNguoiDung"
+                           class="view-all-link mt-3 d-block text-center">
+                            Xem tất cả tác phẩm của @Model.MaNguoiDungNavigation.TenNguoiDung
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (isOwner)
+{
+    <div class="modal fade" id="deleteModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Xác nhận xóa</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    Bạn có chắc chắn muốn xóa tác phẩm này không?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    @Html.AntiForgeryToken()
+                    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+                    <script>
+                        function confirmDelete(artworkId) {
+                            if (confirm('Bạn có chắc chắn muốn xóa tranh này không?')) {
+                                $.ajax({
+                                    url: '/Artwork/Delete/' + artworkId,
+                                    type: 'POST',
+                                    headers: {
+                                        'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                                    },
+                                    success: function (response) {
+                                        if (response.success) {
+                                            alert(response.message);
+                                            window.location.href = response.redirectUrl;
+                                        } else {
+                                            alert(response.message);
+                                        }
+                                    },
+                                    error: function () {
+                                        alert('Có lỗi xảy ra khi xóa tranh');
+                                    }
+                                });
+                            }
+                        }
+                    </script>
+                </div>
+            </div>
+        </div>
+    </div>
+}
