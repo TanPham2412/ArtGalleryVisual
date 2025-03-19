@@ -22,7 +22,6 @@
   <ItemGroup>
     <Folder Include="wwwroot\images\authors\avatars\" />
     <Folder Include="wwwroot\images\icons\" />
-    <Folder Include="wwwroot\images\products\" />
   </ItemGroup>
 
 </Project>

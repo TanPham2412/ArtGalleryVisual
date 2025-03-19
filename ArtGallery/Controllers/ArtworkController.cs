@@ -62,24 +62,54 @@ namespace ArtGallery.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(Tranh model, IFormFile? ImageFile, string TagsInput, List<int> SelectedCategories)
         {
-            if (!ModelState.IsValid)
+            try 
             {
+                ModelState.Remove("MaNguoiDungNavigation");
+                
+                if (!ModelState.IsValid)
+                {
+                    ViewBag.Categories = await _artworkRepository.GetCategories();
+                    TempData["ErrorMessage"] = "Dữ liệu không hợp lệ";
+                    return View(model);
+                }
+
+                var currentUserId = int.Parse(User.FindFirst("UserId")?.Value ?? "0");
+                
+                if (model.Gia < 0)
+                {
+                    ViewBag.Categories = await _artworkRepository.GetCategories();
+                    TempData["ErrorMessage"] = "Giá không thể là số âm";
+                    return View(model);
+                }
+                
+                if (model.SoLuongTon < 0)
+                {
+                    ViewBag.Categories = await _artworkRepository.GetCategories();
+                    TempData["ErrorMessage"] = "Số lượng không thể là số âm";
+                    return View(model);
+                }
+
+                var result = await _artworkRepository.UpdateArtwork(model, ImageFile, TagsInput, SelectedCategories, currentUserId);
+
+                if (result.success)
+                {
+                    TempData["SuccessMessage"] = "Cập nhật thành công!";
+                    return RedirectToAction("Display", new { id = model.MaTranh });
+                }
+                else
+                {
+                    ViewBag.Categories = await _artworkRepository.GetCategories();
+                    TempData["ErrorMessage"] = result.message;
+                    return View(model);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi cập nhật tranh");
                 ViewBag.Categories = await _artworkRepository.GetCategories();
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi cập nhật tranh";
                 return View(model);
             }
-
-            var currentUserId = int.Parse(User.FindFirst("UserId")?.Value ?? "0");
-            var result = await _artworkRepository.UpdateArtwork(model, ImageFile, TagsInput, SelectedCategories, currentUserId);
-
-            if (result.success)
-            {
-                TempData["SuccessMessage"] = result.message;
-                return RedirectToAction(nameof(Display), new { id = model.MaTranh });
-            }
-
-            TempData["ErrorMessage"] = result.message;
-            ViewBag.Categories = await _artworkRepository.GetCategories();
-            return View(model);
         }
 
         [HttpPost]

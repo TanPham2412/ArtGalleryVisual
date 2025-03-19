@@ -18,11 +18,15 @@
             <div class="upload-form">
                 <h3 class="text-center mb-4 pt-4">Chỉnh sửa tranh</h3>
 
-                <form id="editForm" asp-controller="Artwork" asp-action="Edit" method="post" enctype="multipart/form-data">
+                <form asp-controller="Artwork" asp-action="Edit" method="post" enctype="multipart/form-data">
                     @Html.AntiForgeryToken()
                     <input type="hidden" asp-for="MaTranh" />
                     <input type="hidden" asp-for="MaNguoiDung" />
                     <input type="hidden" asp-for="DuongDanAnh" />
+                    <input type="hidden" asp-for="NgayDang" />
+                    <input type="hidden" asp-for="TrangThai" />
+                    <input type="hidden" asp-for="DaBan" />
+                    <input type="hidden" asp-for="MaNguoiDungNavigation" />
                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
                     <div class="mb-3">
@@ -89,36 +93,15 @@
     </div>
 </div>
 
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger mt-3">
+        @TempData["ErrorMessage"]
+    </div>
+}
+
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
-
-    <script>
-        $(document).ready(function () {
-            $('#editForm').on('submit', function (e) {
-                e.preventDefault();
-                var formData = new FormData(this);
-
-                $.ajax({
-                    url: '@Url.Action("Edit", "Artwork")',
-                    type: 'POST',
-                    data: formData,
-                    processData: false,
-                    contentType: false,
-                    success: function (response) {
-                        if (response.success) {
-                            window.location.href = '@Url.Action("Profile", "User", new { id = Model.MaNguoiDung })';
-                        } else {
-                            alert('Có lỗi xảy ra khi cập nhật');
-                        }
-                    },
-                    error: function (xhr, status, error) {
-                        console.error('Error:', error);
-                        alert('Có lỗi xảy ra khi cập nhật');
-                    }
-                });
-            });
-        });
-    </script>
 }
