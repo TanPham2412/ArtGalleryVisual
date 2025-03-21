@@ -9,7 +9,7 @@ public partial class BinhLuan
 
     public int MaTranh { get; set; }
 
-    public int MaNguoiDung { get; set; }
+    public string MaNguoiDung { get; set; } = null!;
 
     public string NoiDung { get; set; } = null!;
 

@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 
 namespace ArtGallery.Models;
 
-public partial class ArtGalleryContext : DbContext
+public partial class ArtGalleryContext : IdentityDbContext<NguoiDung, IdentityRole, string>
 {
     public ArtGalleryContext()
     {
@@ -27,8 +29,6 @@ public partial class ArtGalleryContext : DbContext
 
     public virtual DbSet<Medium> Media { get; set; }
 
-    public virtual DbSet<NguoiDung> NguoiDungs { get; set; }
-
     public virtual DbSet<NoiBat> NoiBats { get; set; }
 
     public virtual DbSet<TheLoai> TheLoais { get; set; }
@@ -39,9 +39,20 @@ public partial class ArtGalleryContext : DbContext
 
     public virtual DbSet<Tranh> Tranhs { get; set; }
 
-
+    public virtual DbSet<NguoiDung> NguoiDungs { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder);
+        
+        // Đặt tên bảng theo schema của bạn
+        modelBuilder.Entity<NguoiDung>().ToTable("nguoi_dung");
+        modelBuilder.Entity<IdentityRole>().ToTable("roles");
+        modelBuilder.Entity<IdentityUserRole<string>>().ToTable("user_roles");
+        modelBuilder.Entity<IdentityUserClaim<string>>().ToTable("user_claims");
+        modelBuilder.Entity<IdentityUserLogin<string>>().ToTable("user_logins");
+        modelBuilder.Entity<IdentityRoleClaim<string>>().ToTable("role_claims");
+        modelBuilder.Entity<IdentityUserToken<string>>().ToTable("user_tokens");
+
         modelBuilder.Entity<BinhLuan>(entity =>
         {
             entity.HasKey(e => e.MaBinhLuan).HasName("PK__binh_lua__300DD2D8D7F67231");
@@ -107,12 +118,14 @@ public partial class ArtGalleryContext : DbContext
                 .HasColumnType("decimal(18, 2)")
                 .HasColumnName("so_tien");
 
-            entity.HasOne(d => d.MaNguoiMuaNavigation).WithMany(p => p.GiaoDiches)
+            entity.HasOne(d => d.MaNguoiMuaNavigation)
+                .WithMany(p => p.GiaoDiches)
                 .HasForeignKey(d => d.MaNguoiMua)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__giao_dich__ma_ng__2354350C");
 
-            entity.HasOne(d => d.MaTranhNavigation).WithMany(p => p.GiaoDiches)
+            entity.HasOne(d => d.MaTranhNavigation)
+                .WithMany(p => p.GiaoDiches)
                 .HasForeignKey(d => d.MaTranh)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__giao_dich__ma_tr__24485945");
@@ -134,12 +147,14 @@ public partial class ArtGalleryContext : DbContext
                 .HasColumnType("datetime")
                 .HasColumnName("ngay_thich");
 
-            entity.HasOne(d => d.MaNguoiDungNavigation).WithMany(p => p.LuotThiches)
+            entity.HasOne(d => d.MaNguoiDungNavigation)
+                .WithMany(p => p.LuotThiches)
                 .HasForeignKey(d => d.MaNguoiDung)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__luot_thic__ma_ng__1411F17C");
 
-            entity.HasOne(d => d.MaTranhNavigation).WithMany(p => p.LuotThiches)
+            entity.HasOne(d => d.MaTranhNavigation)
+                .WithMany(p => p.LuotThiches)
                 .HasForeignKey(d => d.MaTranh)
                 .HasConstraintName("FK__luot_thic__ma_tr__131DCD43");
         });
@@ -186,73 +201,6 @@ public partial class ArtGalleryContext : DbContext
             entity.HasOne(d => d.MaNguoiDungNavigation).WithMany(p => p.Media)
                 .HasForeignKey(d => d.MaNguoiDung)
                 .HasConstraintName("FK__media__ma_nguoi___2CDD9F46");
-        });
-
-        modelBuilder.Entity<NguoiDung>(entity =>
-        {
-            entity.HasKey(e => e.MaNguoiDung).HasName("PK__nguoi_du__19C32CF7F6564FF8");
-
-            entity.ToTable("nguoi_dung");
-
-            entity.HasIndex(e => e.TenNguoiDung, "UQ__nguoi_du__073A9BE65892B795").IsUnique();
-
-            entity.HasIndex(e => e.TenDangNhap, "UQ__nguoi_du__363698B350854AD2").IsUnique();
-
-            entity.HasIndex(e => e.Email, "UQ__nguoi_du__AB6E616435DAC6DE").IsUnique();
-
-            entity.Property(e => e.MaNguoiDung).HasColumnName("ma_nguoi_dung");
-            entity.Property(e => e.AnhDaiDien).HasColumnName("anh_dai_dien");
-            entity.Property(e => e.BaiHat)
-                .HasMaxLength(255)
-                .HasColumnName("bai_hat");
-            entity.Property(e => e.CoverImage).HasColumnName("cover_image");
-            entity.Property(e => e.DiaChi)
-                .HasMaxLength(255)
-                .HasColumnName("dia_chi");
-            entity.Property(e => e.Email)
-                .HasMaxLength(100)
-                .HasColumnName("email");
-            entity.Property(e => e.GioiTinh)
-                .HasMaxLength(10)
-                .HasColumnName("gioi_tinh");
-            entity.Property(e => e.HienThiDiaChi)
-                .HasMaxLength(10)
-                .HasDefaultValue("Public")
-                .HasColumnName("hien_thi_dia_chi");
-            entity.Property(e => e.HienThiGioiTinh)
-                .HasMaxLength(10)
-                .HasDefaultValue("Public")
-                .HasColumnName("hien_thi_gioi_tinh");
-            entity.Property(e => e.HienThiNamSinh)
-                .HasMaxLength(10)
-                .HasDefaultValue("Public")
-                .HasColumnName("hien_thi_nam_sinh");
-            entity.Property(e => e.HienThiNgaySinh)
-                .HasMaxLength(10)
-                .HasDefaultValue("Public")
-                .HasColumnName("hien_thi_ngay_sinh");
-            entity.Property(e => e.LoaiNguoiDung)
-                .HasMaxLength(10)
-                .HasDefaultValue("user")
-                .HasColumnName("loai_nguoi_dung");
-            entity.Property(e => e.MatKhau)
-                .HasMaxLength(255)
-                .HasColumnName("mat_khau");
-            entity.Property(e => e.MoTa).HasColumnName("mo_ta");
-            entity.Property(e => e.NgaySinh).HasColumnName("ngay_sinh");
-            entity.Property(e => e.NgayTao)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime")
-                .HasColumnName("ngay_tao");
-            entity.Property(e => e.SoDienThoai)
-                .HasMaxLength(15)
-                .HasColumnName("so_dien_thoai");
-            entity.Property(e => e.TenDangNhap)
-                .HasMaxLength(50)
-                .HasColumnName("ten_dang_nhap");
-            entity.Property(e => e.TenNguoiDung)
-                .HasMaxLength(50)
-                .HasColumnName("ten_nguoi_dung");
         });
 
         modelBuilder.Entity<NoiBat>(entity =>
@@ -397,6 +345,16 @@ public partial class ArtGalleryContext : DbContext
         });
 
         OnModelCreatingPartial(modelBuilder);
+    }
+
+    // Thêm phương thức OnConfiguring để cấu hình connection string cho EF Core tools
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        if (!optionsBuilder.IsConfigured)
+        {
+            // Cấu hình connection string cho dotnet ef migrations
+            optionsBuilder.UseSqlServer(Environment.GetEnvironmentVariable("ART_GALLERY", EnvironmentVariableTarget.User));
+        }
     }
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);

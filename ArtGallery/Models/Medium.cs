@@ -7,7 +7,7 @@ public partial class Medium
 {
     public int MaMedia { get; set; }
 
-    public int MaNguoiDung { get; set; }
+    public string MaNguoiDung { get; set; }
 
     public string? LoaiMedia { get; set; }
 

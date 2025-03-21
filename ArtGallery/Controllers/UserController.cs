@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Mvc;
 using ArtGallery.Repositories.Interfaces;
 using ArtGallery.Models;
 using ArtGallery.Repositories;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ArtGallery.Controllers
 {
@@ -9,28 +11,49 @@ namespace ArtGallery.Controllers
     {
         private readonly IUserRepository _userRepository;
         private readonly ILogger<UserController> _logger;
+        private readonly UserManager<NguoiDung> _userManager;
 
-        public UserController(IUserRepository userRepository, ILogger<UserController> logger)
+        public UserController(
+            IUserRepository userRepository, 
+            ILogger<UserController> logger,
+            UserManager<NguoiDung> userManager)
         {
             _userRepository = userRepository;
             _logger = logger;
+            _userManager = userManager;
         }
 
-        public async Task<IActionResult> Profile(int id)
+        public async Task<IActionResult> Profile(string id)
         {
             try
             {
+                if (string.IsNullOrEmpty(id))
+                {
+                    var currentUser = await _userManager.GetUserAsync(User);
+                    if (currentUser != null)
+                    {
+                        id = currentUser.Id;
+                    }
+                    else
+                    {
+                        return RedirectToAction("Login", "Account");
+                    }
+                }
+
                 var result = await _userRepository.GetUserProfile(id);
 
                 if (result == null)
                 {
-                    return NotFound();
+                    return NotFound("Không tìm thấy người dùng");
                 }
 
                 var (user, followersCount, followingCount) = result.Value;
 
                 ViewBag.FollowersCount = followersCount;
                 ViewBag.FollowingCount = followingCount;
+                
+                ViewBag.IsOwnProfile = User.Identity.IsAuthenticated && 
+                                      (await _userManager.GetUserAsync(User))?.Id == id;
 
                 return View(user);
             }
@@ -43,28 +66,44 @@ namespace ArtGallery.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize]
         public async Task<IActionResult> UpdateProfile([FromForm] NguoiDung model, IFormFile profileImage, IFormFile coverImage, List<string> LoaiMedia, List<string> DuongDan)
         {
             try
             {
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (currentUser == null)
+                {
+                    return Json(new { success = false, message = "Bạn cần đăng nhập để thực hiện thao tác này" });
+                }
+
+                if (currentUser.Id != model.Id)
+                {
+                    return Json(new { success = false, message = "Bạn không có quyền chỉnh sửa hồ sơ này" });
+                }
+
+                model.Id = currentUser.Id;
+                
                 if (coverImage != null && coverImage.Length > 0)
                 {
                     _logger.LogInformation($"Đã nhận được file ảnh bìa: {coverImage.FileName}, Size: {coverImage.Length} bytes");
                 }
 
                 var result = await _userRepository.UpdateProfile(model, profileImage, coverImage, LoaiMedia, DuongDan);
-                
-                return Json(new { 
-                    success = result.success, 
-                    message = result.message 
+
+                return Json(new
+                {
+                    success = result.success,
+                    message = result.message
                 });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Lỗi khi cập nhật profile người dùng {UserId}", model.MaNguoiDung);
-                return Json(new { 
-                    success = false, 
-                    message = "Có lỗi xảy ra khi cập nhật profile" 
+                _logger.LogError(ex, "Lỗi khi cập nhật profile người dùng {UserId}", model.Id);
+                return Json(new
+                {
+                    success = false,
+                    message = "Có lỗi xảy ra khi cập nhật profile"
                 });
             }
         }

@@ -7,7 +7,7 @@ public partial class Tranh
 {
     public int MaTranh { get; set; }
 
-    public int MaNguoiDung { get; set; }
+    public string MaNguoiDung { get; set; }
 
     public string TieuDe { get; set; } = null!;
 

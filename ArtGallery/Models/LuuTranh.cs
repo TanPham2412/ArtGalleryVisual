@@ -7,7 +7,7 @@ public partial class LuuTranh
 {
     public int MaLuuTranh { get; set; }
 
-    public int MaNguoiDung { get; set; }
+    public string MaNguoiDung { get; set; }
 
     public int MaTranh { get; set; }
 

@@ -1,22 +1,21 @@
-@using Microsoft.Extensions.DependencyInjection
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<NguoiDung> UserManager
 @inject ArtGalleryContext DbContext
 @inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
 
 @{
     var token = Antiforgery.GetAndStoreTokens(Context).RequestToken;
-    var userId = User.FindFirst("UserId")?.Value;
+    var currentUser = User.Identity.IsAuthenticated ? await UserManager.GetUserAsync(User) : null;
     var defaultAvatar = "/images/authors/default/default-image.png";
     var userAvatar = defaultAvatar;
-    var currentUser = userId != null ? DbContext.NguoiDungs.FirstOrDefault(u => u.MaNguoiDung == int.Parse(userId)) : null;
 
     var followersCount = 0;
     var followingCount = 0;
 
     if (currentUser != null)
     {
-        followersCount = DbContext.TheoDois.Count(t => t.MaNguoiDuocTheoDoi == currentUser.MaNguoiDung);
-        followingCount = DbContext.TheoDois.Count(t => t.MaNguoiTheoDoi == currentUser.MaNguoiDung);
-
+        followersCount = DbContext.TheoDois.Count(t => t.MaNguoiDuocTheoDoi == currentUser.Id);
+        followingCount = DbContext.TheoDois.Count(t => t.MaNguoiTheoDoi == currentUser.Id);
         userAvatar = currentUser.GetAvatarPath();
     }
 }
@@ -34,20 +33,17 @@
         </a>
 
         <div class="d-flex align-items-center flex-grow-1 justify-content-end">
-            <!-- Search box -->
             <div class="search-box mx-3 position-relative">
                 <input type="text" class="form-control" id="searchInput" placeholder="Tìm kiếm người dùng">
                 <div class="search-results" id="searchResults"></div>
             </div>
 
-            <!-- Upload button -->
             <div class="me-3">
                 <button class="btn btn-primary" onclick="location.href='@Url.Action("Add", "Home")'">
                     <i class=""></i> Đăng tranh ảnh
                 </button>
             </div>
 
-            <!-- Nav icons (avatar) -->
             @if (currentUser != null)
             {
                 <div class="nav-icons">
@@ -62,7 +58,7 @@
                                 <img src="@userAvatar" alt="User Avatar" class="user-profile-avatar">
                                 <div class="user-profile-info">
                                     <div class="user-profile-name">@currentUser.TenNguoiDung</div>
-                                    <div class="user-profile-id">ID: @currentUser.MaNguoiDung</div>
+                                    <div class="user-profile-id">ID: @currentUser.Id</div>
                                 </div>
                             </div>
                             <div class="follow-stats">
@@ -76,7 +72,7 @@
                                 </div>
                             </div>
                             <div class="dropdown-menu-items">
-                                <a asp-controller="User" asp-action="Profile" asp-route-id="@currentUser.MaNguoiDung" class="dropdown-item">
+                                <a asp-controller="User" asp-action="Profile" asp-route-id="@currentUser.Id" class="dropdown-item">
                                     <i class="fas fa-user"></i>
                                     Trang cá nhân
                                 </a>
@@ -84,7 +80,7 @@
                                     <i class="fas fa-cog"></i>
                                     Cài đặt
                                 </a>
-                                <a asp-controller="Profile" asp-action="Gallery" asp-route-id="@currentUser.MaNguoiDung" class="dropdown-item">
+                                <a asp-controller="Profile" asp-action="Gallery" asp-route-id="@currentUser.Id" class="dropdown-item">
                                     <i class="fas fa-palette"></i>
                                     Tác phẩm của tôi
                                 </a>
@@ -92,7 +88,7 @@
                                     <i class="fas fa-heart"></i>
                                     Yêu thích
                                 </a>
-                                <a asp-controller="Account" asp-action="Logout" class="dropdown-item">
+                                <a href="@Url.Action("LogoutDirect", "Home")" class="dropdown-item">
                                     <i class="fas fa-sign-out-alt"></i>
                                     Đăng xuất
                                 </a>
@@ -109,7 +105,6 @@
                 </div>
             }
 
-            <!-- Grid menu -->
             <a href="#" class="icon-link ms-3">
                 <i class="fas fa-th"></i>
             </a>
@@ -118,76 +113,89 @@
 </nav>
 
 <script>
-    // Dropdown menu
     document.getElementById('userDropdown')?.addEventListener('click', function(e) {
         e.preventDefault();
         document.getElementById('userDropdownMenu').classList.toggle('show');
     });
 
-    // Close dropdown when clicking outside
     document.addEventListener('click', function(e) {
         if (!e.target.closest('.user-dropdown')) {
             document.getElementById('userDropdownMenu')?.classList.remove('show');
         }
     });
 
-    // Search functionality
     let searchTimeout;
     const searchInput = document.getElementById('searchInput');
     const searchResults = document.getElementById('searchResults');
 
-    searchInput?.addEventListener('input', function() {
-    clearTimeout(searchTimeout);
-    const query = this.value.trim();
+    if (searchInput && searchResults) {
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            const query = this.value.trim();
 
-    if (query.length === 0) {
-        searchResults.style.display = 'none';
-        return;
-    }
+            if (query.length === 0) {
+                searchResults.style.display = 'none';
+                return;
+            }
 
-    searchTimeout = setTimeout(() => {
-        fetch(`/Home/SearchUsers?query=${encodeURIComponent(query)}`)
-        .then(response => response.json())
-        .then(users => {
-            console.log('Users data:', users); // Kiểm tra dữ liệu
-            if (users.length > 0) {
-                searchResults.innerHTML = users.map(user => {
-                    // Xây dựng đường dẫn avatar
-                    const avatarPath = user.anhDaiDien 
-                        ? `/images/authors/avatars/${user.tenDangNhap}/${user.anhDaiDien}`
-                        : '/images/authors/default/default-image.png';
+            searchTimeout = setTimeout(() => {
+                console.log("Đang tìm kiếm: " + query); // Kiểm tra
+                
+                fetch(`/Home/SearchUsers?query=${encodeURIComponent(query)}`)
+                .then(response => {
+                    console.log("Trạng thái phản hồi:", response.status);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log("Kết quả tìm kiếm:", data); // Kiểm tra dữ liệu nhận được
                     
-                    console.log('User:', user); // Kiểm tra thông tin user
-                    console.log('Avatar path:', avatarPath); // Kiểm tra đường dẫn
+                    if (data.error) {
+                        searchResults.innerHTML = `<div class="p-3">Lỗi: ${data.error}</div>`;
+                        searchResults.style.display = 'block';
+                        return;
+                    }
+                    
+                    if (data.length > 0) {
+                        searchResults.innerHTML = data.map(user => {
+                            const avatarPath = user.anhDaiDien
+                                ? `/images/authors/avatars/${user.tenDangNhap}/${user.anhDaiDien}`
+                                : '/images/authors/default/default-image.png';
 
-                    return `
-                    <a href="/User/Profile/${user.maNguoiDung}" class="search-result-item">
-                        <div class="search-result-avatar">
-                            <img src="${avatarPath}" 
-                                 alt="${user.tenNguoiDung}"
-                                 onerror="this.src='/images/authors/default/default-image.png'">
-                        </div>
-                        <div class="search-result-info">
-                            <div class="search-result-name">${user.tenNguoiDung}</div>
-                            <div class="search-result-username">${user.tenDangNhap}</div>
-                        </div>
-                        <button class="follow-button ${user.daTheoDoi ? 'following' : ''}"
-                                onclick="toggleFollow(event, ${user.maNguoiDung})"
-                                data-user-id="${user.maNguoiDung}">
-                            <span>${user.daTheoDoi ? 'Đang theo dõi' : 'Theo dõi'}</span>
-                        </button>
-                    </a>
-                `}).join('');
-                searchResults.style.display = 'block';
-            } else {
-                searchResults.innerHTML = '<div class="p-3">Không tìm thấy kết quả</div>';
-                searchResults.style.display = 'block';
+                            return `
+                            <a href="/User/Profile/${user.maNguoiDung}" class="search-result-item">
+                                <div class="search-result-avatar">
+                                    <img src="${avatarPath}"
+                                         alt="${user.tenNguoiDung}"
+                                         onerror="this.src='/images/authors/default/default-image.png'">
+                                </div>
+                                <div class="search-result-info">
+                                    <div class="search-result-name">${user.tenNguoiDung || 'Người dùng'}</div>
+                                    <div class="search-result-username">${user.tenDangNhap || ''}</div>
+                                </div>
+                            </a>`;
+                        }).join('');
+                        searchResults.style.display = 'block';
+                    } else {
+                        searchResults.innerHTML = '<div class="p-3">Không tìm thấy kết quả</div>';
+                        searchResults.style.display = 'block';
+                    }
+                })
+                .catch(error => {
+                    console.error('Lỗi tìm kiếm:', error);
+                    searchResults.innerHTML = '<div class="p-3">Có lỗi xảy ra khi tìm kiếm</div>';
+                    searchResults.style.display = 'block';
+                });
+            }, 300);
+        });
+
+        // Đóng kết quả tìm kiếm khi click ra ngoài
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.search-box')) {
+                searchResults.style.display = 'none';
             }
         });
-    }, 300);
-});
+    }
 
-    // Follow functionality
     function toggleFollow(event, userId) {
         event.preventDefault();
         event.stopPropagation();
@@ -220,10 +228,16 @@
         });
     }
 
-    // Close search results when clicking outside
-    document.addEventListener('click', function(e) {
-        if (!e.target.closest('.search-box')) {
-            document.getElementById('searchResults').style.display = 'none';
-        }
-    });
+    function autoSubmitLogout(e) {
+        e.preventDefault();
+        var form = e.target.closest('.logoutForm');
+
+        var hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.name = 'autoLogout';
+        hiddenInput.value = 'true';
+        form.appendChild(hiddenInput);
+
+        form.submit();
+    }
 </script>

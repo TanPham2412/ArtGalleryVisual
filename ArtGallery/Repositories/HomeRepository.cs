@@ -21,7 +21,7 @@ namespace ArtGallery.Repositories
             _logger = logger;
         }
 
-        public async Task<List<Tranh>> GetRandomArtworksFromFollowing(int userId, int count)
+        public async Task<List<Tranh>> GetRandomArtworksFromFollowing(string userId, int count)
         {
             var followingIds = await _context.TheoDois
                 .Where(t => t.MaNguoiTheoDoi == userId)
@@ -41,26 +41,26 @@ namespace ArtGallery.Repositories
         public async Task<List<SelectListItem>> GetCategories()
         {
             return await _context.TheLoais
-                .Select(c => new SelectListItem 
-                { 
-                    Value = c.MaTheLoai.ToString(), 
-                    Text = c.TenTheLoai 
+                .Select(c => new SelectListItem
+                {
+                    Value = c.MaTheLoai.ToString(),
+                    Text = c.TenTheLoai
                 })
                 .ToListAsync();
         }
 
-        public async Task<List<dynamic>> SearchUsers(string query, int currentUserId)
+        public async Task<List<dynamic>> SearchUsers(string query, string currentUserId)
         {
             if (string.IsNullOrEmpty(query))
                 return new List<dynamic>();
 
-            return await _context.NguoiDungs
-                .Where(u => u.TenDangNhap.Contains(query) || u.TenNguoiDung.Contains(query))
+            return await _context.Users
+                .Where(u => u.UserName.Contains(query) || u.TenNguoiDung.Contains(query))
                 .Select(u => new
                 {
-                    u.MaNguoiDung,
+                    u.Id,
                     u.TenNguoiDung,
-                    u.TenDangNhap,
+                    u.UserName,
                     u.AnhDaiDien,
                     SoNguoiTheoDoi = u.TheoDoiMaNguoiDuocTheoDoiNavigations.Count,
                     DaTheoDoi = u.TheoDoiMaNguoiDuocTheoDoiNavigations.Any(t =>
@@ -70,7 +70,7 @@ namespace ArtGallery.Repositories
                 .ToListAsync<dynamic>();
         }
 
-        public async Task<(bool success, string message, int followerCount, bool isFollowing)> ToggleFollow(int currentUserId, int userId)
+        public async Task<(bool success, string message, int followerCount, bool isFollowing)> ToggleFollow(string currentUserId, string userId)
         {
             if (currentUserId == userId)
             {
@@ -104,12 +104,12 @@ namespace ArtGallery.Repositories
             return (true, null, followerCount, existingFollow == null);
         }
 
-        public async Task<(bool success, string message)> AddArtwork(Tranh tranh, IFormFile imageFile, string tagsInput, List<int> selectedCategories, int currentUserId)
+        public async Task<(bool success, string message)> AddArtwork(Tranh tranh, IFormFile imageFile, string tagsInput, List<int> selectedCategories, string currentUserId)
         {
             try
             {
-                var currentUser = await _context.NguoiDungs
-                    .FirstOrDefaultAsync(u => u.MaNguoiDung == currentUserId);
+                var currentUser = await _context.Users
+                    .FirstOrDefaultAsync(u => u.Id == currentUserId.ToString());
 
                 if (currentUser == null)
                 {
@@ -196,6 +196,25 @@ namespace ArtGallery.Repositories
             {
                 _logger.LogError(ex, "Lỗi khi thêm tranh: {Message}", ex.Message);
                 return (false, $"Có lỗi xảy ra khi thêm tranh: {ex.Message}");
+            }
+        }
+
+        public async Task<List<Tranh>> GetRecommendedArtworks()
+        {
+            try
+            {
+                return await _context.Tranhs
+                    .Include(t => t.MaNguoiDungNavigation)
+                    .Include(t => t.MaTags)
+                    .Include(t => t.MaTheLoais)
+                    .OrderByDescending(t => t.NgayDang)
+                    .Take(8)
+                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi lấy danh sách tranh đề xuất");
+                return new List<Tranh>();
             }
         }
     }

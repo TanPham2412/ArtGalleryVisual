@@ -5,7 +5,7 @@ namespace ArtGallery.Models;
 
 public partial class DoanhThu
 {
-    public int MaNguoiDung { get; set; }
+    public string MaNguoiDung { get; set; }
 
     public decimal? TongDoanhThu { get; set; }
 

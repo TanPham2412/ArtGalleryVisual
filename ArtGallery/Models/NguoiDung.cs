@@ -1,29 +1,48 @@
 ﻿using System;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Identity;
+using System.ComponentModel.DataAnnotations;
 
 namespace ArtGallery.Models;
 
-public partial class NguoiDung
+public partial class NguoiDung : IdentityUser<string>
 {
-    public int MaNguoiDung { get; set; }
+    private string _userName;
+    private string _tenNguoiDung;
+    
+    public NguoiDung()
+    {
+        Id = Guid.NewGuid().ToString();
+        NgayTao = DateTime.Now;
+    }
 
-    public string TenDangNhap { get; set; } = null!;
+    // Ghi đè thuộc tính UserName để tự động cập nhật TenNguoiDung
+    public override string UserName
+    {
+        get => _userName;
+        set
+        {
+            _userName = value;
+            // Tự động thiết lập TenNguoiDung khi UserName được gán giá trị
+            if (string.IsNullOrEmpty(TenNguoiDung) && !string.IsNullOrEmpty(value))
+            {
+                TenNguoiDung = value;
+            }
+        }
+    }
 
-    public string Email { get; set; } = null!;
-
-    public string MatKhau { get; set; } = null!;
-
-    public string TenNguoiDung { get; set; } = null!;
+    [Required]
+    public string TenNguoiDung 
+    { 
+        get => _tenNguoiDung ?? UserName ?? Email?.Split('@')[0] ?? "User_" + Id?.Substring(0, 8);
+        set => _tenNguoiDung = value;
+    }
 
     public string? DiaChi { get; set; }
 
     public string? GioiTinh { get; set; }
 
-    public string? SoDienThoai { get; set; }
-
     public DateOnly? NgaySinh { get; set; }
-
-    public string? LoaiNguoiDung { get; set; }
 
     public string? BaiHat { get; set; }
 
@@ -69,6 +88,6 @@ public partial class NguoiDung
         {
             return "/images/authors/default/default-image.png";
         }
-        return $"/images/authors/avatars/{TenDangNhap}/{AnhDaiDien}";
+        return $"/images/authors/avatars/{UserName}/{AnhDaiDien}";
     }
 }

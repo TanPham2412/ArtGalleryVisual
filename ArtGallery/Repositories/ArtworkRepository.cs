@@ -69,7 +69,7 @@ namespace ArtGallery.Repositories
             return (tag, artworks);
         }
 
-        public async Task<Tranh> GetArtworkForEdit(int id, int currentUserId)
+        public async Task<Tranh> GetArtworkForEdit(int id, string currentUserId)
         {
             var artwork = await _context.Tranhs
                 .Include(t => t.MaTheLoais)
@@ -90,7 +90,7 @@ namespace ArtGallery.Repositories
         }
 
         public async Task<(bool success, string message)> UpdateArtwork(
-            Tranh model, IFormFile imageFile, string tagsInput, List<int> selectedCategories, int currentUserId)
+            Tranh model, IFormFile imageFile, string tagsInput, List<int> selectedCategories, string currentUserId)
         {
             try
             {
@@ -129,7 +129,7 @@ namespace ArtGallery.Repositories
             }
         }
 
-        public async Task<(bool success, string message, string redirectUrl)> DeleteArtwork(int id, int currentUserId)
+        public async Task<(bool success, string message, string redirectUrl)> DeleteArtwork(int id, string currentUserId)
         {
             try
             {

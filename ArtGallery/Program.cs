@@ -3,18 +3,27 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using ArtGallery.Repositories.Interfaces;
 using ArtGallery.Repositories;
-using Microsoft.AspNetCore.Authentication.Google;
-
+using Microsoft.AspNetCore.Identity;
+using ArtGallery.Data;
+using Microsoft.AspNetCore.Mvc;
+using ArtGallery.Services;
+using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Loại bỏ dòng này vì đã có cấu hình connection string bên dưới
+// var connectionString = builder.Configuration.GetConnectionString("ArtGallery") ?? throw new InvalidOperationException("Connection string 'ArtGallery' not found.");
+
 builder.Services.AddHttpContextAccessor();
 
+// Loại bỏ IAccountRepository vì đã xóa
 builder.Services.AddScoped<IHomeRepository, HomeRepository>();
-builder.Services.AddScoped<IAccountRepository, AccountRepository>();
 builder.Services.AddScoped<IArtworkRepository, ArtworkRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 builder.Services.AddControllersWithViews();
+builder.Services.AddRazorPages();
 
 builder.Services.AddDbContext<ArtGalleryContext>(options =>
     options.UseSqlServer(Environment.GetEnvironmentVariable("ART_GALLERY", EnvironmentVariableTarget.User)));
@@ -27,14 +36,44 @@ builder.Services.AddLogging(logging =>
     logging.SetMinimumLevel(LogLevel.Debug);
 });
 
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie(options =>
-    {
-        options.LoginPath = "/Account/Login";
-        options.LogoutPath = "/Account/Logout";
-        options.AccessDeniedPath = "/Account/AccessDenied";
-        options.ExpireTimeSpan = TimeSpan.FromDays(30);
-    })
+builder.Services.AddScoped<IUserStore<NguoiDung>, CustomUserStore>();
+// Cấu hình Identity đầy đủ
+builder.Services.AddIdentity<NguoiDung, IdentityRole>(options => {
+    // Cấu hình password
+    options.Password.RequireDigit = true;
+    options.Password.RequireLowercase = true;
+    options.Password.RequireUppercase = true;
+    options.Password.RequireNonAlphanumeric = true;
+    options.Password.RequiredLength = 6;
+
+    // Cấu hình lockout
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+    options.Lockout.MaxFailedAccessAttempts = 5;
+    options.Lockout.AllowedForNewUsers = true;
+
+    // Cấu hình user
+    options.User.RequireUniqueEmail = true;
+    
+    // Cấu hình đăng nhập
+    options.SignIn.RequireConfirmedAccount = false; // Không yêu cầu xác nhận email
+})
+.AddEntityFrameworkStores<ArtGalleryContext>()
+.AddDefaultTokenProviders()
+.AddDefaultUI();
+
+// Cấu hình các đường dẫn Identity
+builder.Services.ConfigureApplicationCookie(options => {
+    options.LoginPath = "/Identity/Account/Login";
+    options.LogoutPath = "/Identity/Account/Logout";
+    options.AccessDeniedPath = "/Identity/Account/AccessDenied";
+    options.ExpireTimeSpan = TimeSpan.FromDays(30);
+    options.SlidingExpiration = true;
+    options.Cookie.Name = "ArtGallery.Identity";
+    options.Cookie.HttpOnly = true;
+});
+
+// Thêm vào bên trong phương thức AddIdentity() hoặc sau đó
+builder.Services.AddAuthentication()
     .AddGoogle(options =>
     {
         options.ClientId = Environment.GetEnvironmentVariable("GOOGLE_CLIENT_ID", EnvironmentVariableTarget.User);
@@ -42,9 +81,23 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.CallbackPath = "/signin-google";
     });
 
+// Thêm vào sau phần cấu hình Identity
+builder.Services.Configure<IdentityOptions>(options =>
+{
+    // Cấu hình khác...
+});
+
+// Phải đảm bảo đăng ký CustomUserStore trước khi đăng ký Identity
 
 
 var app = builder.Build();
+
+// Seed Roles và Admin user
+using (var scope = app.Services.CreateScope())
+{
+    await DbSeeder.SeedRolesAndAdminAsync(scope.ServiceProvider);
+}
+
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
@@ -56,7 +109,24 @@ app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Cấu hình routing
 app.MapControllerRoute(
-name: "default",
-pattern: "{controller=Home}/{action=Index}/{id?}");
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}");
+app.MapRazorPages();
+
+using (var scope = app.Services.CreateScope())
+{
+    try
+    {
+        await DbSeeder.SeedRolesAndAdminAsync(scope.ServiceProvider);
+    }
+    catch (Exception ex)
+    {
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "Lỗi khi tạo Roles ban đầu");
+    }
+}
+
 app.Run();

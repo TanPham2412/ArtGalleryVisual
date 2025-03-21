@@ -48,7 +48,7 @@ namespace ArtGallery.Controllers
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
-            var currentUserId = int.Parse(User.FindFirst("UserId")?.Value ?? "0");
+            var currentUserId = User.FindFirst("UserId").Value;
             var artwork = await _artworkRepository.GetArtworkForEdit(id, currentUserId);
             
             if (artwork == null)
@@ -73,8 +73,8 @@ namespace ArtGallery.Controllers
                     return View(model);
                 }
 
-                var currentUserId = int.Parse(User.FindFirst("UserId")?.Value ?? "0");
-                
+                var currentUserId = User.FindFirst("UserId")?.Value;
+
                 if (model.Gia < 0)
                 {
                     ViewBag.Categories = await _artworkRepository.GetCategories();
@@ -116,7 +116,7 @@ namespace ArtGallery.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
-            var currentUserId = int.Parse(User.FindFirst("UserId")?.Value ?? "0");
+            var currentUserId = User.FindFirst("UserId").Value;
             var result = await _artworkRepository.DeleteArtwork(id, currentUserId);
 
             return Json(new { 

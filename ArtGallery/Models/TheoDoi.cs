@@ -5,9 +5,9 @@ namespace ArtGallery.Models;
 
 public partial class TheoDoi
 {
-    public int MaNguoiTheoDoi { get; set; }
+    public string MaNguoiTheoDoi { get; set; }
 
-    public int MaNguoiDuocTheoDoi { get; set; }
+    public string MaNguoiDuocTheoDoi { get; set; }
 
     public DateTime? NgayTheoDoi { get; set; }
 

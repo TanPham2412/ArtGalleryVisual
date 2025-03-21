@@ -7,7 +7,7 @@ public partial class GiaoDich
 {
     public int MaGiaoDich { get; set; }
 
-    public int MaNguoiMua { get; set; }
+    public string MaNguoiMua { get; set; } = null!;
 
     public int MaTranh { get; set; }
 

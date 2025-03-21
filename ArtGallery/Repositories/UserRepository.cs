@@ -26,14 +26,14 @@ namespace ArtGallery.Repositories
             _logger = logger;
         }
 
-        public async Task<(NguoiDung user, int followersCount, int followingCount)?> GetUserProfile(int userId)
+        public async Task<(NguoiDung user, int followersCount, int followingCount)?> GetUserProfile(string userId)
         {
             try
             {
-                var user = await _context.NguoiDungs
+                var user = await _context.Users
                     .Include(u => u.Tranhs)
                     .Include(u => u.Media)
-                    .FirstOrDefaultAsync(u => u.MaNguoiDung == userId);
+                    .FirstOrDefaultAsync(u => u.Id == userId);
 
                 if (user == null)
                 {
@@ -59,9 +59,9 @@ namespace ArtGallery.Repositories
         {
             try
             {
-                var user = await _context.NguoiDungs
+                var user = await _context.Users
                     .Include(u => u.Media)
-                    .FirstOrDefaultAsync(u => u.MaNguoiDung == model.MaNguoiDung);
+                    .FirstOrDefaultAsync(u => u.Id == model.Id);
 
                 if (user == null)
                     return (false, "Không tìm thấy người dùng");
@@ -72,7 +72,7 @@ namespace ArtGallery.Repositories
                     try
                     {
                         // Tạo thư mục nếu chưa tồn tại
-                        var userFolder = Path.Combine(_webHostEnvironment.WebRootPath, "images", "authors", "coverimages", user.TenDangNhap);
+                        var userFolder = Path.Combine(_webHostEnvironment.WebRootPath, "images", "authors", "coverimages", user.UserName);
                         if (!Directory.Exists(userFolder))
                         {
                             Directory.CreateDirectory(userFolder);
@@ -115,7 +115,7 @@ namespace ArtGallery.Repositories
                     try
                     {
                         // Tạo thư mục cho người dùng nếu chưa tồn tại
-                        var userFolder = Path.Combine(_webHostEnvironment.WebRootPath, "images", "authors", "avatars", user.TenDangNhap);
+                        var userFolder = Path.Combine(_webHostEnvironment.WebRootPath, "images", "authors", "avatars", user.UserName);
                         Directory.CreateDirectory(userFolder);
 
                         // Xóa ảnh cũ nếu có
@@ -164,7 +164,7 @@ namespace ArtGallery.Repositories
 
                 // Validate loại media trước khi thêm
                 var validMediaTypes = new[] { "X", "Facebook", "Instagram", "Tiktok", "Website" };
-                
+
                 if (LoaiMedia != null && DuongDan != null)
                 {
                     for (int i = 0; i < LoaiMedia.Count; i++)
@@ -179,7 +179,7 @@ namespace ArtGallery.Repositories
 
                             var media = new Medium
                             {
-                                MaNguoiDung = user.MaNguoiDung,
+                                MaNguoiDung = user.Id,
                                 LoaiMedia = LoaiMedia[i],
                                 DuongDan = DuongDan[i]
                             };
@@ -228,7 +228,7 @@ namespace ArtGallery.Repositories
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Lỗi khi cập nhật profile người dùng {UserId}", model.MaNguoiDung);
+                _logger.LogError(ex, "Lỗi khi cập nhật profile người dùng {UserId}", model.Id);
                 return (false, $"Có lỗi xảy ra: {ex.Message}");
             }
         }

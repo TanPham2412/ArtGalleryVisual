@@ -5,7 +5,7 @@ namespace ArtGallery.Models;
 
 public partial class NoiBat
 {
-    public int MaNguoiDung { get; set; }
+    public string MaNguoiDung { get; set; }
 
     public int MaTranh { get; set; }
 
