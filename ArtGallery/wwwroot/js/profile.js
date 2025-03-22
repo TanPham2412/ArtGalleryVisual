@@ -163,6 +163,14 @@ document.addEventListener('DOMContentLoaded', function () {
             openEditProfileModal();
         };
     }
+
+    // Xóa nút Theo dõi bên trái nếu nó được tạo động bởi JavaScript
+    const leftFollowButtons = document.querySelectorAll('.profile-header button:not(.follow-button-primary):not(.share-profile-btn):not(.edit-profile-btn)');
+    leftFollowButtons.forEach(button => {
+        if (button.textContent.includes('Theo dõi')) {
+            button.style.display = 'none';
+        }
+    });
 });
 
 function initializeSelects() {

@@ -93,14 +93,18 @@
               }
               else
               {
-                  <!-- Nút theo dõi hoặc các hành động khác dành cho người xem -->
-                  <button class="follow-btn">Theo dõi</button>
+                  @if (User.Identity.IsAuthenticated && Model.Id != ViewBag.CurrentUserId)
+                  {
+                      <button class="follow-button-primary @(ViewBag.IsFollowing ? "following" : "")" 
+                              onclick="toggleFollow(event, '@Model.Id')">
+                          <span class="follow-text">Theo dõi</span>
+                          <span class="following-text">Đang theo dõi</span>
+                      </button>
+                  }
                   <button class="share-profile-btn"><i class="fas fa-share"></i></button>
               }
           </div>  
       </div>  
-
-
 
       <!-- Navigation Tabs -->  
       <div class="profile-nav">  

@@ -50,9 +50,8 @@
     padding: 0 32px;
     margin-top: -80px;
     padding-top: 40px;
-    background: linear-gradient(to bottom, transparent, white); /* Tạo hiệu ứng gradient */
+    background: linear-gradient(to bottom, transparent, white);
     display: flex;
-    align-items: flex-end;
     margin-bottom: 24px;
 }
 
@@ -80,13 +79,15 @@
     display: flex;
     flex-direction: column;
     gap: 4px;
-    padding-top: 40px; /* Thêm padding-top để đẩy nội dung xuống dưới */
+    padding-top: 40px;
+    min-height: 120px;
 }
 
 .profile-name {
     font-size: 24px;
     font-weight: 700;
     margin-bottom: 8px;
+    margin-right: 150px;
 }
 
 .profile-stats {
@@ -123,7 +124,11 @@
 }
 .social-media-links {
     margin-top: 16px;
-    margin-bottom: 12px; /* Thêm khoảng cách phía dưới */
+    margin-bottom: 12px;
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    max-width: calc(100% - 160px);
 }
 
 /* See More Link */
@@ -148,8 +153,11 @@
 .profile-actions {
     display: flex;
     gap: 8px;
-    padding-bottom: 150px;
     align-items: center;
+    margin-top: 48px;
+    position: absolute;
+    top: 40px;
+    right: 32px;
 }
 
 .share-profile-btn {
@@ -771,4 +779,36 @@ textarea:hover,
 
 .social-media-link .fa-linkedin:hover {
     color: #0A66C2;
+}
+
+/* Đảm bảo nút theo dõi có kích thước phù hợp */
+.follow-button-primary {
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: 1px solid #1DA1F2;
+    background-color: #1DA1F2;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap; /* Ngăn chữ bị xuống dòng */
+}
+
+.follow-button-primary:not(.following) {
+    background-color: white;
+    color: #1DA1F2;
+}
+
+/* Ẩn phần text khi không cần thiết */
+.follow-button-primary .follow-text,
+.follow-button-primary .following-text {
+    transition: opacity 0.2s;
+}
+
+.follow-button-primary:not(.following) .following-text {
+    display: none;
+}
+
+.follow-button-primary.following .follow-text {
+    display: none;
 }

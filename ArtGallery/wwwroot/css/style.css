@@ -98,38 +98,66 @@
 }
 /*Follow Button*/
 .follow-button {
-    padding: 6px 16px;
+    padding: 8px 16px;
     border-radius: 20px;
-    border: none;
-    background: #0096fa;
-    color: white;
-    font-size: 14px;
+    border: 1px solid #1DA1F2;
+    background-color: white;
+    color: #1DA1F2;
+    font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
 }
 
-    .follow-button.following {
-        background: #e0e0e0;
-        color: #333;
-    }
+.follow-button .follow-text,
+.follow-button .following-text,
+.follow-button .unfollow-text {
+    transition: opacity 0.2s, transform 0.2s;
+}
 
-    .follow-button:hover {
-        opacity: 0.9;
-    }
+/* Mặc định - trạng thái chưa theo dõi */
+.follow-button .following-text,
+.follow-button .unfollow-text {
+    display: none;
+}
 
-    .follow-button.following:hover {
-        background: #ff4444;
-        color: white;
-    }
+.follow-button .follow-text {
+    display: inline;
+}
 
-        .follow-button.following:hover::before {
-            content: "Hủy theo dõi";
-            display: inline;
-        }
+/* Khi đang theo dõi */
+.follow-button.following {
+    background-color: #1DA1F2;
+    color: white;
+}
 
-        .follow-button.following:hover span {
-            display: none;
-        }
+.follow-button.following .follow-text {
+    display: none;
+}
+
+.follow-button.following .following-text {
+    display: inline;
+}
+
+.follow-button.following .unfollow-text {
+    display: none;
+}
+
+/* Khi hover vào nút đang theo dõi */
+.follow-button.following:hover {
+    background-color: #f8d7da;
+    border-color: #dc3545;
+    color: #dc3545;
+}
+
+.follow-button.following:hover .following-text {
+    display: none;
+}
+
+.follow-button.following:hover .unfollow-text {
+    display: inline;
+}
 
 /* Upload button */
 .btn-primary {
@@ -707,6 +735,7 @@
     font-size: 14px;
 }
 
+
 .follow-stats {
     display: flex;
     padding: 12px;
@@ -750,3 +779,40 @@
         width: 20px;
         text-align: center;
     }
+
+/* Ẩn nút trái nếu nó được tạo ra bởi thư viện hoặc framework */
+.profile-header .btn-outline-primary, 
+.profile-header .btn-secondary,
+.profile-header button:not(.follow-button-primary):not(.share-profile-btn):not(.edit-profile-btn) {
+    display: none !important;
+}
+
+/* Style cho nút Theo dõi chính */
+.follow-button-primary {
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: 1px solid #1DA1F2;
+    background-color: #1DA1F2;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.follow-button-primary:not(.following) {
+    background-color: white;
+    color: #1DA1F2;
+}
+
+.follow-button-primary .follow-text,
+.follow-button-primary .following-text {
+    transition: opacity 0.2s;
+}
+
+.follow-button-primary:not(.following) .following-text {
+    display: none;
+}
+
+.follow-button-primary.following .follow-text {
+    display: none;
+}

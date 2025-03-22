@@ -158,7 +158,6 @@ namespace ArtGallery.Repositories
                 user.HienThiNgaySinh = model.HienThiNgaySinh;
                 user.HienThiNamSinh = model.HienThiNamSinh;
 
-                // Cập nhật social media
                 // Xóa tất cả media cũ
                 _context.Media.RemoveRange(user.Media);
 
@@ -190,24 +189,28 @@ namespace ArtGallery.Repositories
                                 switch (LoaiMedia[i])
                                 {
                                     case "X":
-                                        if (!media.DuongDan.Contains("x.com"))
-                                            break;
-                                        media.DuongDan = $"https://x.com/{media.DuongDan.TrimStart('@')}";
+                                        if (!media.DuongDan.Contains("x.com") && !media.DuongDan.Contains("twitter.com"))
+                                        {
+                                            media.DuongDan = $"https://x.com/{media.DuongDan.TrimStart('@')}";
+                                        }
                                         break;
                                     case "Facebook":
-                                        if (media.DuongDan.Contains("facebook.com"))
-                                            break;
-                                        media.DuongDan = $"https://facebook.com/{media.DuongDan}";
+                                        if (!media.DuongDan.Contains("facebook.com"))
+                                        {
+                                            media.DuongDan = $"https://facebook.com/{media.DuongDan}";
+                                        }
                                         break;
                                     case "Instagram":
-                                        if (media.DuongDan.Contains("instagram.com"))
-                                            break;
-                                        media.DuongDan = $"https://instagram.com/{media.DuongDan.TrimStart('@')}";
+                                        if (!media.DuongDan.Contains("instagram.com"))
+                                        {
+                                            media.DuongDan = $"https://instagram.com/{media.DuongDan.TrimStart('@')}";
+                                        }
                                         break;
                                     case "Tiktok":
-                                        if (media.DuongDan.Contains("tiktok.com"))
-                                            break;
-                                        media.DuongDan = $"https://tiktok.com/@{media.DuongDan.TrimStart('@')}";
+                                        if (!media.DuongDan.Contains("tiktok.com"))
+                                        {
+                                            media.DuongDan = $"https://tiktok.com/@{media.DuongDan.TrimStart('@')}";
+                                        }
                                         break;
                                     default:
                                         if (!media.DuongDan.StartsWith("http"))

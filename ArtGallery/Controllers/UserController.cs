@@ -4,6 +4,7 @@ using ArtGallery.Models;
 using ArtGallery.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 
 namespace ArtGallery.Controllers
 {
@@ -12,15 +13,18 @@ namespace ArtGallery.Controllers
         private readonly IUserRepository _userRepository;
         private readonly ILogger<UserController> _logger;
         private readonly UserManager<NguoiDung> _userManager;
+        private readonly ArtGalleryContext _context;
 
         public UserController(
             IUserRepository userRepository, 
             ILogger<UserController> logger,
-            UserManager<NguoiDung> userManager)
+            UserManager<NguoiDung> userManager,
+            ArtGalleryContext context)
         {
             _userRepository = userRepository;
             _logger = logger;
             _userManager = userManager;
+            _context = context;
         }
 
         public async Task<IActionResult> Profile(string id)
@@ -54,6 +58,15 @@ namespace ArtGallery.Controllers
                 
                 ViewBag.IsOwnProfile = User.Identity.IsAuthenticated && 
                                       (await _userManager.GetUserAsync(User))?.Id == id;
+
+                if (User.Identity.IsAuthenticated)
+                {
+                    var currentUserId = _userManager.GetUserId(User);
+                    ViewBag.CurrentUserId = currentUserId;
+                    ViewBag.IsFollowing = await _context.TheoDois
+                        .AnyAsync(t => t.MaNguoiTheoDoi == currentUserId && 
+                                       t.MaNguoiDuocTheoDoi == id);
+                }
 
                 return View(user);
             }
