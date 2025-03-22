@@ -32,7 +32,7 @@ namespace ArtGallery.Areas.Identity.Pages.Account
                 // Tạo người dùng mới nếu chưa tồn tại
                 user = new NguoiDung
                 {
-                    Id = Guid.NewGuid().ToString(), // Đặt ID trước khi thêm vào database
+                    Id = Guid.NewGuid().ToString(), 
                     UserName = email,
                     Email = email,
                     TenNguoiDung = info.Principal.FindFirstValue(ClaimTypes.Name) ?? email.Split('@')[0],

@@ -6,6 +6,7 @@
     <title>Đăng nhập - PiaoYue Art Gallery</title>
     <link rel="stylesheet" href="~/css/login.css">
     <link rel="stylesheet" href="~/css/login1_register.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
     <!-- Thêm container cho slideshow -->
@@ -33,13 +34,43 @@
                 <span>Đăng nhập với tài khoản hiện có</span>
             </div>
 
-
             <!-- Social login buttons -->
-            <div class="social-login">
-                <a href="/Identity/Account/ExternalLogin" class="social-btn google">
-                    <img src="~/images/icons/google.png" alt="Google">
-                </a>
-            </div>
+            @{
+                // Lấy danh sách ExternalLogins từ ViewData hoặc ViewBag nếu có
+                var externalLogins = ViewData["ExternalLogins"] as List<Microsoft.AspNetCore.Authentication.AuthenticationScheme>;
+                
+                if (externalLogins != null && externalLogins.Count > 0)
+                {
+                    <form id="external-account" asp-area="Identity" asp-page="/Account/ExternalLogin" asp-route-returnUrl="@Url.Action("Index", "Home")" method="post">
+                        <div class="social-login">
+                            @foreach (var provider in externalLogins)
+                            {
+                                @if (provider.Name.ToLower() == "google")
+                                {
+                                    <button type="submit" name="provider" value="@provider.Name" class="social-btn google">
+                                        <img src="~/images/icons/google.png" alt="Google">
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button type="submit" name="provider" value="@provider.Name" class="social-btn">
+                                        @provider.DisplayName
+                                    </button>
+                                }
+                            }
+                        </div>
+                    </form>
+                }
+                else
+                {
+                    <!-- Sử dụng URL tương đối thay vì tuyệt đối -->
+                    <div class="social-login">
+                        <a href="/Identity/Account/ExternalLogin?provider=Google&returnUrl=%2F" class="social-btn google">
+                            <img src="~/images/icons/google.png" alt="Google">
+                        </a>
+                    </div>
+                }
+            }
 
             <!-- Footer text -->
             <div class="login-footer">

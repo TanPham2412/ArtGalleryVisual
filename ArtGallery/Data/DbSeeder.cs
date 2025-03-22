@@ -20,7 +20,7 @@ public static class DbSeeder
             }
         }
         
-        // Tạo Admin nếu cần
-        // Thêm code tạo Admin nếu muốn
+        // Tạo Admin
+
     }
 } 

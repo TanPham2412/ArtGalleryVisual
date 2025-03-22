@@ -7,6 +7,7 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.AspNetCore.Identity;
 
 namespace ArtGallery.Repositories
 {
@@ -15,15 +16,18 @@ namespace ArtGallery.Repositories
         private readonly ArtGalleryContext _context;
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly ILogger<UserRepository> _logger;
+        private readonly SignInManager<NguoiDung> _signInManager;
 
         public UserRepository(
             ArtGalleryContext context,
             IWebHostEnvironment webHostEnvironment,
-            ILogger<UserRepository> logger)
+            ILogger<UserRepository> logger,
+            SignInManager<NguoiDung> signInManager)
         {
             _context = context;
             _webHostEnvironment = webHostEnvironment;
             _logger = logger;
+            _signInManager = signInManager;
         }
 
         public async Task<(NguoiDung user, int followersCount, int followingCount)?> GetUserProfile(string userId)

@@ -108,6 +108,11 @@ namespace ArtGallery.Repositories
         {
             try
             {
+                if (string.IsNullOrEmpty(tranh.MaNguoiDung) || tranh.MaNguoiDung != currentUserId)
+                {
+                    tranh.MaNguoiDung = currentUserId;
+                }
+
                 var currentUser = await _context.Users
                     .FirstOrDefaultAsync(u => u.Id == currentUserId.ToString());
 
@@ -194,8 +199,8 @@ namespace ArtGallery.Repositories
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Lỗi khi thêm tranh: {Message}", ex.Message);
-                return (false, $"Có lỗi xảy ra khi thêm tranh: {ex.Message}");
+                _logger.LogError(ex, "Lỗi khi thêm tranh");
+                return (false, "Có lỗi xảy ra khi thêm tranh");
             }
         }
 

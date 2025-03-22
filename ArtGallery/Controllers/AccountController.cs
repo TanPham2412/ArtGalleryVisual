@@ -13,23 +13,19 @@ public class AccountController : Controller
         _logger = logger;
     }
 
-    // Đảm bảo tên phương thức khớp với tên file (có dấu gạch dưới)
     public IActionResult Login_register()
     {
-        return View();  // Tự động tìm Views/Account/Login_register.cshtml
+        return View(); 
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Logout()
     {
-        // Đăng xuất người dùng hiện tại
         await _signInManager.SignOutAsync();
         
-        // Thêm thông báo thành công nếu cần
         _logger.LogInformation("Người dùng đã đăng xuất thành công.");
         
-        // Chuyển hướng đến trang Login_register sau khi đăng xuất
         return RedirectToAction("Login_register", "Account");
     }
 } 

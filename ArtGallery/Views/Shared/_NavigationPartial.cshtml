@@ -88,13 +88,10 @@
                                     <i class="fas fa-heart"></i>
                                     Yêu thích
                                 </a>
-                                <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="/Account/Login_register" method="post" class="dropdown-item logoutForm">
-                                    <input name="__RequestVerificationToken" type="hidden" value="@token" />
-                                    <button type="submit" style="background: none; border: none; padding: 0; width: 100%; text-align: left;" onclick="autoSubmitLogout(event)">
-                                        <i class="fas fa-sign-out-alt"></i>
-                                        Đăng xuất
-                                    </button>
-                                </form>
+                                <a href="@Url.Action("LogoutDirect", "Home")" class="dropdown-item">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                    Đăng xuất
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -114,6 +111,11 @@
         </div>
     </div>
 </nav>
+
+<form id="logoutForm" class="d-none" action="/Identity/Account/Logout" method="post">
+    <input type="hidden" name="__RequestVerificationToken" value="@Antiforgery.GetAndStoreTokens(Context).RequestToken" />
+    <input type="hidden" name="returnUrl" value="/" />
+</form>
 
 <script>
     document.getElementById('userDropdown')?.addEventListener('click', function(e) {
@@ -255,19 +257,5 @@
             }
             alert('Có lỗi xảy ra khi thực hiện theo dõi');
         });
-    }
-
-    function autoSubmitLogout(e) {
-        e.preventDefault();
-        var form = e.target.closest('.logoutForm');
-        
-        // Thêm tham số để tự động xác nhận đăng xuất (không hiển thị trang xác nhận)
-        var hiddenInput = document.createElement('input');
-        hiddenInput.type = 'hidden';
-        hiddenInput.name = 'autoLogout';
-        hiddenInput.value = 'true';
-        form.appendChild(hiddenInput);
-        
-        form.submit();
     }
 </script>

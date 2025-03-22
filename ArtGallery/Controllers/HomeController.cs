@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Hosting;
 using ArtGallery.Repositories.Interfaces;
 using Microsoft.AspNetCore.Identity;
+using System.Security.Claims;
 
 namespace ArtGallery.Controllers
 {
@@ -29,20 +30,16 @@ namespace ArtGallery.Controllers
 
         public async Task<IActionResult> Index()
         {
-            // Kiểm tra nếu người dùng đã đăng nhập
             if (!User.Identity.IsAuthenticated)
             {
-                // Nếu chưa đăng nhập, chuyển hướng đến trang Login_register
                 return RedirectToAction("LoginRegister");
             }
             
-            // Nếu đã đăng nhập, hiển thị trang Index bình thường
             var currentUserId = User.FindFirst("UserId")?.Value ?? "";
             var model = await _homeRepository.GetRandomArtworksFromFollowing(currentUserId, 8);
             return View(model);
         }
 
-        // Trang Login_register - không cần [Authorize]
         [AllowAnonymous]
         public IActionResult LoginRegister()
         {
@@ -50,15 +47,31 @@ namespace ArtGallery.Controllers
             {
                 return RedirectToAction("Index");
             }
+            
+            // Nếu cần, lấy danh sách external logins
+            var schemes = _signInManager.GetExternalAuthenticationSchemesAsync().Result;
+            ViewData["ExternalLogins"] = schemes.ToList();
+            
             return View();
         }
 
-        [Authorize] // Chỉ thêm Authorize ở các phương thức cần xác thực
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> Add()
         {
             try 
             {
+                // Debug thông tin xác thực
+                var isAuthenticated = User.Identity.IsAuthenticated;
+                var userId = _userManager.GetUserId(User);
+                var claimUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                var customClaim = User.FindFirst("UserId")?.Value;
+                
+                _logger.LogInformation($"Debug Auth: IsAuthenticated={isAuthenticated}, " +
+                                       $"UserManager.GetUserId={userId}, " +
+                                       $"ClaimTypes.NameIdentifier={claimUserId}, " +
+                                       $"CustomClaim UserId={customClaim}");
+                
                 ViewBag.Categories = await _homeRepository.GetCategories();
                 return View();
             }
@@ -72,15 +85,31 @@ namespace ArtGallery.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize]
         public async Task<IActionResult> Add([FromForm] Tranh tranh, IFormFile ImageFile, string TagsInput, List<int> SelectedCategories)
         {
             try
             {
                 _logger.LogInformation("Bắt đầu thêm tranh mới: {@Tranh}", tranh);
 
-                // Xóa validation errors cho DuongDanAnh và MaNguoiDungNavigation
+                // Xóa validation errors
                 ModelState.Remove("DuongDanAnh");
                 ModelState.Remove("MaNguoiDungNavigation");
+                ModelState.Remove("MaNguoiDung");
+
+                // Thay đổi cách lấy ID người dùng
+                var currentUserId = _userManager.GetUserId(User);
+                if (string.IsNullOrEmpty(currentUserId))
+                {
+                    _logger.LogWarning("Không thể xác định người dùng hiện tại dù đã đăng nhập");
+                    ModelState.AddModelError("", "Không thể xác định người dùng. Vui lòng đăng nhập lại");
+                    ViewBag.Categories = await _homeRepository.GetCategories();
+                    return View(tranh);
+                }
+                
+                // Gán ID người dùng cho tranh
+                tranh.MaNguoiDung = currentUserId;
+                _logger.LogInformation($"Đã gán MaNguoiDung = {currentUserId} cho tranh mới");
 
                 if (!ModelState.IsValid)
                 {
@@ -98,7 +127,6 @@ namespace ArtGallery.Controllers
                     return View(tranh);
                 }
 
-                var currentUserId = User.FindFirst("UserId")?.Value;
                 _logger.LogInformation("Người dùng hiện tại: {UserId}", currentUserId);
 
                 var result = await _homeRepository.AddArtwork(tranh, ImageFile, TagsInput, SelectedCategories, currentUserId);  
@@ -189,12 +217,10 @@ namespace ArtGallery.Controllers
 
                 if (existingFollow != null)
                 {
-                    // Unfollow
                     _context.TheoDois.Remove(existingFollow);
                 }
                 else
                 {
-                    // Follow
                     _context.TheoDois.Add(new TheoDoi
                     {
                         MaNguoiTheoDoi = currentUser.Id,
@@ -228,15 +254,14 @@ namespace ArtGallery.Controllers
             return RedirectToAction("Login_register", "Account");
         }
 
-        public async Task<IActionResult> LogoutDirect([FromServices] SignInManager<NguoiDung> signInManager)
+        public async Task<IActionResult> LogoutDirect()
         {
-            await signInManager.SignOutAsync();
+            await _signInManager.SignOutAsync();
             
-            // Chuyển hướng trực tiếp đến trang chủ sau khi đăng xuất
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("LoginRegister", "Home");
         }
 
-        [AllowAnonymous] // Trang lỗi không cần xác thực
+        [AllowAnonymous]
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
