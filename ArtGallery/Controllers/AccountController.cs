@@ -1,31 +1,40 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
+using ArtGallery.Models;
 
-public class AccountController : Controller
+namespace ArtGallery.Controllers
 {
-    private readonly SignInManager<IdentityUser> _signInManager;
-    private readonly ILogger<AccountController> _logger;
-
-    public AccountController(SignInManager<IdentityUser> signInManager, ILogger<AccountController> logger)
+    public class AccountController : Controller
     {
-        _signInManager = signInManager;
-        _logger = logger;
-    }
+        private readonly UserManager<NguoiDung> _userManager;
+        private readonly SignInManager<NguoiDung> _signInManager;
+        private readonly ILogger<AccountController> _logger;
 
-    public IActionResult Login_register()
-    {
-        return View(); 
-    }
+        public AccountController(
+            UserManager<NguoiDung> userManager,
+            SignInManager<NguoiDung> signInManager,
+            ILogger<AccountController> logger)
+        {
+            _userManager = userManager;
+            _signInManager = signInManager;
+            _logger = logger;
+        }
 
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Logout()
-    {
-        await _signInManager.SignOutAsync();
-        
-        _logger.LogInformation("Người dùng đã đăng xuất thành công.");
-        
-        return RedirectToAction("Login_register", "Account");
+        public IActionResult Login_register()
+        {
+            return View(); 
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Logout()
+        {
+            await _signInManager.SignOutAsync();
+            
+            _logger.LogInformation("Người dùng đã đăng xuất thành công.");
+            
+            return RedirectToAction("Login_register", "Account");
+        }
     }
 } 

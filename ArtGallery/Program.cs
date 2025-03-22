@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using ArtGallery.Services;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity.UI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,29 +38,14 @@ builder.Services.AddLogging(logging =>
 });
 
 builder.Services.AddScoped<IUserStore<NguoiDung>, CustomUserStore>();
-// Cấu hình Identity đầy đủ
+// Đảm bảo chỉ có một cấu hình Identity
 builder.Services.AddIdentity<NguoiDung, IdentityRole>(options => {
-    // Cấu hình password
-    options.Password.RequireDigit = true;
-    options.Password.RequireLowercase = true;
-    options.Password.RequireUppercase = true;
-    options.Password.RequireNonAlphanumeric = true;
-    options.Password.RequiredLength = 6;
-
-    // Cấu hình lockout
-    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
-    options.Lockout.MaxFailedAccessAttempts = 5;
-    options.Lockout.AllowedForNewUsers = true;
-
-    // Cấu hình user
-    options.User.RequireUniqueEmail = true;
-    
-    // Cấu hình đăng nhập
-    options.SignIn.RequireConfirmedAccount = false; // Không yêu cầu xác nhận email
+    options.SignIn.RequireConfirmedAccount = false;
+    options.SignIn.RequireConfirmedEmail = false;
+    // Cấu hình khác...
 })
 .AddEntityFrameworkStores<ArtGalleryContext>()
-.AddDefaultTokenProviders()
-.AddDefaultUI();
+.AddDefaultTokenProviders();
 
 // Cấu hình các đường dẫn Identity
 builder.Services.ConfigureApplicationCookie(options => {
@@ -89,6 +75,7 @@ builder.Services.Configure<IdentityOptions>(options =>
 
 // Phải đảm bảo đăng ký CustomUserStore trước khi đăng ký Identity
 
+builder.Services.AddTransient<IEmailSender, EmailSender>();
 
 var app = builder.Build();
 

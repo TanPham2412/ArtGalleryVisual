@@ -41,50 +41,50 @@ body {
 }
 
 .register-box {
-    width: 360px;
+    width: 320px;
     background: #fff;
     border-radius: 16px;
-    padding: 40px;
+    padding: 30px;
     text-align: center;
 } 
 
 /* Logo */
 .logo-text {
-    font-size: 48px;
+    font-size: 40px;
     font-weight: bold;
     margin: 0 0 8px;
     color: #3da0e1;
 }
 
 .logo-highlight {
-    font-size: 48px;
+    font-size: 40px;
     font-weight: bold;
     margin: 0 0 8px;
     color: #70a8d2;
 }
 
 .register-text {
-    padding-top: 20px;
+    padding-top: 15px;
     color: #1F1F1F;
-    font-size: 24px;
+    font-size: 20px;
     font-weight: bold;
-    margin: 0 0 32px;
+    margin: 0 0 20px;
 }
 
 . /* Form styles */
 .form-group {
     position: relative;
-    margin-bottom: 16px;
+    margin-bottom: 24px;
 }
 
 .form-input {
     width: 100%;
-    height: 48px;
+    height: 40px;
     padding: 0 45px 0 16px;
     background-color: #F8F8F8;
     border: none;
     border-radius: 8px;
-    font-size: 16px;
+    font-size: 14px;
     box-sizing: border-box;
 }
 
@@ -145,18 +145,27 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
         margin-top: 3px;
     }
 
+/* Chỉnh lại checkbox "Ghi nhớ đăng nhập" */
+.checkbox.mb-3 {
+    margin-bottom: 8px !important;
+}
 
+.form-check-input {
+    margin-right: 5px;
+}
+
+/* Điều chỉnh nút đăng nhập */
 .next-button {
     width: 100%;
-    height: 48px;
+    height: 40px;
     background-color: #75B8FF;
     color: white;
     border: none;
     border-radius: 200px;
-    font-size: 16px;
+    font-size: 14px;
     font-weight: bold;
     cursor: pointer;
-    margin: 16px 0;
+    margin: 10px 0;
 }
 
     .next-button:hover {
@@ -177,10 +186,14 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
     text-align: center;
 }
 
+.login-link {
+    margin-top: 8px;
+}
+
 .login-divider {
     position: relative;
     text-align: center;
-    margin: 32px 0;
+    margin: 15px 0;
 }
 
     .login-divider span {
@@ -207,8 +220,8 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
 .social-login {
     display: flex;
     justify-content: center;
-    gap: 16px;
-    margin-bottom: 32px;
+    gap: 12px;
+    margin-bottom: 18px;
 }
 
 .social-btn {
@@ -231,7 +244,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
 
 /* Footer */
 .register-footer {
-    margin-top: 24px;
+    margin-top: 15px;
     text-align: center;
     font-size: 12px;
     color: #86868B;

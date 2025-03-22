@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Hosting;
 using ArtGallery.Repositories.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
 
 namespace ArtGallery.Controllers
 {
@@ -43,15 +44,6 @@ namespace ArtGallery.Controllers
         [AllowAnonymous]
         public IActionResult LoginRegister()
         {
-            if (User.Identity.IsAuthenticated)
-            {
-                return RedirectToAction("Index");
-            }
-            
-            // Nếu cần, lấy danh sách external logins
-            var schemes = _signInManager.GetExternalAuthenticationSchemesAsync().Result;
-            ViewData["ExternalLogins"] = schemes.ToList();
-            
             return View();
         }
 
