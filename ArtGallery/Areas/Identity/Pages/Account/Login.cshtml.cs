@@ -22,11 +22,13 @@ namespace ArtGallery.Areas.Identity.Pages.Account
     {
         private readonly SignInManager<NguoiDung> _signInManager;
         private readonly ILogger<LoginModel> _logger;
+        private readonly UserManager<NguoiDung> _userManager;
 
-        public LoginModel(SignInManager<NguoiDung> signInManager, ILogger<LoginModel> logger)
+        public LoginModel(SignInManager<NguoiDung> signInManager, ILogger<LoginModel> logger, UserManager<NguoiDung> userManager)
         {
             _signInManager = signInManager;
             _logger = logger;
+            _userManager = userManager;
         }
 
         /// <summary>
@@ -61,27 +63,16 @@ namespace ArtGallery.Areas.Identity.Pages.Account
         /// </summary>
         public class InputModel
         {
-            /// <summary>
-            ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-            ///     directly from your code. This API may change or be removed in future releases.
-            /// </summary>
-            [Required]
-            [EmailAddress]
+            [Required(ErrorMessage = "Vui lòng nhập tên đăng nhập hoặc email")]
+            [Display(Name = "Tên đăng nhập hoặc Email")]
             public string Email { get; set; }
-
-            /// <summary>
-            ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-            ///     directly from your code. This API may change or be removed in future releases.
-            /// </summary>
-            [Required]
+            
+            [Required(ErrorMessage = "Vui lòng nhập mật khẩu")]
             [DataType(DataType.Password)]
+            [Display(Name = "Mật khẩu")]
             public string Password { get; set; }
-
-            /// <summary>
-            ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-            ///     directly from your code. This API may change or be removed in future releases.
-            /// </summary>
-            [Display(Name = "Remember me?")]
+            
+            [Display(Name = "Ghi nhớ đăng nhập")]
             public bool RememberMe { get; set; }
         }
 
@@ -110,12 +101,32 @@ namespace ArtGallery.Areas.Identity.Pages.Account
 
             if (ModelState.IsValid)
             {
-                // This doesn't count login failures towards account lockout
-                // To enable password failures to trigger account lockout, set lockoutOnFailure: true
-                var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
+                // Đầu tiên thử đăng nhập với email hoặc username như đã nhập
+                var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: true);
+                
+                // Nếu không thành công và chuỗi nhập vào không phải email, thử tìm user bằng username
+                if (!result.Succeeded && !Input.Email.Contains("@"))
+                {
+                    var user = await _userManager.FindByNameAsync(Input.Email);
+                    if (user != null)
+                    {
+                        result = await _signInManager.PasswordSignInAsync(user.UserName, Input.Password, Input.RememberMe, lockoutOnFailure: true);
+                    }
+                }
+                
+                // Nếu vẫn không thành công và chuỗi có thể là email, thử tìm user bằng email
+                if (!result.Succeeded && Input.Email.Contains("@"))
+                {
+                    var user = await _userManager.FindByEmailAsync(Input.Email);
+                    if (user != null)
+                    {
+                        result = await _signInManager.PasswordSignInAsync(user.UserName, Input.Password, Input.RememberMe, lockoutOnFailure: true);
+                    }
+                }
+
                 if (result.Succeeded)
                 {
-                    _logger.LogInformation("User logged in.");
+                    _logger.LogInformation("Đăng nhập thành công.");
                     return LocalRedirect(returnUrl);
                 }
                 if (result.RequiresTwoFactor)
@@ -124,12 +135,14 @@ namespace ArtGallery.Areas.Identity.Pages.Account
                 }
                 if (result.IsLockedOut)
                 {
-                    _logger.LogWarning("User account locked out.");
+                    _logger.LogWarning("Tài khoản bị khóa.");
                     return RedirectToPage("./Lockout");
                 }
                 else
                 {
-                    ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                    // Ghi log chi tiết để dễ debug
+                    _logger.LogWarning($"Đăng nhập thất bại với thông tin đăng nhập: {Input.Email}");
+                    ModelState.AddModelError(string.Empty, "Tên đăng nhập hoặc mật khẩu không chính xác.");
                     return Page();
                 }
             }

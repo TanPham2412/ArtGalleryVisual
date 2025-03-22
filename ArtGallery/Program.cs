@@ -29,12 +29,11 @@ builder.Services.AddRazorPages();
 builder.Services.AddDbContext<ArtGalleryContext>(options =>
     options.UseSqlServer(Environment.GetEnvironmentVariable("ART_GALLERY", EnvironmentVariableTarget.User)));
 
-builder.Services.AddLogging(logging =>
+builder.Services.AddLogging(options =>
 {
-    logging.ClearProviders();
-    logging.AddConsole();
-    logging.AddDebug();
-    logging.SetMinimumLevel(LogLevel.Debug);
+    options.AddConsole();
+    options.AddDebug();
+    options.SetMinimumLevel(LogLevel.Debug);
 });
 
 builder.Services.AddScoped<IUserStore<NguoiDung>, CustomUserStore>();
@@ -42,7 +41,15 @@ builder.Services.AddScoped<IUserStore<NguoiDung>, CustomUserStore>();
 builder.Services.AddIdentity<NguoiDung, IdentityRole>(options => {
     options.SignIn.RequireConfirmedAccount = false;
     options.SignIn.RequireConfirmedEmail = false;
-    // Cấu hình khác...
+    options.Password.RequireDigit = false; // Không bắt buộc số
+    options.Password.RequireLowercase = false; // Không bắt buộc chữ thường
+    options.Password.RequireUppercase = false; // Không bắt buộc chữ hoa
+    options.Password.RequireNonAlphanumeric = false; // Không bắt buộc ký tự đặc biệt
+    options.Password.RequiredLength = 6; // Độ dài tối thiểu 6 ký tự
+    
+    options.User.RequireUniqueEmail = true; // Email phải duy nhất
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5); // Thời gian khóa mặc định
+    options.Lockout.MaxFailedAccessAttempts = 5; // Số lần thử tối đa
 })
 .AddEntityFrameworkStores<ArtGalleryContext>()
 .AddDefaultTokenProviders();
