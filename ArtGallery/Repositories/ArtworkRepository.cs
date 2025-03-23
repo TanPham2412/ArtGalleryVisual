@@ -74,10 +74,13 @@ namespace ArtGallery.Repositories
             var artwork = await _context.Tranhs
                 .Include(t => t.MaTheLoais)
                 .Include(t => t.MaTags)
+                .Include(t => t.MaNguoiDungNavigation)
                 .FirstOrDefaultAsync(t => t.MaTranh == id);
 
             if (artwork == null || artwork.MaNguoiDung != currentUserId)
                 return null;
+
+            _logger.LogInformation($"Artwork Owner ID: {artwork.MaNguoiDung}, Current User ID: {currentUserId}");
 
             return artwork;
         }
@@ -102,6 +105,8 @@ namespace ArtGallery.Repositories
 
                 if (artwork == null || artwork.MaNguoiDung != currentUserId)
                     return (false, "Không tìm thấy tranh hoặc bạn không có quyền sửa");
+
+                _logger.LogInformation($"Artwork Owner ID: {artwork.MaNguoiDung}, Current User ID: {currentUserId}");
 
                 // Cập nhật thông tin cơ bản
                 artwork.TieuDe = model.TieuDe;

@@ -80,26 +80,6 @@
         </div>
     </div>
     
-    <script>
-        // Slideshow
-        document.addEventListener("DOMContentLoaded", function() {
-            let slideIndex = 0;
-            const slides = document.querySelectorAll(".slide");
-            
-            function changeSlide() {
-                for (let i = 0; i < slides.length; i++) {
-                    slides[i].classList.remove("active");
-                }
-                slideIndex++;
-                if (slideIndex > slides.length) { slideIndex = 1 }
-                slides[slideIndex - 1].classList.add("active");
-                setTimeout(changeSlide, 5000);
-            }
-            
-            if (slides.length > 1) {
-                setTimeout(changeSlide, 5000);
-            }
-        });
-    </script>
+    <script src="~/js/login_register.js"></script>
 </body>
 </html> 

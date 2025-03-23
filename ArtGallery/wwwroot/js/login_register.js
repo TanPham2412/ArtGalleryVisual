@@ -18,7 +18,7 @@
 });
 
 function togglePassword(button) {
-    const passwordInput = button.previousElementSibling;
+    const passwordInput = button.parentElement.querySelector('input');
     const icon = button.querySelector('i');
 
     if (passwordInput.type === 'password') {

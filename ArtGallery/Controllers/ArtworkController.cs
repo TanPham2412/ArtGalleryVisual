@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using ArtGallery.Models;
 using ArtGallery.Repositories.Interfaces;
+using System.Security.Claims;
 
 namespace ArtGallery.Controllers
 {
@@ -48,7 +49,7 @@ namespace ArtGallery.Controllers
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
-            var currentUserId = User.FindFirst("UserId").Value;
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var artwork = await _artworkRepository.GetArtworkForEdit(id, currentUserId);
             
             if (artwork == null)
@@ -62,18 +63,20 @@ namespace ArtGallery.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(Tranh model, IFormFile? ImageFile, string TagsInput, List<int> SelectedCategories)
         {
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            _logger.LogInformation($"Current User ID: {currentUserId}");
+
             try 
             {
                 ModelState.Remove("MaNguoiDungNavigation");
-                
+                ModelState.Remove("TagsInput");
+
                 if (!ModelState.IsValid)
                 {
                     ViewBag.Categories = await _artworkRepository.GetCategories();
                     TempData["ErrorMessage"] = "Dữ liệu không hợp lệ";
                     return View(model);
                 }
-
-                var currentUserId = User.FindFirst("UserId")?.Value;
 
                 if (model.Gia < 0)
                 {
@@ -116,7 +119,7 @@ namespace ArtGallery.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
-            var currentUserId = User.FindFirst("UserId").Value;
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var result = await _artworkRepository.DeleteArtwork(id, currentUserId);
 
             return Json(new { 
