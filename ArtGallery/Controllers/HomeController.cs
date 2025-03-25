@@ -36,14 +36,18 @@ namespace ArtGallery.Controllers
                 return RedirectToAction("LoginRegister");
             }
             
-            var currentUserId = User.FindFirst("UserId")?.Value ?? "";
-            var model = await _homeRepository.GetRandomArtworksFromFollowing(currentUserId, 8);
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var model = await _homeRepository.GetRandomArtworksFromFollowing(currentUserId, 12);
             return View(model);
         }
 
         [AllowAnonymous]
-        public IActionResult LoginRegister()
+        public async Task<IActionResult> LoginRegister()
         {
+            // Lấy danh sách các external login providers
+            var externalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+            ViewData["ExternalLogins"] = externalLogins;
+            
             return View();
         }
 

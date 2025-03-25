@@ -36,7 +36,7 @@
 
             <!-- Social login buttons -->
             @{
-                // Lấy danh sách ExternalLogins từ ViewData hoặc ViewBag nếu có
+                // Lấy danh sách ExternalLogins từ ViewData
                 var externalLogins = ViewData["ExternalLogins"] as List<Microsoft.AspNetCore.Authentication.AuthenticationScheme>;
                 
                 if (externalLogins != null && externalLogins.Count > 0)
@@ -63,12 +63,16 @@
                 }
                 else
                 {
-                    <!-- Sử dụng URL tương đối thay vì tuyệt đối -->
-                    <div class="social-login">
-                        <a href="/Identity/Account/ExternalLogin?provider=Google&returnUrl=%2F" class="social-btn google">
-                            <img src="~/images/icons/google.png" alt="Google">
-                        </a>
-                    </div>
+                    // Sử dụng form thay vì liên kết trực tiếp
+                    <form action="/Identity/Account/ExternalLogin" method="post">
+                        <input type="hidden" name="provider" value="Google" />
+                        <input type="hidden" name="returnUrl" value="/" />
+                        <div class="social-login">
+                            <button type="submit" class="social-btn google">
+                                <img src="~/images/icons/google.png" alt="Google">
+                            </button>
+                        </div>
+                    </form>
                 }
             }
 
