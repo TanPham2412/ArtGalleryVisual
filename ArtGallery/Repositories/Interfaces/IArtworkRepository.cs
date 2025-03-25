@@ -8,9 +8,10 @@ namespace ArtGallery.Repositories.Interfaces
         Task<(Tranh artwork, List<Tranh> otherWorks)> GetArtworkForDisplay(int id);
         Task<(TheLoai category, List<Tranh> artworks)> GetArtworksByCategory(int categoryId);
         Task<(TheTag tag, List<Tranh> artworks)> GetArtworksByTag(int tagId);
-        Task<Tranh> GetArtworkForEdit(int id, string currentUserId);
+        Task<Tranh> GetArtworkForEdit(int id, string currentUserId, bool isAdmin = false);
         Task<List<SelectListItem>> GetCategories();
-        Task<(bool success, string message)> UpdateArtwork(Tranh model, IFormFile imageFile, string tagsInput, List<int> selectedCategories, string currentUserId);
+        Task<(bool success, string message)> UpdateArtwork(Tranh model, IFormFile imageFile, string tagsInput, List<int> selectedCategories, string currentUserId, bool isAdmin = false);
         Task<(bool success, string message, string redirectUrl)> DeleteArtwork(int id, string currentUserId);
+        Task<List<Tranh>> GetAllArtworks();
     }
 }

@@ -1,0 +1,238 @@
+@model List<ArtGallery.Models.Tranh>
+@{
+    ViewData["Title"] = "Quản lý tranh";
+    var sortOrder = Context.Request.Query["sortOrder"].ToString();
+    var searchString = Context.Request.Query["searchString"].ToString();
+    
+    // Sắp xếp ID
+    var idSort = string.IsNullOrEmpty(sortOrder) ? "id_asc" : (sortOrder == "id_asc" ? "id_desc" : "id_asc");
+    
+    // Các sắp xếp khác
+    var titleSort = sortOrder == "title_asc" ? "title_desc" : "title_asc";
+    var artistSort = sortOrder == "artist_asc" ? "artist_desc" : "artist_asc";
+    var priceSort = sortOrder == "price_asc" ? "price_desc" : "price_asc";
+    var quantitySort = sortOrder == "quantity_asc" ? "quantity_desc" : "quantity_asc";
+    var dateSort = sortOrder == "date_asc" ? "date_desc" : "date_asc";
+}
+<link rel="stylesheet" href="~/css/admin.css">
+@Html.AntiForgeryToken()
+
+<div class="container mt-5 pt-4">
+    <h1 class="text-center mb-4">Quản lý Tranh</h1>
+    
+    <div class="d-flex justify-content-between mb-4">
+        <a asp-controller="Home" asp-action="Index" class="btn btn-primary">
+            <i class="fas fa-arrow-left"></i> Về trang chủ
+        </a>
+        
+        <!-- Box tìm kiếm -->
+        <form asp-action="Admin" method="get" class="d-flex">
+            <div class="input-group">
+                <input type="text" name="searchString" value="@searchString" class="form-control" placeholder="Tìm kiếm...">
+                <button type="submit" class="btn btn-outline-primary">
+                    <i class="fas fa-search"></i>
+                </button>
+                @if (!string.IsNullOrEmpty(searchString))
+                {
+                    <a asp-action="Admin" class="btn btn-outline-secondary">
+                        <i class="fas fa-times"></i>
+                    </a>
+                }
+                <!-- Giữ lại sortOrder khi tìm kiếm -->
+                <input type="hidden" name="sortOrder" value="@sortOrder" />
+            </div>
+        </form>
+    </div>
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="alert alert-info">
+            Không có tranh nào trong hệ thống.
+        </div>
+    }
+    else
+    {
+        <!-- Form để chứa token -->
+        <form id="deleteForm">
+            @Html.AntiForgeryToken()
+        </form>
+        
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>
+                            <a asp-action="Admin" asp-route-sortOrder="@idSort" asp-route-searchString="@searchString" class="text-white text-decoration-none">
+                                ID
+                                @if (sortOrder == "id_asc")
+                                {
+                                    <i class="fas fa-sort-up"></i>
+                                }
+                                else if (sortOrder == "id_desc")
+                                {
+                                    <i class="fas fa-sort-down"></i>
+                                }
+                                else
+                                {
+                                    <i class="fas fa-sort"></i>
+                                }
+                            </a>
+                        </th>
+                        <th>Ảnh</th>
+                        <th>
+                            <a asp-action="Admin" asp-route-sortOrder="@titleSort" asp-route-searchString="@searchString" class="text-white text-decoration-none">
+                                Tiêu đề
+                                @if (sortOrder == "title_asc")
+                                {
+                                    <i class="fas fa-sort-up"></i>
+                                }
+                                else if (sortOrder == "title_desc")
+                                {
+                                    <i class="fas fa-sort-down"></i>
+                                }
+                                else
+                                {
+                                    <i class="fas fa-sort"></i>
+                                }
+                            </a>
+                        </th>
+                        <th>
+                            <a asp-action="Admin" asp-route-sortOrder="@artistSort" asp-route-searchString="@searchString" class="text-white text-decoration-none">
+                                Người đăng
+                                @if (sortOrder == "artist_asc")
+                                {
+                                    <i class="fas fa-sort-up"></i>
+                                }
+                                else if (sortOrder == "artist_desc")
+                                {
+                                    <i class="fas fa-sort-down"></i>
+                                }
+                                else
+                                {
+                                    <i class="fas fa-sort"></i>
+                                }
+                            </a>
+                        </th>
+                        <th>
+                            <a asp-action="Admin" asp-route-sortOrder="@priceSort" asp-route-searchString="@searchString" class="text-white text-decoration-none">
+                                Giá
+                                @if (sortOrder == "price_asc")
+                                {
+                                    <i class="fas fa-sort-up"></i>
+                                }
+                                else if (sortOrder == "price_desc")
+                                {
+                                    <i class="fas fa-sort-down"></i>
+                                }
+                                else
+                                {
+                                    <i class="fas fa-sort"></i>
+                                }
+                            </a>
+                        </th>
+                        <th>
+                            <a asp-action="Admin" asp-route-sortOrder="@quantitySort" asp-route-searchString="@searchString" class="text-white text-decoration-none">
+                                Số lượng
+                                @if (sortOrder == "quantity_asc")
+                                {
+                                    <i class="fas fa-sort-up"></i>
+                                }
+                                else if (sortOrder == "quantity_desc")
+                                {
+                                    <i class="fas fa-sort-down"></i>
+                                }
+                                else
+                                {
+                                    <i class="fas fa-sort"></i>
+                                }
+                            </a>
+                        </th>
+                        <th>
+                            <a asp-action="Admin" asp-route-sortOrder="@dateSort" asp-route-searchString="@searchString" class="text-white text-decoration-none">
+                                Ngày đăng
+                                @if (sortOrder == "date_asc")
+                                {
+                                    <i class="fas fa-sort-up"></i>
+                                }
+                                else if (sortOrder == "date_desc")
+                                {
+                                    <i class="fas fa-sort-down"></i>
+                                }
+                                else
+                                {
+                                    <i class="fas fa-sort"></i>
+                                }
+                            </a>
+                        </th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.MaTranh</td>
+                            <td>
+                                <img src="@item.DuongDanAnh" alt="@item.TieuDe" style="width:60px; height: 60px; object-fit: cover;" />
+                            </td>
+                            <td>@item.TieuDe</td>
+                            <td>@item.MaNguoiDungNavigation.TenNguoiDung</td>
+                            <td>@item.Gia.ToString("#,##0") VND</td>
+                            <td>@item.SoLuongTon</td>
+                            <td>@(item.NgayDang.HasValue ? item.NgayDang.Value.ToString("dd/MM/yyyy") : "N/A")</td>
+                            <td>
+                                <div class="btn-group">
+                                    <a asp-action="Display" asp-route-id="@item.MaTranh" class="btn btn-sm btn-info">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a asp-action="Edit" asp-route-id="@item.MaTranh" class="btn btn-sm btn-warning">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <button type="button" class="btn btn-sm btn-danger btn-delete" 
+                                            data-id="@item.MaTranh">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Script xử lý xóa
+            $('.btn-delete').on('click', function() {
+                var artworkId = $(this).data('id');
+                if (confirm('Bạn có chắc chắn muốn xóa tranh này không?')) {
+                    var token = $('input[name="__RequestVerificationToken"]').val();
+                    
+                    $.ajax({
+                        url: '/Artwork/Delete/' + artworkId,
+                        type: 'POST',
+                        headers: {
+                            'RequestVerificationToken': token
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                alert(response.message);
+                                window.location.href = response.redirectUrl;
+                            } else {
+                                alert(response.message);
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.error("Error:", xhr.responseText);
+                            alert('Có lỗi xảy ra khi xóa tranh: ' + error);
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+} 

@@ -69,7 +69,7 @@ namespace ArtGallery.Repositories
             return (tag, artworks);
         }
 
-        public async Task<Tranh> GetArtworkForEdit(int id, string currentUserId)
+        public async Task<Tranh> GetArtworkForEdit(int id, string currentUserId, bool isAdmin = false)
         {
             var artwork = await _context.Tranhs
                 .Include(t => t.MaTheLoais)
@@ -77,10 +77,11 @@ namespace ArtGallery.Repositories
                 .Include(t => t.MaNguoiDungNavigation)
                 .FirstOrDefaultAsync(t => t.MaTranh == id);
 
-            if (artwork == null || artwork.MaNguoiDung != currentUserId)
+            // Cho phép admin hoặc chủ sở hữu sửa tranh
+            if (artwork == null || (artwork.MaNguoiDung != currentUserId && !isAdmin))
                 return null;
 
-            _logger.LogInformation($"Artwork Owner ID: {artwork.MaNguoiDung}, Current User ID: {currentUserId}");
+            _logger.LogInformation($"Artwork Owner ID: {artwork.MaNguoiDung}, Current User ID: {currentUserId}, IsAdmin: {isAdmin}");
 
             return artwork;
         }
@@ -93,7 +94,7 @@ namespace ArtGallery.Repositories
         }
 
         public async Task<(bool success, string message)> UpdateArtwork(
-            Tranh model, IFormFile imageFile, string tagsInput, List<int> selectedCategories, string currentUserId)
+            Tranh model, IFormFile imageFile, string tagsInput, List<int> selectedCategories, string currentUserId, bool isAdmin = false)
         {
             try
             {
@@ -103,10 +104,11 @@ namespace ArtGallery.Repositories
                     .Include(t => t.MaNguoiDungNavigation)
                     .FirstOrDefaultAsync(t => t.MaTranh == model.MaTranh);
 
-                if (artwork == null || artwork.MaNguoiDung != currentUserId)
+                // Cho phép admin hoặc chủ sở hữu sửa tranh
+                if (artwork == null || (artwork.MaNguoiDung != currentUserId && !isAdmin))
                     return (false, "Không tìm thấy tranh hoặc bạn không có quyền sửa");
 
-                _logger.LogInformation($"Artwork Owner ID: {artwork.MaNguoiDung}, Current User ID: {currentUserId}");
+                _logger.LogInformation($"Artwork Owner ID: {artwork.MaNguoiDung}, Current User ID: {currentUserId}, IsAdmin: {isAdmin}");
 
                 // Cập nhật thông tin cơ bản
                 artwork.TieuDe = model.TieuDe;
@@ -138,35 +140,72 @@ namespace ArtGallery.Repositories
         {
             try
             {
+                // Kiểm tra quyền admin
+                var isAdmin = await _context.UserRoles
+                    .Join(_context.Roles, ur => ur.RoleId, r => r.Id, (ur, r) => new { ur, r })
+                    .AnyAsync(x => x.ur.UserId == currentUserId && x.r.Name == "Admin");
+                
+                _logger.LogInformation($"DeleteArtwork - ArtworkID: {id}, UserID: {currentUserId}, IsAdmin: {isAdmin}");
+                
                 var artwork = await _context.Tranhs
-                    .Include(t => t.MaNguoiDungNavigation)
+                    .Include(t => t.MaTags)
+                    .Include(t => t.MaTheLoais)
                     .FirstOrDefaultAsync(t => t.MaTranh == id);
 
                 if (artwork == null)
+                {
+                    _logger.LogWarning($"Artwork not found - ID: {id}");
                     return (false, "Không tìm thấy tranh", null);
+                }
 
-                if (artwork.MaNguoiDung != currentUserId)
+                // Cho phép admin hoặc chủ sở hữu xóa tranh
+                if (artwork.MaNguoiDung != currentUserId && !isAdmin)
+                {
+                    _logger.LogWarning($"Permission denied - ArtworkID: {id}, OwnerID: {artwork.MaNguoiDung}, CurrentUserID: {currentUserId}");
                     return (false, "Bạn không có quyền xóa tranh này", null);
+                }
 
+                // Xóa file ảnh
                 if (!string.IsNullOrEmpty(artwork.DuongDanAnh))
                 {
                     var imagePath = Path.Combine(_webHostEnvironment.WebRootPath, artwork.DuongDanAnh.TrimStart('/'));
+                    _logger.LogInformation($"Image path: {imagePath}");
+                    
                     if (System.IO.File.Exists(imagePath))
                     {
-                        System.IO.File.Delete(imagePath);
+                        try
+                        {
+                            System.IO.File.Delete(imagePath);
+                            _logger.LogInformation($"Deleted image file: {imagePath}");
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, $"Error deleting image file: {imagePath}");
+                        }
+                    }
+                    else
+                    {
+                        _logger.LogWarning($"Image file not found: {imagePath}");
                     }
                 }
 
+                // Xóa liên kết với tags và thể loại
+                artwork.MaTags.Clear();
+                artwork.MaTheLoais.Clear();
+                
+                // Xóa tranh
                 _context.Tranhs.Remove(artwork);
                 await _context.SaveChangesAsync();
+                _logger.LogInformation($"Artwork deleted successfully - ID: {id}");
 
-                var redirectUrl = $"/User/Profile/{currentUserId}";
+                // Chuyển hướng về trang admin nếu là admin
+                var redirectUrl = isAdmin ? "/Artwork/Admin" : $"/User/Profile/{currentUserId}";
                 return (true, "Xóa thành công!", redirectUrl);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Lỗi khi xóa tranh");
-                return (false, "Có lỗi xảy ra khi xóa tranh", null);
+                _logger.LogError(ex, $"Error in DeleteArtwork - ArtworkID: {id}");
+                return (false, "Có lỗi xảy ra khi xóa tranh: " + ex.Message, null);
             }
         }
 
@@ -244,6 +283,24 @@ namespace ArtGallery.Repositories
 
                     artwork.MaTags.Add(tag);
                 }
+            }
+        }
+
+        public async Task<List<Tranh>> GetAllArtworks()
+        {
+            try
+            {
+                return await _context.Tranhs
+                    .Include(t => t.MaNguoiDungNavigation)
+                    .Include(t => t.MaTheLoais)
+                    .Include(t => t.MaTags)
+                    .OrderByDescending(t => t.NgayDang)
+                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi lấy tất cả tranh");
+                return new List<Tranh>();
             }
         }
     }

@@ -84,6 +84,16 @@ builder.Services.Configure<IdentityOptions>(options =>
 
 builder.Services.AddTransient<IEmailSender, EmailSender>();
 
+// Cấu hình xử lý khi từ chối truy cập
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.AccessDeniedPath = "/Artwork/AccessDenied";
+    options.LoginPath = "/Home/LoginRegister";
+    options.LogoutPath = "/Home/LogoutDirect";
+    options.ExpireTimeSpan = TimeSpan.FromDays(30);
+    options.SlidingExpiration = true;
+});
+
 var app = builder.Build();
 
 // Seed Roles và Admin user
@@ -112,14 +122,15 @@ app.MapRazorPages();
 
 using (var scope = app.Services.CreateScope())
 {
+    var services = scope.ServiceProvider;
     try
     {
-        await DbSeeder.SeedRolesAndAdminAsync(scope.ServiceProvider);
+        await ArtGallery.Data.DbSeeder.SeedRolesAndAdminAsync(services);
     }
     catch (Exception ex)
     {
-        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "Lỗi khi tạo Roles ban đầu");
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "Lỗi khi khởi tạo dữ liệu.");
     }
 }
 

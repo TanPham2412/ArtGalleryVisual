@@ -1,0 +1,20 @@
+/* Styles cho các liên kết sắp xếp */
+th a {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+th a:hover {
+    text-decoration: none;
+    opacity: 0.8;
+}
+
+th a i {
+    margin-left: 5px;
+}
+
+/* Highlight cho cột đang được sắp xếp */
+th.active-sort {
+    background-color: rgba(0, 0, 0, 0.2);
+} 
