@@ -4,6 +4,7 @@ using ArtGallery.Repositories.Interfaces;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using System.Linq;
+using Microsoft.AspNetCore.Identity;
 
 namespace ArtGallery.Controllers
 {
@@ -11,11 +12,15 @@ namespace ArtGallery.Controllers
     {
         private readonly IArtworkRepository _artworkRepository;
         private readonly ILogger<ArtworkController> _logger;
+        private readonly UserManager<NguoiDung> _userManager;
+        private readonly ILikeArtworkRepository _likeArtworkRepository;
 
-        public ArtworkController(IArtworkRepository artworkRepository, ILogger<ArtworkController> logger)
+        public ArtworkController(IArtworkRepository artworkRepository, ILogger<ArtworkController> logger, UserManager<NguoiDung> userManager, ILikeArtworkRepository likeArtworkRepository)
         {
             _artworkRepository = artworkRepository;
             _logger = logger;
+            _userManager = userManager;
+            _likeArtworkRepository = likeArtworkRepository;
         }
 
         public async Task<IActionResult> Display(int id)
@@ -217,6 +222,33 @@ namespace ArtGallery.Controllers
                 _logger.LogError(ex, "Lỗi khi lấy danh sách tranh cho Admin");
                 TempData["ErrorMessage"] = "Có lỗi xảy ra khi tải danh sách tranh";
                 return RedirectToAction("Index", "Home");
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ToggleLike(int artworkId)
+        {
+            if (!User.Identity.IsAuthenticated)
+            {
+                return Json(new { success = false, message = "Vui lòng đăng nhập để thích tác phẩm" });
+            }
+
+            try
+            {
+                var userId = _userManager.GetUserId(User);
+                var isLiked = await _likeArtworkRepository.ToggleLike(artworkId, userId);
+
+                return Json(new { 
+                    success = true, 
+                    isLiked = isLiked,
+                    message = isLiked ? "Đã thích tác phẩm" : "Đã bỏ thích tác phẩm"
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi thực hiện like/unlike");
+                return Json(new { success = false, message = "Có lỗi xảy ra" });
             }
         }
 
