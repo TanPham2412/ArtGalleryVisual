@@ -4,7 +4,7 @@ using ArtGallery.Repositories.Interfaces;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using System.Linq;
-using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace ArtGallery.Controllers
 {
@@ -12,15 +12,13 @@ namespace ArtGallery.Controllers
     {
         private readonly IArtworkRepository _artworkRepository;
         private readonly ILogger<ArtworkController> _logger;
-        private readonly UserManager<NguoiDung> _userManager;
-        private readonly ILikeArtworkRepository _likeArtworkRepository;
+        private readonly ArtGalleryContext _context;
 
-        public ArtworkController(IArtworkRepository artworkRepository, ILogger<ArtworkController> logger, UserManager<NguoiDung> userManager, ILikeArtworkRepository likeArtworkRepository)
+        public ArtworkController(IArtworkRepository artworkRepository, ILogger<ArtworkController> logger, ArtGalleryContext context)
         {
             _artworkRepository = artworkRepository;
             _logger = logger;
-            _userManager = userManager;
-            _likeArtworkRepository = likeArtworkRepository;
+            _context = context;
         }
 
         public async Task<IActionResult> Display(int id)
@@ -225,38 +223,54 @@ namespace ArtGallery.Controllers
             }
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ToggleLike(int artworkId)
-        {
-            if (!User.Identity.IsAuthenticated)
-            {
-                return Json(new { success = false, message = "Vui lòng đăng nhập để thích tác phẩm" });
-            }
-
-            try
-            {
-                var userId = _userManager.GetUserId(User);
-                var isLiked = await _likeArtworkRepository.ToggleLike(artworkId, userId);
-
-                return Json(new { 
-                    success = true, 
-                    isLiked = isLiked,
-                    message = isLiked ? "Đã thích tác phẩm" : "Đã bỏ thích tác phẩm"
-                });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Lỗi khi thực hiện like/unlike");
-                return Json(new { success = false, message = "Có lỗi xảy ra" });
-            }
-        }
-
         // Xử lý khi người dùng không có quyền truy cập
         [AllowAnonymous]
         public IActionResult AccessDenied()
         {
             return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ToggleLike(int artworkId)
+        {
+            try
+            {
+                if (!User.Identity.IsAuthenticated)
+                {
+                    return Json(new { success = false, message = "Vui lòng đăng nhập để thích tác phẩm" });
+                }
+
+                var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var existingLike = await _context.LuotThiches
+                    .FirstOrDefaultAsync(lt => lt.MaTranh == artworkId && lt.MaNguoiDung == currentUserId);
+
+                if (existingLike != null)
+                {
+                    // Nếu đã thích, xóa lượt thích
+                    _context.LuotThiches.Remove(existingLike);
+                    await _context.SaveChangesAsync();
+                    return Json(new { success = true, liked = false });
+                }
+                else
+                {
+                    // Nếu chưa thích, thêm lượt thích mới
+                    var luotThich = new LuotThich
+                    {
+                        MaTranh = artworkId,
+                        MaNguoiDung = currentUserId,
+                        NgayThich = DateTime.Now
+                    };
+                    _context.LuotThiches.Add(luotThich);
+                    await _context.SaveChangesAsync();
+                    return Json(new { success = true, liked = true });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi thay đổi trạng thái yêu thích");
+                return Json(new { success = false, message = "Có lỗi xảy ra" });
+            }
         }
     }
 }

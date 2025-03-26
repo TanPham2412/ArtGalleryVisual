@@ -816,3 +816,30 @@
 .follow-button-primary.following .follow-text {
     display: none;
 }
+
+/* Nút like khi đã thích */
+.btn-outline-primary.active {
+    background-color: #0096fa;
+    color: white;
+}
+
+.btn-outline-primary.active i {
+    color: red;
+}
+
+/* Style cho trang yêu thích */
+.liked-empty {
+    text-align: center;
+    padding: 50px 0;
+}
+
+.liked-empty i {
+    font-size: 48px;
+    color: #ccc;
+    margin-bottom: 20px;
+}
+
+.liked-empty p {
+    color: #666;
+    font-size: 16px;
+}

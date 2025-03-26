@@ -1,0 +1,90 @@
+﻿@model IEnumerable<ArtGallery.Models.Tranh>
+@using System.Security.Claims
+@inject ArtGalleryContext _context
+
+<link rel="stylesheet" href="~/css/style.css">
+
+@await Html.PartialAsync("_NavigationPartial")
+
+<div class="container mt-5 pt-5">
+    <h2 class="mb-4">Danh sách yêu thích</h2>
+
+    @if (!Model.Any())
+    {
+        <div class="text-center py-5">
+            <i class="far fa-heart fa-3x mb-3 text-muted"></i>
+            <p class="text-muted">Bạn chưa thích tác phẩm nào</p>
+        </div>
+    }
+    else
+    {
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-4">
+            @foreach (var item in Model)
+            {
+                <div>
+                    <div class="pic-item">
+                        <div class="image-wrapper">
+                            <a asp-controller="Artwork" asp-action="Display" asp-route-id="@item.MaTranh" class="art-link">
+                                <img src="@item.DuongDanAnh" alt="@item.TieuDe">
+                            </a>
+                            @{
+                                var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                                var isLiked = true; // Luôn true vì đây là danh sách yêu thích
+                            }
+                            <button class="like-button active" onclick="toggleLike(this, @item.MaTranh)">
+                                <i class="fas fa-heart"></i>
+                            </button>
+                        </div>
+
+                        <div class="img-info mt-2">
+                            <a asp-controller="Artwork" asp-action="Display" asp-route-id="@item.MaTranh" class="art-link">
+                                <h6 class="artwork-title">@item.TieuDe</h6>
+                            </a>
+                            <div class="artist-info d-flex align-items-center">
+                                <div class="artist-avatar">
+                                    <img src="@item.MaNguoiDungNavigation.GetAvatarPath()" alt="@item.MaNguoiDungNavigation.TenNguoiDung">
+                                </div>
+                                <span class="artist-name">@item.MaNguoiDungNavigation.TenNguoiDung</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        function toggleLike(button, artworkId) {
+            $.ajax({
+                url: '/Artwork/ToggleLike',
+                type: 'POST',
+                data: { artworkId: artworkId },
+                headers: {
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function(response) {
+                    if (response.success) {
+                        // Nếu bỏ thích thành công, xóa item khỏi danh sách
+                        if (!response.liked) {
+                            $(button).closest('.pic-item').parent().fadeOut(300, function() {
+                                $(this).remove();
+                                // Kiểm tra nếu không còn item nào
+                                if ($('.pic-item').length === 0) {
+                                    location.reload(); // Tải lại trang để hiện thông báo trống
+                                }
+                            });
+                        }
+                    } else {
+                        alert(response.message);
+                    }
+                },
+                error: function() {
+                    alert('Có lỗi xảy ra khi thực hiện thao tác');
+                }
+            });
+        }
+    </script>
+}

@@ -1,5 +1,4 @@
-﻿
-const swiper = new Swiper('.mySwiper', {
+﻿const swiper = new Swiper('.mySwiper', {
     slidesPerView: 3,        // Hiển thị chính xác 3 slides
     spaceBetween: 30,       // Khoảng cách nhỏ giữa các slides
     loop: true,             // Lặp vô tận
@@ -27,17 +26,34 @@ const swiper = new Swiper('.mySwiper', {
     }
 });
 
-function toggleLike(button) {
-    // Toggle class active
-    button.classList.toggle('active');
-
-    // Thay đổi icon
-    const icon = button.querySelector('i');
-    if (button.classList.contains('active')) {
-        icon.classList.remove('far');
-        icon.classList.add('fas');
-    } else {
-        icon.classList.remove('fas');
-        icon.classList.add('far');
-    }
+function toggleLike(button, artworkId) {
+    $.ajax({
+        url: '/Artwork/ToggleLike',
+        type: 'POST',
+        data: { artworkId: artworkId },
+        headers: {
+            'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+        },
+        success: function(response) {
+            if (response.success) {
+                const icon = button.querySelector('i');
+                if (response.liked) {
+                    // Đã thích
+                    icon.classList.remove('far');
+                    icon.classList.add('fas');
+                    button.classList.add('active');
+                } else {
+                    // Đã hủy thích
+                    icon.classList.remove('fas');
+                    icon.classList.add('far');
+                    button.classList.remove('active');
+                }
+            } else {
+                alert(response.message);
+            }
+        },
+        error: function() {
+            alert('Có lỗi xảy ra khi thực hiện thao tác');
+        }
+    });
 }

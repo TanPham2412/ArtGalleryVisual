@@ -1,6 +1,8 @@
 ﻿@model IEnumerable<ArtGallery.Models.Tranh>
 
 @using Microsoft.Extensions.DependencyInjection
+@using Microsoft.EntityFrameworkCore
+@using System.Security.Claims
 @inject ArtGalleryContext DbContext
 @inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
 
@@ -102,8 +104,14 @@
                             <a asp-controller="Artwork" asp-action="Display" asp-route-id="@item.MaTranh" class="art-link">
                                 <img src="@item.DuongDanAnh" alt="@item.TieuDe">
                             </a>
-                            <button class="like-button" onclick="toggleLike(this)">
-                                <i class="far fa-heart"></i>
+                            @{
+                                var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                                var isLiked = await DbContext.LuotThiches
+                                    .AnyAsync(lt => lt.MaTranh == item.MaTranh && lt.MaNguoiDung == currentUserId);
+                            }
+                            <button class="like-button @(isLiked ? "active" : "")" 
+                                    onclick="toggleLike(this, @item.MaTranh)">
+                                <i class="@(isLiked ? "fas" : "far") fa-heart"></i>
                             </button>
                         </div>
 
@@ -128,3 +136,40 @@
 
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 <script src="~/js/index.js"></script>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        function toggleLike(button, artworkId) {
+            $.ajax({
+                url: '/Artwork/ToggleLike',
+                type: 'POST',
+                data: { artworkId: artworkId },
+                headers: {
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function(response) {
+                    if (response.success) {
+                        const icon = button.querySelector('i');
+                        if (response.liked) {
+                            // Đã thích
+                            icon.classList.remove('far');
+                            icon.classList.add('fas');
+                            button.classList.add('active');
+                        } else {
+                            // Đã hủy thích
+                            icon.classList.remove('fas');
+                            icon.classList.add('far');
+                            button.classList.remove('active');
+                        }
+                    } else {
+                        alert(response.message);
+                    }
+                },
+                error: function() {
+                    alert('Có lỗi xảy ra khi thực hiện thao tác');
+                }
+            });
+        }
+    </script>
+}

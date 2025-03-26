@@ -1,6 +1,10 @@
 @model ArtGallery.Models.Tranh
 @using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@using System.Security.Claims
 @inject UserManager<NguoiDung> _userManager
+@inject ArtGalleryContext _context
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
 @{
     // Lấy người dùng hiện tại
     var currentUser = await _userManager.GetUserAsync(User);
@@ -14,6 +18,8 @@
     
     // Có thể sửa/xóa nếu là admin hoặc chủ sở hữu
     var canEditOrDelete = isOwner || isAdmin;
+
+    var token = Antiforgery.GetAndStoreTokens(Context).RequestToken;
 }
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
@@ -88,10 +94,15 @@
                 <!-- Action Buttons -->
                 <div class="action-buttons">
                     <button class="btn btn-outline-primary btn-lg w-100 mb-3">
-                        <i class="fas fa-shopping-cart me-2"></i>Thêm vào giỏ hàng
-                    </button>
-                    <button class="btn btn-outline-primary btn-lg w-100">
-                        <i class="far fa-heart me-2"></i>Yêu thích
+                        <i class="fas fa-shopping-cart me-2"></i>Đặt hàng ngay
+                    </button>   
+                    @{
+                        var isLiked = await _context.LuotThiches
+                            .AnyAsync(lt => lt.MaTranh == Model.MaTranh && lt.MaNguoiDung == currentUserId);
+                    }
+                    <button class="btn btn-outline-primary btn-lg w-100 @(isLiked ? "active" : "")" 
+                            onclick="toggleLike(this, @Model.MaTranh)">
+                        <i class="@(isLiked ? "fas" : "far") fa-heart me-2"></i>Yêu thích
                     </button>
                 </div>
 
@@ -168,3 +179,42 @@
         </div>
     </div>
 }
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        function toggleLike(button, artworkId) {
+            $.ajax({
+                url: '/Artwork/ToggleLike',
+                type: 'POST',
+                data: { artworkId: artworkId },
+                headers: {
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function(response) {
+                    if (response.success) {
+                        const icon = button.querySelector('i');
+                        if (response.liked) {
+                            // Đã thích
+                            icon.classList.remove('far');
+                            icon.classList.add('fas');
+                            button.classList.add('active');
+                        } else {
+                            // Đã hủy thích
+                            icon.classList.remove('fas');
+                            icon.classList.add('far');
+                            button.classList.remove('active');
+                        }
+                    } else {
+                        alert(response.message);
+                    }
+                },
+                error: function() {
+                    alert('Có lỗi xảy ra khi thực hiện thao tác');
+                }
+            });
+        }
+    </script>
+}
+
+<input type="hidden" name="__RequestVerificationToken" value="@token" />
