@@ -303,5 +303,123 @@ namespace ArtGallery.Repositories
                 return new List<Tranh>();
             }
         }
+
+        public async Task<List<Tranh>> GetFilteredArtworks(string searchString, string sortOrder)
+        {
+            try
+            {
+                // Lấy tất cả tranh
+                var artworks = await GetAllArtworks();
+                
+                // Tìm kiếm nếu có chuỗi tìm kiếm
+                if (!string.IsNullOrEmpty(searchString))
+                {
+                    searchString = searchString.ToLower();
+                    artworks = artworks.Where(a => 
+                        a.TieuDe.ToLower().Contains(searchString) ||
+                        a.MaNguoiDungNavigation.TenNguoiDung.ToLower().Contains(searchString) ||
+                        a.Gia.ToString().Contains(searchString) ||
+                        a.SoLuongTon.ToString().Contains(searchString)
+                    ).ToList();
+                }
+                
+                // Mặc định sắp xếp theo ID giảm dần
+                if (string.IsNullOrEmpty(sortOrder))
+                {
+                    sortOrder = "id_desc"; 
+                }
+                
+                // Sắp xếp danh sách artworks theo sortOrder
+                switch (sortOrder)
+                {
+                    case "id_asc":
+                        artworks = artworks.OrderBy(a => a.MaTranh).ToList();
+                        break;
+                    case "id_desc":
+                        artworks = artworks.OrderByDescending(a => a.MaTranh).ToList();
+                        break;
+                    case "title_asc":
+                        artworks = artworks.OrderBy(a => a.TieuDe).ToList();
+                        break;
+                    case "title_desc":
+                        artworks = artworks.OrderByDescending(a => a.TieuDe).ToList();
+                        break;
+                    case "artist_asc":
+                        artworks = artworks.OrderBy(a => a.MaNguoiDungNavigation.TenNguoiDung).ToList();
+                        break;
+                    case "artist_desc":
+                        artworks = artworks.OrderByDescending(a => a.MaNguoiDungNavigation.TenNguoiDung).ToList();
+                        break;
+                    case "price_asc":
+                        artworks = artworks.OrderBy(a => a.Gia).ToList();
+                        break;
+                    case "price_desc":
+                        artworks = artworks.OrderByDescending(a => a.Gia).ToList();
+                        break;
+                    case "quantity_asc":
+                        artworks = artworks.OrderBy(a => a.SoLuongTon).ToList();
+                        break;
+                    case "quantity_desc":
+                        artworks = artworks.OrderByDescending(a => a.SoLuongTon).ToList();
+                        break;
+                    case "date_asc":
+                        artworks = artworks.OrderBy(a => a.NgayDang).ToList();
+                        break;
+                    case "date_desc":
+                        artworks = artworks.OrderByDescending(a => a.NgayDang).ToList();
+                        break;
+                    default:
+                        artworks = artworks.OrderByDescending(a => a.MaTranh).ToList();
+                        break;
+                }
+                
+                return artworks;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi lọc và sắp xếp tranh");
+                return new List<Tranh>();
+            }
+        }
+
+        public async Task<(bool success, bool liked, string message)> ToggleLike(int artworkId, string userId)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return (false, false, "Vui lòng đăng nhập để thích tác phẩm");
+                }
+
+                var existingLike = await _context.LuotThiches
+                    .FirstOrDefaultAsync(lt => lt.MaTranh == artworkId && lt.MaNguoiDung == userId);
+
+                if (existingLike != null)
+                {
+                    // Nếu đã thích, xóa lượt thích
+                    _context.LuotThiches.Remove(existingLike);
+                    await _context.SaveChangesAsync();
+                    return (true, false, "Đã hủy yêu thích");
+                }
+                else
+                {
+                    // Nếu chưa thích, thêm lượt thích mới
+                    var luotThich = new LuotThich
+                    {
+                        MaTranh = artworkId,
+                        MaNguoiDung = userId,
+                        NgayThich = DateTime.Now
+                    };
+                    _context.LuotThiches.Add(luotThich);
+                    await _context.SaveChangesAsync();
+                    return (true, true, "Đã thêm vào yêu thích");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi thay đổi trạng thái yêu thích");
+                return (false, false, "Có lỗi xảy ra");
+            }
+        }
     }
 }

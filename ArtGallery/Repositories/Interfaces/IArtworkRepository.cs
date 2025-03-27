@@ -13,5 +13,7 @@ namespace ArtGallery.Repositories.Interfaces
         Task<(bool success, string message)> UpdateArtwork(Tranh model, IFormFile imageFile, string tagsInput, List<int> selectedCategories, string currentUserId, bool isAdmin = false);
         Task<(bool success, string message, string redirectUrl)> DeleteArtwork(int id, string currentUserId);
         Task<List<Tranh>> GetAllArtworks();
+        Task<List<Tranh>> GetFilteredArtworks(string searchString, string sortOrder);
+        Task<(bool success, bool liked, string message)> ToggleLike(int artworkId, string userId);
     }
 }
