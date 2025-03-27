@@ -15,7 +15,12 @@ public partial class GiaoDich
 
     public decimal SoTien { get; set; }
 
+    public string TrangThai { get; set; }
+
+    public string PhuongThucThanhToan { get; set; } = null!;
+
     public DateTime? NgayMua { get; set; }
+
 
     public virtual NguoiDung MaNguoiMuaNavigation { get; set; } = null!;
 

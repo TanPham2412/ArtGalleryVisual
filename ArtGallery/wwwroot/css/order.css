@@ -65,4 +65,68 @@
         max-width: 120px;
         font-size: 12px;
     }
+}
+
+/* Style cho modal thanh toán */
+.qr-container {
+    background-color: #f8f9fa;
+    transition: all 0.3s ease;
+}
+
+.qr-container:hover {
+    transform: scale(1.03);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+#paymentTabs .nav-link {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    color: #495057;
+    font-weight: 500;
+    border-radius: 0;
+    transition: all 0.2s ease;
+}
+
+#paymentTabs .nav-link.active {
+    background-color: #f8f9fa;
+    color: #0d6efd;
+    border-color: #dee2e6 #dee2e6 #f8f9fa;
+    font-weight: 600;
+}
+
+.tab-content {
+    min-height: 300px;
+}
+
+/* Style cho nút Thêm vào giỏ hàng */
+#btnThemGioHang {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    background-color: #28a745;
+    border-color: #28a745;
+    font-weight: 500;
+}
+
+#btnThemGioHang:hover {
+    background-color: #218838;
+    border-color: #1e7e34;
+}
+
+#btnThemGioHang:disabled {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    cursor: not-allowed;
+}
+
+/* Animation khi thêm vào giỏ hàng */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s;
 } 

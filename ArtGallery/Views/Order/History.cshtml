@@ -33,6 +33,7 @@
                                 <th>Tổng tiền</th>
                                 <th>Ngày mua</th>
                                 <th>Trạng thái</th>
+                                <th>Phương thức thanh toán</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -52,7 +53,37 @@
                                     <td>@item.SoLuong</td>
                                     <td>@item.SoTien.ToString("N0") VND</td>
                                     <td>@item.NgayMua?.ToString("dd/MM/yyyy HH:mm")</td>
-                                    <td><span class="badge bg-success">Hoàn thành</span></td>
+                                    <td>
+                                        @if (item.TrangThai == "Đã hoàn thành")
+                                        {
+                                            <span class="badge bg-success">Đã hoàn thành</span>
+                                        }
+                                        else if (item.TrangThai == "Chờ xác nhận")
+                                        {
+                                            <span class="badge bg-warning text-dark">Chờ xác nhận</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">@item.TrangThai</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(item.PhuongThucThanhToan))
+                                        {
+                                            @if (item.PhuongThucThanhToan == "chuyển khoản")
+                                            {
+                                                <span class="badge bg-info">
+                                                    <i class="fas fa-qrcode me-1"></i> Chuyển khoản
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-secondary">
+                                                    <i class="fas fa-money-bill-wave me-1"></i> COD
+                                                </span>
+                                            }
+                                        }
+                                    </td>
                                 </tr>
                             }
                         </tbody>

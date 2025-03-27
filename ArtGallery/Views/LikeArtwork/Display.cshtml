@@ -29,7 +29,6 @@
                             </a>
                             @{
                                 var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                                var isLiked = true; // Luôn true vì đây là danh sách yêu thích
                             }
                             <button class="like-button active" onclick="toggleLike(this, @item.MaTranh)">
                                 <i class="fas fa-heart"></i>

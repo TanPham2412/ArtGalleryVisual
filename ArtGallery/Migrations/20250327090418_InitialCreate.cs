@@ -16,6 +16,7 @@ namespace ArtGallery.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
                     TenNguoiDung = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     DiaChi = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     GioiTinh = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -29,7 +30,6 @@ namespace ArtGallery.Migrations
                     HienThiDiaChi = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     HienThiNgaySinh = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     HienThiNamSinh = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedEmail = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -322,7 +322,9 @@ namespace ArtGallery.Migrations
                     ma_tranh = table.Column<int>(type: "int", nullable: false),
                     so_luong = table.Column<int>(type: "int", nullable: false),
                     so_tien = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    ngay_mua = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "(getdate())")
+                    ngay_mua = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "(getdate())"),
+                    TrangThai = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PhuongThucThanhToan = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
