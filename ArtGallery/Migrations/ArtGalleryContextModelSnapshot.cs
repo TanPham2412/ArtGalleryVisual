@@ -109,6 +109,10 @@ namespace ArtGallery.Migrations
                         .HasColumnName("ngay_mua")
                         .HasDefaultValueSql("(getdate())");
 
+                    b.Property<string>("PhuongThucThanhToan")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("SoLuong")
                         .HasColumnType("int")
                         .HasColumnName("so_luong");
@@ -116,6 +120,10 @@ namespace ArtGallery.Migrations
                     b.Property<decimal>("SoTien")
                         .HasColumnType("decimal(18, 2)")
                         .HasColumnName("so_tien");
+
+                    b.Property<string>("TrangThai")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("MaGiaoDich")
                         .HasName("PK__giao_dic__FB80ED3254B2912A");

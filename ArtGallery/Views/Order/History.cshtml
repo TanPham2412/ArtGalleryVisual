@@ -1,0 +1,95 @@
+@model IEnumerable<ArtGallery.Models.GiaoDich>
+
+@{
+    ViewData["Title"] = "Lịch sử đặt hàng";
+}
+
+<link rel="stylesheet" href="~/css/style.css">
+<link rel="stylesheet" href="~/css/order.css">
+
+@await Html.PartialAsync("_NavigationPartial")
+
+<div class="container mt-5 pt-5">
+    <h2 class="mb-4">Lịch sử đặt hàng</h2>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info text-center py-5">
+            <i class="fas fa-shopping-cart fa-3x mb-3"></i>
+            <p class="mb-0">Bạn chưa có đơn hàng nào</p>
+        </div>
+    }
+    else
+    {
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Mã đơn</th>
+                                <th>Tranh</th>
+                                <th>Số lượng</th>
+                                <th>Tổng tiền</th>
+                                <th>Ngày mua</th>
+                                <th>Trạng thái</th>
+                                <th>Phương thức thanh toán</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>@item.MaGiaoDich</td>
+                                    <td>
+                                        <a asp-controller="Artwork" asp-action="Display" asp-route-id="@item.MaTranh" class="d-flex align-items-center text-decoration-none">
+                                            <div class="order-thumb-container">
+                                                <img src="@item.MaTranhNavigation.DuongDanAnh" alt="@item.MaTranhNavigation.TieuDe" 
+                                                    class="order-artwork-thumbnail">
+                                            </div>
+                                            <span class="ms-2 text-truncate order-artwork-title">@item.MaTranhNavigation.TieuDe</span>
+                                        </a>
+                                    </td>
+                                    <td>@item.SoLuong</td>
+                                    <td>@item.SoTien.ToString("N0") VND</td>
+                                    <td>@item.NgayMua?.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td>
+                                        @if (item.TrangThai == "Đã hoàn thành")
+                                        {
+                                            <span class="badge bg-success">Đã hoàn thành</span>
+                                        }
+                                        else if (item.TrangThai == "Chờ xác nhận")
+                                        {
+                                            <span class="badge bg-warning text-dark">Chờ xác nhận</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">@item.TrangThai</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(item.PhuongThucThanhToan))
+                                        {
+                                            @if (item.PhuongThucThanhToan == "chuyển khoản")
+                                            {
+                                                <span class="badge bg-info">
+                                                    <i class="fas fa-qrcode me-1"></i> Chuyển khoản
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-secondary">
+                                                    <i class="fas fa-money-bill-wave me-1"></i> COD
+                                                </span>
+                                            }
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+</div> 

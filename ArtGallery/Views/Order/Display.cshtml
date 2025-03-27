@@ -1,0 +1,344 @@
+﻿@model ArtGallery.Models.Tranh
+@using System.Security.Claims
+@inject ArtGalleryContext _context
+
+@{
+    ViewData["Title"] = "Đặt hàng";
+    var artwork = (ViewBag.Artwork as Tranh) ?? Model;
+}
+
+<link rel="stylesheet" href="~/css/style.css">
+<link rel="stylesheet" href="~/css/order.css">
+
+@await Html.PartialAsync("_NavigationPartial")
+
+<div class="container mt-5 pt-5">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h2 class="mb-4">Thông tin đặt hàng</h2>
+                    
+                    <div class="artwork-preview d-flex mb-4">
+                        <div class="artwork-image">
+                            <img src="@artwork.DuongDanAnh" alt="@artwork.TieuDe" class="img-fluid rounded">
+                        </div>
+                        <div class="artwork-info ms-3">
+                            <h4>@artwork.TieuDe</h4>
+                            <p class="text-muted">Nghệ sĩ: @artwork.MaNguoiDungNavigation.TenNguoiDung</p>
+                            <p class="price">Giá: <span class="text-danger fw-bold">@artwork.Gia.ToString("N0") VND</span></p>
+                            <p>Còn lại: @artwork.SoLuongTon sản phẩm</p>
+                        </div>
+                    </div>
+
+                    <form asp-controller="Order" asp-action="Create" method="post">
+                        <input type="hidden" name="artworkId" value="@artwork.MaTranh" />
+                        <input type="hidden" id="totalAmount" name="totalAmount" value="@artwork.Gia" />
+                        
+                        <div class="form-group mb-3">
+                            <label for="quantity" class="form-label">Số lượng:</label>
+                            <div class="input-group">
+                                <button type="button" class="btn btn-outline-secondary" id="decrease">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                                <input type="number" class="form-control text-center" id="quantity" name="quantity" 
+                                       value="1" min="1" max="@artwork.SoLuongTon" required>
+                                <button type="button" class="btn btn-outline-secondary" id="increase">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-info total-price mb-4">
+                            Thành tiền: <span class="fw-bold" id="totalPrice">@artwork.Gia.ToString("N0") VND</span>
+                        </div>
+                        
+                        <div class="row mt-3">
+                            <div class="col-6">
+                                <button type="button" id="btnThemGioHang" class="btn btn-success btn-lg w-100">
+                                    <i class="fas fa-cart-plus me-2"></i>Thêm vào giỏ hàng
+                                </button>
+                            </div>
+                            <div class="col-6">
+                                <button type="button" id="btnXacNhanDatHang" class="btn btn-primary btn-lg w-100">
+                                    <i class="fas fa-check-circle me-2"></i>Xác nhận đặt hàng
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h4 class="mb-3">Tóm tắt đơn hàng</h4>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Giá sản phẩm:</span>
+                        <span>@artwork.Gia.ToString("N0") VND</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Số lượng:</span>
+                        <span id="summaryQuantity">1</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between fw-bold">
+                        <span>Tổng cộng:</span>
+                        <span class="text-danger" id="summaryTotal">@artwork.Gia.ToString("N0") VND</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Thêm modal chọn phương thức thanh toán -->
+<div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="paymentModalLabel">Chọn phương thức thanh toán</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Tab điều hướng -->
+                <ul class="nav nav-tabs" id="paymentTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="transfer-tab" data-bs-toggle="tab" data-bs-target="#transfer-content" type="button" role="tab">
+                            <i class="fas fa-qrcode me-2"></i>Chuyển khoản
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="cod-tab" data-bs-toggle="tab" data-bs-target="#cod-content" type="button" role="tab">
+                            <i class="fas fa-money-bill-wave me-2"></i>Thanh toán khi nhận hàng
+                        </button>
+                    </li>
+                </ul>
+                
+                <!-- Nội dung tab -->
+                <div class="tab-content pt-3" id="paymentTabContent">
+                    <!-- Tab chuyển khoản -->
+                    <div class="tab-pane fade show active" id="transfer-content" role="tabpanel">
+                        <div class="text-center">
+                            <p>Quét mã QR để thanh toán số tiền: <strong class="text-danger" id="qrAmountText">400.000 VND</strong></p>
+                            <div class="qr-container p-3 border rounded mx-auto" style="max-width: 250px;">
+                                <img src="https://api.qrserver.com/v1/create-qr-code/?data=ArtGallery_Payment_@Model.MaTranh&size=200x200" class="img-fluid" alt="Mã QR thanh toán">
+                            </div>
+                            <p class="mt-3 text-muted small">Sau khi quét mã thành công, hệ thống sẽ tự động xác nhận đơn hàng</p>
+                            
+                            <!-- Nút giả lập quét mã thành công (trong thực tế sẽ có webhook xác nhận) -->
+                            <button id="btnSimulateQRPayment" class="btn btn-success mt-2">
+                                <i class="fas fa-check me-2"></i>Giả lập thanh toán thành công
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Tab thanh toán khi nhận hàng -->
+                    <div class="tab-pane fade" id="cod-content" role="tabpanel">
+                        <div class="text-center">
+                            <div class="py-3">
+                                <i class="fas fa-truck fa-4x text-primary mb-3"></i>
+                                <h5>Thanh toán khi nhận hàng</h5>
+                                <p>Bạn sẽ thanh toán số tiền <strong class="text-danger" id="codAmountText">400.000 VND</strong> khi nhận được hàng</p>
+                            </div>
+                            <button id="btnConfirmCOD" class="btn btn-primary btn-lg">
+                                <i class="fas fa-check me-2"></i>Xác nhận đặt hàng
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        $(document).ready(function() {
+            const price = parseFloat('@artwork.Gia');
+            const maxQuantity = parseInt('@artwork.SoLuongTon');
+            const quantityInput = $('#quantity');
+            const totalPrice = $('#totalPrice');
+            const summaryQuantity = $('#summaryQuantity');
+            const summaryTotal = $('#summaryTotal');
+            
+            function updateTotal() {
+                const quantity = parseInt(quantityInput.val());
+                const total = price * quantity;
+                
+                totalPrice.text(formatCurrency(total) + ' VND');
+                summaryQuantity.text(quantity);
+                summaryTotal.text(formatCurrency(total) + ' VND');
+                
+                $('#totalAmount').val(total);
+            }
+            
+            function formatCurrency(amount) {
+                return new Intl.NumberFormat('vi-VN').format(amount);
+            }
+            
+            $('#decrease').click(function() {
+                let value = parseInt(quantityInput.val());
+                if (value > 1) {
+                    quantityInput.val(value - 1);
+                    updateTotal();
+                }
+            });
+            
+            $('#increase').click(function() {
+                let value = parseInt(quantityInput.val());
+                if (value < maxQuantity) {
+                    quantityInput.val(value + 1);
+                    updateTotal();
+                }
+            });
+            
+            quantityInput.on('input change', function() {
+                let value = parseInt($(this).val()) || 1;
+                
+                if (value < 1) {
+                    $(this).val(1);
+                    value = 1;
+                } else if (value > maxQuantity) {
+                    $(this).val(maxQuantity);
+                    value = maxQuantity;
+                }
+                
+                updateTotal();
+            });
+            
+            updateTotal();
+
+            // Cập nhật số tiền trong modal khi thay đổi số lượng
+            function updateTotalAmount() {
+                var soLuong = parseInt($("#quantity").val());
+                var tongTien = soLuong * price;
+                
+                // Định dạng tiền tệ
+                var formattedAmount = formatCurrency(tongTien);
+                
+                // Cập nhật hiển thị
+                $("#qrAmountText, #codAmountText").text(formattedAmount);
+                $(".thanh-tien").text(formattedAmount);
+            }
+            
+            // Xử lý khi nhấn nút Thêm vào giỏ hàng
+            $("#btnThemGioHang").on('click', function() {
+                var maTranh = @Model.MaTranh;
+                var soLuong = parseInt($("#quantity").val());
+                var tongTien = soLuong * parseFloat('@artwork.Gia');
+                
+                // Thêm vào giỏ hàng với trạng thái "Chờ xác nhận"
+                $.ajax({
+                    url: '/Order/AddToCart',
+                    type: 'POST',
+                    data: {
+                        maTranh: maTranh,
+                        soLuong: soLuong,
+                        tongTien: tongTien,
+                        trangThai: "Chờ xác nhận",
+                        phuongThucThanhToan: "chưa xác định"
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            // Đổi text của nút
+                            $("#btnThemGioHang").html('<i class="fas fa-check me-2"></i>Đã thêm vào giỏ hàng');
+                            $("#btnThemGioHang").removeClass('btn-success').addClass('btn-secondary');
+                            $("#btnThemGioHang").prop('disabled', true);
+                            
+                            // Hiển thị thông báo
+                            Swal.fire({
+                                title: 'Thành công!',
+                                text: 'Đã thêm vào giỏ hàng. Xem lịch sử đặt hàng?',
+                                icon: 'success',
+                                showCancelButton: true,
+                                confirmButtonText: 'Xem lịch sử',
+                                cancelButtonText: 'Tiếp tục mua sắm'
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    window.location.href = '/Order/History';
+                                }
+                            });
+                        } else {
+                            Swal.fire({
+                                title: 'Lỗi!',
+                                text: response.message,
+                                icon: 'error'
+                            });
+                        }
+                    },
+                    error: function() {
+                        Swal.fire({
+                            title: 'Lỗi!',
+                            text: 'Có lỗi xảy ra, vui lòng thử lại sau.',
+                            icon: 'error'
+                        });
+                    }
+                });
+            });
+            
+            // Xử lý khi nhấn nút Xác nhận đặt hàng
+            $("#btnXacNhanDatHang").on('click', function(e) {
+                e.preventDefault();
+                updateTotalAmount();
+                var paymentModal = new bootstrap.Modal(document.getElementById('paymentModal'));
+                paymentModal.show();
+            });
+            
+            // Xử lý thanh toán QR thành công
+            $("#btnSimulateQRPayment").click(function() {
+                // Lưu đơn hàng với trạng thái "Đã hoàn thành"
+                saveOrder("Đã hoàn thành", "chuyển khoản");
+            });
+            
+            // Xử lý thanh toán COD
+            $("#btnConfirmCOD").click(function() {
+                // Lưu đơn hàng với trạng thái "Đã hoàn thành"
+                saveOrder("Đã hoàn thành", "thanh toán khi nhận hàng");
+            });
+            
+            // Hàm lưu đơn hàng
+            function saveOrder(trangThai, phuongThuc) {
+                var maTranh = @Model.MaTranh;
+                var soLuong = parseInt($("#quantity").val());
+                var tongTien = soLuong * price;
+                
+                // Gửi Ajax request để lưu đơn hàng
+                $.ajax({
+                    url: '/Order/PlaceOrder',
+                    type: 'POST',
+                    data: {
+                        maTranh: maTranh,
+                        soLuong: soLuong,
+                        tongTien: tongTien,
+                        trangThai: trangThai,
+                        phuongThucThanhToan: phuongThuc
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            // Chuyển đến trang đặt hàng thành công
+                            window.location.href = '/Order/OrderSuccess';
+                        } else {
+                            Swal.fire({
+                                title: 'Lỗi!',
+                                text: response.message,
+                                icon: 'error'
+                            });
+                        }
+                    },
+                    error: function() {
+                        Swal.fire({
+                            title: 'Lỗi!',
+                            text: 'Có lỗi xảy ra, vui lòng thử lại sau.',
+                            icon: 'error'
+                        });
+                    }
+                });
+            }
+        });
+    </script>
+}

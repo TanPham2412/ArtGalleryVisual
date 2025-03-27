@@ -34,11 +34,16 @@
 
         <div class="d-flex align-items-center flex-grow-1 justify-content-end">
             <div class="search-box mx-3 position-relative">
-                <input type="text" class="form-control" id="searchInput" placeholder="Tìm kiếm người dùng">
-                <div class="search-results" id="searchResults"></div>
+                <input type="text" class="form-control" id="searchInput" placeholder="Tìm kiếm tranh, người dùng...">
+                <div class="search-results" id="searchResults">
+                    <!-- Kết quả tìm kiếm sẽ hiển thị ở đây -->
+                </div>
             </div>
 
             <div class="me-3">
+                <a href="@Url.Action("Products", "Artwork")" class="btn btn-outline-primary me-2">
+                    <i class="fas fa-shopping-basket"></i> Sản phẩm
+                </a>
                 <button class="btn btn-primary" onclick="location.href='@Url.Action("Add", "Home")'">
                     <i class=""></i> Đăng tranh ảnh
                 </button>
@@ -87,6 +92,10 @@
                                 <a asp-controller="LikeArtwork" asp-action="Display" class="dropdown-item">
                                     <i class="fas fa-heart"></i>
                                     Yêu thích
+                                </a>
+                                <a asp-controller="Order" asp-action="History" class="dropdown-item">
+                                    <i class="fas fa-history"></i>
+                                    Lịch sử đặt hàng
                                 </a>
                                 <a href="@Url.Action("LogoutDirect", "Home")" class="dropdown-item">
                                     <i class="fas fa-sign-out-alt"></i>
