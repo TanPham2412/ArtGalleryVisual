@@ -39,6 +39,9 @@
             </div>
 
             <div class="me-3">
+                <a href="@Url.Action("Products", "Artwork")" class="btn btn-outline-primary me-2">
+                    <i class="fas fa-shopping-basket"></i> Sản phẩm
+                </a>
                 <button class="btn btn-primary" onclick="location.href='@Url.Action("Add", "Home")'">
                     <i class=""></i> Đăng tranh ảnh
                 </button>
@@ -87,6 +90,10 @@
                                 <a asp-controller="LikeArtwork" asp-action="Display" class="dropdown-item">
                                     <i class="fas fa-heart"></i>
                                     Yêu thích
+                                </a>
+                                <a asp-controller="Order" asp-action="History" class="dropdown-item">
+                                    <i class="fas fa-history"></i>
+                                    Lịch sử đặt hàng
                                 </a>
                                 <a href="@Url.Action("LogoutDirect", "Home")" class="dropdown-item">
                                     <i class="fas fa-sign-out-alt"></i>

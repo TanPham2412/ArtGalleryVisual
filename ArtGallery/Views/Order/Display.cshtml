@@ -1,0 +1,146 @@
+﻿@model GiaoDich
+@using System.Security.Claims
+@inject ArtGalleryContext _context
+
+@{
+    ViewData["Title"] = "Đặt hàng";
+    var artwork = ViewBag.Artwork as Tranh;
+}
+
+<link rel="stylesheet" href="~/css/style.css">
+<link rel="stylesheet" href="~/css/order.css">
+
+@await Html.PartialAsync("_NavigationPartial")
+
+<div class="container mt-5 pt-5">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h2 class="mb-4">Thông tin đặt hàng</h2>
+                    
+                    <div class="artwork-preview d-flex mb-4">
+                        <div class="artwork-image">
+                            <img src="@artwork.DuongDanAnh" alt="@artwork.TieuDe" class="img-fluid rounded">
+                        </div>
+                        <div class="artwork-info ms-3">
+                            <h4>@artwork.TieuDe</h4>
+                            <p class="text-muted">Nghệ sĩ: @artwork.MaNguoiDungNavigation.TenNguoiDung</p>
+                            <p class="price">Giá: <span class="text-danger fw-bold">@artwork.Gia.ToString("N0") VND</span></p>
+                            <p>Còn lại: @artwork.SoLuongTon sản phẩm</p>
+                        </div>
+                    </div>
+
+                    <form asp-controller="Order" asp-action="Create" method="post">
+                        <input type="hidden" name="artworkId" value="@artwork.MaTranh" />
+                        <input type="hidden" id="totalAmount" name="totalAmount" value="@artwork.Gia" />
+                        
+                        <div class="form-group mb-3">
+                            <label for="quantity" class="form-label">Số lượng:</label>
+                            <div class="input-group">
+                                <button type="button" class="btn btn-outline-secondary" id="decrease">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                                <input type="number" class="form-control text-center" id="quantity" name="quantity" 
+                                       value="1" min="1" max="@artwork.SoLuongTon" required>
+                                <button type="button" class="btn btn-outline-secondary" id="increase">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-info total-price mb-4">
+                            Thành tiền: <span class="fw-bold" id="totalPrice">@artwork.Gia.ToString("N0") VND</span>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">Xác nhận đặt hàng</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h4 class="mb-3">Tóm tắt đơn hàng</h4>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Giá sản phẩm:</span>
+                        <span>@artwork.Gia.ToString("N0") VND</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Số lượng:</span>
+                        <span id="summaryQuantity">1</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between fw-bold">
+                        <span>Tổng cộng:</span>
+                        <span class="text-danger" id="summaryTotal">@artwork.Gia.ToString("N0") VND</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            const price = parseFloat('@artwork.Gia');
+            const maxQuantity = parseInt('@artwork.SoLuongTon');
+            const quantityInput = $('#quantity');
+            const totalPrice = $('#totalPrice');
+            const summaryQuantity = $('#summaryQuantity');
+            const summaryTotal = $('#summaryTotal');
+            
+            function updateTotal() {
+                const quantity = parseInt(quantityInput.val());
+                const total = price * quantity;
+                
+                totalPrice.text(formatCurrency(total) + ' VND');
+                summaryQuantity.text(quantity);
+                summaryTotal.text(formatCurrency(total) + ' VND');
+                
+                $('#totalAmount').val(total);
+            }
+            
+            function formatCurrency(amount) {
+                return new Intl.NumberFormat('vi-VN').format(amount);
+            }
+            
+            $('#decrease').click(function() {
+                let value = parseInt(quantityInput.val());
+                if (value > 1) {
+                    quantityInput.val(value - 1);
+                    updateTotal();
+                }
+            });
+            
+            $('#increase').click(function() {
+                let value = parseInt(quantityInput.val());
+                if (value < maxQuantity) {
+                    quantityInput.val(value + 1);
+                    updateTotal();
+                }
+            });
+            
+            quantityInput.on('input change', function() {
+                let value = parseInt($(this).val()) || 1;
+                
+                if (value < 1) {
+                    $(this).val(1);
+                    value = 1;
+                } else if (value > maxQuantity) {
+                    $(this).val(maxQuantity);
+                    value = maxQuantity;
+                }
+                
+                updateTotal();
+            });
+            
+            updateTotal();
+        });
+    </script>
+}
