@@ -1,4 +1,4 @@
-﻿@model IEnumerable<ArtGallery.Models.Tranh>
+﻿@model ArtGallery.ViewModels.HomeIndexViewModel
 
 @using Microsoft.Extensions.DependencyInjection
 @using Microsoft.EntityFrameworkCore
@@ -98,11 +98,11 @@
     <!-- Recommended pics -->
     <div class="recommended-pics">
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h3 class="section-title">Tác phẩm của những người bạn theo dõit</h3>
+            <h3 class="section-title">Tác phẩm của những người bạn theo dõi</h3>
         </div>
 
         <div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-4">
-            @foreach (var item in Model)
+            @foreach (var item in Model.FollowingArtworks)
             {
                 <div>
                     <div class="pic-item">
@@ -134,6 +134,57 @@
                         </div>
                     </div>
                 </div>  
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Thêm phần Được đề xuất - 12 sản phẩm được yêu thích nhất -->
+<div class="container mt-5">
+    <div class="recommended-pics">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3 class="section-title">Được đề xuất</h3>
+        </div>
+
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-4">
+            @foreach (var item in Model.MostLikedArtworks)
+            {
+                <div>
+                    <div class="pic-item">
+                        <div class="image-wrapper">
+                            <a asp-controller="Artwork" asp-action="Display" asp-route-id="@item.MaTranh" class="art-link">
+                                <img src="@item.DuongDanAnh" alt="@item.TieuDe">
+                            </a>
+                            @{
+                                var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                                var isLiked = await DbContext.LuotThiches
+                                    .AnyAsync(lt => lt.MaTranh == item.MaTranh && lt.MaNguoiDung == currentUserId);
+                                var likeCount = item.LuotThiches.Count;
+                            }
+                            <button class="like-button @(isLiked ? "active" : "")" 
+                                    onclick="toggleLike(this, @item.MaTranh)">
+                                <i class="@(isLiked ? "fas" : "far") fa-heart"></i>
+                            </button>
+                            
+                            <!-- Hiển thị số lượt thích -->
+                            <div class="like-count">
+                                @likeCount <i class="fas fa-heart"></i>
+                            </div>
+                        </div>
+
+                        <div class="img-info mt-2">
+                            <a asp-controller="Artwork" asp-action="Display" asp-route-id="@item.MaTranh" class="art-link">
+                                <h6 class="artwork-title">@item.TieuDe</h6>
+                            </a>
+                            <div class="artist-info d-flex align-items-center">
+                                <div class="artist-avatar">
+                                    <img src="@item.MaNguoiDungNavigation.GetAvatarPath()" alt="@item.MaNguoiDungNavigation.TenNguoiDung">
+                                </div>
+                                <span class="artist-name">@item.MaNguoiDungNavigation.TenNguoiDung</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             }
         </div>
     </div>

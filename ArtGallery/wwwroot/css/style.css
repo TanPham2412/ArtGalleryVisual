@@ -1434,3 +1434,23 @@
     height: 3px;
     background-color: #0096fa;
 }
+
+/* CSS cho số lượt thích */
+.like-count {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 3px 8px;
+    border-radius: 20px;
+    font-size: 12px;
+    color: #666;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.like-count i {
+    color: #ff4444;
+    font-size: 12px;
+}

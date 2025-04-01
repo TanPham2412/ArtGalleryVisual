@@ -222,5 +222,24 @@ namespace ArtGallery.Repositories
                 return new List<Tranh>();
             }
         }
+
+        public async Task<List<Tranh>> GetMostLikedArtworks(int count)
+        {
+            try
+            {
+                // Lấy danh sách tranh và đếm số lượt thích
+                return await _context.Tranhs
+                    .Include(t => t.MaNguoiDungNavigation)
+                    .Include(t => t.LuotThiches)
+                    .OrderByDescending(t => t.LuotThiches.Count) // Sắp xếp theo số lượt thích
+                    .Take(count) // Lấy số lượng theo yêu cầu
+                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi lấy danh sách tranh có nhiều lượt thích nhất");
+                return new List<Tranh>();
+            }
+        }
     }
 }

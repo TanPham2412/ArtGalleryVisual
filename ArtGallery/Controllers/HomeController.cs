@@ -9,6 +9,7 @@ using ArtGallery.Repositories.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
+using ArtGallery.ViewModels;
 
 namespace ArtGallery.Controllers
 {
@@ -37,8 +38,15 @@ namespace ArtGallery.Controllers
             }
             
             var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var model = await _homeRepository.GetRandomArtworksFromFollowing(currentUserId, 12);
-            return View(model);
+            
+            // Tạo view model thay vì dùng ViewBag để tránh lỗi dynamic
+            var viewModel = new HomeIndexViewModel
+            {
+                FollowingArtworks = await _homeRepository.GetRandomArtworksFromFollowing(currentUserId, 12),
+                MostLikedArtworks = await _homeRepository.GetMostLikedArtworks(12)
+            };
+            
+            return View(viewModel);
         }
 
         [AllowAnonymous]
