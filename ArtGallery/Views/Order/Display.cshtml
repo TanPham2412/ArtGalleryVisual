@@ -5,6 +5,8 @@
 @{
     ViewData["Title"] = "Đặt hàng";
     var artwork = (ViewBag.Artwork as Tranh) ?? Model;
+    var existingOrder = ViewBag.ExistingOrder as GiaoDich;
+    var isInCart = existingOrder != null && existingOrder.TrangThai == "Chờ xác nhận";
 }
 
 <link rel="stylesheet" href="~/css/style.css">
@@ -54,16 +56,32 @@
                         </div>
                         
                         <div class="row mt-3">
-                            <div class="col-6">
-                                <button type="button" id="btnThemGioHang" class="btn btn-success btn-lg w-100">
-                                    <i class="fas fa-cart-plus me-2"></i>Thêm vào giỏ hàng
-                                </button>
-                            </div>
-                            <div class="col-6">
-                                <button type="button" id="btnXacNhanDatHang" class="btn btn-primary btn-lg w-100">
-                                    <i class="fas fa-check-circle me-2"></i>Xác nhận đặt hàng
-                                </button>
-                            </div>
+                            @if (isInCart)
+                            {
+                                <div class="col-6">
+                                    <button type="button" id="btnRemoveFromCart" class="btn btn-danger btn-lg w-100" data-order-id="@existingOrder.MaGiaoDich">
+                                        <i class="fas fa-trash-alt me-2"></i>Xóa khỏi giỏ hàng
+                                    </button>
+                                </div>
+                                <div class="col-6">
+                                    <button type="button" id="btnXacNhanDatHang" class="btn btn-primary btn-lg w-100">
+                                        <i class="fas fa-check-circle me-2"></i>Xác nhận đặt hàng
+                                    </button>
+        </div>
+    }
+    else
+    {
+                                <div class="col-6">
+                                    <button type="button" id="btnThemGioHang" class="btn btn-success btn-lg w-100">
+                                        <i class="fas fa-cart-plus me-2"></i>Thêm vào giỏ hàng
+                                    </button>
+                                </div>
+                                <div class="col-6">
+                                    <button type="button" id="btnXacNhanDatHang" class="btn btn-primary btn-lg w-100">
+                                        <i class="fas fa-check-circle me-2"></i>Xác nhận đặt hàng
+                                    </button>
+                                </div>
+                            }
                         </div>
                     </form>
                 </div>
@@ -132,8 +150,8 @@
                                 <i class="fas fa-check me-2"></i>Giả lập thanh toán thành công
                             </button>
                         </div>
-                    </div>
-                    
+                        </div>
+
                     <!-- Tab thanh toán khi nhận hàng -->
                     <div class="tab-pane fade" id="cod-content" role="tabpanel">
                         <div class="text-center">
@@ -226,6 +244,62 @@
                 $(".thanh-tien").text(formattedAmount);
             }
             
+            // Biến kiểm tra trạng thái giỏ hàng
+            const isInCart = @Json.Serialize(isInCart);
+            const orderId = @(existingOrder != null ? existingOrder.MaGiaoDich.ToString() : "null");
+            
+            // Xử lý khi nhấn nút Xóa khỏi giỏ hàng
+            $("#btnRemoveFromCart").on('click', function() {
+                var orderToRemove = $(this).data('order-id');
+                
+                Swal.fire({
+                    title: 'Xác nhận xóa?',
+                    text: "Bạn có chắc muốn xóa sản phẩm này khỏi giỏ hàng?",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Xóa',
+                    cancelButtonText: 'Hủy'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Gửi ajax request để xóa
+                        $.ajax({
+                            url: '/Order/RemoveFromCart',
+                            type: 'POST',
+                            data: {
+                                orderId: orderToRemove
+                            },
+                            success: function(response) {
+                                if (response.success) {
+                                    Swal.fire({
+                                        title: 'Thành công!',
+                                        text: 'Đã xóa sản phẩm khỏi giỏ hàng',
+                                        icon: 'success'
+                                    }).then(() => {
+                                        // Reload trang để cập nhật giao diện
+                                        window.location.href = '/Order/Display/' + @Model.MaTranh;
+                                    });
+                                } else {
+                                    Swal.fire({
+                                        title: 'Lỗi!',
+                                        text: response.message,
+                                        icon: 'error'
+                                    });
+                                }
+                            },
+                            error: function() {
+                                Swal.fire({
+                                    title: 'Lỗi!',
+                                    text: 'Có lỗi xảy ra, vui lòng thử lại sau.',
+                                    icon: 'error'
+                                });
+                            }
+                        });
+                    }
+                });
+            });
+            
             // Xử lý khi nhấn nút Thêm vào giỏ hàng
             $("#btnThemGioHang").on('click', function() {
                 var maTranh = @Model.MaTranh;
@@ -233,18 +307,18 @@
                 var tongTien = soLuong * parseFloat('@artwork.Gia');
                 
                 // Thêm vào giỏ hàng với trạng thái "Chờ xác nhận"
-                $.ajax({
+            $.ajax({
                     url: '/Order/AddToCart',
-                    type: 'POST',
+                type: 'POST',
                     data: {
                         maTranh: maTranh,
                         soLuong: soLuong,
                         tongTien: tongTien,
                         trangThai: "Chờ xác nhận",
                         phuongThucThanhToan: "chưa xác định"
-                    },
-                    success: function(response) {
-                        if (response.success) {
+                },
+                success: function(response) {
+                    if (response.success) {
                             // Đổi text của nút
                             $("#btnThemGioHang").html('<i class="fas fa-check me-2"></i>Đã thêm vào giỏ hàng');
                             $("#btnThemGioHang").removeClass('btn-success').addClass('btn-secondary');
@@ -307,7 +381,7 @@
                 var soLuong = parseInt($("#quantity").val());
                 var tongTien = soLuong * price;
                 
-                // Gửi Ajax request để lưu đơn hàng
+                // Gửi Ajax request để lưu/cập nhật đơn hàng
                 $.ajax({
                     url: '/Order/PlaceOrder',
                     type: 'POST',
@@ -316,7 +390,8 @@
                         soLuong: soLuong,
                         tongTien: tongTien,
                         trangThai: trangThai,
-                        phuongThucThanhToan: phuongThuc
+                        phuongThucThanhToan: phuongThuc,
+                        orderId: isInCart ? orderId : null  // Truyền orderId nếu đơn hàng đã trong giỏ
                     },
                     success: function(response) {
                         if (response.success) {
@@ -328,17 +403,17 @@
                                 text: response.message,
                                 icon: 'error'
                             });
-                        }
-                    },
-                    error: function() {
+                    }
+                },
+                error: function() {
                         Swal.fire({
                             title: 'Lỗi!',
                             text: 'Có lỗi xảy ra, vui lòng thử lại sau.',
                             icon: 'error'
                         });
-                    }
-                });
-            }
+                }
+            });
+        }
         });
     </script>
 }

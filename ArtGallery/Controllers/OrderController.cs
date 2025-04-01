@@ -24,21 +24,34 @@ namespace ArtGallery.Controllers
             _context = context;
         }
 
-        public async Task<IActionResult> Display(int id)
+        public async Task<IActionResult> Display(int id, int? orderId = null)
         {
             // Lấy thông tin tranh từ cơ sở dữ liệu
             var artwork = await _context.Tranhs
                 .Include(t => t.MaNguoiDungNavigation)
                 .FirstOrDefaultAsync(t => t.MaTranh == id);
-            
+
             if (artwork == null)
             {
                 return NotFound();
             }
-            
+
             // Gán giá trị cho ViewBag
             ViewBag.Artwork = artwork;
-            
+
+            // Nếu có orderId, lấy thông tin đơn hàng
+            if (orderId.HasValue)
+            {
+                var userId = _userManager.GetUserId(User);
+                var existingOrder = await _context.GiaoDiches
+                    .FirstOrDefaultAsync(g => g.MaGiaoDich == orderId.Value && g.MaNguoiMua == userId);
+
+                if (existingOrder != null)
+                {
+                    ViewBag.ExistingOrder = existingOrder;
+                }
+            }
+
             return View(artwork);
         }
 
@@ -87,7 +100,7 @@ namespace ArtGallery.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> PlaceOrder(int maTranh, int soLuong, decimal tongTien, string trangThai, string phuongThucThanhToan)
+        public async Task<IActionResult> PlaceOrder(int maTranh, int soLuong, decimal tongTien, string trangThai, string phuongThucThanhToan, int? orderId = null)
         {
             try
             {
@@ -98,32 +111,53 @@ namespace ArtGallery.Controllers
                     return Json(new { success = false, message = "Bạn cần đăng nhập để đặt hàng" });
                 }
 
-                // Tạo giao dịch mới
-                var giaoDich = new GiaoDich
+                // Nếu có orderId (đang xác nhận đơn hàng từ giỏ hàng), cập nhật giao dịch hiện có
+                if (orderId.HasValue)
                 {
-                    MaNguoiMua = userId,
-                    MaTranh = maTranh,
-                    SoLuong = soLuong,
-                    SoTien = tongTien,
-                    NgayMua = DateTime.Now,
-                    TrangThai = trangThai,
-                    PhuongThucThanhToan = phuongThucThanhToan
-                };
-
-                // Thêm vào cơ sở dữ liệu
-                _context.GiaoDiches.Add(giaoDich);
-
-                // Cập nhật số lượng tranh còn lại
-                var artwork = await _context.Tranhs.FindAsync(maTranh);
-                if (artwork != null)
-                {
-                    artwork.SoLuongTon -= soLuong;
-                    _context.Tranhs.Update(artwork);
+                    var existingOrder = await _context.GiaoDiches.FindAsync(orderId.Value);
+                    if (existingOrder != null && existingOrder.MaNguoiMua == userId)
+                    {
+                        // Cập nhật trạng thái và phương thức thanh toán
+                        existingOrder.TrangThai = trangThai;
+                        existingOrder.PhuongThucThanhToan = phuongThucThanhToan;
+                        
+                        _context.GiaoDiches.Update(existingOrder);
+                        await _context.SaveChangesAsync();
+                        
+                        return Json(new { success = true });
+                    }
+                    
+                    return Json(new { success = false, message = "Không tìm thấy đơn hàng cần cập nhật" });
                 }
-
-                await _context.SaveChangesAsync();
-
-                return Json(new { success = true });
+                else
+                {
+                    // Tạo giao dịch mới 
+                    var giaoDich = new GiaoDich
+                    {
+                        MaNguoiMua = userId,
+                        MaTranh = maTranh,
+                        SoLuong = soLuong,
+                        SoTien = tongTien,
+                        NgayMua = DateTime.Now,
+                        TrangThai = trangThai,
+                        PhuongThucThanhToan = phuongThucThanhToan
+                    };
+                    
+                    // Thêm vào cơ sở dữ liệu
+                    _context.GiaoDiches.Add(giaoDich);
+                    
+                    // Cập nhật số lượng tranh còn lại
+                    var artwork = await _context.Tranhs.FindAsync(maTranh);
+                    if (artwork != null)
+                    {
+                        artwork.SoLuongTon -= soLuong;
+                        _context.Tranhs.Update(artwork);
+                    }
+                    
+                    await _context.SaveChangesAsync();
+                    
+                    return Json(new { success = true });
+                }
             }
             catch (Exception ex)
             {
@@ -155,7 +189,7 @@ namespace ArtGallery.Controllers
                 {
                     return Json(new { success = false, message = "Bạn cần đăng nhập để thêm vào giỏ hàng" });
                 }
-                
+
                 // Tạo giao dịch mới với trạng thái "Chờ xác nhận"
                 var giaoDich = new GiaoDich
                 {
@@ -167,12 +201,44 @@ namespace ArtGallery.Controllers
                     TrangThai = trangThai,
                     PhuongThucThanhToan = phuongThucThanhToan
                 };
-                
+
                 // Thêm vào cơ sở dữ liệu
                 _context.GiaoDiches.Add(giaoDich);
                 await _context.SaveChangesAsync();
-                
+
                 return Json(new { success = true, message = "Đã thêm vào giỏ hàng thành công" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Lỗi: " + ex.Message });
+            }
+        }
+
+        [HttpPost]
+        [HttpPost]
+        public async Task<IActionResult> RemoveFromCart(int orderId)
+        {
+            try
+            {
+                var userId = _userManager.GetUserId(User);
+                var order = await _context.GiaoDiches
+                    .FirstOrDefaultAsync(g => g.MaGiaoDich == orderId && g.MaNguoiMua == userId);
+
+                if (order == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy đơn hàng" });
+                }
+
+                if (order.TrangThai != "Chờ xác nhận")
+                {
+                    return Json(new { success = false, message = "Chỉ có thể xóa đơn hàng đang chờ xác nhận" });
+                }
+
+                // Xóa đơn hàng
+                _context.GiaoDiches.Remove(order);
+                await _context.SaveChangesAsync();
+
+                return Json(new { success = true, message = "Đã xóa sản phẩm khỏi giỏ hàng" });
             }
             catch (Exception ex)
             {

@@ -15,5 +15,6 @@ namespace ArtGallery.Repositories.Interfaces
         Task<List<Tranh>> GetAllArtworks();
         Task<List<Tranh>> GetFilteredArtworks(string searchString, string sortOrder);
         Task<(bool success, bool liked, string message)> ToggleLike(int artworkId, string userId);
+        List<Tranh> ApplySorting(List<Tranh> artworks, string sortOrder);
     }
 }

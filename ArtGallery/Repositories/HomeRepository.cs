@@ -222,5 +222,73 @@ namespace ArtGallery.Repositories
                 return new List<Tranh>();
             }
         }
+
+        public async Task<List<Tranh>> GetMostLikedArtworks(int count)
+        {
+            try
+            {
+                // Lấy danh sách tranh và đếm số lượt thích
+                return await _context.Tranhs
+                    .Include(t => t.MaNguoiDungNavigation)
+                    .Include(t => t.LuotThiches)
+                    .OrderByDescending(t => t.LuotThiches.Count) // Sắp xếp theo số lượt thích
+                    .Take(count) // Lấy số lượng theo yêu cầu
+                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi lấy danh sách tranh có nhiều lượt thích nhất");
+                return new List<Tranh>();
+            }
+        }
+
+        public async Task<List<Tranh>> GetRandomArtworksFromFollowingByCategory(string userId, int count, string category)
+        {
+            try
+            {
+                var followingIds = await _context.TheoDois
+                    .Where(t => t.MaNguoiTheoDoi == userId)
+                    .Select(t => t.MaNguoiDuocTheoDoi)
+                    .ToListAsync();
+
+                // Lấy danh sách tranh theo thể loại
+                return await _context.Tranhs
+                    .Include(t => t.MaNguoiDungNavigation)
+                    .Include(t => t.MaTags)
+                    .Include(t => t.MaTheLoais)
+                    .Include(t => t.LuotThiches)
+                    .Where(t => followingIds.Contains(t.MaNguoiDung) && 
+                          t.MaTheLoais.Any(c => c.TenTheLoai == category))
+                    .OrderBy(r => Guid.NewGuid())
+                    .Take(count)
+                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Lỗi khi lấy danh sách tranh từ người theo dõi theo thể loại '{category}'");
+                return new List<Tranh>();
+            }
+        }
+
+        public async Task<List<Tranh>> GetMostLikedArtworksByCategory(int count, string category)
+        {
+            try
+            {
+                // Lấy danh sách tranh theo thể loại và đếm số lượt thích
+                return await _context.Tranhs
+                    .Include(t => t.MaNguoiDungNavigation)
+                    .Include(t => t.LuotThiches)
+                    .Include(t => t.MaTheLoais)
+                    .Where(t => t.MaTheLoais.Any(c => c.TenTheLoai == category))
+                    .OrderByDescending(t => t.LuotThiches.Count)
+                    .Take(count)
+                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Lỗi khi lấy danh sách tranh có nhiều lượt thích theo thể loại '{category}'");
+                return new List<Tranh>();
+            }
+        }
     }
 }

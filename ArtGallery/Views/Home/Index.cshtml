@@ -1,4 +1,4 @@
-﻿@model IEnumerable<ArtGallery.Models.Tranh>
+﻿@model ArtGallery.ViewModels.HomeIndexViewModel
 
 @using Microsoft.Extensions.DependencyInjection
 @using Microsoft.EntityFrameworkCore
@@ -20,16 +20,7 @@
 
 <input type="hidden" name="__RequestVerificationToken" value="@token" />
 
-<div class="container mt-5 pt-5">
-    <!-- Tags -->
-    <div class="tag container">
-        <a href="#" class="tag-items illustration">Tranh minh họa (Illustration Art)</a>
-        <a href="#" class="tag-items concept">Tranh concept (Concept Art)</a>
-        <a href="#" class="tag-items anime">Tranh anime/manga (Anime/Manga Art)</a>
-        <a href="#" class="tag-items pixel">Tranh pixel (Pixel Art)</a>
-        <a href="#" class="tag-items vector">Tranh vector (Vector Art)</a>
-        <a href="#" class="tag-items lowpoly">Tranh low-poly (Low-Poly Art)</a>
-    </div>
+<div class="container mt-3">
     <!-- Swiper -->
     <div class="swiper mySwiper">
         <div class="swiper-wrapper">
@@ -89,14 +80,27 @@
         <div class="swiper-button-prev"></div>
     </div>
 
+    <div class="container-fluid p-0">
+        <div class="tag-container">
+            <div class="tag">
+                <a href="@Url.Action("Index", "Home")" class="tag-items home @(Model.ActiveCategory == "Home" ? "active" : "")">Home</a>
+                <a href="@Url.Action("Category", "Home", new { name = "Illustrations" })" class="tag-items illustration @(Model.ActiveCategory == "Illustrations" ? "active" : "")">Illustrations</a>
+                <a href="@Url.Action("Category", "Home", new { name = "Concept" })" class="tag-items concept @(Model.ActiveCategory == "Concept" ? "active" : "")">Concept</a>
+                <a href="@Url.Action("Category", "Home", new { name = "Anime/Manga" })" class="tag-items anime @(Model.ActiveCategory == "Anime/Manga" ? "active" : "")">Anime/Manga</a>
+                <a href="@Url.Action("Category", "Home", new { name = "Pixel" })" class="tag-items pixel @(Model.ActiveCategory == "Pixel" ? "active" : "")">Pixel</a>
+                <a href="@Url.Action("Category", "Home", new { name = "Vector" })" class="tag-items vector @(Model.ActiveCategory == "Vector" ? "active" : "")">Vector</a>
+                <a href="@Url.Action("Category", "Home", new { name = "Low-Poly" })" class="tag-items lowpoly @(Model.ActiveCategory == "Low-Poly" ? "active" : "")">Low-Poly</a>
+            </div>
+        </div>
+    </div>
     <!-- Recommended pics -->
     <div class="recommended-pics">
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h3 class="section-title">Được đề xuất</h3>
+            <h3 class="section-title">Tác phẩm của những người bạn theo dõi</h3>
         </div>
 
         <div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-4">
-            @foreach (var item in Model)
+            @foreach (var item in Model.FollowingArtworks)
             {
                 <div>
                     <div class="pic-item">
@@ -131,8 +135,58 @@
             }
         </div>
     </div>
- </div>
+</div>
 
+<!-- Thêm phần Được đề xuất - 12 sản phẩm được yêu thích nhất -->
+<div class="container mt-5">
+    <div class="recommended-pics">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3 class="section-title">Được đề xuất</h3>
+        </div>
+
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-4">
+            @foreach (var item in Model.MostLikedArtworks)
+            {
+                <div>
+                    <div class="pic-item">
+                        <div class="image-wrapper">
+                            <a asp-controller="Artwork" asp-action="Display" asp-route-id="@item.MaTranh" class="art-link">
+                                <img src="@item.DuongDanAnh" alt="@item.TieuDe">
+                            </a>
+                            @{
+                                var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                                var isLiked = await DbContext.LuotThiches
+                                    .AnyAsync(lt => lt.MaTranh == item.MaTranh && lt.MaNguoiDung == currentUserId);
+                                var likeCount = item.LuotThiches.Count;
+                            }
+                            <button class="like-button @(isLiked ? "active" : "")" 
+                                    onclick="toggleLike(this, @item.MaTranh)">
+                                <i class="@(isLiked ? "fas" : "far") fa-heart"></i>
+                            </button>
+                            
+                            <!-- Hiển thị số lượt thích -->
+                            <div class="like-count">
+                                @likeCount <i class="fas fa-heart"></i>
+                            </div>
+                        </div>
+
+                        <div class="img-info mt-2">
+                            <a asp-controller="Artwork" asp-action="Display" asp-route-id="@item.MaTranh" class="art-link">
+                                <h6 class="artwork-title">@item.TieuDe</h6>
+                            </a>
+                            <div class="artist-info d-flex align-items-center">
+                                <div class="artist-avatar">
+                                    <img src="@item.MaNguoiDungNavigation.GetAvatarPath()" alt="@item.MaNguoiDungNavigation.TenNguoiDung">
+                                </div>
+                                <span class="artist-name">@item.MaNguoiDungNavigation.TenNguoiDung</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 <script src="~/js/index.js"></script>
@@ -171,5 +225,17 @@
                 }
             });
         }
+
+        // Thêm đoạn debug để kiểm tra
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded');
+            const tagContainer = document.querySelector('.tag-container');
+            if (tagContainer) {
+                console.log('Tag container exists');
+                console.log('Visibility:', window.getComputedStyle(tagContainer).display);
+            } else {
+                console.log('Tag container not found');
+            }
+        });
     </script>
 }

@@ -24,36 +24,39 @@
 
 <nav class="navbar fixed-top bg-white">
     <div class="container-fluid">
-        <button class="navbar-toggler border-0" type="button">
-            <i class="fas fa-bars"></i>
-        </button>
+        <div class="d-flex align-items-center ms-0">
+            <button class="navbar-toggler border-0 me-2 ms-0" type="button">
+                <i class="fas fa-bars"></i>
+            </button>
+            <a class="navbar-brand ms-0" asp-controller="Home" asp-action="Index">
+                <span class="logo-text">Piao<span class="logo-highlight">Yue</span></span>
+            </a>
+        </div>
 
-        <a class="navbar-brand ms-2" asp-controller="Home" asp-action="Index">
-            <span class="logo-text">Piao<span class="logo-highlight">Yue</span></span>
-        </a>
-
-        <div class="d-flex align-items-center flex-grow-1 justify-content-end">
-            <div class="search-box mx-3 position-relative">
+        <div class="search-container flex-grow-1 mx-md-5 mx-2">
+            <div class="search-box w-100 position-relative">
                 <input type="text" class="form-control" id="searchInput" placeholder="Tìm kiếm tranh, người dùng...">
                 <div class="search-results" id="searchResults">
                     <!-- Kết quả tìm kiếm sẽ hiển thị ở đây -->
                 </div>
             </div>
+        </div>
 
-            <div class="me-3">
-                <a href="@Url.Action("Products", "Artwork")" class="btn btn-outline-primary me-2">
-                    <i class="fas fa-shopping-basket"></i> Sản phẩm
-                </a>
-                <button class="btn btn-primary" onclick="location.href='@Url.Action("Add", "Home")'">
-                    <i class=""></i> Đăng tranh ảnh
-                </button>
-            </div>
+        <div class="d-flex align-items-center">
+            <a href="@Url.Action("Products", "Artwork")" class="btn-pixiv fw-bold me-2">
+                <i class="fas fa-shopping-basket"></i> Sản phẩm
+            </a>
+            
+            <a href="@Url.Action("Add", "Home")" class="btn-pixiv fw-bold me-3">
+                Đăng tranh ảnh
+            </a>
 
             @if (currentUser != null)
             {
-                <div class="nav-icons">
-                    <a href="#" class="icon-link"><i class="far fa-envelope"></i></a>
-                    <a href="#" class="icon-link"><i class="far fa-bell"></i></a>
+                <div class="nav-icons d-flex align-items-center">
+                    <a href="#" class="icon-link me-3"><i class="far fa-envelope"></i></a>
+                    <a href="#" class="icon-link me-3"><i class="far fa-bell"></i></a>
+                    
                     <div class="user-dropdown">
                         <a href="#" class="icon-link user-avatar" id="userDropdown">
                             <img src="@userAvatar" alt="User Avatar" class="w-100 h-100 rounded-circle">
@@ -109,8 +112,8 @@
             else
             {
                 <div class="nav-icons">
-                    <a asp-controller="Account" asp-action="Login" class="btn btn-outline-primary me-2">Đăng nhập</a>
-                    <a asp-controller="Account" asp-action="Register" class="btn btn-primary">Đăng ký</a>
+                    <a asp-controller="Account" asp-action="Login" class="btn-pixiv me-2">Đăng nhập</a>
+                    <a asp-controller="Account" asp-action="Register" class="btn-pixiv">Đăng ký</a>
                 </div>
             }
 

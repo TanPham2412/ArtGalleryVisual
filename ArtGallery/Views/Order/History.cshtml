@@ -42,13 +42,26 @@
                                 <tr>
                                     <td>@item.MaGiaoDich</td>
                                     <td>
-                                        <a asp-controller="Artwork" asp-action="Display" asp-route-id="@item.MaTranh" class="d-flex align-items-center text-decoration-none">
-                                            <div class="order-thumb-container">
-                                                <img src="@item.MaTranhNavigation.DuongDanAnh" alt="@item.MaTranhNavigation.TieuDe" 
-                                                    class="order-artwork-thumbnail">
-                                            </div>
-                                            <span class="ms-2 text-truncate order-artwork-title">@item.MaTranhNavigation.TieuDe</span>
-                                        </a>
+                                        @if (item.TrangThai == "Chờ xác nhận")
+                                        {
+                                            <a asp-controller="Order" asp-action="Display" asp-route-id="@item.MaTranh" asp-route-orderId="@item.MaGiaoDich" class="d-flex align-items-center text-decoration-none">
+                                                <div class="order-thumb-container">
+                                                    <img src="@item.MaTranhNavigation.DuongDanAnh" alt="@item.MaTranhNavigation.TieuDe" 
+                                                        class="order-artwork-thumbnail">
+                                                </div>
+                                                <span class="ms-2 text-truncate order-artwork-title">@item.MaTranhNavigation.TieuDe</span>
+                                            </a>
+                                        }
+                                        else 
+                                        {
+                                            <a asp-controller="Artwork" asp-action="Display" asp-route-id="@item.MaTranh" class="d-flex align-items-center text-decoration-none">
+                                                <div class="order-thumb-container">
+                                                    <img src="@item.MaTranhNavigation.DuongDanAnh" alt="@item.MaTranhNavigation.TieuDe" 
+                                                        class="order-artwork-thumbnail">
+                                                </div>
+                                                <span class="ms-2 text-truncate order-artwork-title">@item.MaTranhNavigation.TieuDe</span>
+                                            </a>
+                                        }
                                     </td>
                                     <td>@item.SoLuong</td>
                                     <td>@item.SoTien.ToString("N0") VND</td>

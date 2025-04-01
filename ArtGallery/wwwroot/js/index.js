@@ -57,3 +57,16 @@ function toggleLike(button, artworkId) {
         }
     });
 }
+
+// Thêm đoạn này vào cuối file index.js để xử lý active state cho các tab
+document.addEventListener('DOMContentLoaded', function() {
+    // Xử lý các tab
+    const tagItems = document.querySelectorAll('.tag-items');
+    
+    tagItems.forEach(item => {
+        item.addEventListener('click', function(e) {
+            // Chuyển hướng trang qua href thông thường, không cần JavaScript
+            // Đánh dấu active được xử lý ở server-side
+        });
+    });
+});

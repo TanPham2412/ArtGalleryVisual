@@ -309,27 +309,34 @@ namespace ArtGallery.Repositories
             try
             {
                 // Lấy tất cả tranh
-                var artworks = await GetAllArtworks();
+                var query = _context.Tranhs
+                    .Include(t => t.MaNguoiDungNavigation)
+                    .Include(t => t.MaTheLoais)
+                    .Include(t => t.MaTags)
+                    .AsQueryable();
                 
                 // Tìm kiếm nếu có chuỗi tìm kiếm
                 if (!string.IsNullOrEmpty(searchString))
                 {
                     searchString = searchString.ToLower();
-                    artworks = artworks.Where(a => 
+                    query = query.Where(a => 
                         a.TieuDe.ToLower().Contains(searchString) ||
                         a.MaNguoiDungNavigation.TenNguoiDung.ToLower().Contains(searchString) ||
+                        a.MaTheLoais.Any(tl => tl.TenTheLoai.ToLower().Contains(searchString)) || // Tìm theo tên thể loại
                         a.Gia.ToString().Contains(searchString) ||
                         a.SoLuongTon.ToString().Contains(searchString)
-                    ).ToList();
+                    );
                 }
                 
-                // Mặc định sắp xếp theo ID giảm dần
+                // Sắp xếp danh sách artworks theo sortOrder
+                var artworks = await query.ToListAsync();
+                
+                // Mặc định sắp xếp theo ID giảm dần nếu không có sắp xếp
                 if (string.IsNullOrEmpty(sortOrder))
                 {
                     sortOrder = "id_desc"; 
                 }
                 
-                // Sắp xếp danh sách artworks theo sortOrder
                 switch (sortOrder)
                 {
                     case "id_asc":
@@ -349,6 +356,14 @@ namespace ArtGallery.Repositories
                         break;
                     case "artist_desc":
                         artworks = artworks.OrderByDescending(a => a.MaNguoiDungNavigation.TenNguoiDung).ToList();
+                        break;
+                    case "category_asc":
+                        // Sắp xếp theo tên thể loại đầu tiên (nếu có)
+                        artworks = artworks.OrderBy(a => a.MaTheLoais.Any() ? a.MaTheLoais.First().TenTheLoai : "").ToList();
+                        break;
+                    case "category_desc":
+                        // Sắp xếp theo tên thể loại đầu tiên (nếu có) giảm dần
+                        artworks = artworks.OrderByDescending(a => a.MaTheLoais.Any() ? a.MaTheLoais.First().TenTheLoai : "").ToList();
                         break;
                     case "price_asc":
                         artworks = artworks.OrderBy(a => a.Gia).ToList();
@@ -419,6 +434,49 @@ namespace ArtGallery.Repositories
             {
                 _logger.LogError(ex, "Lỗi khi thay đổi trạng thái yêu thích");
                 return (false, false, "Có lỗi xảy ra");
+            }
+        }
+
+        public List<Tranh> ApplySorting(List<Tranh> artworks, string sortOrder)
+        {
+            // Mặc định sắp xếp theo ID giảm dần
+            if (string.IsNullOrEmpty(sortOrder))
+            {
+                sortOrder = "id_desc"; 
+            }
+            
+            switch (sortOrder)
+            {
+                case "id_asc":
+                    return artworks.OrderBy(a => a.MaTranh).ToList();
+                case "id_desc":
+                    return artworks.OrderByDescending(a => a.MaTranh).ToList();
+                case "title_asc":
+                    return artworks.OrderBy(a => a.TieuDe).ToList();
+                case "title_desc":
+                    return artworks.OrderByDescending(a => a.TieuDe).ToList();
+                case "artist_asc":
+                    return artworks.OrderBy(a => a.MaNguoiDungNavigation.TenNguoiDung).ToList();
+                case "artist_desc":
+                    return artworks.OrderByDescending(a => a.MaNguoiDungNavigation.TenNguoiDung).ToList();
+                case "category_asc":
+                    return artworks.OrderBy(a => a.MaTheLoais.Any() ? a.MaTheLoais.First().TenTheLoai : "").ToList();
+                case "category_desc":
+                    return artworks.OrderByDescending(a => a.MaTheLoais.Any() ? a.MaTheLoais.First().TenTheLoai : "").ToList();
+                case "price_asc":
+                    return artworks.OrderBy(a => a.Gia).ToList();
+                case "price_desc":
+                    return artworks.OrderByDescending(a => a.Gia).ToList();
+                case "quantity_asc":
+                    return artworks.OrderBy(a => a.SoLuongTon).ToList();
+                case "quantity_desc":
+                    return artworks.OrderByDescending(a => a.SoLuongTon).ToList();
+                case "date_asc":
+                    return artworks.OrderBy(a => a.NgayDang).ToList();
+                case "date_desc":
+                    return artworks.OrderByDescending(a => a.NgayDang).ToList();
+                default:
+                    return artworks.OrderByDescending(a => a.MaTranh).ToList();
             }
         }
     }
