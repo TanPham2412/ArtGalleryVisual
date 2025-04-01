@@ -20,8 +20,6 @@
 
 <input type="hidden" name="__RequestVerificationToken" value="@token" />
 
-
-
 <div class="container mt-3">
     <!-- Swiper -->
     <div class="swiper mySwiper">
@@ -85,13 +83,13 @@
     <div class="container-fluid p-0">
         <div class="tag-container">
             <div class="tag">
-                <a href="/" class="tag-items home active">Home</a>
-                <a href="#" class="tag-items illustration">Illustrations</a>
-                <a href="#" class="tag-items concept">Concept</a>
-                <a href="#" class="tag-items anime">Anime/Manga</a>
-                <a href="#" class="tag-items pixel">Pixel</a>
-                <a href="#" class="tag-items vector">Vector</a>
-                <a href="#" class="tag-items lowpoly">Low-Poly</a>
+                <a href="@Url.Action("Index", "Home")" class="tag-items home @(Model.ActiveCategory == "Home" ? "active" : "")">Home</a>
+                <a href="@Url.Action("Category", "Home", new { name = "Illustrations" })" class="tag-items illustration @(Model.ActiveCategory == "Illustrations" ? "active" : "")">Illustrations</a>
+                <a href="@Url.Action("Category", "Home", new { name = "Concept" })" class="tag-items concept @(Model.ActiveCategory == "Concept" ? "active" : "")">Concept</a>
+                <a href="@Url.Action("Category", "Home", new { name = "Anime/Manga" })" class="tag-items anime @(Model.ActiveCategory == "Anime/Manga" ? "active" : "")">Anime/Manga</a>
+                <a href="@Url.Action("Category", "Home", new { name = "Pixel" })" class="tag-items pixel @(Model.ActiveCategory == "Pixel" ? "active" : "")">Pixel</a>
+                <a href="@Url.Action("Category", "Home", new { name = "Vector" })" class="tag-items vector @(Model.ActiveCategory == "Vector" ? "active" : "")">Vector</a>
+                <a href="@Url.Action("Category", "Home", new { name = "Low-Poly" })" class="tag-items lowpoly @(Model.ActiveCategory == "Low-Poly" ? "active" : "")">Low-Poly</a>
             </div>
         </div>
     </div>

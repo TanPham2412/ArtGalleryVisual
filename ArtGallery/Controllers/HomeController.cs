@@ -43,7 +43,8 @@ namespace ArtGallery.Controllers
             var viewModel = new HomeIndexViewModel
             {
                 FollowingArtworks = await _homeRepository.GetRandomArtworksFromFollowing(currentUserId, 12),
-                MostLikedArtworks = await _homeRepository.GetMostLikedArtworks(12)
+                MostLikedArtworks = await _homeRepository.GetMostLikedArtworks(12),
+                ActiveCategory = "Home"
             };
             
             return View(viewModel);
@@ -270,6 +271,62 @@ namespace ArtGallery.Controllers
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Category(string name)
+        {
+            if (!User.Identity.IsAuthenticated)
+            {
+                return RedirectToAction("LoginRegister");
+            }
+            
+            // Xử lý tên danh mục
+            if (string.IsNullOrEmpty(name))
+            {
+                return RedirectToAction("Index");
+            }
+            
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            
+            // Tạo view model với dữ liệu đã lọc theo thể loại
+            var viewModel = new HomeIndexViewModel
+            {
+                FollowingArtworks = await _homeRepository.GetRandomArtworksFromFollowingByCategory(currentUserId, 12, name),
+                MostLikedArtworks = await _homeRepository.GetMostLikedArtworksByCategory(12, name),
+                ActiveCategory = name
+            };
+            
+            // Sử dụng cùng view Index nhưng với dữ liệu khác
+            return View("Index", viewModel);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetArtworksByCategory(string category)
+        {
+            if (!User.Identity.IsAuthenticated)
+            {
+                return Json(new { success = false, message = "Cần đăng nhập để thực hiện chức năng này" });
+            }
+            
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            
+            try
+            {
+                var followingArtworks = await _homeRepository.GetRandomArtworksFromFollowingByCategory(currentUserId, 12, category);
+                var mostLikedArtworks = await _homeRepository.GetMostLikedArtworksByCategory(12, category);
+                
+                return Json(new { 
+                    success = true, 
+                    followingArtworks = followingArtworks, 
+                    mostLikedArtworks = mostLikedArtworks 
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Lỗi khi lấy danh sách tranh theo thể loại '{category}'");
+                return Json(new { success = false, message = "Có lỗi xảy ra khi lọc tranh theo thể loại" });
+            }
         }
     }
 }
