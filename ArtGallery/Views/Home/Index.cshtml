@@ -20,16 +20,9 @@
 
 <input type="hidden" name="__RequestVerificationToken" value="@token" />
 
-<div class="container mt-5 pt-5">
-    <!-- Tags -->
-    <div class="tag container">
-        <a href="#" class="tag-items illustration">Tranh minh họa (Illustration Art)</a>
-        <a href="#" class="tag-items concept">Tranh concept (Concept Art)</a>
-        <a href="#" class="tag-items anime">Tranh anime/manga (Anime/Manga Art)</a>
-        <a href="#" class="tag-items pixel">Tranh pixel (Pixel Art)</a>
-        <a href="#" class="tag-items vector">Tranh vector (Vector Art)</a>
-        <a href="#" class="tag-items lowpoly">Tranh low-poly (Low-Poly Art)</a>
-    </div>
+
+
+<div class="container mt-3">
     <!-- Swiper -->
     <div class="swiper mySwiper">
         <div class="swiper-wrapper">
@@ -89,10 +82,23 @@
         <div class="swiper-button-prev"></div>
     </div>
 
+    <div class="container-fluid p-0">
+        <div class="tag-container">
+            <div class="tag">
+                <a href="/" class="tag-items home active">Home</a>
+                <a href="#" class="tag-items illustration">Illustrations</a>
+                <a href="#" class="tag-items concept">Concept</a>
+                <a href="#" class="tag-items anime">Anime/Manga</a>
+                <a href="#" class="tag-items pixel">Pixel</a>
+                <a href="#" class="tag-items vector">Vector</a>
+                <a href="#" class="tag-items lowpoly">Low-Poly</a>
+            </div>
+        </div>
+    </div>
     <!-- Recommended pics -->
     <div class="recommended-pics">
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h3 class="section-title">Được đề xuất</h3>
+            <h3 class="section-title">Tác phẩm của những người bạn theo dõit</h3>
         </div>
 
         <div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-4">
@@ -131,8 +137,7 @@
             }
         </div>
     </div>
- </div>
-
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 <script src="~/js/index.js"></script>
@@ -171,5 +176,17 @@
                 }
             });
         }
+
+        // Thêm đoạn debug để kiểm tra
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded');
+            const tagContainer = document.querySelector('.tag-container');
+            if (tagContainer) {
+                console.log('Tag container exists');
+                console.log('Visibility:', window.getComputedStyle(tagContainer).display);
+            } else {
+                console.log('Tag container not found');
+            }
+        });
     </script>
 }

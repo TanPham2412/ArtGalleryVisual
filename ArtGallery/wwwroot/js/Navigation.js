@@ -147,6 +147,23 @@
             searchResults.hide();
         }
     });
+
+    // Cải thiện trải nghiệm tìm kiếm và nút
+    $('.search-box input').on('focus', function() {
+        $(this).parent().addClass('search-focus');
+    }).on('blur', function() {
+        $(this).parent().removeClass('search-focus');
+    });
+    
+    // Hiệu ứng hover cho nút
+    $('.btn-post-artwork').hover(
+        function() {
+            $(this).css('transform', 'translateY(-1px)');
+        },
+        function() {
+            $(this).css('transform', 'translateY(0)');
+        }
+    );
 });
 
 function toggleFollow(event, userId) {

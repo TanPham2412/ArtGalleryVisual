@@ -57,3 +57,25 @@ function toggleLike(button, artworkId) {
         }
     });
 }
+
+// Thêm đoạn này vào cuối file index.js để xử lý active state cho các tab
+document.addEventListener('DOMContentLoaded', function() {
+    // Lấy tất cả các phần tử tag-items
+    const tagItems = document.querySelectorAll('.tag-items');
+    
+    // Thêm sự kiện click cho mỗi tag
+    tagItems.forEach(item => {
+        item.addEventListener('click', function(e) {
+            // Loại bỏ class active khỏi tất cả các tag
+            tagItems.forEach(tag => tag.classList.remove('active'));
+            
+            // Thêm class active cho tag được click
+            this.classList.add('active');
+            
+            // Nếu bạn muốn ngăn chặn chuyển trang mặc định
+            // e.preventDefault();
+            
+            // Code để lọc tranh theo tag có thể được thêm vào đây
+        });
+    });
+});

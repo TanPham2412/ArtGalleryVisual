@@ -1,43 +1,77 @@
 ﻿body {
-    background-color: #f8f9fa;
+    background-color: #fff;
     font-family: Arial, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    padding-top: 0;
 }
 
 /* Navbar */
 .navbar {
-    box-shadow: 0 1px 2px rgba(255, 255, 255, 0.1);
-    padding: 8px 16px;
+    background-color: #fff;
+    box-shadow: 0 1px 10px rgba(0, 0, 0, 0.05);
+    padding: 8px 12px;
     height: 56px;
+    margin-bottom: 5px;
+    border-bottom: 1px solid #f0f0f0;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.navbar .container-fluid {
+    display: flex;
+    justify-content: space-between;
+    padding-left: 0;
+    padding-right: 20px;
+    max-width: 1400px;
+    margin: 0 auto;
 }
 
 /* Logo */
+.navbar-brand {
+    padding-left: 0;
+    margin-right: 0;
+}
+
 .logo-text {
-    font-size: 24px;
-    font-weight: bold;
-    color: #3da0e1;
+    font-size: 22px;
+    font-weight: 600;
+    color: #333;
 }
 
 .logo-highlight {
-    color: #70a8d2;
-    font-size: 24px;
-    font-weight: bold;
+    color: #0096fa;
+    font-weight: 600;
 }
 
 /* Styles cho khung tìm kiếm */
 .search-box {
     position: relative;
     min-width: 300px;
-    z-index: 9500; /* Thấp hơn dropdown */
+    z-index: 9500;
     flex-grow: 1;
     max-width: 500px;
 }
 
 .search-box input {
-    border-radius: 8px;
-    padding-left: 15px;
-    padding-right: 15px;
-    background-color: #f5f5f5;
-    border: 1px solid #e0e0e0;
+    border-radius: 16px;
+    padding: 10px 16px;
+    background-color: #f2f2f2;
+    border: none;
+    color: #333;
+    font-size: 14px;
+    width: 100%;
+    box-shadow: none;
+    transition: all 0.2s ease;
+}
+
+.search-box input:focus {
+    background-color: #f7f7f7;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(0,0,0,0.05);
+}
+
+.search-box input::placeholder {
+    color: #888;
+    font-size: 14px;
 }
 
 .search-results {
@@ -370,8 +404,9 @@
     max-width: 1250px;
     margin: 0 auto;
     padding: 0 30px; /* Giảm padding container */
-    margin-bottom: 60px;
-    margin-top: 30px;
+    padding-top: 80px; /* Tăng padding trên */
+    margin-bottom: 30px;
+    margin-top: 60px;
 }
 
 /* Slide */
@@ -481,10 +516,11 @@
     align-items: center; /* Căn giữa theo chiều dọc */
     gap: 12px; /* Giảm khoảng cách giữa các tag */
     flex-wrap: nowrap; /* Ngăn không cho wrap xuống dòng */
-    margin-bottom: 40px;
+    margin-top: 10px; /* Giảm khoảng cách từ trên xuống */
+    margin-bottom: 20px; /* Cũng giảm khoảng cách dưới nếu cần */
     width: 100%;
     overflow-x: auto; /* Cho phép scroll ngang nếu không đủ chỗ */
-    padding: 10px 0; /* Thêm padding để thanh scroll không che mất nội dung */
+    padding-top: 0; /* Bỏ padding trên */
 }
 
 
@@ -543,7 +579,8 @@
 }
 
 .section-title {
-    font-size: 24px;
+    margin-top: 20px;
+    font-size: 20px;
     font-weight: 700;
     color: #333;
     margin-bottom: 10px;
@@ -1007,4 +1044,393 @@
     width: 100%;
     object-fit: contain;
     margin-bottom: 10px;
+}
+
+/* Sửa lại style cho các nút theo mẫu */
+.btn-post-artwork {
+    background-color: #f2f2f2;
+    color: #666;
+    border: none;
+    border-radius: 16px;
+    padding: 6px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    transition: all 0.2s ease;
+    height: 40px;
+    width: auto;
+}
+
+.btn-post-artwork:hover {
+    background-color: #e5e5e5;
+    color: #333;
+}
+
+.btn-post-artwork i {
+    margin-right: 6px;
+}
+
+.btn-post-artwork.with-chevron {
+    padding-right: 24px;
+    position: relative;
+}
+
+.btn-post-artwork.with-chevron::after {
+    content: '▼';
+    font-size: 10px;
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #888;
+}
+
+/* Thêm hiệu ứng focus cho search box */
+.search-focus input {
+    background-color: #fff;
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Style cho nút giống Post your work */
+.btn-pixiv {
+    background-color: #f2f2f2;
+    color: #333;
+    border: none;
+    border-radius: 30px;
+    padding: 6px 16px;
+    font-size: 14px;
+    font-weight: 700 !important; /* Tăng độ đậm của chữ */
+    transition: all 0.2s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 36px;
+    white-space: nowrap;
+}
+
+.btn-pixiv:hover {
+    background-color: #e6e6e6;
+    color: #333;
+    text-decoration: none;
+}
+
+.btn-pixiv i {
+    margin-right: 8px;
+    font-size: 14px;
+}
+
+/* Style cho nút Đăng tranh ảnh - nút xanh */
+.btn-pixiv-primary {
+    background-color: #f2f2f2 !important;
+    color: #333 !important;
+    border: none !important;
+    border-radius: 30px !important;
+    padding: 8px 18px !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    height: 40px;
+}
+
+.btn-pixiv-primary:hover {
+    background-color: #e6e6e6 !important;
+    color: #333 !important;
+}
+
+/* Hiệu ứng mũi tên xuống */
+.btn-pixiv-dropdown::after {
+    content: '▼';
+    font-size: 10px;
+    margin-left: 8px;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+/* Nút chính xác giống Post your work */
+.btn-post-work {
+    background-color: #f2f2f2;
+    color: #333;
+    border: none;
+    border-radius: 30px;
+    padding: 8px 18px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    height: 40px;
+}
+
+.btn-post-work:hover {
+    background-color: #e6e6e6;
+}
+
+.btn-post-work::after {
+    content: '▼';
+    font-size: 10px;
+    margin-left: 8px;
+    display: inline-block;
+    vertical-align: middle;
+    color: #888;
+}
+
+/* Ghi đè các style bootstrap */
+.btn-primary {
+    background-color: #f2f2f2 !important;
+    color: #333 !important;
+    border: none !important;
+    border-radius: 30px !important;
+}
+
+.btn-primary:hover {
+    background-color: #e6e6e6 !important;
+    color: #333 !important;
+}
+
+/* Container */
+.container-fluid {
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+/* Dropdown menu */
+.dropdown-menu {
+    right: 0;
+    left: auto;
+    top: 45px;
+}
+
+/* Fix user dropdown */
+.user-dropdown {
+    position: relative;
+}
+
+/* Di chuyển nút toggle menu sang trái */
+.navbar-toggler {
+    margin-left: 10px;
+    margin-right: 5px;
+    padding: 4px;
+}
+
+/* Điều chỉnh khoảng cách giữa các phần tử trong navbar */
+.navbar-nav {
+    margin-left: 10px;
+}
+
+/* Điều chỉnh thanh tìm kiếm */
+.form-control.search-input {
+    width: 350px;
+}
+
+/* Điều chỉnh container cho toàn bộ trang */
+.container-fluid {
+    padding-top: 0;
+}
+
+.swiper, .recommended-pics, .tag {
+    margin-top: 10px; /* Giảm margin top mặc định */
+}
+
+/* Điều chỉnh style cho tag-container mới */
+.tag-container {
+    border-bottom: 1px solid #e7e7e7;
+    margin-top: 0;
+    padding: 0;
+    background-color: #fff;
+    width: 100%;
+    display: block; /* Đảm bảo hiển thị */
+    position: relative;
+    z-index: 1;
+}
+
+.tag {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    margin: 0;
+    padding: 0 15px;
+    max-width: 1400px;
+    margin-left: auto;
+    margin-right: auto;
+    overflow-x: auto;
+    height: 46px; /* Đảm bảo chiều cao cố định */
+}
+
+/* Style cho tag item giống Pixiv */
+.tag-items {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 20px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: bold;
+    color: #666;
+    background-color: transparent !important; /* Loại bỏ background */
+    border-radius: 0;
+    position: relative;
+    transition: color 0.2s;
+    white-space: nowrap;
+    height: 100%;
+}
+
+.tag-items:hover {
+    color: #0096fa;
+    background-color: transparent;
+    text-decoration: none;
+}
+
+    .tag-items.active {
+        color: #0096fa;
+        font-weight: bold;
+    }
+
+.tag-items.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background-color: #0096fa;
+}
+
+/* Đảm bảo không có style khác ghi đè */
+.container-fluid.p-0 {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Điều chỉnh responsive */
+@media (max-width: 768px) {
+    .navbar .container-fluid {
+        padding-left: 0;
+    }
+    
+    .navbar-toggler {
+        margin-left: 0;
+    }
+    
+    .btn-pixiv {
+        font-size: 13px;
+        padding: 6px 12px;
+    }
+}
+
+@media (max-width: 576px) {
+    body {
+        padding-top: 55px;
+    }
+    
+    .tag {
+        margin-top: 5px;
+    }
+}
+
+/* Điều chỉnh các nút chức năng bên phải */
+.navbar-right {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.navbar-right .nav-item {
+    margin-left: 15px;
+}
+
+.navbar-right .nav-link {
+    padding: 8px 15px;
+}
+
+/* Làm cho các biểu tượng căn chỉnh tốt hơn */
+.nav-link i {
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Điều chỉnh khoảng cách giữa navbar và nội dung */
+.main-content {
+    margin-top: 5px;
+}
+
+/* Điều chỉnh các nút để giống Pixiv hơn */
+.nav-link.fw-bold {
+    font-weight: 600 !important;
+}
+
+/* Điều chỉnh khoảng cách giữa các thành phần bên phải để chúng cách đều nhau */
+.search-container {
+    margin-right: auto;
+    margin-left: 15px;
+}
+
+/* Đảm bảo tất cả các thành phần trong navbar có chiều cao chuẩn */
+.navbar .nav-link,
+.navbar .navbar-brand,
+.navbar .navbar-toggler,
+.navbar .search-container {
+    height: 56px;
+    display: flex;
+    align-items: center;
+}
+
+/* PHẦN TAB PIXIV MỚI */
+.pixiv-tabs {
+    width: 100%;
+    border-bottom: 1px solid #e7e7e7;
+    background-color: #fff;
+    margin-top: 0;
+    height: 46px;
+    display: block !important;
+}
+
+.pixiv-tabs-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    height: 100%;
+    padding: 0 20px;
+}
+
+.pixiv-tab-item {
+    height: 100%;
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    color: #666;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    position: relative;
+    transition: all 0.2s;
+}
+
+.pixiv-tab-item:hover {
+    color: #0096fa;
+}
+
+.pixiv-tab-item.active {
+    color: #0096fa;
+    font-weight: 600;
+}
+
+.pixiv-tab-item.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background-color: #0096fa;
 }
