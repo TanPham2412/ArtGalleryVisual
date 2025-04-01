@@ -144,12 +144,32 @@ namespace ArtGallery.Controllers
         }
 
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Admin(string sortOrder, string searchString)
+        public async Task<IActionResult> Admin(string sortOrder, string searchString, string categoryFilter)
         {
             try
             {
-                var artworks = await _artworkRepository.GetFilteredArtworks(searchString, sortOrder);
-                return View(artworks);
+                // Nếu có categoryFilter thì ưu tiên lọc theo thể loại
+                if (!string.IsNullOrEmpty(categoryFilter))
+                {
+                    var artworks = await _context.Tranhs
+                        .Include(t => t.MaNguoiDungNavigation)
+                        .Include(t => t.MaTheLoais)
+                        .Include(t => t.MaTags)
+                        .Where(t => t.MaTheLoais.Any(c => c.TenTheLoai.Contains(categoryFilter)))
+                        .ToListAsync();
+                        
+                    if (sortOrder != null)
+                    {
+                        // Áp dụng sắp xếp nếu có
+                        artworks = _artworkRepository.ApplySorting(artworks, sortOrder);
+                    }
+                        
+                    ViewBag.CategoryFilter = categoryFilter;
+                    return View(artworks);
+                }
+                
+                var filteredArtworks = await _artworkRepository.GetFilteredArtworks(searchString, sortOrder);
+                return View(filteredArtworks);
             }
             catch (Exception ex)
             {
@@ -193,11 +213,44 @@ namespace ArtGallery.Controllers
             }
         }
 
-        [AllowAnonymous]
-        public async Task<IActionResult> Products(string sortOrder, string searchString)
+        [HttpGet]
+        public async Task<IActionResult> FilterByCategory(string categoryName)
+        {
+            if (string.IsNullOrEmpty(categoryName))
+            {
+                return RedirectToAction("Products");
+            }
+            
+            try
+            {
+                var artworks = await _context.Tranhs
+                    .Include(t => t.MaNguoiDungNavigation)
+                    .Include(t => t.MaTheLoais)
+                    .Include(t => t.MaTags)
+                    .Where(t => t.MaTheLoais.Any(c => c.TenTheLoai.Contains(categoryName)))
+                    .ToListAsync();
+                    
+                ViewBag.CategoryName = categoryName;
+                return View("Products", artworks);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Lỗi khi lọc tranh theo thể loại '{categoryName}'");
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi lọc tranh";
+                return RedirectToAction("Products");
+            }
+        }
+
+        public async Task<IActionResult> Products(string sortOrder, string searchString, string categoryFilter)
         {
             try
             {
+                // Nếu có categoryFilter thì ưu tiên lọc theo thể loại
+                if (!string.IsNullOrEmpty(categoryFilter))
+                {
+                    return await FilterByCategory(categoryFilter);
+                }
+                
                 var artworks = await _artworkRepository.GetFilteredArtworks(searchString, sortOrder);
                 return View(artworks);
             }

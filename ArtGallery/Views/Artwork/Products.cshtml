@@ -10,6 +10,7 @@
     // Các sắp xếp khác
     var titleSort = sortOrder == "title_asc" ? "title_desc" : "title_asc";
     var artistSort = sortOrder == "artist_asc" ? "artist_desc" : "artist_asc";
+    var categorySort = sortOrder == "category_asc" ? "category_desc" : "category_asc";
     var priceSort = sortOrder == "price_asc" ? "price_desc" : "price_asc";
     var quantitySort = sortOrder == "quantity_asc" ? "quantity_desc" : "quantity_asc";
     var dateSort = sortOrder == "date_asc" ? "date_desc" : "date_asc";
@@ -27,7 +28,7 @@
             <i class="fas fa-arrow-left"></i> Về trang chủ
         </a>
         
-        <!-- Box tìm kiếm -->
+        <!-- Box tìm kiếm chung -->
         <form asp-action="Products" method="get" class="d-flex">
             <div class="input-group">
                 <input type="text" name="searchString" value="@searchString" class="form-control" placeholder="Tìm kiếm...">
@@ -45,6 +46,15 @@
             </div>
         </form>
     </div>
+
+    <!-- Thông báo bộ lọc nếu có -->
+    @if (!string.IsNullOrEmpty(ViewBag.CategoryName))
+    {
+        <div class="alert alert-info d-flex justify-content-between align-items-center">
+            <span>Đang lọc theo thể loại: <strong>@ViewBag.CategoryName</strong></span>
+            <a asp-action="Products" class="btn btn-sm btn-outline-dark">Xóa bộ lọc</a>
+        </div>
+    }
 
     @if (Model == null || !Model.Any())
     {
@@ -101,6 +111,23 @@
                                     <i class="fas fa-sort-up"></i>
                                 }
                                 else if (sortOrder == "artist_desc")
+                                {
+                                    <i class="fas fa-sort-down"></i>
+                                }
+                                else
+                                {
+                                    <i class="fas fa-sort"></i>
+                                }
+                            </a>
+                        </th>
+                        <th>
+                            <a asp-action="Products" asp-route-sortOrder="@categorySort" asp-route-searchString="@searchString" class="text-white text-decoration-none">
+                                Thể loại
+                                @if (sortOrder == "category_asc")
+                                {
+                                    <i class="fas fa-sort-up"></i>
+                                }
+                                else if (sortOrder == "category_desc")
                                 {
                                     <i class="fas fa-sort-down"></i>
                                 }
@@ -174,6 +201,25 @@
                             </td>
                             <td>@item.TieuDe</td>
                             <td>@item.MaNguoiDungNavigation.TenNguoiDung</td>
+                            <td>
+                                @if (item.MaTheLoais != null && item.MaTheLoais.Any())
+                                {
+                                    <div class="d-flex flex-wrap gap-1">
+                                        @foreach (var theLoai in item.MaTheLoais.Take(2))
+                                        {
+                                            <span class="badge bg-info text-dark">@theLoai.TenTheLoai</span>
+                                        }
+                                        @if (item.MaTheLoais.Count > 2)
+                                        {
+                                            <span class="badge bg-secondary">+@(item.MaTheLoais.Count - 2)</span>
+                                        }
+                                    </div>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Chưa phân loại</span>
+                                }
+                            </td>
                             <td>@item.Gia.ToString("#,##0") VND</td>
                             <td>@item.SoLuongTon</td>
                             <td>@(item.NgayDang.HasValue ? item.NgayDang.Value.ToString("dd/MM/yyyy") : "N/A")</td>

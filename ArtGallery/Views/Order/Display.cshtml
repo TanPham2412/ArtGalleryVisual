@@ -67,10 +67,10 @@
                                     <button type="button" id="btnXacNhanDatHang" class="btn btn-primary btn-lg w-100">
                                         <i class="fas fa-check-circle me-2"></i>Xác nhận đặt hàng
                                     </button>
-                                </div>
-                            }
-                            else
-                            {
+        </div>
+    }
+    else
+    {
                                 <div class="col-6">
                                     <button type="button" id="btnThemGioHang" class="btn btn-success btn-lg w-100">
                                         <i class="fas fa-cart-plus me-2"></i>Thêm vào giỏ hàng
@@ -150,8 +150,8 @@
                                 <i class="fas fa-check me-2"></i>Giả lập thanh toán thành công
                             </button>
                         </div>
-                    </div>
-                    
+                        </div>
+
                     <!-- Tab thanh toán khi nhận hàng -->
                     <div class="tab-pane fade" id="cod-content" role="tabpanel">
                         <div class="text-center">
@@ -307,18 +307,18 @@
                 var tongTien = soLuong * parseFloat('@artwork.Gia');
                 
                 // Thêm vào giỏ hàng với trạng thái "Chờ xác nhận"
-                $.ajax({
+            $.ajax({
                     url: '/Order/AddToCart',
-                    type: 'POST',
+                type: 'POST',
                     data: {
                         maTranh: maTranh,
                         soLuong: soLuong,
                         tongTien: tongTien,
                         trangThai: "Chờ xác nhận",
                         phuongThucThanhToan: "chưa xác định"
-                    },
-                    success: function(response) {
-                        if (response.success) {
+                },
+                success: function(response) {
+                    if (response.success) {
                             // Đổi text của nút
                             $("#btnThemGioHang").html('<i class="fas fa-check me-2"></i>Đã thêm vào giỏ hàng');
                             $("#btnThemGioHang").removeClass('btn-success').addClass('btn-secondary');
@@ -403,17 +403,17 @@
                                 text: response.message,
                                 icon: 'error'
                             });
-                        }
-                    },
-                    error: function() {
+                    }
+                },
+                error: function() {
                         Swal.fire({
                             title: 'Lỗi!',
                             text: 'Có lỗi xảy ra, vui lòng thử lại sau.',
                             icon: 'error'
                         });
-                    }
-                });
-            }
+                }
+            });
+        }
         });
     </script>
 }
