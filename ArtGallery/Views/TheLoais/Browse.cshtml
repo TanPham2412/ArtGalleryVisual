@@ -1,0 +1,104 @@
+@model ArtGallery.ViewModels.TheLoaiViewModel
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@using System.Security.Claims
+@inject ArtGalleryContext DbContext
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
+
+@{
+    ViewData["Title"] = $"Thể loại: {Model.CategoryName}";
+    var token = Antiforgery.GetAndStoreTokens(Context).RequestToken;
+}
+
+<link rel="stylesheet" href="~/css/style.css">
+<link rel="stylesheet" href="~/css/theloai.css">
+
+@await Html.PartialAsync("_NavigationPartial")
+
+<div class="container mt-5 pt-4">
+    <div class="category-header">
+        <h2 class="category-title">Thể loại: @Model.CategoryName</h2>
+        <p class="category-description">Các tác phẩm thuộc thể loại @Model.CategoryName</p>
+    </div>
+
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-4 mt-3">
+        @foreach (var artwork in Model.Artworks)
+        {
+            <div>
+                <div class="pic-item">
+                    <div class="image-wrapper">
+                        <a asp-controller="Artwork" asp-action="Display" asp-route-id="@artwork.MaTranh" class="art-link">
+                            <img src="@artwork.DuongDanAnh" alt="@artwork.TieuDe">
+                        </a>
+                        @{
+                            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                            var isLiked = await DbContext.LuotThiches
+                                .AnyAsync(lt => lt.MaTranh == artwork.MaTranh && lt.MaNguoiDung == currentUserId);
+                            var likeCount = artwork.LuotThiches.Count;
+                        }
+                        <button class="like-button @(isLiked ? "active" : "")" 
+                                onclick="toggleLike(this, @artwork.MaTranh)">
+                            <i class="@(isLiked ? "fas" : "far") fa-heart"></i>
+                        </button>
+                        
+                        <div class="like-count">
+                            @likeCount <i class="fas fa-heart"></i>
+                        </div>
+                    </div>
+
+                    <div class="img-info mt-2">
+                        <a asp-controller="Artwork" asp-action="Display" asp-route-id="@artwork.MaTranh" class="art-link">
+                            <h6 class="artwork-title">@artwork.TieuDe</h6>
+                        </a>
+                        <div class="artist-info d-flex align-items-center">
+                            <div class="artist-avatar">
+                                <img src="@artwork.MaNguoiDungNavigation.GetAvatarPath()" alt="@artwork.MaNguoiDungNavigation.TenNguoiDung">
+                            </div>
+                            <span class="artist-name">@artwork.MaNguoiDungNavigation.TenNguoiDung</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<input type="hidden" name="__RequestVerificationToken" value="@token" />
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="~/js/theloai.js"></script>
+    <script>
+        function toggleLike(button, artworkId) {
+            $.ajax({
+                url: '/Artwork/ToggleLike',
+                type: 'POST',
+                data: { artworkId: artworkId },
+                headers: {
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function(response) {
+                    if (response.success) {
+                        const icon = button.querySelector('i');
+                        if (response.liked) {
+                            // Đã thích
+                            icon.classList.remove('far');
+                            icon.classList.add('fas');
+                            button.classList.add('active');
+                        } else {
+                            // Đã hủy thích
+                            icon.classList.remove('fas');
+                            icon.classList.add('far');
+                            button.classList.remove('active');
+                        }
+                    } else {
+                        alert(response.message);
+                    }
+                },
+                error: function() {
+                    alert('Có lỗi xảy ra khi thực hiện thao tác');
+                }
+            });
+        }
+    </script>
+} 

@@ -23,6 +23,7 @@ builder.Services.AddScoped<IHomeRepository, HomeRepository>();
 builder.Services.AddScoped<IArtworkRepository, ArtworkRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+builder.Services.AddScoped<ITheLoaiRepositories, TheLoaiRepository>();
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();

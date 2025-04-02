@@ -56,12 +56,12 @@
                     <div class="dropdown-header">Thể loại</div>
                     <div class="category-items">
                         <a href="@Url.Action("Index", "Home")" class="category-item home">Home</a>
-                        <a href="@Url.Action("Category", "Home", new { name = "Illustrations" })" class="category-item">Illustrations</a>
-                        <a href="@Url.Action("Category", "Home", new { name = "Concept" })" class="category-item">Concept</a>
-                        <a href="@Url.Action("Category", "Home", new { name = "Anime/Manga" })" class="category-item">Anime/Manga</a>
-                        <a href="@Url.Action("Category", "Home", new { name = "Pixel" })" class="category-item">Pixel</a>
-                        <a href="@Url.Action("Category", "Home", new { name = "Vector" })" class="category-item">Vector</a>
-                        <a href="@Url.Action("Category", "Home", new { name = "Low-Poly" })" class="category-item">Low-Poly</a>
+                        @foreach (var theLoai in theLoaiList)
+                        {
+                            <a href="@Url.Action("Display", "TheLoais", new { id = theLoai.MaTheLoai })" class="category-item">
+                                @theLoai.TenTheLoai
+                            </a>
+                        }
                     </div>
                 </div>
             </div>
