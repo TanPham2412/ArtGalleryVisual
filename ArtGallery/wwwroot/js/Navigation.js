@@ -14,6 +14,21 @@
         }
     });
     
+    // Script cho dropdown category menu
+    $('#categoryDropdownBtn').on('click', function(e) {
+        e.stopPropagation();
+        $('#categoryDropdownMenu').toggle();
+    });
+    
+    // Ẩn dropdown category khi click ra ngoài
+    $(document).on('click', function(e) {
+        if (!$('#categoryDropdownBtn').is(e.target) && 
+            !$('#categoryDropdownMenu').is(e.target) && 
+            $('#categoryDropdownMenu').has(e.target).length === 0) {
+            $('#categoryDropdownMenu').hide();
+        }
+    });
+    
     console.log("Navigation.js đã được tải");
     
     const searchInput = $('#searchInput');

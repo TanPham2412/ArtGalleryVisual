@@ -1,0 +1,24 @@
+﻿@model ArtGallery.Models.TheLoai
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h1>Details</h1>
+
+<div>
+    <h4>TheLoai</h4>
+    <hr />
+    <dl class="row">
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.TenTheLoai)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.TenTheLoai)
+        </dd>
+    </dl>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model?.MaTheLoai">Edit</a> |
+    <a asp-action="Index">Back to List</a>
+</div>

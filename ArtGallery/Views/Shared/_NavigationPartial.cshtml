@@ -1,4 +1,5 @@
 @using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
 @inject UserManager<NguoiDung> UserManager
 @inject ArtGalleryContext DbContext
 @inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
@@ -18,6 +19,9 @@
         followingCount = DbContext.TheoDois.Count(t => t.MaNguoiTheoDoi == currentUser.Id);
         userAvatar = currentUser.GetAvatarPath();
     }
+    
+    // Lấy danh sách thể loại
+    var theLoaiList = await DbContext.TheLoais.OrderBy(t => t.TenTheLoai).ToListAsync();
 }
 
 <input type="hidden" name="__RequestVerificationToken" value="@token" />
@@ -43,6 +47,25 @@
         </div>
 
         <div class="d-flex align-items-center">
+            <!-- Thêm nút Danh mục với dropdown -->
+            <div class="category-dropdown me-2">
+                <button class="btn-pixiv fw-bold" id="categoryDropdownBtn">
+                    <i class="fas fa-list"></i> Danh mục
+                </button>
+                <div class="category-dropdown-menu" id="categoryDropdownMenu">
+                    <div class="dropdown-header">Thể loại</div>
+                    <div class="category-items">
+                        <a href="@Url.Action("Index", "Home")" class="category-item home">Home</a>
+                        @foreach (var theLoai in theLoaiList)
+                        {
+                            <a href="@Url.Action("Display", "TheLoais", new { id = theLoai.MaTheLoai })" class="category-item">
+                                @theLoai.TenTheLoai
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+            
             <a href="@Url.Action("Products", "Artwork")" class="btn-pixiv fw-bold me-2">
                 <i class="fas fa-shopping-basket"></i> Sản phẩm
             </a>
