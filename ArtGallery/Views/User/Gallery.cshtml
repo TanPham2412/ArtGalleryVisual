@@ -1,0 +1,53 @@
+@model ArtGallery.Models.NguoiDung
+@{
+    ViewData["Title"] = "Tác phẩm của " + Model.TenNguoiDung;
+}
+
+<link rel="stylesheet" href="~/css/style.css">
+
+@await Html.PartialAsync("_NavigationPartial")
+
+<div class="container mt-5 pt-5">
+    <h2 class="mb-4">Tác phẩm của @Model.TenNguoiDung</h2>
+
+    @if (Model.Tranhs == null || !Model.Tranhs.Any())
+    {
+        <div class="text-center py-5">
+            <i class="far fa-image fa-3x mb-3 text-muted"></i>
+            <p class="text-muted">Chưa có tác phẩm nào</p>
+        </div>
+    }
+    else
+    {
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-4">
+            @foreach (var item in Model.Tranhs)
+            {
+                <div>
+                    <div class="pic-item">
+                        <div class="image-wrapper">
+                            <a asp-controller="Artwork" asp-action="Display" asp-route-id="@item.MaTranh" class="art-link">
+                                <img src="@item.DuongDanAnh" alt="@item.TieuDe">
+                            </a>
+                        </div>
+
+                        <div class="img-info mt-2">
+                            <a asp-controller="Artwork" asp-action="Display" asp-route-id="@item.MaTranh" class="art-link">
+                                <h6 class="artwork-title">@item.TieuDe</h6>
+                            </a>
+                            <div class="artist-info d-flex align-items-center">
+                                <div class="artist-avatar">
+                                    <img src="@Model.GetAvatarPath()" alt="@Model.TenNguoiDung">
+                                </div>
+                                <span class="artist-name">@Model.TenNguoiDung</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script src="~/js/gallery.js"></script>
+} 

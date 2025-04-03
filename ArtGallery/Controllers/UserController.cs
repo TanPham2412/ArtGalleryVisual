@@ -120,5 +120,45 @@ namespace ArtGallery.Controllers
                 });
             }
         }
+
+        public async Task<IActionResult> Gallery(string id)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(id))
+                {
+                    var currentUser = await _userManager.GetUserAsync(User);
+                    if (currentUser != null)
+                    {
+                        id = currentUser.Id;
+                    }
+                    else
+                    {
+                        return RedirectToAction("Login", "Account");
+                    }
+                }
+
+                var result = await _userRepository.GetUserProfile(id);
+
+                if (result == null)
+                {
+                    return NotFound("Không tìm thấy người dùng");
+                }
+
+                var (user, followersCount, followingCount) = result.Value;
+
+                ViewBag.FollowersCount = followersCount;
+                ViewBag.FollowingCount = followingCount;
+                ViewBag.IsOwnProfile = User.Identity.IsAuthenticated && 
+                                     (await _userManager.GetUserAsync(User))?.Id == id;
+
+                return View(user);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi hiển thị tác phẩm của người dùng {UserId}", id);
+                return RedirectToAction("Error", "Home");
+            }
+        }
     }
 }
