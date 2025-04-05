@@ -101,6 +101,7 @@ namespace ArtGallery.Controllers
                 ModelState.Remove("DuongDanAnh");
                 ModelState.Remove("MaNguoiDungNavigation");
                 ModelState.Remove("MaNguoiDung");
+                ModelState.Remove("TagsInput");
 
                 // Thay đổi cách lấy ID người dùng
                 var currentUserId = _userManager.GetUserId(User);
