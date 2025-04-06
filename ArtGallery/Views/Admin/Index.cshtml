@@ -1,0 +1,45 @@
+@model List<NguoiDung>
+@{
+    ViewData["Title"] = "Quản lý";
+}
+
+<div class="container mt-4">
+    <h2>Quản lý hệ thống</h2>
+    
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Danh sách đăng ký nghệ sĩ</h5>
+        </div>
+        <div class="card-body">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Tên nghệ sĩ</th>
+                        <th>Ngày đăng ký</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in Model.Where(u => u.DangKyNgheSi))
+                    {
+                        <tr>
+                            <td>@user.TenNguoiDung</td>
+                            <td>@user.NgayDangKy.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>
+                                <a href="@Url.Action("ArtistApproval", "Admin", new { id = user.Id })" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-eye"></i> Xem chi tiết
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                    @if (!Model.Any(u => u.DangKyNgheSi))
+                    {
+                        <tr>
+                            <td colspan="3" class="text-center">Không có đơn đăng ký mới</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div> 

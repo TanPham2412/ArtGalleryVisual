@@ -1,0 +1,99 @@
+@model ArtGallery.ViewModels.ArtistApprovalViewModel
+
+@{
+    ViewData["Title"] = "Phê duyệt đăng ký nghệ sĩ";
+}
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">Thông tin đăng ký nghệ sĩ</h4>
+                    <a href="@Url.Action("Index", "Home")" class="btn btn-light">Quay lại</a>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 text-center">
+                            <img src="@Model.AvatarPath" alt="@Model.ArtistName" class="img-fluid rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
+                        </div>
+                        <div class="col-md-9">
+                            <h4>@Model.ArtistName</h4>
+                            <div class="mt-4">
+                                <div class="row mb-3">
+                                    <div class="col-md-3 fw-bold">ID Người dùng:</div>
+                                    <div class="col-md-9">@Model.UserId</div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-3 fw-bold">Địa chỉ:</div>
+                                    <div class="col-md-9">@Model.Address</div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-3 fw-bold">Số điện thoại:</div>
+                                    <div class="col-md-9">@Model.PhoneNumber</div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-3 fw-bold">Mô tả về bản thân:</div>
+                                    <div class="col-md-9">
+                                        <p style="white-space: pre-line;">@Model.Description</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-5">
+                        <div class="col-md-6 d-flex justify-content-end">
+                            <form asp-action="ApproveArtist" method="post">
+                                <input type="hidden" name="userId" value="@Model.UserId" />
+                                <button type="submit" class="btn btn-success btn-lg px-5">
+                                    <i class="fas fa-check-circle me-2"></i> Chấp thuận
+                                </button>
+                            </form>
+                        </div>
+                        <div class="col-md-6">
+                            <button type="button" class="btn btn-danger btn-lg px-5" data-bs-toggle="modal" data-bs-target="#rejectModal">
+                                <i class="fas fa-times-circle me-2"></i> Từ chối
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal từ chối -->
+<div class="modal fade" id="rejectModal" tabindex="-1" aria-labelledby="rejectModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="rejectModalLabel">Lý do từ chối</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-action="RejectArtist" method="post">
+                <div class="modal-body">
+                    <input type="hidden" name="userId" value="@Model.UserId" />
+                    <div class="form-group">
+                        <label for="reason">Vui lòng nhập lý do từ chối:</label>
+                        <textarea class="form-control" id="reason" name="reason" rows="5" placeholder="Nhập lý do từ chối đăng ký nghệ sĩ..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-danger">Xác nhận từ chối</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('#rejectModal').on('shown.bs.modal', function() {
+                $('#reason').focus();
+            });
+        });
+    </script>
+} 

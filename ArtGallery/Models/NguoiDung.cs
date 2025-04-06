@@ -35,7 +35,7 @@ public partial class NguoiDung : IdentityUser<string>
     public string TenNguoiDung 
     { 
         get => _tenNguoiDung ?? UserName ?? Email?.Split('@')[0] ?? "User_" + Id?.Substring(0, 8);
-        set => _tenNguoiDung = value;
+        set => _tenNguoiDung = value!;
     }
 
     public string? DiaChi { get; set; }
@@ -64,9 +64,11 @@ public partial class NguoiDung : IdentityUser<string>
 
     public bool DangKyNgheSi { get; set; } = false;
 
-    public virtual ICollection<BinhLuan> BinhLuans { get; set; } = new List<BinhLuan>();
+    public DateTime NgayDangKy { get; set; } = DateTime.Now;
 
     public virtual DoanhThu? DoanhThu { get; set; }
+
+    public virtual ICollection<BinhLuan> BinhLuans { get; set; } = new List<BinhLuan>();
 
     public virtual ICollection<GiaoDich> GiaoDiches { get; set; } = new List<GiaoDich>();
 

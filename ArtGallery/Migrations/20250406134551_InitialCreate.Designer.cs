@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ArtGallery.Migrations
 {
     [DbContext(typeof(ArtGalleryContext))]
-    [Migration("20250406132750_InitialCreate")]
+    [Migration("20250406134551_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -297,6 +297,9 @@ namespace ArtGallery.Migrations
 
                     b.Property<string>("MoTa")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("NgayDangKy")
+                        .HasColumnType("datetime2");
 
                     b.Property<DateOnly?>("NgaySinh")
                         .HasColumnType("date");

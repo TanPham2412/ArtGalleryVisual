@@ -295,6 +295,9 @@ namespace ArtGallery.Migrations
                     b.Property<string>("MoTa")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime>("NgayDangKy")
+                        .HasColumnType("datetime2");
+
                     b.Property<DateOnly?>("NgaySinh")
                         .HasColumnType("date");
 

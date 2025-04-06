@@ -99,7 +99,9 @@ namespace ArtGallery.Controllers
                 return Ok();
             }
 
-            // Chỉ cập nhật view state trong session hoặc cookie, không thay đổi database
+            var userId = _userManager.GetUserId(User);
+            await Task.CompletedTask;
+
             return Ok();
         }
 
