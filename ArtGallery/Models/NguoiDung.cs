@@ -22,7 +22,7 @@ public partial class NguoiDung : IdentityUser<string>
         get => _userName;
         set
         {
-            _userName = value;
+            _userName = value!;
             // Tự động thiết lập TenNguoiDung khi UserName được gán giá trị
             if (string.IsNullOrEmpty(TenNguoiDung) && !string.IsNullOrEmpty(value))
             {

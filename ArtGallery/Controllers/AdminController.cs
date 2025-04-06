@@ -42,8 +42,24 @@ namespace ArtGallery.Controllers
                 return NotFound();
 
             var user = await _userManager.FindByIdAsync(id);
-            if (user == null || !user.DangKyNgheSi)
+            if (user == null)
                 return NotFound();
+            
+            // Kiểm tra nếu đơn đã được xử lý
+            if (!user.DangKyNgheSi)
+            {
+                // Kiểm tra xem người này đã là nghệ sĩ chưa
+                bool isArtist = await _userManager.IsInRoleAsync(user, "Artists");
+                
+                // Chuyển đến view đã xử lý
+                return View("ArtistApprovalProcessed", new ArtistApprovalProcessedViewModel
+                {
+                    UserId = user.Id,
+                    ArtistName = user.TenNguoiDung,
+                    AvatarPath = user.GetAvatarPath(),
+                    IsApproved = isArtist
+                });
+            }
 
             var viewModel = new ArtistApprovalViewModel
             {
