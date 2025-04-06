@@ -160,5 +160,44 @@ namespace ArtGallery.Controllers
                 return RedirectToAction("Error", "Home");
             }
         }
+
+        public async Task<IActionResult> RegisterArtist()
+        {
+            if (!User.Identity.IsAuthenticated)
+                return RedirectToAction("Login", "Account");
+        
+            var user = await _userManager.GetUserAsync(User);
+            if (await _userManager.IsInRoleAsync(user, "Artists"))
+                return RedirectToAction("Gallery", new { id = user.Id });
+        
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RegisterArtist(ArtistRegistrationViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+                return NotFound();
+
+            // Cập nhật thông tin nghệ sĩ
+            user.TenNguoiDung = model.TenNgheSi;
+            user.DiaChi = model.DiaChi;
+            user.MoTa = model.MoTa;
+            user.PhoneNumber = model.SoDienThoai;
+            
+            // Cập nhật vai trò thành nghệ sĩ
+            await _userManager.AddToRoleAsync(user, "Artists");
+            await _userManager.UpdateAsync(user);
+
+            // Thêm thông báo thành công
+            TempData["SuccessMessage"] = "Đăng ký nghệ sĩ thành công!";
+
+            return RedirectToAction("Gallery", new { id = user.Id });
+        }
     }
 }
