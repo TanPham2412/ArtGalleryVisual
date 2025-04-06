@@ -258,6 +258,9 @@ namespace ArtGallery.Migrations
                     b.Property<string>("CoverImage")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("DangKyNgheSi")
+                        .HasColumnType("bit");
+
                     b.Property<string>("DiaChi")
                         .HasColumnType("nvarchar(max)");
 

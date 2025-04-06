@@ -30,6 +30,7 @@ namespace ArtGallery.Migrations
                     HienThiDiaChi = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     HienThiNgaySinh = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     HienThiNamSinh = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    DangKyNgheSi = table.Column<bool>(type: "bit", nullable: false),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedEmail = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),

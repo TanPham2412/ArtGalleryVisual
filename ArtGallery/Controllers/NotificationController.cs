@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using ArtGallery.Models;
 using System.Security.Claims;
+using ArtGallery.Repositories.Interfaces;
 
 namespace ArtGallery.Controllers
 {
@@ -11,15 +12,18 @@ namespace ArtGallery.Controllers
         private readonly ArtGalleryContext _context;
         private readonly UserManager<NguoiDung> _userManager;
         private readonly ILogger<NotificationController> _logger;
+        private readonly INotificationRepository _notificationRepository;
 
         public NotificationController(
             ArtGalleryContext context,
             UserManager<NguoiDung> userManager,
-            ILogger<NotificationController> logger)
+            ILogger<NotificationController> logger,
+            INotificationRepository notificationRepository)
         {
             _context = context;
             _userManager = userManager;
             _logger = logger;
+            _notificationRepository = notificationRepository;
         }
 
         [HttpPost]
@@ -120,6 +124,36 @@ namespace ArtGallery.Controllers
                 _logger.LogError(ex, "Lỗi khi lấy số lượng thông báo");
                 return Json(new { count = 0 });
             }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ApproveArtist(string userId)
+        {
+            if (!User.IsInRole("Admin"))
+                return Forbid();
+        
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+                return NotFound();
+        
+            // Thêm người dùng vào vai trò Artists
+            await _userManager.AddToRoleAsync(user, "Artists");
+        
+            // Cập nhật trạng thái đăng ký
+            user.DangKyNgheSi = false;
+            await _userManager.UpdateAsync(user);
+        
+            // Gửi thông báo cho người dùng
+            await _notificationRepository.CreateSystemNotification(
+                userId,
+                "Đăng ký nghệ sĩ được chấp nhận",
+                "Chúc mừng! Bạn đã được chấp nhận trở thành nghệ sĩ trên PiaoYue.",
+                "/User/Gallery/" + userId,
+                "system"
+            );
+        
+            return RedirectToAction("Index", "Admin");
         }
     }
 } 

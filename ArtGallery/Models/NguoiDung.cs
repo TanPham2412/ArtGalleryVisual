@@ -62,6 +62,8 @@ public partial class NguoiDung : IdentityUser<string>
 
     public string? HienThiNamSinh { get; set; }
 
+    public bool DangKyNgheSi { get; set; } = false;
+
     public virtual ICollection<BinhLuan> BinhLuans { get; set; } = new List<BinhLuan>();
 
     public virtual DoanhThu? DoanhThu { get; set; }

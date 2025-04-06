@@ -14,17 +14,20 @@ namespace ArtGallery.Controllers
         private readonly ILogger<UserController> _logger;
         private readonly UserManager<NguoiDung> _userManager;
         private readonly ArtGalleryContext _context;
+        private readonly INotificationRepository _notificationRepository;
 
         public UserController(
             IUserRepository userRepository, 
             ILogger<UserController> logger,
             UserManager<NguoiDung> userManager,
-            ArtGalleryContext context)
+            ArtGalleryContext context,
+            INotificationRepository notificationRepository)
         {
             _userRepository = userRepository;
             _logger = logger;
             _userManager = userManager;
             _context = context;
+            _notificationRepository = notificationRepository;
         }
 
         public async Task<IActionResult> Profile(string id)
@@ -189,15 +192,27 @@ namespace ArtGallery.Controllers
             user.DiaChi = model.DiaChi;
             user.MoTa = model.MoTa;
             user.PhoneNumber = model.SoDienThoai;
+            user.DangKyNgheSi = true; // Đánh dấu đã đăng ký, chờ xét duyệt
             
-            // Cập nhật vai trò thành nghệ sĩ
-            await _userManager.AddToRoleAsync(user, "Artists");
             await _userManager.UpdateAsync(user);
 
-            // Thêm thông báo thành công
-            TempData["SuccessMessage"] = "Đăng ký nghệ sĩ thành công!";
+            // Gửi thông báo cho Admin
+            var admins = await _userManager.GetUsersInRoleAsync("Admin");
+            foreach (var admin in admins)
+            {
+                await _notificationRepository.CreateNotification(
+                    admin.Id, 
+                    user.Id,
+                    "Đăng ký nghệ sĩ mới", 
+                    $"{user.TenNguoiDung} đã đăng ký trở thành nghệ sĩ",
+                    $"/Admin/ArtistApproval/{user.Id}",
+                    "system",
+                    user.GetAvatarPath()
+                );
+            }
 
-            return RedirectToAction("Gallery", new { id = user.Id });
+            TempData["SuccessMessage"] = "Đăng ký nghệ sĩ thành công! Chúng tôi đang xem xét hồ sơ của bạn.";
+            return RedirectToAction("Profile", new { id = user.Id });
         }
     }
 }

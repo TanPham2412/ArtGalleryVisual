@@ -139,6 +139,13 @@
                                         Tác phẩm của tôi
                                     </a>
                                 }
+                                else if (currentUser.DangKyNgheSi)
+                                {
+                                    <a href="#" class="dropdown-item disabled">
+                                        <i class="fas fa-hourglass-half"></i>
+                                        Đang chờ xét duyệt nghệ sĩ
+                                    </a>
+                                }
                                 else
                                 {
                                     <a asp-controller="User" asp-action="RegisterArtist" class="dropdown-item">

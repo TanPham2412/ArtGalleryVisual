@@ -1736,3 +1736,10 @@
     font-size: 14px;
     font-weight: 500;
 }
+
+.dropdown-item.disabled {
+    color: #999;
+    pointer-events: none;
+    background-color: transparent;
+    cursor: not-allowed;
+}

@@ -96,6 +96,9 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.SlidingExpiration = true;
 });
 
+// Đăng ký NotificationRepository
+builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+
 var app = builder.Build();
 
 // Seed Roles và Admin user
