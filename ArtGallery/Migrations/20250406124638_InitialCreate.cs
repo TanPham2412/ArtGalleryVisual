@@ -153,6 +153,37 @@ namespace ArtGallery.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ThongBao",
+                columns: table => new
+                {
+                    ma_thong_bao = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ma_nguoi_nhan = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: false),
+                    ma_nguoi_gui = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: true),
+                    tieu_de = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    noi_dung = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    duong_dan_anh = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    url = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    loai_thong_bao = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    da_doc = table.Column<bool>(type: "bit", nullable: true, defaultValueSql: "((0))"),
+                    thoi_gian = table.Column<DateTime>(type: "datetime", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ThongBao", x => x.ma_thong_bao);
+                    table.ForeignKey(
+                        name: "FK_ThongBao_AspNetUsers_NguoiGui",
+                        column: x => x.ma_nguoi_gui,
+                        principalTable: "nguoi_dung",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_ThongBao_AspNetUsers_NguoiNhan",
+                        column: x => x.ma_nguoi_nhan,
+                        principalTable: "nguoi_dung",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "tranh",
                 columns: table => new
                 {
@@ -559,6 +590,16 @@ namespace ArtGallery.Migrations
                 column: "ma_nguoi_duoc_theo_doi");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ThongBao_ma_nguoi_gui",
+                table: "ThongBao",
+                column: "ma_nguoi_gui");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ThongBao_ma_nguoi_nhan",
+                table: "ThongBao",
+                column: "ma_nguoi_nhan");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_tranh_ma_nguoi_dung",
                 table: "tranh",
                 column: "ma_nguoi_dung");
@@ -618,6 +659,9 @@ namespace ArtGallery.Migrations
 
             migrationBuilder.DropTable(
                 name: "theo_doi");
+
+            migrationBuilder.DropTable(
+                name: "ThongBao");
 
             migrationBuilder.DropTable(
                 name: "tranh_the_loai");

@@ -179,6 +179,89 @@
             $(this).css('transform', 'translateY(0)');
         }
     );
+
+    // Code xử lý dropdown thông báo
+    $('#notificationDropdown').on('click', function(e) {
+        e.stopPropagation();
+        $('#notificationDropdownMenu').toggle();
+        
+        // Đánh dấu đã xem khi mở dropdown
+        if ($('#notificationDropdownMenu').is(':visible')) {
+            markNotificationsAsViewed();
+        }
+    });
+    
+    // Ẩn dropdown thông báo khi click ra ngoài
+    $(document).on('click', function(e) {
+        if (!$('#notificationDropdown').is(e.target) && 
+            !$('#notificationDropdownMenu').is(e.target) && 
+            $('#notificationDropdownMenu').has(e.target).length === 0) {
+            $('#notificationDropdownMenu').hide();
+        }
+    });
+    
+    // Tab thông báo
+    $('.notification-tab').on('click', function() {
+        $('.notification-tab').removeClass('active');
+        $(this).addClass('active');
+        
+        const tab = $(this).data('tab');
+        if (tab === 'all') {
+            $('.notification-item').show();
+        } else if (tab === 'unread') {
+            $('.notification-item').hide();
+            $('.notification-item.unread').show();
+        }
+    });
+    
+    // Đánh dấu tất cả là đã đọc
+    $('#markAllAsRead').on('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        $.ajax({
+            url: '/Notification/MarkAllAsRead',
+            type: 'POST',
+            headers: {
+                'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+            },
+            success: function(response) {
+                if (response.success) {
+                    $('.notification-item').removeClass('unread');
+                    $('.notification-status').remove();
+                    $('.notification-badge').remove();
+                }
+            }
+        });
+    });
+    
+    // Đánh dấu thông báo là đã xem khi mở dropdown
+    function markNotificationsAsViewed() {
+        $.ajax({
+            url: '/Notification/MarkAsViewed',
+            type: 'POST',
+            headers: {
+                'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+            }
+        });
+    }
+    
+    // Đánh dấu thông báo đã đọc khi click vào thông báo
+    $('.notification-item').on('click', function() {
+        const notificationId = $(this).data('id');
+        
+        $.ajax({
+            url: '/Notification/MarkAsRead',
+            type: 'POST',
+            data: { id: notificationId },
+            headers: {
+                'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+            }
+        });
+        
+        $(this).removeClass('unread');
+        $(this).find('.notification-status').remove();
+    });
 });
 
 function toggleFollow(event, userId) {

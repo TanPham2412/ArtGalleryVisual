@@ -40,6 +40,8 @@ public partial class ArtGalleryContext : IdentityDbContext<NguoiDung, IdentityRo
     public virtual DbSet<Tranh> Tranhs { get; set; }
 
     public virtual DbSet<NguoiDung> NguoiDungs { get; set; }
+
+    public virtual DbSet<ThongBao> ThongBaos { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -342,6 +344,61 @@ public partial class ArtGalleryContext : IdentityDbContext<NguoiDung, IdentityRo
                         j.IndexerProperty<int>("MaTranh").HasColumnName("ma_tranh");
                         j.IndexerProperty<int>("MaTheLoai").HasColumnName("ma_the_loai");
                     });
+        });
+
+        modelBuilder.Entity<ThongBao>(entity =>
+        {
+            entity.HasKey(e => e.MaThongBao);
+
+            entity.ToTable("ThongBao");
+
+            entity.Property(e => e.MaThongBao).HasColumnName("ma_thong_bao");
+
+            entity.Property(e => e.MaNguoiNhan)
+                .HasMaxLength(450)
+                .HasColumnName("ma_nguoi_nhan");
+
+            entity.Property(e => e.MaNguoiGui)
+                .HasMaxLength(450)
+                .HasColumnName("ma_nguoi_gui");
+
+            entity.Property(e => e.TieuDe)
+                .HasMaxLength(200)
+                .HasColumnName("tieu_de");
+
+            entity.Property(e => e.NoiDung)
+                .HasColumnName("noi_dung");
+
+            entity.Property(e => e.DuongDanAnh)
+                .HasMaxLength(500)
+                .HasColumnName("duong_dan_anh");
+
+            entity.Property(e => e.URL)
+                .HasMaxLength(500)
+                .HasColumnName("url");
+
+            entity.Property(e => e.LoaiThongBao)
+                .HasMaxLength(50)
+                .HasColumnName("loai_thong_bao");
+
+            entity.Property(e => e.DaDoc)
+                .HasColumnName("da_doc")
+                .HasDefaultValueSql("((0))");
+
+            entity.Property(e => e.ThoiGian)
+                .HasColumnType("datetime")
+                .HasColumnName("thoi_gian");
+
+            entity.HasOne(d => d.MaNguoiNhanNavigation)
+                .WithMany()
+                .HasForeignKey(d => d.MaNguoiNhan)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_ThongBao_AspNetUsers_NguoiNhan");
+
+            entity.HasOne(d => d.MaNguoiGuiNavigation)
+                .WithMany()
+                .HasForeignKey(d => d.MaNguoiGui)
+                .HasConstraintName("FK_ThongBao_AspNetUsers_NguoiGui");
         });
 
         OnModelCreatingPartial(modelBuilder);

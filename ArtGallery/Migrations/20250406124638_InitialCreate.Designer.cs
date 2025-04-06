@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ArtGallery.Migrations
 {
     [DbContext(typeof(ArtGalleryContext))]
-    [Migration("20250403062957_InitialCreate")]
+    [Migration("20250406124638_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -442,6 +442,71 @@ namespace ArtGallery.Migrations
                     b.ToTable("theo_doi", (string)null);
                 });
 
+            modelBuilder.Entity("ArtGallery.Models.ThongBao", b =>
+                {
+                    b.Property<int>("MaThongBao")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("ma_thong_bao");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MaThongBao"));
+
+                    b.Property<bool?>("DaDoc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasColumnName("da_doc")
+                        .HasDefaultValueSql("((0))");
+
+                    b.Property<string>("DuongDanAnh")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)")
+                        .HasColumnName("duong_dan_anh");
+
+                    b.Property<string>("LoaiThongBao")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("loai_thong_bao");
+
+                    b.Property<string>("MaNguoiGui")
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("ma_nguoi_gui");
+
+                    b.Property<string>("MaNguoiNhan")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("ma_nguoi_nhan");
+
+                    b.Property<string>("NoiDung")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("noi_dung");
+
+                    b.Property<DateTime>("ThoiGian")
+                        .HasColumnType("datetime")
+                        .HasColumnName("thoi_gian");
+
+                    b.Property<string>("TieuDe")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)")
+                        .HasColumnName("tieu_de");
+
+                    b.Property<string>("URL")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)")
+                        .HasColumnName("url");
+
+                    b.HasKey("MaThongBao");
+
+                    b.HasIndex("MaNguoiGui");
+
+                    b.HasIndex("MaNguoiNhan");
+
+                    b.ToTable("ThongBao", (string)null);
+                });
+
             modelBuilder.Entity("ArtGallery.Models.Tranh", b =>
                 {
                     b.Property<int>("MaTranh")
@@ -813,6 +878,24 @@ namespace ArtGallery.Migrations
                     b.Navigation("MaNguoiDuocTheoDoiNavigation");
 
                     b.Navigation("MaNguoiTheoDoiNavigation");
+                });
+
+            modelBuilder.Entity("ArtGallery.Models.ThongBao", b =>
+                {
+                    b.HasOne("ArtGallery.Models.NguoiDung", "MaNguoiGuiNavigation")
+                        .WithMany()
+                        .HasForeignKey("MaNguoiGui")
+                        .HasConstraintName("FK_ThongBao_AspNetUsers_NguoiGui");
+
+                    b.HasOne("ArtGallery.Models.NguoiDung", "MaNguoiNhanNavigation")
+                        .WithMany()
+                        .HasForeignKey("MaNguoiNhan")
+                        .IsRequired()
+                        .HasConstraintName("FK_ThongBao_AspNetUsers_NguoiNhan");
+
+                    b.Navigation("MaNguoiGuiNavigation");
+
+                    b.Navigation("MaNguoiNhanNavigation");
                 });
 
             modelBuilder.Entity("ArtGallery.Models.Tranh", b =>
