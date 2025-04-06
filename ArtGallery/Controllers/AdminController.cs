@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using ArtGallery.Repositories.Interfaces;
 using ArtGallery.ViewModels;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace ArtGallery.Controllers
 {
@@ -14,15 +15,18 @@ namespace ArtGallery.Controllers
         private readonly UserManager<NguoiDung> _userManager;
         private readonly ArtGalleryContext _context;
         private readonly INotificationRepository _notificationRepository;
+        private readonly ILogger<AdminController> _logger;
 
         public AdminController(
             UserManager<NguoiDung> userManager,
             ArtGalleryContext context,
-            INotificationRepository notificationRepository)
+            INotificationRepository notificationRepository,
+            ILogger<AdminController> logger)
         {
             _userManager = userManager;
             _context = context;
             _notificationRepository = notificationRepository;
+            _logger = logger;
         }
 
         public async Task<IActionResult> Index()
@@ -86,29 +90,50 @@ namespace ArtGallery.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> RejectArtist(string userId, string reason)
         {
+            // Thêm log để kiểm tra dữ liệu đầu vào
+            _logger.LogInformation($"Reject Artist - UserId: {userId}, Reason: {reason}");
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                _logger.LogWarning("UserId is null or empty");
+                return NotFound();
+            }
+        
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
+            {
+                _logger.LogWarning($"User with ID {userId} not found");
                 return NotFound();
+            }
+        
+            try
+            {
+                // Cập nhật trạng thái đăng ký
+                user.DangKyNgheSi = false;
+                await _userManager.UpdateAsync(user);
             
-            // Cập nhật trạng thái đăng ký
-            user.DangKyNgheSi = false;
-            await _userManager.UpdateAsync(user);
+                // Gửi thông báo từ chối
+                string reasonText = string.IsNullOrEmpty(reason) 
+                    ? "Đăng ký của bạn không đáp ứng đủ yêu cầu của chúng tôi."
+                    : reason;
             
-            // Gửi thông báo từ chối
-            string message = string.IsNullOrEmpty(reason)
-                ? "Rất tiếc, đăng ký nghệ sĩ của bạn đã bị từ chối."
-                : $"Rất tiếc, đăng ký nghệ sĩ của bạn đã bị từ chối vì lý do: {reason}";
+                await _notificationRepository.CreateSystemNotification(
+                    userId,
+                    "Đăng ký nghệ sĩ bị từ chối",
+                    $"Rất tiếc, đăng ký nghệ sĩ của bạn đã bị từ chối với lý do: {reasonText}",
+                    "/User/Profile/" + userId,
+                    "system"
+                );
             
-            await _notificationRepository.CreateSystemNotification(
-                userId,
-                "Đăng ký nghệ sĩ bị từ chối",
-                message,
-                "/User/Profile/" + userId,
-                "system"
-            );
-            
-            TempData["SuccessMessage"] = "Đã từ chối đăng ký nghệ sĩ!";
-            return RedirectToAction("Index");
+                TempData["SuccessMessage"] = "Đã từ chối đăng ký nghệ sĩ";
+                return RedirectToAction("Index", "Home");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error rejecting artist application");
+                TempData["ErrorMessage"] = "Đã xảy ra lỗi khi từ chối đăng ký: " + ex.Message;
+                return RedirectToAction("Index", "Home");
+            }
         }
     }
 }
