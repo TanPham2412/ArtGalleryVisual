@@ -85,9 +85,27 @@
                 <i class="fas fa-shopping-basket"></i> Sản phẩm
             </a>
             
-            <a href="@Url.Action("Add", "Home")" class="btn-pixiv fw-bold me-3">
-                Đăng tranh ảnh
-            </a>
+            @if (currentUser != null)
+            {
+                @if (await UserManager.IsInRoleAsync(currentUser, "Artists"))
+                {
+                    <a href="@Url.Action("Add", "Home")" class="btn-pixiv fw-bold me-3">
+                        Đăng tranh ảnh
+                    </a>
+                }
+                else
+                {
+                    <a href="@Url.Action("RegisterArtist", "User")" class="btn-pixiv fw-bold me-3">
+                        Đăng tranh ảnh
+                    </a>
+                }
+            }
+            else
+            {
+                <a href="@Url.Action("Login", "Account")" class="btn-pixiv fw-bold me-3">
+                    Đăng tranh ảnh
+                </a>
+            }
 
             @if (currentUser != null)
             {

@@ -4,6 +4,9 @@
     ViewData["Title"] = "Đăng ký trở thành nghệ sĩ";
 }
 
+<link rel="stylesheet" href="~/css/register-artist.css">
+@await Html.PartialAsync("_NavigationPartial")
+
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-8">
@@ -12,35 +15,59 @@
                     <h3 class="card-title mb-0">Đăng ký trở thành nghệ sĩ</h3>
                 </div>
                 <div class="card-body">
+                    <!-- Phần lợi ích khi trở thành nghệ sĩ -->
+                    <div class="artist-benefits bg-light p-4 rounded shadow-sm mb-5">
+                        <h4 class="benefits-title text-center text-danger fw-bold mb-3">Lợi ích khi trở thành nghệ sĩ trên ArtGallery</h4>
+                        <ul class="benefits-list list-unstyled ps-3">
+                            <li class="mb-2">Đăng tải và kinh doanh các tác phẩm nghệ thuật một cách dễ dàng</li>
+                            <li class="mb-2">Tiếp cận hàng nghìn khách hàng yêu thích tranh trên toàn quốc</li>
+                            <li class="mb-2">Tự do thiết lập giá bán và số lượng sản phẩm</li>
+                            <li class="mb-2">Hệ thống thanh toán an toàn, minh bạch</li>
+                            <li class="mb-2">Hỗ trợ vận chuyển và xử lý đơn hàng nhanh chóng</li>
+                            <li class="mb-2">Quảng bá tác phẩm trên các kênh truyền thông của ArtGallery</li>
+                            <li class="mb-2">Theo dõi doanh thu, lượt xem và hiệu suất bán hàng theo thời gian thực</li>
+                        </ul>
+                    </div>
+
                     <form asp-action="RegisterArtist" method="post">
                         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                         
                         <div class="form-group mb-3">
-                            <label asp-for="TenNgheSi" class="control-label">Tên nghệ sĩ</label>
-                            <input asp-for="TenNgheSi" class="form-control" placeholder="Nhập tên nghệ sĩ của bạn" />
+                            <label asp-for="TenNgheSi" class="control-label d-flex align-items-center">
+                                Tên nghệ sĩ <span class="text-danger ms-1">*</span>
+                            </label>
+                            <input asp-for="TenNgheSi" class="form-control" placeholder="Nhập tên nghệ sĩ của bạn" required />
                             <span asp-validation-for="TenNgheSi" class="text-danger"></span>
                             <small class="form-text text-muted">Tên này sẽ được hiển thị công khai trong hồ sơ của bạn</small>
                         </div>
                         
                         <div class="form-group mb-3">
-                            <label asp-for="DiaChi" class="control-label">Địa chỉ</label>
-                            <input asp-for="DiaChi" class="form-control" placeholder="Nhập địa chỉ của bạn" />
+                            <label asp-for="DiaChi" class="control-label d-flex align-items-center">
+                                Địa chỉ <span class="text-danger ms-1">*</span>
+                            </label>
+                            <input asp-for="DiaChi" class="form-control" placeholder="Nhập địa chỉ của bạn" required />
                             <span asp-validation-for="DiaChi" class="text-danger"></span>
                         </div>
                         
                         <div class="form-group mb-3">
-                            <label asp-for="MoTa" class="control-label">Mô tả về bản thân</label>
-                            <textarea asp-for="MoTa" class="form-control" rows="5" placeholder="Giới thiệu về bản thân và nghệ thuật của bạn..."></textarea>
+                            <label asp-for="MoTa" class="control-label d-flex align-items-center">
+                                Mô tả về bản thân <span class="text-danger ms-1">*</span>
+                            </label>
+                            <textarea asp-for="MoTa" class="form-control" rows="5" placeholder="Giới thiệu về bản thân và nghệ thuật của bạn..." required></textarea>
                             <span asp-validation-for="MoTa" class="text-danger"></span>
+                            <small class="form-text text-muted">Mô tả sẽ giúp người xem hiểu rõ hơn về phong cách và quan điểm nghệ thuật của bạn</small>
                         </div>
                         
                         <div class="form-group mb-3">
-                            <label asp-for="SoDienThoai" class="control-label">Số điện thoại liên hệ</label>
-                            <input asp-for="SoDienThoai" class="form-control" placeholder="Nhập số điện thoại" />
+                            <label asp-for="SoDienThoai" class="control-label d-flex align-items-center">
+                                Số điện thoại liên hệ <span class="text-danger ms-1">*</span>
+                            </label>
+                            <input asp-for="SoDienThoai" class="form-control" placeholder="Nhập số điện thoại" required />
                             <span asp-validation-for="SoDienThoai" class="text-danger"></span>
+                            <small class="form-text text-muted">Số điện thoại sẽ được sử dụng để xác minh danh tính và liên hệ khi cần</small>
                         </div>
                         
-                        <div class="form-group mb-3">
+                        <div class="form-group mb-4">
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" id="agreeTerms" required />
                                 <label class="form-check-label" for="agreeTerms">
@@ -57,4 +84,8 @@
             </div>
         </div>
     </div>
-</div> 
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+} 

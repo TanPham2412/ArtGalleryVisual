@@ -25,3 +25,24 @@
         $('.alert').alert('close');
     }, 3000);
 });
+
+// Script để thêm tag khi click vào recommended tag
+document.addEventListener('DOMContentLoaded', function () {
+    const tagsInput = document.querySelector('input[name="TagsInput"]');
+    const clickableTags = document.querySelectorAll('.clickable-tag');
+
+    clickableTags.forEach(tag => {
+        tag.addEventListener('click', function () {
+            const tagText = this.textContent.trim();
+
+            // Thêm tag vào input nếu chưa có
+            if (tagsInput.value.indexOf(tagText) === -1) {
+                if (tagsInput.value.trim() !== '') {
+                    tagsInput.value += ' ' + tagText;
+                } else {
+                    tagsInput.value = tagText;
+                }
+            }
+        });
+    });
+});
