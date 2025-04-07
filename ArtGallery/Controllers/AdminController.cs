@@ -78,28 +78,77 @@ namespace ArtGallery.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ApproveArtist(string userId)
         {
+            _logger.LogInformation($"Approve Artist - UserId: {userId}");
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                _logger.LogWarning("UserId is null or empty");
+                return NotFound();
+            }
+
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
+            {
+                _logger.LogWarning($"User with ID {userId} not found");
                 return NotFound();
+            }
 
-            // Thêm người dùng vào vai trò Artists
-            await _userManager.AddToRoleAsync(user, "Artists");
-            
-            // Cập nhật trạng thái đăng ký
-            user.DangKyNgheSi = false;
-            await _userManager.UpdateAsync(user);
-            
-            // Gửi thông báo cho người dùng
-            await _notificationRepository.CreateSystemNotification(
-                userId,
-                "Đăng ký nghệ sĩ được chấp nhận",
-                "Chúc mừng! Bạn đã được chấp nhận trở thành nghệ sĩ trên PiaoYue.",
-                "/User/Gallery/" + userId,
-                "system"
-            );
-            
-            TempData["SuccessMessage"] = "Đã phê duyệt đăng ký nghệ sĩ thành công!";
-            return RedirectToAction("Index");
+            try
+            {
+                // Kiểm tra xem role Artists có tồn tại chưa
+                var roleExists = await _context.Roles.AnyAsync(r => r.Name == "Artists");
+                if (!roleExists)
+                {
+                    // Nếu chưa có role, tạo mới
+                    _logger.LogInformation("Creating Artists role as it doesn't exist");
+                    await _context.Roles.AddAsync(new Microsoft.AspNetCore.Identity.IdentityRole { Name = "Artists", NormalizedName = "ARTISTS" });
+                    await _context.SaveChangesAsync();
+                }
+
+                // Thêm người dùng vào vai trò Artists
+                var result = await _userManager.AddToRoleAsync(user, "Artists");
+                
+                if (!result.Succeeded)
+                {
+                    string errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                    _logger.LogError($"Failed to add user to Artists role: {errors}");
+                    
+                    // Thử tìm lỗi cụ thể
+                    var userRoles = await _userManager.GetRolesAsync(user);
+                    _logger.LogInformation($"Current user roles: {string.Join(", ", userRoles)}");
+                    
+                    TempData["ErrorMessage"] = "Không thể thêm người dùng vào vai trò nghệ sĩ: " + errors;
+                    return RedirectToAction("Index", "Home");
+                }
+                
+                // Cập nhật trạng thái đăng ký
+                user.DangKyNgheSi = false;
+                var updateResult = await _userManager.UpdateAsync(user);
+                
+                if (!updateResult.Succeeded)
+                {
+                    string errors = string.Join(", ", updateResult.Errors.Select(e => e.Description));
+                    _logger.LogError($"Failed to update user: {errors}");
+                }
+                
+                // Gửi thông báo cho người dùng
+                await _notificationRepository.CreateSystemNotification(
+                    userId,
+                    "Đăng ký nghệ sĩ được chấp nhận",
+                    "Chúc mừng! Bạn đã được chấp nhận trở thành nghệ sĩ trên PiaoYue.",
+                    "/User/Gallery/" + userId,
+                    "system"
+                );
+                
+                TempData["SuccessMessage"] = "Đã phê duyệt đăng ký nghệ sĩ thành công!";
+                return RedirectToAction("Index", "Home");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error approving artist application");
+                TempData["ErrorMessage"] = "Đã xảy ra lỗi khi chấp nhận đăng ký: " + ex.Message;
+                return RedirectToAction("Index", "Home");
+            }
         }
 
         [HttpPost]
