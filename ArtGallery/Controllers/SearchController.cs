@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ArtGallery.Models;
 using ArtGallery.ViewModels;
+using System.Security.Claims;
 
 namespace ArtGallery.Controllers
 {
@@ -93,13 +94,23 @@ namespace ArtGallery.Controllers
 
                 if (category == "Artists")
                 {
-                    // Tìm kiếm tác giả
+                    var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                    var follows = await _context.TheoDois.Where(f => f.MaNguoiTheoDoi == currentUserId).ToListAsync();
+
+                    viewModel = new SearchViewModel(currentUserId, follows)
+                    {
+                        Query = q,
+                        Category = category,
+                        SortBy = sortBy
+                    };
+
                     viewModel.Artists = await _context.Users
                         .Where(u => (u.TenNguoiDung.ToLower().Contains(q) ||
                                    u.UserName.ToLower().Contains(q)) &&
                                    _context.UserRoles.Any(ur => ur.UserId == u.Id &&
                                    ur.RoleId == _context.Roles.FirstOrDefault(r => r.Name == "Artists").Id))
                         .Include(u => u.Tranhs)
+                        .Include(u => u.TheoDoiMaNguoiDuocTheoDoiNavigations)
                         .ToListAsync();
 
                     viewModel.Artworks = new List<Tranh>(); // Khởi tạo list rỗng
@@ -154,6 +165,46 @@ namespace ArtGallery.Controllers
                 _logger.LogError(ex, "Lỗi khi tìm kiếm với từ khóa: {Query}", q);
                 TempData["ErrorMessage"] = "Đã xảy ra lỗi trong quá trình tìm kiếm. Vui lòng thử lại sau.";
                 return RedirectToAction("Index", "Home");
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ToggleFollow(string artistId)
+        {
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(currentUserId))
+                return Json(new { success = false, message = "Vui lòng đăng nhập để thực hiện chức năng này" });
+
+            try
+            {
+                var follow = await _context.TheoDois
+                    .FirstOrDefaultAsync(f => f.MaNguoiTheoDoi == currentUserId && f.MaNguoiDuocTheoDoi == artistId);
+
+                if (follow == null)
+                {
+                    // Thêm theo dõi mới
+                    follow = new TheoDoi
+                    {
+                        MaNguoiTheoDoi = currentUserId,
+                        MaNguoiDuocTheoDoi = artistId,
+                        NgayTheoDoi = DateTime.Now
+                    };
+                    _context.TheoDois.Add(follow);
+                    await _context.SaveChangesAsync();
+                    return Json(new { success = true, following = true });
+                }
+                else
+                {
+                    // Hủy theo dõi
+                    _context.TheoDois.Remove(follow);
+                    await _context.SaveChangesAsync();
+                    return Json(new { success = true, following = false });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi thực hiện theo dõi");
+                return Json(new { success = false, message = "Có lỗi xảy ra, vui lòng thử lại sau" });
             }
         }
     }

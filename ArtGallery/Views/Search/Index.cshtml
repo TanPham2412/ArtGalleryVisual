@@ -58,43 +58,66 @@
 
     @if (Model.Category == "Artists")
     {
-        <div class="results-count">
-            <h4>Tác giả <span class="badge bg-secondary">@Model.Artists.Count()</span></h4>
-        </div>
+        <div class="artist-section">
+            <h4 class="section-title">Tác giả <span class="count-badge">@Model.Artists.Count()</span></h4>
 
-        @if (Model.Artists.Any())
-        {
-            <div class="artists-grid">
-                <div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-4">
-                    @foreach (var artist in Model.Artists)
-                    {
-                        <div class="col">
-                            <div class="artist-card">
-                                <a href="@Url.Action("Profile", "User", new { id = artist.Id })" class="artist-link">
-                                    <div class="artist-avatar-large">
-                                        <img src="@artist.GetAvatarPath()" alt="@artist.TenNguoiDung">
-                                    </div>
-                                    <div class="artist-info">
-                                        <h5 class="artist-name">@artist.TenNguoiDung</h5>
-                                        <div class="artist-stats">
-                                            <span><i class="fas fa-image"></i> @artist.Tranhs.Count tác phẩm</span>
-                                        </div>
-                                    </div>
+            @foreach (var artist in Model.Artists)
+            {
+                <div class="artist-card">
+                    <div class="artist-row">
+                        <div class="artist-info-column">
+                            <div class="user-info">
+                                <a href="@Url.Action("Profile", "User", new { username = artist.UserName })" class="user-avatar">
+                                    <img src="@artist.GetAvatarPath()" alt="@artist.TenNguoiDung">
                                 </a>
+                                <div class="user-profile">
+                                    <div class="user-name">@artist.TenNguoiDung</div>
+                                    @if (!string.IsNullOrEmpty(artist.MoTa))
+                                    {
+                                        <div class="user-description">@artist.MoTa</div>
+                                    }
+                                </div>
+                            </div>
+                            <div class="user-actions">
+                                <button class="follow-button @(Model.IsFollowing(artist.Id) ? "following" : "")" onclick="toggleFollow(this, '@artist.Id')">
+                                    @(Model.IsFollowing(artist.Id) ? "Following" : "Follow")
+                                </button>
+                                <button class="more-button">
+                                    <i class="fas fa-ellipsis-h"></i>
+                                </button>
                             </div>
                         </div>
-                    }
+                        
+                        <div class="artist-artwork-column">
+                            @if (artist.Tranhs.Any())
+                            {
+                                <div class="artwork-grid">
+                                    @foreach (var artwork in artist.Tranhs.Take(3))
+                                    {
+                                        <div class="artwork-item">
+                                            <div class="artwork-image-container">
+                                                <a href="@Url.Action("Display", "Home", new { id = artwork.MaTranh })" class="artwork-link">
+                                                    <img src="@artwork.DuongDanAnh" alt="@artwork.TieuDe" class="artwork-image">
+                                                </a>
+                                                <div class="artwork-overlay">
+                                                    <button class="like-button" onclick="toggleLike(this, @artwork.MaTranh)">
+                                                        <i class="@(artwork.LuotThiches.Any(l => l.MaNguoiDung == Context.User.FindFirstValue(ClaimTypes.NameIdentifier)) ? "fas" : "far") fa-heart"></i>
+                                                        <span class="like-count">@artwork.LuotThiches.Count</span>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div class="artwork-caption">
+                                                <a href="@Url.Action("Display", "Home", new { id = artwork.MaTranh })" class="artwork-title">@artwork.TieuDe</a>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    </div>
                 </div>
-            </div>
-        }
-        else
-        {
-            <div class="no-results">
-                <i class="fas fa-user-slash fa-3x mb-3"></i>
-                <h4>Không tìm thấy tác giả phù hợp</h4>
-                <p>Vui lòng thử tìm kiếm với từ khóa khác</p>
-            </div>
-        }
+            }
+        </div>
     }
     else
     {
@@ -155,35 +178,4 @@
 @section Scripts {
     <script src="~/js/search-index.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-        function toggleLike(button, artworkId) {
-            $.ajax({
-                url: '/Artwork/ToggleLike',
-                type: 'POST',
-                data: { artworkId: artworkId },
-                headers: {
-                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
-                },
-                success: function(response) {
-                    if (response.success) {
-                        const icon = button.querySelector('i');
-                        if (response.liked) {
-                            icon.classList.remove('far');
-                            icon.classList.add('fas');
-                            button.classList.add('active');
-                        } else {
-                            icon.classList.remove('fas');
-                            icon.classList.add('far');
-                            button.classList.remove('active');
-                        }
-                    } else {
-                        alert(response.message);
-                    }
-                },
-                error: function() {
-                    alert('Có lỗi xảy ra khi thực hiện thao tác');
-                }
-            });
-        }
-    </script>
 }

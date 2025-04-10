@@ -9,7 +9,7 @@ body {
     position: relative;
     width: 100%;
     margin-top: 20px;
-    max-width: 1400px;
+    max-width: 1200px;
     margin: 0 auto;
     padding: 0 15px;
 }
@@ -76,7 +76,7 @@ body {
     align-items: center;
     margin: 0;
     padding: 0;
-    max-width: 1400px;
+    max-width: 1200px;
     margin-left: auto;
     margin-right: auto;
     overflow-x: auto;
@@ -156,71 +156,231 @@ body {
         background-color: transparent !important;
     }
 
-/* Artists grid styles */
-.artists-grid {
-    margin-bottom: 30px;
+/* Pixiv-style artist section */
+.artist-section {
+    margin: 24px 0;
+}
+
+.section-title {
+    font-size: 16px;
+    font-weight: 500;
+    color: #333;
+    display: flex;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.count-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #e9e9e9;
+    color: #666;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    font-size: 12px;
+    margin-left: 8px;
+}
+
+/* Cập nhật bố cục artist card */
+.artist-row {
+    display: flex;
     width: 100%;
 }
 
+.artist-info-column {
+    width: 33.33%;
+    padding-right: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+.artist-artwork-column {
+    width: 66.67%;
+}
+
 .artist-card {
-    background: #fff;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    transition: transform 0.2s;
-    height: 100%;
+    margin-bottom: 32px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 32px;
 }
 
-    .artist-card:hover {
-        transform: translateY(-2px);
-    }
+.user-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 16px;
+}
 
-.artist-link {
-    text-decoration: none;
-    color: inherit;
+.user-avatar {
     display: block;
-    padding: 20px;
-    height: 100%;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    overflow: hidden;
+    margin-bottom: 12px;
 }
 
-.artist-avatar-large {
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    margin: 0 auto 15px;
+.user-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.user-profile {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.user-name {
+    font-size: 18px;
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+.user-description {
+    font-size: 14px;
+    color: #666;
+    line-height: 1.4;
+    margin-bottom: 16px;
+    word-break: break-word;
+}
+
+.user-actions {
+    display: flex;
+    align-items: center;
+    margin-top: auto;
+}
+
+.follow-button {
+    background-color: #0096fa;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    padding: 8px 24px;
+    font-size: 14px;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.follow-button.following {
+    background-color: #f2f2f2;
+    color: #666;
+}
+
+.more-button {
+    background: none;
+    border: none;
+    color: #666;
+    font-size: 16px;
+    margin-left: 12px;
+    cursor: pointer;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.artwork-container {
+    width: 100%;
+}
+
+.artwork-list {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+}
+
+.artwork-item {
+    width: 100%;
+    position: relative;
+}
+
+.artwork-image-container {
+    position: relative;
+    width: 100%;
+    padding-bottom: 100%;
+    border-radius: 8px;
     overflow: hidden;
 }
 
-    .artist-avatar-large img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-
-.artist-info {
-    text-align: center;
+.artwork-link {
+    display: block;
+    position: absolute;
+    width: 100%;
+    height: 100%;
 }
 
-.artist-name {
-    font-size: 16px;
-    font-weight: 600;
-    margin-bottom: 8px;
+.artwork-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.artwork-overlay {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+}
+
+.like-count-badge {
+    background-color: white;
+    color: #333;
+    border-radius: 12px;
+    padding: 2px 8px;
+    font-size: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.like-button {
+    background-color: white;
+    border: none;
+    width: auto;
+    height: 28px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 10px;
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.like-button i {
+    color: #666;
+    font-size: 14px;
+    margin-right: 4px;
+}
+
+.like-button i.fas {
+    color: #ff4060;
+}
+
+.like-count {
+    font-size: 12px;
     color: #333;
 }
 
-.artist-stats {
-    color: #666;
-    font-size: 14px;
+.artwork-caption {
+    margin-top: 8px;
 }
 
-    .artist-stats i {
-        margin-right: 5px;
-        color: #0096fa;
-    }
-
-/* Điều chỉnh no-results cho tác giả */
-.no-results .fa-user-slash {
-    color: #ccc;
+.artwork-title {
+    font-size: 14px;
+    color: #333;
+    text-decoration: none;
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* Container */
@@ -298,30 +458,10 @@ body {
 
 /* Artwork Grid - phù hợp với style của style.css */
 .artwork-grid {
-    margin-bottom: 30px;
-    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
 }
-
-/* Thay artwork-card bằng pic-item theo style.css */
-.artwork-card {
-    position: relative;
-    transition: transform 0.2s;
-    height: 100%;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-    .artwork-card:hover {
-        transform: translateY(-2px);
-    }
-
-    .artwork-card a {
-        color: inherit;
-        text-decoration: none;
-        display: block;
-        height: 100%;
-    }
 
 .image-wrapper {
     position: relative;
@@ -359,94 +499,6 @@ body {
         font-size: 12px;
     }
 
-/* Like Button */
-.like-button {
-    position: absolute;
-    bottom: 10px;
-    right: 10px;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.9);
-    border: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-    .like-button:hover {
-        background: #fff;
-        transform: scale(1.1);
-    }
-
-    .like-button i {
-        color: #666;
-        font-size: 16px;
-    }
-
-    .like-button.active i {
-        color: #ff4444;
-        animation: likeEffect 0.3s ease;
-    }
-
-@keyframes likeEffect {
-    0% {
-        transform: scale(1);
-    }
-
-    50% {
-        transform: scale(1.2);
-    }
-
-    100% {
-        transform: scale(1);
-    }
-}
-
-/* Artwork Info */
-.artwork-info {
-    padding: 8px 0;
-}
-
-.artwork-title {
-    font-size: 14px;
-    margin-bottom: 8px;
-    color: #333;
-    font-weight: 600;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.artist-info {
-    display: flex;
-    align-items: center;
-}
-
-.artist-avatar {
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    margin-right: 8px;
-    overflow: hidden;
-}
-
-    .artist-avatar img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-
-.artist-name {
-    font-size: 12px;
-    color: #666;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
 /* No results */
 .no-results {
     margin-top: 30px;
@@ -473,15 +525,34 @@ body {
         font-size: 14px;
     }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    .category-tab {
-        padding: 8px 15px;
-        font-size: 13px;
+/* Responsive styles */
+@media (max-width: 992px) {
+    .artist-row {
+        flex-direction: column;
     }
+    
+    .artist-info-column,
+    .artist-artwork-column {
+        width: 100%;
+    }
+    
+    .artist-info-column {
+        margin-bottom: 20px;
+    }
+    
+    .artwork-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
 
-    .sort-option {
-        padding: 4px 10px;
-        font-size: 13px;
+@media (max-width: 768px) {
+    .artwork-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 576px) {
+    .artwork-grid {
+        grid-template-columns: repeat(1, 1fr);
     }
 }
