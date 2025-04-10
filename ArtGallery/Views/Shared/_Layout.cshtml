@@ -100,15 +100,5 @@
     @await RenderSectionAsync("Scripts", required: false)
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="~/js/Navigation.js"></script>
-    @section Scripts {
-        <script>
-            $(document).ready(function() {
-                // Ngăn không cho lightbox hiển thị cho kết quả tìm kiếm
-                $(document).on('click', '.search-results a, .search-results img', function(e) {
-                    e.stopPropagation();
-                });
-            });
-        </script>
-    }
 </body>
 </html>

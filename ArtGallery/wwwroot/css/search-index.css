@@ -1,0 +1,236 @@
+﻿body {
+}
+
+/* Full-page styles */
+.search-main-container {
+    position: absolute;
+    top: 70px;
+    left: 0;
+    right: 0;
+    width: 100%;
+    min-height: calc(100vh - 70px);
+    background-color: #f9f9f9;
+    z-index: 10;
+}
+
+.search-results-wrapper {
+    width: 100%;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #fff;
+}
+
+/* Categories tabs */
+.categories-tabs {
+    margin-bottom: 20px;
+    border-bottom: 1px solid #e0e0e0;
+    overflow-x: auto;
+    white-space: nowrap;
+    width: 100%;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+    padding-bottom: 10px;
+}
+
+.categories-tabs::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+}
+
+.scroll-container {
+    display: flex;
+    padding-bottom: 10px;
+}
+
+.category-tab {
+    padding: 8px 16px;
+    margin-right: 8px;
+    color: #666;
+    text-decoration: none;
+    font-weight: 500;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.category-tab:hover {
+    color: #0d6efd;
+    background-color: rgba(13, 110, 253, 0.1);
+}
+
+.category-tab.active {
+    color: #fff;
+    background-color: #0d6efd;
+}
+
+/* Sort options */
+.sort-options {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e0e0e0;
+    width: 100%;
+}
+
+.sort-option {
+    padding: 6px 16px;
+    margin-right: 8px;
+    color: #666;
+    text-decoration: none;
+    border-radius: 30px;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    background-color: #f5f5f5;
+}
+
+.sort-option:hover {
+    color: #0d6efd;
+    background-color: rgba(13, 110, 253, 0.1);
+}
+
+.sort-option.active {
+    color: #fff;
+    background-color: #0d6efd;
+}
+
+.search-option-btn {
+    font-size: 14px;
+}
+
+/* Results count */
+.results-count {
+    margin-bottom: 20px;
+    width: 100%;
+}
+
+.results-count h4 {
+    display: flex;
+    align-items: center;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.results-count .badge {
+    margin-left: 8px;
+    font-weight: 500;
+    background-color: #6c757d;
+}
+
+/* Artwork Grid */
+.artwork-grid {
+    margin-bottom: 30px;
+    width: 100%;
+}
+
+.artwork-card {
+    border-radius: 8px;
+    overflow: hidden;
+    transition: transform 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 10px;
+    position: relative;
+    height: 100%;
+}
+
+.artwork-card:hover {
+    transform: translateY(-5px);
+}
+
+.artwork-card a {
+    color: inherit;
+    text-decoration: none;
+    display: block;
+    height: 100%;
+}
+
+.image-wrapper {
+    position: relative;
+    padding-top: 100%; /* 1:1 Aspect Ratio */
+    overflow: hidden;
+}
+
+.image-wrapper img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.like-count {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    background-color: rgba(0, 0, 0, 0.6);
+    color: #fff;
+    padding: 2px 8px;
+    border-radius: 30px;
+    font-size: 12px;
+}
+
+.like-count i {
+    color: #ff5c5c;
+    margin-right: 3px;
+}
+
+.artwork-info {
+    padding: 10px;
+    background-color: #fff;
+}
+
+.artwork-title {
+    font-size: 14px;
+    margin-bottom: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.artist-info {
+    display: flex;
+    align-items: center;
+}
+
+.artist-avatar {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    margin-right: 5px;
+    object-fit: cover;
+}
+
+.artist-name {
+    font-size: 12px;
+    color: #666;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* No results */
+.no-results {
+    margin-top: 30px;
+    color: #666;
+    width: 100%;
+}
+
+.no-results i {
+    color: #ccc;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .search-main-container {
+        top: 60px;
+    }
+    
+    .category-tab {
+        padding: 6px 12px;
+        font-size: 14px;
+    }
+    
+    .sort-option {
+        padding: 4px 10px;
+        font-size: 13px;
+    }
+}

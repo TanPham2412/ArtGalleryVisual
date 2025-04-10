@@ -52,6 +52,21 @@
         }, 300);
     });
     
+    // Thêm xử lý nhấn Enter để chuyển đến trang kết quả tìm kiếm
+    searchInput.on('keydown', function(e) {
+        console.log('Key pressed:', e.key);
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const query = $(this).val().trim();
+            console.log('Search query:', query);
+
+            if (query) {
+                // Chuyển hướng đến trang kết quả tìm kiếm
+                window.location.href = '/Search/Index?q=' + encodeURIComponent(query);
+            }
+        }
+    });
+    
     // Hàm thực hiện tìm kiếm
     function performSearch(query) {
         console.log("Gọi API tìm kiếm với từ khóa:", query);
@@ -264,6 +279,7 @@
     });
 });
 
+// Giữ hàm toggleFollow ở bên ngoài document.ready
 function toggleFollow(event, userId) {
     event.preventDefault();
     event.stopPropagation();

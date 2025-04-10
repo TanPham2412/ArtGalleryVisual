@@ -1,1 +1,97 @@
- 
+@model ArtGallery.ViewModels.SearchViewModel
+@{
+    ViewData["Title"] = $"Tìm kiếm: {Model.Query}";
+}
+
+<link rel="stylesheet" href="~/css/search-index.css" />
+
+@await Html.PartialAsync("_NavigationPartial")
+
+<div class="search-main-container">
+    <div class="search-results-wrapper">
+        <!-- Tab navigation -->
+        <div class="categories-tabs">
+            <div class="scroll-container">
+                <a href="@Url.Action("Index", "Search", new { q = Model.Query, category = "Top", sortBy = Model.SortBy })" 
+                   class="category-tab @(Model.Category == "Top" ? "active" : "")">Top</a>
+                
+                @foreach (var category in Model.Categories)
+                {
+                    <a href="@Url.Action("Index", "Search", new { q = Model.Query, category = category.TenTheLoai, sortBy = Model.SortBy })" 
+                       class="category-tab @(Model.Category == category.TenTheLoai ? "active" : "")">@category.TenTheLoai</a>
+                }
+                
+                <a href="@Url.Action("Index", "Search", new { q = Model.Query, category = "All", sortBy = Model.SortBy })" 
+                   class="category-tab @(Model.Category == "All" ? "active" : "")">All</a>
+            </div>
+        </div>
+
+        <!-- Sort options -->
+        <div class="sort-options">
+            <a href="@Url.Action("Index", "Search", new { q = Model.Query, category = Model.Category, sortBy = "newest" })" 
+               class="sort-option @(Model.SortBy == "newest" ? "active" : "")">Newest</a>
+               
+            <a href="@Url.Action("Index", "Search", new { q = Model.Query, category = Model.Category, sortBy = "oldest" })" 
+               class="sort-option @(Model.SortBy == "oldest" ? "active" : "")">Oldest</a>
+            
+            <div class="ms-auto">
+                <button class="btn btn-sm btn-outline-secondary search-option-btn">
+                    <i class="fas fa-sliders-h"></i> Search option
+                </button>
+            </div>
+        </div>
+        
+        <!-- Results count -->
+        <div class="results-count">
+            <h4>@Model.Category <span class="badge bg-secondary">@Model.TotalResults</span></h4>
+        </div>
+
+        <!-- Results grid -->
+        @if (Model.Artworks.Any())
+        {
+            <div class="artwork-grid">
+                <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 g-3">
+                    @foreach (var artwork in Model.Artworks)
+                    {
+                        <div class="col">
+                            <div class="artwork-card">
+                                <a href="@Url.Action("Display", "Home", new { id = artwork.MaTranh })">
+                                    <div class="image-wrapper">
+                                        <img src="@artwork.DuongDanAnh" alt="@artwork.TieuDe">
+                                        @if (artwork.LuotThiches.Count > 0)
+                                        {
+                                            <div class="like-count">
+                                                <i class="fas fa-heart"></i> @artwork.LuotThiches.Count
+                                            </div>
+                                        }
+                                    </div>
+                                    <div class="artwork-info">
+                                        <h5 class="artwork-title">@artwork.TieuDe</h5>
+                                        <div class="artist-info">
+                                            <img src="@artwork.MaNguoiDungNavigation.GetAvatarPath()" class="artist-avatar" alt="@artwork.MaNguoiDungNavigation.TenNguoiDung">
+                                            <span class="artist-name">@artwork.MaNguoiDungNavigation.TenNguoiDung</span>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="no-results">
+                <div class="text-center py-5">
+                    <i class="fas fa-search fa-3x mb-3 text-muted"></i>
+                    <h4>Không tìm thấy kết quả phù hợp</h4>
+                    <p class="text-muted">Vui lòng thử tìm kiếm với từ khóa khác hoặc thay đổi bộ lọc</p>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/search-index.js"></script>
+} 
