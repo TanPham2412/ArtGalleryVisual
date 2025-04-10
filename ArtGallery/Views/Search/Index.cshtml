@@ -9,169 +9,171 @@
 
 @await Html.PartialAsync("_NavigationPartial")
 
-<div class="search-main-container">
-    <!-- Tab navigation -->
-    <div class="container-fluid mt-5">
-        <div class="tag-container">
-            <div class="tag">
-                <a href="@Url.Action("Index", "Search", new { q = Model.Query, category = "Top", sortBy = Model.SortBy })"
-                   class="tag-items home @(Model.Category == "Top" ? "active" : "")">Home</a>
+<div class="search-view">
+    <div class="search-main-container">
+        <!-- Tab navigation -->
+        <div class="container-fluid mt-5">
+            <div class="search-tag-container">
+                <div class="search-tag">
+                    <a href="@Url.Action("Index", "Search", new { q = Model.Query, category = "Top", sortBy = Model.SortBy })"
+                       class="search-tag-items home @(Model.Category == "Top" ? "active" : "")">Home</a>
 
-                <a href="@Url.Action("Index", "Search", new { q = Model.Query, category = "Illustrations", sortBy = Model.SortBy })"
-                   class="tag-items illustration @(Model.Category == "Illustrations" ? "active" : "")">Illustrations</a>
+                    <a href="@Url.Action("Index", "Search", new { q = Model.Query, category = "Illustrations", sortBy = Model.SortBy })"
+                       class="search-tag-items illustration @(Model.Category == "Illustrations" ? "active" : "")">Illustrations</a>
 
-                <a href="@Url.Action("Index", "Search", new { q = Model.Query, category = "Concept", sortBy = Model.SortBy })"
-                   class="tag-items concept @(Model.Category == "Concept" ? "active" : "")">Concept</a>
+                    <a href="@Url.Action("Index", "Search", new { q = Model.Query, category = "Concept", sortBy = Model.SortBy })"
+                       class="search-tag-items concept @(Model.Category == "Concept" ? "active" : "")">Concept</a>
 
-                <a href="@Url.Action("Index", "Search", new { q = Model.Query, category = "Anime/Manga", sortBy = Model.SortBy })"
-                   class="tag-items anime @(Model.Category == "Anime/Manga" ? "active" : "")">Anime/Manga</a>
+                    <a href="@Url.Action("Index", "Search", new { q = Model.Query, category = "Anime/Manga", sortBy = Model.SortBy })"
+                       class="search-tag-items anime @(Model.Category == "Anime/Manga" ? "active" : "")">Anime/Manga</a>
 
-                <a href="@Url.Action("Index", "Search", new { q = Model.Query, category = "Pixel", sortBy = Model.SortBy })"
-                   class="tag-items pixel @(Model.Category == "Pixel" ? "active" : "")">Pixel</a>
+                    <a href="@Url.Action("Index", "Search", new { q = Model.Query, category = "Pixel", sortBy = Model.SortBy })"
+                       class="search-tag-items pixel @(Model.Category == "Pixel" ? "active" : "")">Pixel</a>
 
-                <a href="@Url.Action("Index", "Search", new { q = Model.Query, category = "Vector", sortBy = Model.SortBy })"
-                   class="tag-items vector @(Model.Category == "Vector" ? "active" : "")">Vector</a>
+                    <a href="@Url.Action("Index", "Search", new { q = Model.Query, category = "Vector", sortBy = Model.SortBy })"
+                       class="search-tag-items vector @(Model.Category == "Vector" ? "active" : "")">Vector</a>
 
-                <a href="@Url.Action("Index", "Search", new { q = Model.Query, category = "Low-Poly", sortBy = Model.SortBy })"
-                   class="tag-items lowpoly @(Model.Category == "Low-Poly" ? "active" : "")">Low-Poly</a>
+                    <a href="@Url.Action("Index", "Search", new { q = Model.Query, category = "Low-Poly", sortBy = Model.SortBy })"
+                       class="search-tag-items lowpoly @(Model.Category == "Low-Poly" ? "active" : "")">Low-Poly</a>
 
-                <a href="@Url.Action("Index", "Search", new { q = Model.Query, category = "Artists", sortBy = Model.SortBy })"
-                   class="tag-items artists @(Model.Category == "Artists" ? "active" : "")">Tác giả</a>
+                    <a href="@Url.Action("Index", "Search", new { q = Model.Query, category = "Artists", sortBy = Model.SortBy })"
+                       class="search-tag-items artists @(Model.Category == "Artists" ? "active" : "")">Tác giả</a>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- Sort options -->
-    <div class="sort-options">
-        <a href="@Url.Action("Index", "Search", new { q = Model.Query, category = Model.Category, sortBy = "newest" })"
-           class="sort-option @(Model.SortBy == "newest" ? "active" : "")">Mới nhất</a>
+        <!-- Sort options -->
+        <div class="sort-options">
+            <a href="@Url.Action("Index", "Search", new { q = Model.Query, category = Model.Category, sortBy = "newest" })"
+               class="sort-option @(Model.SortBy == "newest" ? "active" : "")">Mới nhất</a>
 
-        <a href="@Url.Action("Index", "Search", new { q = Model.Query, category = Model.Category, sortBy = "oldest" })"
-           class="sort-option @(Model.SortBy == "oldest" ? "active" : "")">Cũ nhất</a>
+            <a href="@Url.Action("Index", "Search", new { q = Model.Query, category = Model.Category, sortBy = "oldest" })"
+               class="sort-option @(Model.SortBy == "oldest" ? "active" : "")">Cũ nhất</a>
 
-        <div class="ms-auto">
-            <button class="search-option-btn">
-                <i class="fas fa-sliders-h"></i> Tùy chọn tìm kiếm
-            </button>
+            <div class="ms-auto">
+                <button class="search-option-btn">
+                    <i class="fas fa-sliders-h"></i> Tùy chọn tìm kiếm
+                </button>
+            </div>
         </div>
-    </div>
 
-    @if (Model.Category == "Artists")
-    {
-        <div class="artist-section">
-            <h4 class="section-title">Tác giả <span class="count-badge">@Model.Artists.Count()</span></h4>
+        @if (Model.Category == "Artists")
+        {
+            <div class="artist-section">
+                <h4 class="section-title">Tác giả <span class="count-badge">@Model.Artists.Count()</span></h4>
 
-            @foreach (var artist in Model.Artists)
-            {
-                <div class="artist-card">
-                    <div class="artist-row">
-                        <div class="artist-info-column">
-                            <div class="user-info">
-                                <a href="@Url.Action("Profile", "User", new { username = artist.UserName })" class="user-avatar">
-                                    <img src="@artist.GetAvatarPath()" alt="@artist.TenNguoiDung">
-                                </a>
-                                <div class="user-profile">
-                                    <div class="user-name">@artist.TenNguoiDung</div>
-                                    @if (!string.IsNullOrEmpty(artist.MoTa))
-                                    {
-                                        <div class="user-description">@artist.MoTa</div>
-                                    }
-                                    <div class="user-actions">
-                                        <button class="follow-button @(Model.IsFollowing(artist.Id) ? "following" : "")" onclick="toggleFollow(this, '@artist.Id')">
-                                            @(Model.IsFollowing(artist.Id) ? "Following" : "Follow")
-                                        </button>
-                                        <button class="more-button">
-                                            <i class="fas fa-ellipsis-h"></i>
-                                        </button>
+                @foreach (var artist in Model.Artists)
+                {
+                    <div class="artist-card">
+                        <div class="artist-row">
+                            <div class="artist-info-column">
+                                <div class="user-info">
+                                    <a href="@Url.Action("Profile", "User", new { username = artist.UserName })" class="user-avatar">
+                                        <img src="@artist.GetAvatarPath()" alt="@artist.TenNguoiDung">
+                                    </a>
+                                    <div class="user-profile">
+                                        <div class="user-name">@artist.TenNguoiDung</div>
+                                        @if (!string.IsNullOrEmpty(artist.MoTa))
+                                        {
+                                            <div class="user-description">@artist.MoTa</div>
+                                        }
+                                        <div class="user-actions">
+                                            <button class="follow-button @(Model.IsFollowing(artist.Id) ? "following" : "")" onclick="toggleFollow(this, '@artist.Id')">
+                                                @(Model.IsFollowing(artist.Id) ? "Following" : "Follow")
+                                            </button>
+                                            <button class="more-button">
+                                                <i class="fas fa-ellipsis-h"></i>
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        
-                        <div class="artist-artwork-column">
-                            @if (artist.Tranhs.Any())
-                            {
-                                <div class="artwork-grid">
-                                    @foreach (var artwork in artist.Tranhs.Take(4))
-                                    {
-                                        <div class="artwork-item">
-                                            <div class="artwork-image-container">
-                                                <a href="@Url.Action("Display", "Home", new { id = artwork.MaTranh })" class="artwork-link">
-                                                    <img src="@artwork.DuongDanAnh" alt="@artwork.TieuDe" class="artwork-image">
-                                                </a>
-                                                <div class="artwork-overlay">
-                                                    <button class="like-button" onclick="toggleLike(this, @artwork.MaTranh)">
-                                                        <i class="@(artwork.LuotThiches.Any(l => l.MaNguoiDung == Context.User.FindFirstValue(ClaimTypes.NameIdentifier)) ? "fas" : "far") fa-heart"></i>
-                                                    </button>
+                            
+                            <div class="artist-artwork-column">
+                                @if (artist.Tranhs.Any())
+                                {
+                                    <div class="artwork-grid">
+                                        @foreach (var artwork in artist.Tranhs.Take(4))
+                                        {
+                                            <div class="artwork-item">
+                                                <div class="artwork-image-container">
+                                                    <a href="@Url.Action("Display", "Home", new { id = artwork.MaTranh })" class="artwork-link">
+                                                        <img src="@artwork.DuongDanAnh" alt="@artwork.TieuDe" class="artwork-image">
+                                                    </a>
+                                                    <div class="artwork-overlay">
+                                                        <button class="like-button" onclick="toggleLike(this, @artwork.MaTranh)">
+                                                            <i class="@(artwork.LuotThiches.Any(l => l.MaNguoiDung == Context.User.FindFirstValue(ClaimTypes.NameIdentifier)) ? "fas" : "far") fa-heart"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div class="artwork-caption">
+                                                    <a href="@Url.Action("Display", "Home", new { id = artwork.MaTranh })" class="artwork-title">@artwork.TieuDe</a>
                                                 </div>
                                             </div>
-                                            <div class="artwork-caption">
-                                                <a href="@Url.Action("Display", "Home", new { id = artwork.MaTranh })" class="artwork-title">@artwork.TieuDe</a>
-                                            </div>
-                                        </div>
-                                    }
-                                </div>
-                            }
-                        </div>
-                    </div>
-                </div>
-            }
-        </div>
-    }
-    else
-    {
-        <div class="results-count">
-            <h4>@Model.Category <span class="badge bg-secondary">@Model.TotalResults</span></h4>
-        </div>
-
-        @if (Model.Artworks.Any())
-        {
-            <div class="artwork-grid">
-                <div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-4">
-                    @foreach (var artwork in Model.Artworks)
-                    {
-                        <div class="col">
-                            <div class="pic-item">
-                                <div class="image-wrapper">
-                                    <a href="@Url.Action("Display", "Home", new { id = artwork.MaTranh })">
-                                        <img src="@artwork.DuongDanAnh" alt="@artwork.TieuDe">
-                                    </a>
-                                    @if (artwork.LuotThiches.Count > 0)
-                                    {
-                                        <div class="like-count">
-                                            @artwork.LuotThiches.Count <i class="fas fa-heart"></i>
-                                        </div>
-                                    }
-                                    <button class="like-button" onclick="toggleLike(this, @artwork.MaTranh)">
-                                        <i class="@(artwork.LuotThiches.Any(l => l.MaNguoiDung == Context.User.FindFirstValue(ClaimTypes.NameIdentifier)) ? "fas" : "far") fa-heart"></i>
-                                    </button>
-                                </div>
-                                <div class="img-info mt-2">
-                                    <a href="@Url.Action("Display", "Home", new { id = artwork.MaTranh })" class="art-link">
-                                        <h6 class="artwork-title">@artwork.TieuDe</h6>
-                                    </a>
-                                    <div class="artist-info d-flex align-items-center">
-                                        <div class="artist-avatar">
-                                            <img src="@artwork.MaNguoiDungNavigation.GetAvatarPath()" alt="@artwork.MaNguoiDungNavigation.TenNguoiDung">
-                                        </div>
-                                        <span class="artist-name">@artwork.MaNguoiDungNavigation.TenNguoiDung</span>
+                                        }
                                     </div>
-                                </div>
+                                }
                             </div>
                         </div>
-                    }
-                </div>
+                    </div>
+                }
             </div>
         }
         else
         {
-            <div class="no-results">
-                <i class="fas fa-search fa-3x mb-3"></i>
-                <h4>Không tìm thấy kết quả phù hợp</h4>
-                <p>Vui lòng thử tìm kiếm với từ khóa khác hoặc thay đổi bộ lọc</p>
+            <div class="results-count">
+                <h4>@Model.Category <span class="badge bg-secondary">@Model.TotalResults</span></h4>
             </div>
+
+            @if (Model.Artworks.Any())
+            {
+                <div class="artwork-grid">
+                    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-4">
+                        @foreach (var artwork in Model.Artworks)
+                        {
+                            <div class="col">
+                                <div class="pic-item">
+                                    <div class="image-wrapper">
+                                        <a href="@Url.Action("Display", "Home", new { id = artwork.MaTranh })">
+                                            <img src="@artwork.DuongDanAnh" alt="@artwork.TieuDe">
+                                        </a>
+                                        @if (artwork.LuotThiches.Count > 0)
+                                        {
+                                            <div class="like-count">
+                                                @artwork.LuotThiches.Count <i class="fas fa-heart"></i>
+                                            </div>
+                                        }
+                                        <button class="like-button" onclick="toggleLike(this, @artwork.MaTranh)">
+                                            <i class="@(artwork.LuotThiches.Any(l => l.MaNguoiDung == Context.User.FindFirstValue(ClaimTypes.NameIdentifier)) ? "fas" : "far") fa-heart"></i>
+                                        </button>
+                                    </div>
+                                    <div class="img-info mt-2">
+                                        <a href="@Url.Action("Display", "Home", new { id = artwork.MaTranh })" class="art-link">
+                                            <h6 class="artwork-title">@artwork.TieuDe</h6>
+                                        </a>
+                                        <div class="artist-info d-flex align-items-center">
+                                            <div class="artist-avatar">
+                                                <img src="@artwork.MaNguoiDungNavigation.GetAvatarPath()" alt="@artwork.MaNguoiDungNavigation.TenNguoiDung">
+                                            </div>
+                                            <span class="artist-name">@artwork.MaNguoiDungNavigation.TenNguoiDung</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="no-results">
+                    <i class="fas fa-search fa-3x mb-3"></i>
+                    <h4>Không tìm thấy kết quả phù hợp</h4>
+                    <p>Vui lòng thử tìm kiếm với từ khóa khác hoặc thay đổi bộ lọc</p>
+                </div>
+            }
         }
-    }
+    </div>
 </div>
 
 @section Scripts {

@@ -1,10 +1,9 @@
 ﻿/* Cập nhật search-index.css theo phong cách của style.css */
-body {
-    background-color: #fff;
-    font-family: Arial, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+.search-view {
+    /* Đặt scope cho tất cả style tìm kiếm */
 }
 
-/* Search Container - Giống style.css */
+/* Search Container */
 .search-main-container {
     position: relative;
     width: 100%;
@@ -14,54 +13,10 @@ body {
     padding: 0 15px;
 }
 
-.search-results-wrapper {
-    width: 100%;
-    margin: 0 auto;
-    background-color: #fff;
-}
-
-/* Categories tabs */
-.categories-tabs {
-    width: 100%;
+/* Navigation cho phần tìm kiếm - hoàn toàn tách biệt */
+.search-tag-container {
     border-bottom: 1px solid #e7e7e7;
-    background-color: #fff;
-    margin-top: 0;
-    overflow-x: auto;
-    white-space: nowrap;
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-}
-
-    .categories-tabs::-webkit-scrollbar {
-        display: none;
-    }
-
-.scroll-container {
-    display: flex;
-    height: 46px;
-    align-items: center;
-}
-
-.category-tab {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 12px 20px;
-    text-decoration: none;
-    font-size: 14px;
-    font-weight: bold;
-    color: #666;
-    background-color: transparent;
-    border-radius: 0;
-    position: relative;
-    transition: color 0.2s;
-    white-space: nowrap;
-    height: 100%;
-}
-
-.tag-container {
-    border-bottom: 1px solid #e7e7e7;
-    margin-top: 0;
+    margin-top: 80px;
     padding: 0;
     background-color: #fff;
     width: 100%;
@@ -70,7 +25,7 @@ body {
     z-index: 1;
 }
 
-.tag {
+.search-tag {
     display: flex;
     justify-content: flex-start;
     align-items: center;
@@ -85,11 +40,11 @@ body {
     scrollbar-width: none;
 }
 
-    .tag::-webkit-scrollbar {
-        display: none;
-    }
+.search-tag::-webkit-scrollbar {
+    display: none;
+}
 
-.tag-items {
+.search-tag-items {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -106,62 +61,62 @@ body {
     height: 100%;
 }
 
-    .tag-items:hover {
-        color: #0096fa;
-        background-color: transparent;
-        text-decoration: none;
-    }
+.search-tag-items:hover {
+    color: #0096fa;
+    background-color: transparent;
+    text-decoration: none;
+}
 
-    .tag-items.active {
-        color: #0096fa;
-        font-weight: bold;
-    }
+.search-tag-items.active {
+    color: #0096fa;
+    font-weight: bold;
+}
 
-        .tag-items.active::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 3px;
-            background-color: #0096fa;
-        }
+.search-tag-items.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background-color: #0096fa;
+}
 
-    /* Màu riêng cho từng tag */
-    .tag-items.illustration {
-        background-color: transparent !important;
-    }
+/* Màu riêng cho từng tag */
+.search-tag-items.illustration {
+    background-color: transparent !important;
+}
 
-    .tag-items.concept {
-        background-color: transparent !important;
-    }
+.search-tag-items.concept {
+    background-color: transparent !important;
+}
 
-    .tag-items.anime {
-        background-color: transparent !important;
-    }
+.search-tag-items.anime {
+    background-color: transparent !important;
+}
 
-    .tag-items.pixel {
-        background-color: transparent !important;
-    }
+.search-tag-items.pixel {
+    background-color: transparent !important;
+}
 
-    .tag-items.vector {
-        background-color: transparent !important;
-    }
+.search-tag-items.vector {
+    background-color: transparent !important;
+}
 
-    .tag-items.lowpoly {
-        background-color: transparent !important;
-    }
+.search-tag-items.lowpoly {
+    background-color: transparent !important;
+}
 
-    .tag-items.artists {
-        background-color: transparent !important;
-    }
+.search-tag-items.artists {
+    background-color: transparent !important;
+}
 
 /* Pixiv-style artist section */
 .artist-section {
     margin: 24px 0;
 }
 
-.section-title {
+.search-view .section-title {
     font-size: 16px;
     font-weight: 500;
     color: #333;
@@ -170,7 +125,7 @@ body {
     margin-bottom: 16px;
 }
 
-.count-badge {
+.search-view .count-badge {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -204,12 +159,12 @@ body {
     padding-bottom: 24px;
 }
 
-.user-info {
+.search-view .user-info {
     display: flex;
     align-items: flex-start;
 }
 
-.user-avatar {
+.search-view .user-avatar {
     display: block;
     width: 72px;
     height: 72px;
@@ -219,26 +174,26 @@ body {
     flex-shrink: 0;
 }
 
-.user-avatar img {
+.search-view .user-avatar img {
     width: 100%;
     height: 100%;
     object-fit: cover;
 }
 
-.user-profile {
+.search-view .user-profile {
     display: flex;
     flex-direction: column;
     width: 100%;
 }
 
-.user-name {
+.search-view .user-name {
     font-size: 16px;
     font-weight: 700;
     color: #333;
     margin-bottom: 4px;
 }
 
-.user-description {
+.search-view .user-description {
     font-size: 13px;
     color: #666;
     line-height: 1.4;
@@ -246,13 +201,13 @@ body {
     margin-bottom: 8px;
 }
 
-.user-actions {
+.search-view .user-actions {
     display: flex;
     align-items: center;
     margin-top: 8px;
 }
 
-.follow-button {
+.search-view .follow-button {
     background-color: #0096fa;
     color: white;
     border: none;
@@ -264,12 +219,12 @@ body {
     margin-right: 10px;
 }
 
-.follow-button.following {
+.search-view .follow-button.following {
     background-color: #f2f2f2;
     color: #666;
 }
 
-.more-button {
+.search-view .more-button {
     background: none;
     border: none;
     color: #666;
@@ -282,22 +237,19 @@ body {
     justify-content: center;
 }
 
-.artwork-container {
-    width: 100%;
-}
-
-.artwork-list {
+/* Grid artwork */
+.search-view .artwork-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
+    gap: 12px;
 }
 
-.artwork-item {
+.search-view .artwork-item {
     width: 100%;
     position: relative;
 }
 
-.artwork-image-container {
+.search-view .artwork-image-container {
     position: relative;
     width: 100%;
     padding-bottom: 100%;
@@ -305,14 +257,14 @@ body {
     overflow: hidden;
 }
 
-.artwork-link {
+.search-view .artwork-link {
     display: block;
     position: absolute;
     width: 100%;
     height: 100%;
 }
 
-.artwork-image {
+.search-view .artwork-image {
     position: absolute;
     top: 0;
     left: 0;
@@ -321,55 +273,39 @@ body {
     object-fit: cover;
 }
 
-.artwork-overlay {
+.search-view .artwork-overlay {
     position: absolute;
     bottom: 8px;
     right: 8px;
 }
 
-.like-count-badge {
-    background-color: white;
-    color: #333;
-    border-radius: 12px;
-    padding: 2px 8px;
-    font-size: 12px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
-
-.like-button {
+.search-view .like-button {
     background-color: white;
     border: none;
-    width: auto;
+    width: 28px;
     height: 28px;
-    border-radius: 14px;
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 0 10px;
     cursor: pointer;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
-.like-button i {
+.search-view .like-button i {
     color: #666;
     font-size: 14px;
-    margin-right: 4px;
 }
 
-.like-button i.fas {
+.search-view .like-button i.fas {
     color: #ff4060;
 }
 
-.like-count {
-    font-size: 12px;
-    color: #333;
-}
-
-.artwork-caption {
+.search-view .artwork-caption {
     margin-top: 8px;
 }
 
-.artwork-title {
+.search-view .artwork-title {
     font-size: 14px;
     color: #333;
     text-decoration: none;
@@ -378,15 +314,6 @@ body {
     overflow: hidden;
     text-overflow: ellipsis;
     font-weight: 700;
-}
-
-/* Container */
-.container-fluid.p-0 {
-    display: block !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    margin: 0 !important;
-    padding: 0 !important;
 }
 
 /* Sort options */
@@ -410,15 +337,15 @@ body {
     background-color: #f5f5f5;
 }
 
-    .sort-option:hover {
-        color: #0096fa;
-        background-color: rgba(0, 150, 250, 0.1);
-    }
+.sort-option:hover {
+    color: #0096fa;
+    background-color: rgba(0, 150, 250, 0.1);
+}
 
-    .sort-option.active {
-        color: #fff;
-        background-color: #0096fa;
-    }
+.sort-option.active {
+    color: #fff;
+    background-color: #0096fa;
+}
 
 .search-option-btn {
     font-size: 14px;
@@ -429,9 +356,9 @@ body {
     padding: 6px 16px;
 }
 
-    .search-option-btn:hover {
-        background-color: #e6e6e6;
-    }
+.search-option-btn:hover {
+    background-color: #e6e6e6;
+}
 
 /* Results count */
 .results-count {
@@ -439,45 +366,43 @@ body {
     width: 100%;
 }
 
-    .results-count h4 {
-        display: flex;
-        align-items: center;
-        font-size: 18px;
-        font-weight: 600;
-        color: #333;
-    }
-
-    .results-count .badge {
-        margin-left: 8px;
-        font-weight: 500;
-        background-color: #6c757d;
-    }
-
-/* Artwork Grid - phù hợp với style của style.css */
-.artwork-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
+.results-count h4 {
+    display: flex;
+    align-items: center;
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
 }
 
-.image-wrapper {
+.results-count .badge {
+    margin-left: 8px;
+    font-weight: 500;
+    background-color: #6c757d;
+}
+
+/* Artwork Grid styles */
+.search-view .pic-item {
+    margin-bottom: 15px;
+}
+
+.search-view .image-wrapper {
     position: relative;
     width: 100%;
-    padding-top: 75%; /* Tỷ lệ 4:3 */
+    padding-top: 75%;
     border-radius: 12px;
     overflow: hidden;
 }
 
-    .image-wrapper img {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
+.search-view .image-wrapper img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
 
-.like-count {
+.search-view .like-count {
     position: absolute;
     bottom: 10px;
     left: 10px;
@@ -491,10 +416,23 @@ body {
     gap: 4px;
 }
 
-    .like-count i {
-        color: #ff4444;
-        font-size: 12px;
-    }
+.search-view .like-count i {
+    color: #ff4444;
+    font-size: 12px;
+}
+
+.search-view .img-info {
+    margin-top: 8px;
+}
+
+.search-view .art-link {
+    text-decoration: none;
+    display: block;
+}
+
+.search-view .art-link:hover {
+    text-decoration: none;
+}
 
 /* No results */
 .no-results {
@@ -505,26 +443,26 @@ body {
     padding: 50px 0;
 }
 
-    .no-results i {
-        font-size: 48px;
-        color: #ccc;
-        margin-bottom: 20px;
-    }
+.no-results i {
+    font-size: 48px;
+    color: #ccc;
+    margin-bottom: 20px;
+}
 
-    .no-results h4 {
-        font-size: 18px;
-        color: #333;
-        margin-bottom: 10px;
-    }
+.no-results h4 {
+    font-size: 18px;
+    color: #333;
+    margin-bottom: 10px;
+}
 
-    .no-results p {
-        color: #666;
-        font-size: 14px;
-    }
+.no-results p {
+    color: #666;
+    font-size: 14px;
+}
 
 /* Responsive styles */
 @media (max-width: 1200px) {
-    .artwork-grid {
+    .search-view .artwork-grid {
         grid-template-columns: repeat(3, 1fr);
     }
 }
@@ -545,13 +483,13 @@ body {
 }
 
 @media (max-width: 768px) {
-    .artwork-grid {
+    .search-view .artwork-grid {
         grid-template-columns: repeat(2, 1fr);
     }
 }
 
 @media (max-width: 576px) {
-    .artwork-grid {
+    .search-view .artwork-grid {
         grid-template-columns: repeat(1, 1fr);
     }
 }
