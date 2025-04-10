@@ -91,47 +91,63 @@ namespace ArtGallery.Controllers
                 // Lấy tất cả thể loại
                 viewModel.Categories = await _context.TheLoais.ToListAsync();
 
-                // Tìm kiếm tranh
-                var query = _context.Tranhs
-                    .Include(t => t.MaNguoiDungNavigation)
-                    .Include(t => t.LuotThiches)
-                    .Include(t => t.MaTheLoais)
-                    .AsQueryable();
-
-                // Tìm theo từ khóa
-                query = query.Where(t => t.TieuDe.ToLower().Contains(q) || 
-                                        (t.MoTa != null && t.MoTa.ToLower().Contains(q)));
-
-                // Lọc theo danh mục
-                if (category != "Top" && category != "All")
+                if (category == "Artists")
                 {
-                    query = query.Where(t => t.MaTheLoais.Any(tl => tl.TenTheLoai == category));
-                }
+                    // Tìm kiếm tác giả
+                    viewModel.Artists = await _context.Users
+                        .Where(u => (u.TenNguoiDung.ToLower().Contains(q) ||
+                                   u.UserName.ToLower().Contains(q)) &&
+                                   _context.UserRoles.Any(ur => ur.UserId == u.Id &&
+                                   ur.RoleId == _context.Roles.FirstOrDefault(r => r.Name == "Artists").Id))
+                        .Include(u => u.Tranhs)
+                        .ToListAsync();
 
-                // Sắp xếp
-                switch (sortBy)
+                    viewModel.Artworks = new List<Tranh>(); // Khởi tạo list rỗng
+                    return View("Index", viewModel); // Sử dụng view Index thay vì Artists
+                }
+                else
                 {
-                    case "newest":
-                        query = query.OrderByDescending(t => t.NgayDang);
-                        break;
-                    case "oldest":
-                        query = query.OrderBy(t => t.NgayDang);
-                        break;
-                    default:
-                        query = query.OrderByDescending(t => t.NgayDang);
-                        break;
+                    // Tìm kiếm artwork như cũ
+                    viewModel.Artists = new List<NguoiDung>();
+                    var query = _context.Tranhs
+                        .Include(t => t.MaNguoiDungNavigation)
+                        .Include(t => t.LuotThiches)
+                        .Include(t => t.MaTheLoais)
+                        .AsQueryable();
+
+                    // Tìm theo từ khóa
+                    query = query.Where(t => t.TieuDe.ToLower().Contains(q) ||
+                                           (t.MoTa != null && t.MoTa.ToLower().Contains(q)));
+
+                    // Lọc theo danh mục
+                    if (category != "Top" && category != "All")
+                    {
+                        query = query.Where(t => t.MaTheLoais.Any(tl => tl.TenTheLoai == category));
+                    }
+
+                    // Sắp xếp
+                    switch (sortBy)
+                    {
+                        case "newest":
+                            query = query.OrderByDescending(t => t.NgayDang);
+                            break;
+                        case "oldest":
+                            query = query.OrderBy(t => t.NgayDang);
+                            break;
+                        default:
+                            query = query.OrderByDescending(t => t.NgayDang);
+                            break;
+                    }
+
+                    // Nếu chọn Top, ưu tiên sắp xếp theo lượt thích
+                    if (category == "Top")
+                    {
+                        query = query.OrderByDescending(t => t.LuotThiches.Count);
+                    }
+
+                    viewModel.Artworks = await query.ToListAsync();
+                    return View("Index", viewModel);
                 }
-
-                // Nếu chọn Top, ưu tiên sắp xếp theo lượt thích
-                if (category == "Top")
-                {
-                    query = query.OrderByDescending(t => t.LuotThiches.Count);
-                }
-
-                // Lấy kết quả
-                viewModel.Artworks = await query.ToListAsync();
-
-                return View(viewModel);
             }
             catch (Exception ex)
             {
