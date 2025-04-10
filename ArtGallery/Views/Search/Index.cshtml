@@ -76,15 +76,15 @@
                                     {
                                         <div class="user-description">@artist.MoTa</div>
                                     }
+                                    <div class="user-actions">
+                                        <button class="follow-button @(Model.IsFollowing(artist.Id) ? "following" : "")" onclick="toggleFollow(this, '@artist.Id')">
+                                            @(Model.IsFollowing(artist.Id) ? "Following" : "Follow")
+                                        </button>
+                                        <button class="more-button">
+                                            <i class="fas fa-ellipsis-h"></i>
+                                        </button>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="user-actions">
-                                <button class="follow-button @(Model.IsFollowing(artist.Id) ? "following" : "")" onclick="toggleFollow(this, '@artist.Id')">
-                                    @(Model.IsFollowing(artist.Id) ? "Following" : "Follow")
-                                </button>
-                                <button class="more-button">
-                                    <i class="fas fa-ellipsis-h"></i>
-                                </button>
                             </div>
                         </div>
                         
@@ -92,7 +92,7 @@
                             @if (artist.Tranhs.Any())
                             {
                                 <div class="artwork-grid">
-                                    @foreach (var artwork in artist.Tranhs.Take(3))
+                                    @foreach (var artwork in artist.Tranhs.Take(4))
                                     {
                                         <div class="artwork-item">
                                             <div class="artwork-image-container">
@@ -102,7 +102,6 @@
                                                 <div class="artwork-overlay">
                                                     <button class="like-button" onclick="toggleLike(this, @artwork.MaTranh)">
                                                         <i class="@(artwork.LuotThiches.Any(l => l.MaNguoiDung == Context.User.FindFirstValue(ClaimTypes.NameIdentifier)) ? "fas" : "far") fa-heart"></i>
-                                                        <span class="like-count">@artwork.LuotThiches.Count</span>
                                                     </button>
                                                 </div>
                                             </div>

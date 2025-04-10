@@ -192,9 +192,6 @@ body {
 .artist-info-column {
     width: 33.33%;
     padding-right: 20px;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
 }
 
 .artist-artwork-column {
@@ -202,25 +199,24 @@ body {
 }
 
 .artist-card {
-    margin-bottom: 32px;
+    margin-bottom: 24px;
     border-bottom: 1px solid #eee;
-    padding-bottom: 32px;
+    padding-bottom: 24px;
 }
 
 .user-info {
     display: flex;
-    flex-direction: column;
     align-items: flex-start;
-    margin-bottom: 16px;
 }
 
 .user-avatar {
     display: block;
-    width: 64px;
-    height: 64px;
+    width: 72px;
+    height: 72px;
     border-radius: 50%;
     overflow: hidden;
-    margin-bottom: 12px;
+    margin-right: 12px;
+    flex-shrink: 0;
 }
 
 .user-avatar img {
@@ -236,24 +232,24 @@ body {
 }
 
 .user-name {
-    font-size: 18px;
-    font-weight: 500;
+    font-size: 16px;
+    font-weight: 700;
     color: #333;
-    margin-bottom: 8px;
+    margin-bottom: 4px;
 }
 
 .user-description {
-    font-size: 14px;
+    font-size: 13px;
     color: #666;
     line-height: 1.4;
-    margin-bottom: 16px;
     word-break: break-word;
+    margin-bottom: 8px;
 }
 
 .user-actions {
     display: flex;
     align-items: center;
-    margin-top: auto;
+    margin-top: 8px;
 }
 
 .follow-button {
@@ -261,10 +257,11 @@ body {
     color: white;
     border: none;
     border-radius: 20px;
-    padding: 8px 24px;
+    padding: 6px 20px;
     font-size: 14px;
     cursor: pointer;
     font-weight: 500;
+    margin-right: 10px;
 }
 
 .follow-button.following {
@@ -277,7 +274,6 @@ body {
     border: none;
     color: #666;
     font-size: 16px;
-    margin-left: 12px;
     cursor: pointer;
     width: 30px;
     height: 30px;
@@ -381,6 +377,7 @@ body {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    font-weight: 700;
 }
 
 /* Container */
@@ -459,8 +456,8 @@ body {
 /* Artwork Grid - phù hợp với style của style.css */
 .artwork-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
 }
 
 .image-wrapper {
@@ -526,6 +523,12 @@ body {
     }
 
 /* Responsive styles */
+@media (max-width: 1200px) {
+    .artwork-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
 @media (max-width: 992px) {
     .artist-row {
         flex-direction: column;
@@ -538,10 +541,6 @@ body {
     
     .artist-info-column {
         margin-bottom: 20px;
-    }
-    
-    .artwork-grid {
-        grid-template-columns: repeat(3, 1fr);
     }
 }
 
