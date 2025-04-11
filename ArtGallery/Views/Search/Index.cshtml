@@ -130,14 +130,14 @@
 
             @if (Model.Artworks.Any())
             {
-                <div class="artwork-grid">
+                <div class="recommended-pics">
                     <div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-4">
                         @foreach (var artwork in Model.Artworks)
                         {
                             <div class="col">
                                 <div class="pic-item">
                                     <div class="image-wrapper">
-                                        <a href="@Url.Action("Display", "Home", new { id = artwork.MaTranh })">
+                                        <a asp-controller="Artwork" asp-action="Display" asp-route-id="@artwork.MaTranh" class="art-link">
                                             <img src="@artwork.DuongDanAnh" alt="@artwork.TieuDe">
                                         </a>
                                         @if (artwork.LuotThiches.Count > 0)
@@ -146,13 +146,15 @@
                                                 @artwork.LuotThiches.Count <i class="fas fa-heart"></i>
                                             </div>
                                         }
-                                        <button class="like-button" onclick="toggleLike(this, @artwork.MaTranh)">
+                                        <button class="like-button @(artwork.LuotThiches.Any(l => l.MaNguoiDung == Context.User.FindFirstValue(ClaimTypes.NameIdentifier)) ? "active" : "")" 
+                                                onclick="toggleLike(this, @artwork.MaTranh)">
                                             <i class="@(artwork.LuotThiches.Any(l => l.MaNguoiDung == Context.User.FindFirstValue(ClaimTypes.NameIdentifier)) ? "fas" : "far") fa-heart"></i>
                                         </button>
                                     </div>
+
                                     <div class="img-info mt-2">
-                                        <a href="@Url.Action("Display", "Home", new { id = artwork.MaTranh })" class="art-link">
-                                            <h6 class="artwork-title">@artwork.TieuDe</h6>
+                                        <a asp-controller="Artwork" asp-action="Display" asp-route-id="@artwork.MaTranh" class="art-link">
+                                            <h6 class="img-title">@artwork.TieuDe</h6>
                                         </a>
                                         <div class="artist-info d-flex align-items-center">
                                             <div class="artist-avatar">

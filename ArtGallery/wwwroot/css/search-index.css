@@ -493,3 +493,144 @@
         grid-template-columns: repeat(1, 1fr);
     }
 }
+
+/* Cập nhật css theo style.css cho hiển thị ảnh */
+.search-view .recommended-pics {
+    margin-bottom: 30px;
+}
+
+.search-view .pic-item {
+    margin-bottom: 15px;
+    transition: transform 0.2s;
+    position: relative;
+}
+
+.search-view .pic-item:hover {
+    transform: translateY(-5px);
+}
+
+.search-view .image-wrapper {
+    position: relative;
+    width: 100%;
+    padding-top: 75%; /* Tỷ lệ 4:3 */
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.search-view .image-wrapper img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.search-view .like-button {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background-color: white;
+    border: none;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    opacity: 0.9;
+    transition: all 0.2s;
+}
+
+.search-view .like-button:hover {
+    transform: scale(1.1);
+    opacity: 1;
+}
+
+.search-view .like-button i {
+    font-size: 16px;
+    color: #777;
+    transition: transform 0.3s;
+}
+
+.search-view .like-button.active i,
+.search-view .like-button i.fas {
+    color: #ff4060;
+}
+
+.search-view .like-count {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 3px 8px;
+    border-radius: 20px;
+    font-size: 12px;
+    color: #666;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.search-view .like-count i {
+    color: #ff4060;
+    font-size: 12px;
+}
+
+.search-view .img-info {
+    margin-top: 8px;
+}
+
+.search-view .img-title {
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 5px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 500;
+}
+
+.search-view .artist-info {
+    display: flex;
+    align-items: center;
+    margin-top: 5px;
+}
+
+.search-view .artist-avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    overflow: hidden;
+    margin-right: 6px;
+}
+
+.search-view .artist-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.search-view .artist-name {
+    font-size: 12px;
+    color: #666;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.search-view .art-link {
+    text-decoration: none;
+    color: inherit;
+}
+
+.search-view .art-link:hover {
+    text-decoration: none;
+    color: #0096fa;
+}
+
+.search-view .art-link:hover .img-title {
+    color: #0096fa;
+}
