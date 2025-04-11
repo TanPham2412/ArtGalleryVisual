@@ -1,9 +1,4 @@
-﻿namespace ArtGallery.wwwroot.css
-{
-    public class register_artist
-    {
-    }
-}
+﻿
 
 /* Artist Registration Form Styles */
 body {
@@ -154,6 +149,7 @@ textarea.form-control {
     font-size: 16px;
     font-weight: 600;
     transition: all 0.3s;
+    min-width: 250px !important;
 }
 
 .btn-primary:hover {
@@ -175,5 +171,33 @@ textarea.form-control {
     
     .btn-primary {
         width: 100%;
+    }
+}
+
+
+.waiting-approval-icon {
+    color: #ffc107;
+    margin-bottom: 20px;
+}
+
+    .waiting-approval-icon i {
+        font-size: 72px;
+        animation: pulse 2s infinite;
+    }
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.1);
+        opacity: 0.8;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
     }
 }

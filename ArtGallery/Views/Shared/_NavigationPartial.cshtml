@@ -93,6 +93,12 @@
                         Đăng tranh ảnh
                     </a>
                 }
+                else if (currentUser.DangKyNgheSi)
+                {
+                    <a href="@Url.Action("PendingArtistApproval", "User")" class="btn-pixiv fw-bold me-3">
+                        Đăng tranh ảnh
+                    </a>
+                }
                 else
                 {
                     <a href="@Url.Action("RegisterArtist", "User")" class="btn-pixiv fw-bold me-3">

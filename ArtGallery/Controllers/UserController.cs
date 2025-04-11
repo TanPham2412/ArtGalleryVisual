@@ -214,5 +214,13 @@ namespace ArtGallery.Controllers
             TempData["SuccessMessage"] = "Đăng ký nghệ sĩ thành công! Vui lòng chờ quản trị viên phê duyệt.";
             return RedirectToAction("Profile", new { id = user.Id });
         }
+
+        public IActionResult PendingArtistApproval()
+        {
+            if (!User.Identity.IsAuthenticated)
+                return RedirectToAction("Login", "Account");
+
+            return View();
+        }
     }
 }
