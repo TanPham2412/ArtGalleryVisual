@@ -8,10 +8,10 @@
     }
 
     // Đảm bảo scroll container hoạt động tốt
-    const tag = document.querySelector('.tag');
-    if (tag) {
+    const searchTag = document.querySelector('.search-tag');
+    if (searchTag) {
         // Tìm tab active
-        const activeTag = tag.querySelector('.tag-items.active');
+        const activeTag = searchTag.querySelector('.search-tag-items.active');
         if (activeTag) {
             // Scroll đến tab active
             setTimeout(() => {

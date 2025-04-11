@@ -44,6 +44,9 @@
 
         <!-- Sort options -->
         <div class="sort-options">
+            <a href="@Url.Action("Index", "Search", new { q = Model.Query, category = Model.Category, sortBy = "all" })"
+               class="sort-option @(Model.SortBy == "all" ? "active" : "")">Tất cả</a>
+
             <a href="@Url.Action("Index", "Search", new { q = Model.Query, category = Model.Category, sortBy = "newest" })"
                class="sort-option @(Model.SortBy == "newest" ? "active" : "")">Mới nhất</a>
 

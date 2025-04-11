@@ -74,17 +74,15 @@ namespace ArtGallery.Controllers
 
         public async Task<IActionResult> Index(string q, string category = "Top", string sortBy = "newest")
         {
-            if (string.IsNullOrEmpty(q))
-            {
-                return RedirectToAction("Index", "Home");
-            }
-
             try
             {
-                q = q.Trim().ToLower();
+                // Xử lý trường hợp tìm kiếm toàn bộ
+                bool isShowAll = string.IsNullOrEmpty(q) || sortBy == "all";
+                string searchQuery = isShowAll ? string.Empty : q?.Trim().ToLower();
+                
                 var viewModel = new SearchViewModel
                 {
-                    Query = q,
+                    Query = searchQuery,
                     Category = category,
                     SortBy = sortBy
                 };
@@ -99,16 +97,23 @@ namespace ArtGallery.Controllers
 
                     viewModel = new SearchViewModel(currentUserId, follows)
                     {
-                        Query = q,
+                        Query = searchQuery,
                         Category = category,
                         SortBy = sortBy
                     };
 
-                    viewModel.Artists = await _context.Users
-                        .Where(u => (u.TenNguoiDung.ToLower().Contains(q) ||
-                                   u.UserName.ToLower().Contains(q)) &&
-                                   _context.UserRoles.Any(ur => ur.UserId == u.Id &&
-                                   ur.RoleId == _context.Roles.FirstOrDefault(r => r.Name == "Artists").Id))
+                    var artistsQuery = _context.Users
+                        .Where(u => _context.UserRoles.Any(ur => ur.UserId == u.Id &&
+                                   ur.RoleId == _context.Roles.FirstOrDefault(r => r.Name == "Artists").Id));
+                                
+                    // Chỉ áp dụng tìm kiếm nếu không phải hiển thị tất cả
+                    if (!isShowAll)
+                    {
+                        artistsQuery = artistsQuery.Where(u => u.TenNguoiDung.ToLower().Contains(searchQuery) ||
+                                                              u.UserName.ToLower().Contains(searchQuery));
+                    }
+                    
+                    viewModel.Artists = await artistsQuery
                         .Include(u => u.Tranhs)
                         .Include(u => u.TheoDoiMaNguoiDuocTheoDoiNavigations)
                         .ToListAsync();
@@ -126,9 +131,12 @@ namespace ArtGallery.Controllers
                         .Include(t => t.MaTheLoais)
                         .AsQueryable();
 
-                    // Tìm theo từ khóa
-                    query = query.Where(t => t.TieuDe.ToLower().Contains(q) ||
-                                           (t.MoTa != null && t.MoTa.ToLower().Contains(q)));
+                    // Chỉ áp dụng tìm kiếm nếu không phải hiển thị tất cả
+                    if (!isShowAll)
+                    {
+                        query = query.Where(t => t.TieuDe.ToLower().Contains(searchQuery) ||
+                                              (t.MoTa != null && t.MoTa.ToLower().Contains(searchQuery)));
+                    }
 
                     // Lọc theo danh mục
                     if (category != "Top" && category != "All")
@@ -144,6 +152,9 @@ namespace ArtGallery.Controllers
                             break;
                         case "oldest":
                             query = query.OrderBy(t => t.NgayDang);
+                            break;
+                        case "all":
+                            // Không cần sắp xếp nếu là "Tất cả"
                             break;
                         default:
                             query = query.OrderByDescending(t => t.NgayDang);
