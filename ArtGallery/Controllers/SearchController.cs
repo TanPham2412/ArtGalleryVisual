@@ -115,6 +115,7 @@ namespace ArtGallery.Controllers
                     
                     viewModel.Artists = await artistsQuery
                         .Include(u => u.Tranhs)
+                        .ThenInclude(t => t.LuotThiches)
                         .Include(u => u.TheoDoiMaNguoiDuocTheoDoiNavigations)
                         .ToListAsync();
 
@@ -180,9 +181,14 @@ namespace ArtGallery.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> ToggleFollow(string artistId)
         {
             var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            
+            // Log để debug
+            _logger.LogInformation($"ToggleFollow được gọi với artistId={artistId}, currentUserId={currentUserId}");
+            
             if (string.IsNullOrEmpty(currentUserId))
                 return Json(new { success = false, message = "Vui lòng đăng nhập để thực hiện chức năng này" });
 
@@ -202,6 +208,7 @@ namespace ArtGallery.Controllers
                     };
                     _context.TheoDois.Add(follow);
                     await _context.SaveChangesAsync();
+                    _logger.LogInformation($"Đã thêm theo dõi: {currentUserId} -> {artistId}");
                     return Json(new { success = true, following = true });
                 }
                 else
@@ -209,6 +216,7 @@ namespace ArtGallery.Controllers
                     // Hủy theo dõi
                     _context.TheoDois.Remove(follow);
                     await _context.SaveChangesAsync();
+                    _logger.LogInformation($"Đã hủy theo dõi: {currentUserId} -> {artistId}");
                     return Json(new { success = true, following = false });
                 }
             }

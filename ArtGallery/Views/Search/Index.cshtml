@@ -1,7 +1,9 @@
 @model ArtGallery.ViewModels.SearchViewModel
 @using System.Security.Claims;
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
 @{
     ViewData["Title"] = $"Tìm kiếm: {Model.Query}";
+    var requestToken = Antiforgery.GetAndStoreTokens(Context).RequestToken;
 }
 
 <link rel="stylesheet" href="~/css/search-index.css" />
@@ -81,9 +83,14 @@
                                             <div class="user-description">@artist.MoTa</div>
                                         }
                                         <div class="user-actions">
-                                            <button class="follow-button @(Model.IsFollowing(artist.Id) ? "following" : "")" onclick="toggleFollow(this, '@artist.Id')">
-                                                @(Model.IsFollowing(artist.Id) ? "Following" : "Follow")
-                                            </button>
+                                            @if (User.Identity.IsAuthenticated && artist.Id != Context.User.FindFirstValue(ClaimTypes.NameIdentifier))
+                                            {
+                                                <button class="follow-button-primary @(Model.IsFollowing(artist.Id) ? "following" : "")" 
+                                                        data-artist-id="@artist.Id">
+                                                    <span class="follow-text">Theo dõi</span>
+                                                    <span class="following-text">Đang theo dõi</span>
+                                                </button>
+                                            }
                                             <button class="more-button">
                                                 <i class="fas fa-ellipsis-h"></i>
                                             </button>
@@ -98,19 +105,22 @@
                                     <div class="artwork-grid">
                                         @foreach (var artwork in artist.Tranhs.Take(4))
                                         {
+                                            var isLiked = artwork.LuotThiches.Any(l => l.MaNguoiDung == Context.User.FindFirstValue(ClaimTypes.NameIdentifier));
                                             <div class="artwork-item">
                                                 <div class="artwork-image-container">
-                                                    <a href="@Url.Action("Display", "Home", new { id = artwork.MaTranh })" class="artwork-link">
+                                                    <a asp-controller="Artwork" asp-action="Display" asp-route-id="@artwork.MaTranh" class="artwork-link">
                                                         <img src="@artwork.DuongDanAnh" alt="@artwork.TieuDe" class="artwork-image">
                                                     </a>
                                                     <div class="artwork-overlay">
-                                                        <button class="like-button" onclick="toggleLike(this, @artwork.MaTranh)">
-                                                            <i class="@(artwork.LuotThiches.Any(l => l.MaNguoiDung == Context.User.FindFirstValue(ClaimTypes.NameIdentifier)) ? "fas" : "far") fa-heart"></i>
+                                                        <button class="like-button @(isLiked ? "active" : "")" 
+                                                                onclick="toggleLike(this, @artwork.MaTranh)" 
+                                                                data-artwork-id="@artwork.MaTranh">
+                                                            <i class="@(isLiked ? "fas" : "far") fa-heart"></i>
                                                         </button>
                                                     </div>
                                                 </div>
                                                 <div class="artwork-caption">
-                                                    <a href="@Url.Action("Display", "Home", new { id = artwork.MaTranh })" class="artwork-title">@artwork.TieuDe</a>
+                                                    <a asp-controller="Artwork" asp-action="Display" asp-route-id="@artwork.MaTranh" class="artwork-title">@artwork.TieuDe</a>
                                                 </div>
                                             </div>
                                         }
@@ -181,7 +191,11 @@
     </div>
 </div>
 
+<form id="antiforgeryForm">
+    <input type="hidden" name="__RequestVerificationToken" value="@requestToken" />
+</form>
+
 @section Scripts {
-    <script src="~/js/search-index.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="~/js/search-index.js"></script>
 }

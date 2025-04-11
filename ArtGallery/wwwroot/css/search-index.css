@@ -205,25 +205,44 @@
     display: flex;
     align-items: center;
     margin-top: 8px;
+    position: relative;
+    width: 100%;
 }
 
-.search-view .follow-button {
-    background-color: #0096fa;
-    color: white;
-    border: none;
+.search-view .follow-button-primary {
+    padding: 8px 16px;
     border-radius: 20px;
-    padding: 6px 20px;
-    font-size: 14px;
+    border: 1px solid #1DA1F2;
+    background-color: #1DA1F2;
+    color: white;
+    font-weight: 600;
     cursor: pointer;
-    font-weight: 500;
+    transition: all 0.2s;
+    white-space: nowrap;
     margin-right: 10px;
+    position: relative;
 }
 
-.search-view .follow-button.following {
-    background-color: #f2f2f2;
-    color: #666;
+.search-view .follow-button-primary:not(.following) {
+    background-color: white;
+    color: #1DA1F2;
 }
 
+/* Ẩn phần text khi không cần thiết */
+.search-view .follow-button-primary .follow-text,
+.search-view .follow-button-primary .following-text {
+    transition: opacity 0.2s;
+}
+
+.search-view .follow-button-primary:not(.following) .following-text {
+    display: none;
+}
+
+.search-view .follow-button-primary.following .follow-text {
+    display: none;
+}
+
+/* Style cho more button */
 .search-view .more-button {
     background: none;
     border: none;
@@ -633,4 +652,73 @@
 
 .search-view .art-link:hover .img-title {
     color: #0096fa;
+}
+
+/* Cập nhật style cho nút like trong tab tác giả */
+.search-view .artwork-overlay .like-button {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background-color: white;
+    border: none;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    opacity: 0.9;
+    transition: all 0.2s;
+    z-index: 10;
+}
+
+.search-view .artwork-overlay .like-button:hover {
+    transform: scale(1.1);
+    opacity: 1;
+}
+
+.search-view .artwork-overlay .like-button i {
+    font-size: 16px;
+    color: #777;
+}
+
+.search-view .artwork-overlay .like-button.active i {
+    color: #ff4060;
+}
+
+/* Đảm bảo nút like hiển thị đúng trên ảnh trong tab tác giả */
+.search-view .artwork-image-container {
+    position: relative;
+    width: 100%;
+    padding-bottom: 100%;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.search-view .artwork-overlay {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    padding: 10px;
+    z-index: 5;
+}
+
+/* Cập nhật đúng liên kết cho ảnh trong tab tác giả */
+.search-view .artwork-link {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+/* Thêm style cho trạng thái loading */
+.search-view .follow-button-primary.loading {
+    opacity: 0.7;
+    pointer-events: none;
 }

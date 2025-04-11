@@ -19,41 +19,82 @@
             }, 100);
         }
     }
+
+    // Thêm event listener cho nút theo dõi 
+    document.querySelectorAll('.follow-button-primary').forEach(button => {
+        button.addEventListener('click', function (event) {
+            event.preventDefault();
+            const artistId = this.getAttribute('data-artist-id');
+            if (artistId) {
+                toggleFollow(event, artistId);
+            }
+        });
+    });
 });
 
-// Hàm toggle Follow
-function toggleFollow(button, artistId) {
+// Biến để theo dõi trạng thái request đang xử lý
+const pendingRequests = {};
+
+// Hàm toggle Follow cập nhật để xử lý nhiều lần nhấn liên tiếp
+function toggleFollow(event, artistId) {
+    event.preventDefault();
+
+    const button = event.currentTarget;
     const isFollowing = button.classList.contains('following');
-    
-    $.ajax({
-        url: '/Search/ToggleFollow',
-        type: 'POST',
-        data: { artistId: artistId },
+
+    // Nếu đang có request cho artist này, không làm gì cả
+    if (pendingRequests[artistId]) return;
+
+    // Đánh dấu đang có request cho artist này
+    pendingRequests[artistId] = true;
+
+    // Hiệu ứng tức thì nhưng không block nút
+    if (isFollowing) {
+        button.classList.remove('following');
+    } else {
+        button.classList.add('following');
+    }
+
+    fetch('/Search/ToggleFollow', {
+        method: 'POST',
         headers: {
-            'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
         },
-        success: function (response) {
-            if (response.success) {
-                if (response.following) {
-                    button.textContent = "Following";
-                    button.classList.add("following");
+        body: 'artistId=' + encodeURIComponent(artistId)
+    })
+        .then(response => response.json())
+        .then(data => {
+            // Giải phóng lock cho artist này
+            delete pendingRequests[artistId];
+
+            if (!data.success) {
+                // Đảo ngược trạng thái nếu thất bại
+                if (isFollowing) {
+                    button.classList.add('following');
                 } else {
-                    button.textContent = "Follow";
-                    button.classList.remove("following");
+                    button.classList.remove('following');
                 }
-            } else {
-                // Nếu cần đăng nhập
-                if (response.message.includes("đăng nhập")) {
+
+                if (data.message && data.message.includes("đăng nhập")) {
                     window.location.href = '/Identity/Account/Login';
                 } else {
-                    alert(response.message);
+                    console.error('Lỗi:', data.message);
                 }
             }
-        },
-        error: function () {
-            alert('Có lỗi xảy ra khi thực hiện thao tác theo dõi');
-        }
-    });
+        })
+        .catch(error => {
+            // Giải phóng lock cho artist này trong trường hợp lỗi
+            delete pendingRequests[artistId];
+
+            console.error('Lỗi khi gọi API:', error);
+            // Đảo ngược trạng thái nếu có lỗi
+            if (isFollowing) {
+                button.classList.add('following');
+            } else {
+                button.classList.remove('following');
+            }
+        });
 }
 
 // Hàm toggle Like
@@ -63,33 +104,13 @@ function toggleLike(button, artworkId) {
         type: 'POST',
         data: { artworkId: artworkId },
         headers: {
-            'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
         },
         success: function (response) {
             if (response.success) {
-                const icon = button.querySelector('i');
-                if (response.liked) {
-                    icon.classList.remove('far');
-                    icon.classList.add('fas');
-                    
-                    // Cập nhật số lượng like nếu có hiển thị
-                    const likeCountElem = button.closest('.artwork-overlay').querySelector('.like-count-badge span');
-                    if (likeCountElem) {
-                        likeCountElem.textContent = parseInt(likeCountElem.textContent) + 1;
-                    }
-                } else {
-                    icon.classList.remove('fas');
-                    icon.classList.add('far');
-                    
-                    // Cập nhật số lượng like nếu có hiển thị
-                    const likeCountElem = button.closest('.artwork-overlay').querySelector('.like-count-badge span');
-                    if (likeCountElem) {
-                        const currentCount = parseInt(likeCountElem.textContent);
-                        likeCountElem.textContent = currentCount > 0 ? currentCount - 1 : 0;
-                    }
-                }
+                // Cập nhật tất cả các nút like cho cùng một ảnh trong trang
+                updateAllLikeButtons(artworkId, response.liked);
             } else {
-                // Nếu cần đăng nhập
                 if (response.message && response.message.includes("đăng nhập")) {
                     window.location.href = '/Identity/Account/Login';
                 } else {
@@ -102,3 +123,33 @@ function toggleLike(button, artworkId) {
         }
     });
 }
+
+// Hàm cập nhật tất cả các nút like cho cùng một ảnh
+function updateAllLikeButtons(artworkId, isLiked) {
+    // Tìm tất cả các nút like có data-artwork-id = artworkId
+    const allLikeButtons = document.querySelectorAll(`[data-artwork-id="${artworkId}"]`);
+
+    allLikeButtons.forEach(btn => {
+        const icon = btn.querySelector('i');
+
+        if (isLiked) {
+            icon.classList.remove('far');
+            icon.classList.add('fas');
+            btn.classList.add('active');
+        } else {
+            icon.classList.remove('fas');
+            icon.classList.add('far');
+            btn.classList.remove('active');
+        }
+    });
+}
+
+// Khi trang tải, đảm bảo trạng thái like được cập nhật chính xác
+document.addEventListener('DOMContentLoaded', function () {
+    // Đảm bảo jQuery được load trước khi sử dụng
+    if (typeof $ === 'undefined') {
+        console.error('jQuery chưa được load!');
+    } else {
+        console.log('jQuery đã sẵn sàng');
+    }
+});
