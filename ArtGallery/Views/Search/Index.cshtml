@@ -73,7 +73,7 @@
                         <div class="artist-row">
                             <div class="artist-info-column">
                                 <div class="user-info">
-                                    <a href="@Url.Action("Profile", "User", new { username = artist.UserName })" class="user-avatar">
+                                    <a href="@Url.Action("Profile", "User", new { Id = artist.Id })" class="user-avatar">
                                         <img src="@artist.GetAvatarPath()" alt="@artist.TenNguoiDung">
                                     </a>
                                     <div class="user-profile">
