@@ -11,7 +11,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Đăng ký - PiaoYue Art Gallery</title>
-    <link rel="stylesheet" href="~/css/login1_register.css">
+    <link rel="stylesheet" href="~/css/login1_register.css?v=2">
     <script src="~/js/login_register.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
@@ -93,7 +93,7 @@
                             @if (provider.Name.ToLower() == "google")
                             {
                                 <button type="submit" name="provider" value="@provider.Name" class="social-btn google">
-                                    <img src="~/images/icons/google.png" alt="Google">
+                                    <i class="fab fa-google"></i>
                                 </button>
                             }
                             else

@@ -4,6 +4,7 @@
 @inject ArtGalleryContext DbContext
 @inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
 
+<link rel="stylesheet" href="~/css/navigation.css?v=2">
 @{
     var token = Antiforgery.GetAndStoreTokens(Context).RequestToken;
     var currentUser = User.Identity.IsAuthenticated ? await UserManager.GetUserAsync(User) : null;
@@ -285,6 +286,7 @@
     </div>
 </div>
 
+
 <script src="~/js/Navigation.js"></script>
 <script src="~/js/search.js"></script>
 
@@ -303,3 +305,8 @@
         return $"{(int)timeSpan.TotalDays} ngày trước";
     }
 }
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.body.classList.add('has-navbar-fixed');
+    });
+</script>

@@ -342,4 +342,14 @@ function toggleFollow(event, userId) {
             }
             alert('Có lỗi xảy ra khi thực hiện theo dõi');
         });
+
 }
+
+document.addEventListener('DOMContentLoaded', function () {
+    // Fix navbar height issues
+    const navbar = document.querySelector('.navbar');
+    if (navbar) {
+        navbar.style.height = 'auto';
+        navbar.style.minHeight = '56px';
+    }
+});
