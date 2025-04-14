@@ -15,7 +15,24 @@
     @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
-    @await Html.PartialAsync("_NavigationPartial")
+    @{
+        // Kiểm tra URL hiện tại có phải là trang đăng nhập/đăng ký không
+        var currentPath = Context.Request.Path.ToString().ToLower();
+        var authPages = new[] { 
+            "/identity/account/login", 
+            "/identity/account/register", 
+            "/home/loginregister" 
+        };
+        
+        bool isAuthPage = authPages.Any(page => currentPath.Contains(page));
+        
+        // Hiển thị navigation nếu không phải trang xác thực
+        if (!isAuthPage)
+        {
+            @await Html.PartialAsync("_NavigationPartial")
+        }
+    }
+    
     @RenderBody()
     
     <footer class="footer">
