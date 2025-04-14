@@ -12,10 +12,10 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
+    @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
-
+    @await Html.PartialAsync("_NavigationPartial")
     @RenderBody()
     
     <footer class="footer">
@@ -96,8 +96,10 @@
             </div>
         </div>
     </footer>
-    @await RenderSectionAsync("Scripts", required: false)
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="~/js/Navigation.js"></script>
+    <script src="@Url.Content("~/js/Navigation.js")" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
+<link rel="stylesheet" href="@Url.Content("~/css/navigation.css")" asp-append-version="true" />

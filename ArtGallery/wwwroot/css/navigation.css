@@ -393,7 +393,7 @@
 }
 
 /* Notification styles */
-.notification-link {
+.notification-container {
     position: relative;
     display: inline-block;
 }
@@ -419,9 +419,13 @@
     max-height: 500px;
     overflow-y: auto;
     padding: 0;
-    right: 150px !important; 
     background: #1e1e1e;
     border: 1px solid #333;
+    position: absolute;
+    top: 100%;
+    right: -50px !important;
+    margin-top: 8px;
+    z-index: 10000;
 }
 
 .notification-header {

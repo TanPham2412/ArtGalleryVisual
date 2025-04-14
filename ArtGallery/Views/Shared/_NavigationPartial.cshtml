@@ -118,13 +118,86 @@
             {
                 <div class="nav-icons d-flex align-items-center">
                     <a href="#" class="icon-link me-3"><i class="far fa-envelope"></i></a>
-                    <a href="#" class="icon-link me-3 notification-link position-relative" id="notificationDropdown">
-                        <i class="far fa-bell"></i>
-                        @if (thongBaoChuaDoc > 0)
-                        {
-                            <span class="notification-badge">@(thongBaoChuaDoc > 9 ? "9+" : thongBaoChuaDoc.ToString())</span>
-                        }
-                    </a>
+                    <div class="position-relative">
+                        <a href="#" class="icon-link me-3 notification-link position-relative" id="notificationDropdown">
+                            <i class="far fa-bell"></i>
+                            @if (thongBaoChuaDoc > 0)
+                            {
+                                <span class="notification-badge">@(thongBaoChuaDoc > 9 ? "9+" : thongBaoChuaDoc.ToString())</span>
+                            }
+                        </a>
+                        
+                        <div class="dropdown-menu notification-dropdown" id="notificationDropdownMenu">
+                            <div class="notification-header">
+                                <div class="notification-title">Thông báo</div>
+                                <div class="notification-actions">
+                                    <a href="#" class="notification-setting"><i class="fas fa-cog"></i></a>
+                                    <a href="#" id="markAllAsRead" class="mark-all-read">Đánh dấu tất cả là đã đọc</a>
+                                </div>
+                            </div>
+                            <div class="notification-tabs">
+                                <button class="notification-tab active" data-tab="all">Tất cả</button>
+                                <button class="notification-tab" data-tab="unread">Chưa đọc</button>
+                            </div>
+                            <div class="notification-list">
+                                @if (thongBaoList.Any())
+                                {
+                                    foreach (var thongBao in thongBaoList)
+                                    {
+                                        <a href="@thongBao.URL" class="notification-item @(thongBao.DaDoc != true ? "unread" : "")" data-id="@thongBao.MaThongBao">
+                                            <div class="notification-avatar">
+                                                @if (!string.IsNullOrEmpty(thongBao.MaNguoiGui))
+                                                {
+                                                    <img src="@(thongBao.MaNguoiGuiNavigation?.GetAvatarPath() ?? defaultAvatar)" alt="Sender Avatar">
+                                                }
+                                                else
+                                                {
+                                                    <div class="notification-icon @thongBao.LoaiThongBao">
+                                                        @switch (thongBao.LoaiThongBao)
+                                                        {
+                                                            case "like":
+                                                                <i class="fas fa-heart"></i>
+                                                                break;
+                                                            case "comment":
+                                                                <i class="fas fa-comment"></i>
+                                                                break;
+                                                            case "follow":
+                                                                <i class="fas fa-user-plus"></i>
+                                                                break;
+                                                            case "system":
+                                                                <i class="fas fa-info-circle"></i>
+                                                                break;
+                                                            default:
+                                                                <i class="fas fa-bell"></i>
+                                                                break;
+                                                        }
+                                                    </div>
+                                                }
+                                            </div>
+                                            <div class="notification-content">
+                                                <div class="notification-message">@thongBao.NoiDung</div>
+                                                <div class="notification-time">@(((DateTime.Now - thongBao.ThoiGian).TotalDays > 1) ? thongBao.ThoiGian.ToString("dd/MM/yyyy HH:mm") : GetTimeAgo(thongBao.ThoiGian))</div>
+                                            </div>
+                                            @if (thongBao.DaDoc != true)
+                                            {
+                                                <div class="notification-status"></div>
+                                            }
+                                        </a>
+                                    }
+                                }
+                                else
+                                {
+                                    <div class="notification-empty">
+                                        <div class="empty-icon"><i class="far fa-bell-slash"></i></div>
+                                        <div class="empty-text">Không có thông báo nào</div>
+                                    </div>
+                                }
+                            </div>
+                            <div class="notification-footer">
+                                <a href="#" class="view-all-notifications">Xem tất cả thông báo</a>
+                            </div>
+                        </div>
+                    </div>
                     
                     <div class="user-dropdown">
                         <a href="#" class="icon-link user-avatar" id="userDropdown">
@@ -215,80 +288,7 @@
     <input type="hidden" name="returnUrl" value="/" />
 </form>
 
-<div class="dropdown-menu notification-dropdown" id="notificationDropdownMenu">
-    <div class="notification-header">
-        <div class="notification-title">Thông báo</div>
-        <div class="notification-actions">
-            <a href="#" class="notification-setting"><i class="fas fa-cog"></i></a>
-            <a href="#" id="markAllAsRead" class="mark-all-read">Đánh dấu tất cả là đã đọc</a>
-        </div>
-    </div>
-    <div class="notification-tabs">
-        <button class="notification-tab active" data-tab="all">Tất cả</button>
-        <button class="notification-tab" data-tab="unread">Chưa đọc</button>
-    </div>
-    <div class="notification-list">
-        @if (thongBaoList.Any())
-        {
-            foreach (var thongBao in thongBaoList)
-            {
-                <a href="@thongBao.URL" class="notification-item @(thongBao.DaDoc != true ? "unread" : "")" data-id="@thongBao.MaThongBao">
-                    <div class="notification-avatar">
-                        @if (!string.IsNullOrEmpty(thongBao.MaNguoiGui))
-                        {
-                            <img src="@(thongBao.MaNguoiGuiNavigation?.GetAvatarPath() ?? defaultAvatar)" alt="Sender Avatar">
-                        }
-                        else
-                        {
-                            <div class="notification-icon @thongBao.LoaiThongBao">
-                                @switch (thongBao.LoaiThongBao)
-                                {
-                                    case "like":
-                                        <i class="fas fa-heart"></i>
-                                        break;
-                                    case "comment":
-                                        <i class="fas fa-comment"></i>
-                                        break;
-                                    case "follow":
-                                        <i class="fas fa-user-plus"></i>
-                                        break;
-                                    case "system":
-                                        <i class="fas fa-info-circle"></i>
-                                        break;
-                                    default:
-                                        <i class="fas fa-bell"></i>
-                                        break;
-                                }
-                            </div>
-                        }
-                    </div>
-                    <div class="notification-content">
-                        <div class="notification-message">@thongBao.NoiDung</div>
-                        <div class="notification-time">@(((DateTime.Now - thongBao.ThoiGian).TotalDays > 1) ? thongBao.ThoiGian.ToString("dd/MM/yyyy HH:mm") : GetTimeAgo(thongBao.ThoiGian))</div>
-                    </div>
-                    @if (thongBao.DaDoc != true)
-                    {
-                        <div class="notification-status"></div>
-                    }
-                </a>
-            }
-        }
-        else
-        {
-            <div class="notification-empty">
-                <div class="empty-icon"><i class="far fa-bell-slash"></i></div>
-                <div class="empty-text">Không có thông báo nào</div>
-            </div>
-        }
-    </div>
-    <div class="notification-footer">
-        <a href="#" class="view-all-notifications">Xem tất cả thông báo</a>
-    </div>
-</div>
-
-
 <script src="~/js/Navigation.js"></script>
-<script src="~/js/search.js"></script>
 
 @{
     string GetTimeAgo(DateTime dateTime)
