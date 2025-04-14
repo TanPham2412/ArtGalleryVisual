@@ -171,6 +171,20 @@ document.addEventListener('DOMContentLoaded', function () {
             button.style.display = 'none';
         }
     });
+
+    // Sửa tiêu đề modal khi mở
+    const openEditProfileModal = window.openEditProfileModal;
+    window.openEditProfileModal = function() {
+        openEditProfileModal();
+        // Đổi tiêu đề modal sang tiếng việt
+        const modalTitle = document.querySelector('.modal-header h3');
+        if (modalTitle) {
+            modalTitle.textContent = 'Chỉnh sửa hồ sơ';
+        }
+    };
+    
+    // Cập nhật label ô input cho dropdown địa điểm
+    initializeSelects();
 });
 
 function initializeSelects() {

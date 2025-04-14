@@ -148,7 +148,7 @@
   <div id="editProfileModal" class="modal">  
       <div class="modal-content">  
           <div class="modal-header">  
-              <h3>Edit profile</h3>  
+              <h3>Chỉnh sửa hồ sơ</h3>  
               <span class="close" onclick="closeEditProfileModal()">&times;</span>  
           </div>  
           <form id="editProfileForm" method="post" action="@Url.Action("UpdateProfile", "User")" enctype="multipart/form-data">  
@@ -180,9 +180,9 @@
 
               <!-- Profile Image Section -->  
               <div class="form-group">  
-                  <label>Profile images</label>  
+                  <label>Ảnh đại diện</label>  
                   <div class="profile-image-container">  
-                      <img id="profilePreview" src="@Model.GetAvatarPath()" alt="Profile Image">  
+                      <img id="profilePreview" src="@Model.GetAvatarPath()" alt="Ảnh đại diện">  
                       <div class="edit-icon" onclick="document.getElementById('profileImage').click()">  
                           <i class="fas fa-pencil-alt"></i>  
                       </div>  
@@ -192,7 +192,7 @@
 
               <!-- Nickname Section -->  
               <div class="form-group">  
-                  <label for="nickname">Nickname</label>  
+                  <label for="nickname">Tên hiển thị</label>  
                   <div class="input-container">  
                       <input type="text" id="nickname" name="TenNguoiDung" value="@Model.TenNguoiDung" maxlength="50">  
                   </div>  
@@ -200,13 +200,13 @@
 
               <!-- Self Introduction Section -->  
               <div class="form-group">  
-                  <label for="selfIntro">Self introduction</label>  
+                  <label for="selfIntro">Giới thiệu bản thân</label>  
                   <textarea id="selfIntro" name="MoTa" rows="3">@Model.MoTa</textarea>  
               </div>  
 
               <!-- Social Media Section -->  
               <div class="form-group">  
-                  <label>Social media</label>  
+                  <label>Mạng xã hội</label>  
                   <div id="socialMediaContainer">  
                       @if (Model.Media != null && Model.Media.Any())  
                       {  
@@ -232,26 +232,26 @@
 
               <!-- Gender Section -->  
               <div class="form-group">  
-                  <label>Gender</label>  
+                  <label>Giới tính</label>  
                   <div class="gender-row">  
                       <div class="radio-options">  
                           <label class="radio-option">  
                               <input type="radio" name="GioiTinh" value="Nam" @(Model.GioiTinh == "Nam" ? "checked" : "")>  
-                              <span>Male</span>  
+                              <span>Nam</span>  
                           </label>  
                           <label class="radio-option">  
                               <input type="radio" name="GioiTinh" value="Nữ" @(Model.GioiTinh == "Nữ" ? "checked" : "")>  
-                              <span>Female</span>  
+                              <span>Nữ</span>  
                           </label>  
                           <label class="radio-option">  
                               <input type="radio" name="GioiTinh" value="Khác" @(Model.GioiTinh == "Khác" ? "checked" : "")>  
-                              <span>Rather not say</span>  
+                              <span>Khác</span>  
                           </label>  
                       </div>  
                       <div class="privacy-select-wrapper">  
                           <select class="privacy-select" name="HienThiGioiTinh">  
-                              <option value="Public" selected="@(Model.HienThiGioiTinh == "Public")">Public</option>  
-                              <option value="Private" selected="@(Model.HienThiGioiTinh == "Private")">Private</option>  
+                              <option value="Public" selected="@(Model.HienThiGioiTinh == "Public")">Công khai</option>  
+                              <option value="Private" selected="@(Model.HienThiGioiTinh == "Private")">Riêng tư</option>  
                           </select>  
                       </div>  
                   </div>  
@@ -259,7 +259,7 @@
 
               <!-- Location Section -->  
               <div class="form-group">  
-                  <label>Location</label>  
+                  <label>Vị trí</label>  
                   <div class="select-row">  
                       <div class="main-select-wrapper">  
                           <select class="main-select" name="DiaChi" id="locationSelect">  
@@ -269,8 +269,8 @@
                       </div>  
                       <div class="privacy-select-wrapper">  
                           <select class="privacy-select" name="HienThiDiaChi">  
-                              <option value="Public" selected="@(Model.HienThiDiaChi == "Public")">Public</option>  
-                              <option value="Private" selected="@(Model.HienThiDiaChi == "Private")">Private</option>  
+                              <option value="Public" selected="@(Model.HienThiDiaChi == "Public")">Công khai</option>  
+                              <option value="Private" selected="@(Model.HienThiDiaChi == "Private")">Riêng tư</option>  
                           </select>  
                       </div>  
                   </div>  
@@ -281,7 +281,7 @@
 
              <!-- Birth Year Section -->  
               <div class="form-group">  
-                  <label>Birth year</label>  
+                  <label>Năm sinh</label>  
                   <div class="select-row">  
                       <div class="main-select-wrapper">  
                           <select class="main-select" name="BirthYear">  
@@ -290,8 +290,8 @@
                       </div>  
                       <div class="privacy-select-wrapper">  
                           <select class="privacy-select" name="HienThiNamSinh">  
-                              <option value="Public" selected="@(Model.HienThiNamSinh == "Public")">Public</option>  
-                              <option value="Private" selected="@(Model.HienThiNamSinh == "Private")">Private</option>  
+                              <option value="Public" selected="@(Model.HienThiNamSinh == "Public")">Công khai</option>  
+                              <option value="Private" selected="@(Model.HienThiNamSinh == "Private")">Riêng tư</option>  
                           </select>  
                       </div>  
                   </div>  
@@ -299,7 +299,7 @@
 
               <!-- Birthday Section -->  
               <div class="form-group">  
-                  <label>Birthday</label>  
+                  <label>Ngày sinh</label>  
                   <div class="birthday-row">  
                       <div class="month-select-wrapper">  
                           <select class="month-select" name="BirthMonth">  
@@ -313,8 +313,8 @@
                       </div>  
                       <div class="privacy-select-wrapper">  
                           <select class="privacy-select" name="HienThiNgaySinh">  
-                              <option value="Public" selected="@(Model.HienThiNgaySinh == "Public")">Public</option>  
-                              <option value="Private" selected="@(Model.HienThiNgaySinh == "Private")">Private</option>  
+                              <option value="Public" selected="@(Model.HienThiNgaySinh == "Public")">Công khai</option>  
+                              <option value="Private" selected="@(Model.HienThiNgaySinh == "Private")">Riêng tư</option>  
                           </select>  
                       </div>  
                   </div>  
@@ -322,8 +322,8 @@
 
               <!-- Footer Buttons -->  
               <div class="modal-footer">  
-                  <button type="submit" class="save-btn">Save Changes</button>  
-                  <button type="button" class="cancel-btn">Cancel</button>  
+                  <button type="submit" class="save-btn">Lưu thay đổi</button>  
+                  <button type="button" class="cancel-btn" onclick="closeEditProfileModal()">Hủy</button>  
               </div>  
           </form>  
       </div>  

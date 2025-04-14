@@ -1,5 +1,12 @@
-﻿.profile-container {
+﻿/* Màu nền tối và text sáng */
+body {
+    background-color: #121212;
+    color: #e0e0e0;
+}
+
+.profile-container {
     padding-top: 56px;
+    background-color: #121212;
 }
 
 /* Cover Section */
@@ -50,7 +57,7 @@
     padding: 0 32px;
     margin-top: -80px;
     padding-top: 40px;
-    background: linear-gradient(to bottom, transparent, white);
+    background: linear-gradient(to bottom, transparent, #121212);
     display: flex;
     margin-bottom: 24px;
 }
@@ -88,20 +95,22 @@
     font-weight: 700;
     margin-bottom: 8px;
     margin-right: 150px;
+    color: #e0e0e0;
 }
 
 .profile-stats {
     margin-bottom: 8px;
     font-size: 14px;
+    color: #aaa;
 }
 
 .stat-item {
-    color: #666;
+    color: #aaa;
 }
 
 .stat-number {
     font-weight: 600;
-    color: #333;
+    color: #e0e0e0;
 }
 
 .stat-divider {
@@ -111,7 +120,7 @@
 
 .profile-location {
     margin-top: 8px;
-    color: #666;
+    color: #aaa;
     font-size: 14px;
     display: flex;
     align-items: center;
@@ -167,31 +176,39 @@
     align-items: center;
     justify-content: center;
     border-radius: 50%;
+    background: #1a1a1a;
+    color: #e0e0e0;
+    border: 1px solid #333;
 }
 
 .edit-profile-btn {
     padding: 8px 16px;
-    border: 1px solid #ddd;
+    border: 1px solid #333;
     border-radius: 20px;
-    background: white;
+    background: #1a1a1a;
     font-weight: 500;
+    color: #e0e0e0;
+    transition: all 0.3s ease;
 }
 
-.share-profile-btn {
-    width: 36px;
-    height: 36px;
-    border: 1px solid #ddd;
-    border-radius: 50%;
-    background: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.edit-profile-btn:hover {
+    background: #333;
+    color: #00a8ff;
+    border-color: #00a8ff;
+    box-shadow: 0 0 8px rgba(0, 168, 255, 0.3);
+}
+
+.share-profile-btn:hover {
+    background: #333;
+    color: #00a8ff;
+    border-color: #00a8ff;
+    box-shadow: 0 0 8px rgba(0, 168, 255, 0.3);
 }
 
 /* Navigation */
 .profile-nav {
     padding: 0 32px;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid #333;
     margin-bottom: 32px;
 }
 
@@ -199,13 +216,13 @@
     display: inline-block;
     padding: 16px 0;
     margin-right: 32px;
-    color: #666;
+    color: #aaa;
     text-decoration: none;
     position: relative;
 }
 
     .nav-link.active {
-        color: #333;
+        color: #e0e0e0;
         font-weight: 500;
     }
 
@@ -216,7 +233,7 @@
             left: 0;
             right: 0;
             height: 2px;
-            background: #333;
+            background: #00a8ff;
         }
 
 /* Featured Section */
@@ -252,14 +269,15 @@
 
 .add-featured {
     aspect-ratio: 1;
-    border: 2px dashed #ddd;
+    border: 2px dashed #333;
     border-radius: 8px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    color: #666;
+    color: #aaa;
     cursor: pointer;
+    background-color: #1a1a1a;
 }
 
 /* Gallery Section */
@@ -301,48 +319,24 @@ body.modal-open {
     left: 0;
     width: 100%;
     height: 100vh;
-    background-color: rgba(255, 255, 255, 0.95);
+    background-color: rgba(0, 0, 0, 0.7);
     z-index: 9999;
 }
 
 .modal-content {
     position: relative;
-    background-color: #fff;
+    background-color: #1a1a1a;
     width: 350px;
     margin: 0 auto;
     height: 100vh;
     overflow-y: auto;
+    color: #e0e0e0;
+    border: 1px solid #333;
 }
 
 .modal-content::-webkit-scrollbar {
     display: none; /* Ẩn thanh cuộn */
 }
-
-/* Modal Styles */
-.modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100vh;
-    background-color: #fff;
-    z-index: 9999;
-}
-
-.modal-content {
-    position: relative;
-    background-color: #fff;
-    width: 400px;
-    margin: 0 auto;
-    height: 100vh;
-    overflow-y: auto;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
-    .modal-content::-webkit-scrollbar {
-        display: none; /* Ẩn thanh cuộn */
-    }
 
 /* Header */
 .modal-header {
@@ -350,10 +344,10 @@ body.modal-open {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid #333;
     position: sticky;
     top: 0;
-    background: white;
+    background: #1a1a1a;
     z-index: 2;
 }
 
@@ -361,11 +355,13 @@ body.modal-open {
         font-size: 16px;
         font-weight: 500;
         margin: 0;
+        color: #e0e0e0;
     }
 
 .close {
     cursor: pointer;
     font-size: 18px;
+    color: #e0e0e0;
 }
 
 /* Cover Image */
@@ -431,14 +427,15 @@ body.modal-open {
 /* Form Groups */
 .form-group {
     padding: 16px;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid #333;
     position: relative;
     z-index: 1;
+    background-color: #1a1a1a;
 }
 
     .form-group label {
         display: block;
-        color: #333;
+        color: #e0e0e0;
         margin-bottom: 8px;
         font-size: 14px;
         font-weight: normal;
@@ -470,19 +467,19 @@ body.modal-open {
     right: 0;
     width: 20px;
     height: 20px;
-    background: white;
+    background: #333;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid #ddd;
+    border: 1px solid #444;
     cursor: pointer;
     box-shadow: 0 1px 2px rgba(0,0,0,0.1);
 }
 
     .edit-icon i {
         font-size: 10px;
-        color: #555;
+        color: #e0e0e0;
     }
 
 /* Input Container */
@@ -503,11 +500,13 @@ textarea {
     width: 100%;
     min-height: 80px;
     border: none;
-    background-color: #f0f2f5;
+    background-color: #333;
     border-radius: 4px;
     padding: 12px;
     font-size: 14px;
     resize: none;
+    color: #e0e0e0;
+    border: 1px solid #444;
 }
 
 /* Website Input */
@@ -516,8 +515,10 @@ input[type="text"] {
     padding: 12px;
     border: none;
     border-radius: 4px;
-    background-color: #f0f2f5;
+    background-color: #333;
     font-size: 14px;
+    color: #e0e0e0;
+    border: 1px solid #444;
 }
 
 /* Social Media */
@@ -525,7 +526,7 @@ input[type="text"] {
     display: flex;
     align-items: center;
     margin-bottom: 8px;
-    background-color: #f0f2f5;
+    background-color: #333;
     border-radius: 4px;
     overflow: hidden;
 }
@@ -534,24 +535,25 @@ input[type="text"] {
     width: 100px;
     padding: 12px 8px;
     border: none;
-    background-color: #f0f2f5;
+    background-color: #333;
     font-size: 14px;
     cursor: pointer;
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
-    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24'%3E%3Cpath fill='%23333' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24'%3E%3Cpath fill='%23e0e0e0' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 8px center;
+    color: #e0e0e0;
 }
 
 .social-media-item input {
     flex: 1;
     padding: 12px 8px;
     border: none;
-    background-color: #f0f2f5;
+    background-color: #333;
     font-size: 14px;
-    color: #65676B;
+    color: #e0e0e0;
 }
 
 .remove-media {
@@ -567,18 +569,19 @@ input[type="text"] {
     height: 100%;
 }
 .add-media {
-    background-color: #f0f2f5;
+    background-color: #333;
     border: none;
     border-radius: 4px;
     padding: 8px 12px;
     font-size: 14px;
     cursor: pointer;
     margin-top: 8px;
-    color: #333;
+    color: #e0e0e0;
 }   
 
     .add-media:hover {
-        background-color: #e4e6e9;
+        background-color: #444;
+        color: #00a8ff;
     }
 /* Select Styles */
 .select-row, .birthday-row {
@@ -607,14 +610,14 @@ select {
     padding: 8px 12px;
     border: none;
     border-radius: 6px;
-    background-color: #f0f2f5;
+    background-color: #333;
     font-size: 14px;
-    color: #333;
+    color: #e0e0e0;
     cursor: pointer;
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
-    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24'%3E%3Cpath fill='%23333' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24'%3E%3Cpath fill='%23e0e0e0' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 8px center;
 }
@@ -643,12 +646,12 @@ select {
 /* Dropdown menu styles */
 select option {
     padding: 8px;
-    background-color: white;
-    color: #333;
+    background-color: #333;
+    color: #e0e0e0;
 }
 
 select:hover {
-    background-color: #e4e6e9;
+    background-color: #444;
 }
 
     .form-group:hover {
@@ -698,17 +701,17 @@ select:hover {
 /* Footer */
 .modal-footer {
     padding: 16px;
-    border-top: 1px solid #eee;
+    border-top: 1px solid #333;
     position: sticky;
     bottom: 0;
-    background: white;
+    background: #1a1a1a;
     z-index: 2;
 }
 
 .save-btn {
     width: 100%;
     padding: 10px 0;
-    background: #0095f6;
+    background: #00a8ff;
     color: white;
     border: none;
     border-radius: 4px;
@@ -716,33 +719,49 @@ select:hover {
     font-weight: 500;
     cursor: pointer;
     margin-bottom: 12px;
+    transition: all 0.3s ease;
 }
 
     .save-btn:hover {
-        background: #0086e0;
+        background: #0084E0;
+        box-shadow: 0 0 10px rgba(0, 168, 255, 0.5);
     }
 
 .cancel-btn {
     width: 100%;
     background: none;
     border: none;
-    color: #333;
+    color: #e0e0e0;
     font-size: 14px;
     cursor: pointer;
     padding: 8px 0;
 }
 
     .cancel-btn:hover {
-        background-color: #f8f9fa;
-        border-radius: 4px;
+        background-color: #333;
+        color: #ff6b6b;
     }
 
 /* Hover effects */
 input[type="text"]:hover,
 textarea:hover,
 .social-media-item:hover {
-    background-color: #e4e6e9;
+    background-color: #3a3a3a; /* Màu tối hơn khi hover */
+    border-color: #555;
     cursor: pointer;
+}
+
+input[type="text"]:focus,
+textarea:focus {
+    background-color: #3a3a3a;
+    border-color: #00a8ff;
+    outline: none;
+}
+
+/* Sửa màu cho social media item hover */
+.social-media-item:hover select,
+.social-media-item:hover input {
+    background-color: #3a3a3a;
 }
 
 /* Social Media Links */
