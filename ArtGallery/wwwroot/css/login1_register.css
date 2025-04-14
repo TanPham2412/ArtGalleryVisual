@@ -54,14 +54,14 @@ body {
 
 /* Logo */
 .logo-text {
-    font-size: 40px;
+    font-size: 40px !important;
     font-weight: bold;
     margin: 0 0 8px;
     color: #e0e0e0;
 }
 
 .logo-highlight {
-    font-size: 40px;
+    font-size: 40px !important;
     font-weight: bold;
     margin: 0 0 8px;
     color: #00a8ff;

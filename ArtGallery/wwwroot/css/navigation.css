@@ -113,7 +113,7 @@
 }
 
 .search-result-item:hover {
-    background-color: #252525;
+    background-color: #333333;
 }
 
 .search-result-title {
@@ -313,9 +313,10 @@
     transition: background-color 0.2s;
 }
 
-.dropdown-item:hover {
-    background-color: #252525;
-}
+    .dropdown-item:hover {
+        color: #ffffff !important;
+        background-color: #333333;
+    }
 
 .dropdown-item i {
     margin-right: 12px;
@@ -378,7 +379,7 @@
 }
 
 .category-item:hover {
-    background-color: #252525;
+    background-color: #333333;
     color: #00a8ff;
 }
 
@@ -392,7 +393,7 @@
 }
 
 /* Notification styles */
-.notification-link {
+.notification-container {
     position: relative;
     display: inline-block;
 }
@@ -418,9 +419,13 @@
     max-height: 500px;
     overflow-y: auto;
     padding: 0;
-    right: 150px !important; 
     background: #1e1e1e;
     border: 1px solid #333;
+    position: absolute;
+    top: 100%;
+    right: -50px !important;
+    margin-top: 8px;
+    z-index: 10000;
 }
 
 .notification-header {
@@ -487,7 +492,7 @@
 }
 
 .notification-item:hover {
-    background-color: #252525;
+    background-color: #333333;
 }
 
 .notification-item.unread {
@@ -568,4 +573,9 @@
 .search-container {
     width: auto;
     max-width: 40%;
+}
+
+/* Thêm màu chữ sáng cho các menu items */
+.dropdown-item, .category-item, .notification-item {
+    color: #e0e0e0;
 }
