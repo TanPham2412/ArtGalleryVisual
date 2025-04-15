@@ -1145,3 +1145,77 @@ textarea:focus {
         width: 95%;
     }
 }
+
+/* Cập nhật style cho nút xem tất cả */
+.see-all-media {
+    color: #1DA1F2;
+    font-size: 14px;
+    text-decoration: none;
+    margin-top: 10px;
+    display: block;
+    transition: all 0.3s;
+}
+
+.see-all-media:hover {
+    text-decoration: underline;
+}
+
+/* Container cho nút chỉnh sửa hồ sơ ở góc phải trên cùng */
+.edit-profile-button-container {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 10;
+}
+
+/* Style cho nút chỉnh sửa hồ sơ */
+.edit-profile-btn {
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 20px;
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+    transition: background 0.3s ease;
+}
+
+.edit-profile-btn:hover {
+    background: rgba(0, 0, 0, 0.7);
+}
+
+.edit-profile-btn i {
+    margin-right: 6px;
+}
+
+/* Điều chỉnh vị trí của profile info */
+.profile-info {
+    position: relative;
+    z-index: 5;
+}
+
+/* Style cho phần header của section */
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.section-header h2 {
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.section-header .see-all {
+    color: #1DA1F2;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.section-header .see-all:hover {
+    text-decoration: underline;
+}

@@ -20,6 +20,40 @@
             <div class="gradient-overlay"></div>
         </div>
 
+        <div class="profile-actions">
+            @if (ViewBag.IsOwnProfile)
+            {
+                <a href="#" class="edit-profile-btn" onclick="openEditProfileModal()">
+                    <i class="fas fa-edit"></i> Chỉnh sửa hồ sơ
+                </a>
+                <div class="dropdown settings-dropdown">
+                    <button class="settings-btn">
+                        <i class="fas fa-ellipsis-h"></i>
+                    </button>
+                    <div class="dropdown-menu">
+                        <a href="#" class="dropdown-item">
+                            <i class="fas fa-share-alt"></i> Chia sẻ hồ sơ
+                        </a>
+                        <a href="#" class="dropdown-item">
+                            <i class="fas fa-cog"></i> Cài đặt tài khoản
+                        </a>
+                    </div>
+                </div>
+            }
+            else
+            {
+                @if (User.Identity.IsAuthenticated && Model.Id != ViewBag.CurrentUserId)
+                {
+                    <button class="follow-button-primary @(ViewBag.IsFollowing ? "following" : "")"
+                            onclick="toggleFollow(event, '@Model.Id')">
+                        <span class="follow-text">Theo dõi</span>
+                        <span class="following-text">Đang theo dõi</span>
+                    </button>
+                }
+                <button class="share-profile-btn"><i class="fas fa-share"></i></button>
+            }
+        </div>
+
         <!-- Profile Info Section -->
         <div class="profile-info">
             <div class="profile-avatar">
@@ -82,42 +116,8 @@
                 }
                 <a href="#" class="see-all-media">Xem tất cả</a>
             </div>
-            <div class="profile-actions">
-                @if (ViewBag.IsOwnProfile)
-                {
-                    <a href="#" class="edit-profile-btn" onclick="openEditProfileModal()">
-                        <i class="fas fa-edit"></i> Chỉnh sửa hồ sơ
-                    </a>
-                    <div class="dropdown settings-dropdown">
-                        <button class="settings-btn">
-                            <i class="fas fa-ellipsis-h"></i>
-                        </button>
-                        <div class="dropdown-menu">
-                            <a href="#" class="dropdown-item">
-                                <i class="fas fa-share-alt"></i> Chia sẻ hồ sơ
-                            </a>
-                            <a href="#" class="dropdown-item">
-                                <i class="fas fa-cog"></i> Cài đặt tài khoản
-                            </a>
-                        </div>
-                    </div>
-                }
-                else
-                {
-                    @if (User.Identity.IsAuthenticated && Model.Id != ViewBag.CurrentUserId)
-                    {
-                        <button class="follow-button-primary @(ViewBag.IsFollowing ? "following" : "")"
-                                onclick="toggleFollow(event, '@Model.Id')">
-                            <span class="follow-text">Theo dõi</span>
-                            <span class="following-text">Đang theo dõi</span>
-                        </button>
-                    }
-                    <button class="share-profile-btn"><i class="fas fa-share"></i></button>
-                }
-            </div>
         </div>
     </div>
-
 
     <!-- Tab Content -->
     <div class="profile-content">
