@@ -26,15 +26,15 @@
                 <a href="#" class="edit-profile-btn" onclick="openEditProfileModal()">
                     <i class="fas fa-edit"></i> Chỉnh sửa hồ sơ
                 </a>
-                <div class="dropdown settings-dropdown">
-                    <button class="settings-btn">
+                <div class="profile-settings-dropdown">
+                    <button class="profile-settings-btn">
                         <i class="fas fa-ellipsis-h"></i>
                     </button>
-                    <div class="dropdown-menu">
-                        <a href="#" class="dropdown-item">
+                    <div class="profile-dropdown-menu">
+                        <a href="#" class="profile-dropdown-item">
                             <i class="fas fa-share-alt"></i> Chia sẻ hồ sơ
                         </a>
-                        <a href="#" class="dropdown-item">
+                        <a href="#" class="profile-dropdown-item">
                             <i class="fas fa-cog"></i> Cài đặt tài khoản
                         </a>
                     </div>
@@ -375,28 +375,19 @@
     <script src="~/js/profile.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Xử lý chuyển tab
-            const tabs = document.querySelectorAll('.tab');
-            const tabContents = document.querySelectorAll('.tab-content');
-
-            tabs.forEach(tab => {
-                tab.addEventListener('click', () => {
-                    // Xóa active class từ tất cả các tab
-                    tabs.forEach(t => t.classList.remove('active'));
-                    // Thêm active class vào tab được chọn
-                    tab.classList.add('active');
-
-                    // Ẩn tất cả các tab content
-                    tabContents.forEach(content => {
-                        content.classList.remove('active');
-                    });
-
-                    // Hiện tab content tương ứng
-                    const tabId = tab.getAttribute('data-tab');
-                    const selectedContent = document.getElementById(tabId);
-                    if (selectedContent) {
-                        selectedContent.classList.add('active');
-                    }
+            // Đảm bảo navbar hoạt động đúng
+            const navbar = document.querySelector('.navbar.fixed-top');
+            if (navbar) {
+                navbar.style.zIndex = 10000;
+            }
+            
+            // Thêm padding-top cho body
+            document.body.style.paddingTop = '56px';
+            
+            // Xử lý xung đột đường dẫn mặc định
+            document.querySelectorAll('.navbar a[href="#"]').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
                 });
             });
         });

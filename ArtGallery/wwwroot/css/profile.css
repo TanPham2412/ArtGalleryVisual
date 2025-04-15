@@ -14,8 +14,10 @@ body {
 .profile-container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 80px 20px 40px;
+    padding: 60px 20px 40px;
     color: #fff;
+    position: relative;
+    z-index: 1;
 }
 
 /* Header profile */
@@ -267,11 +269,11 @@ body {
         color: #00a8ff;
     }
 
-.settings-dropdown {
+.profile-settings-dropdown {
     position: relative;
 }
 
-.settings-btn {
+.profile-settings-btn {
     background: rgba(255, 255, 255, 0.08);
     color: #fff;
     border: 1px solid rgba(255, 255, 255, 0.15);
@@ -285,12 +287,12 @@ body {
     transition: all 0.3s ease;
 }
 
-    .settings-btn:hover {
+    .profile-settings-btn:hover {
         background: rgba(255, 255, 255, 0.15);
         transform: rotate(90deg);
     }
 
-.dropdown-menu {
+.profile-dropdown-menu {
     position: absolute;
     top: 50px;
     right: 0;
@@ -307,14 +309,14 @@ body {
     transition: all 0.3s ease;
 }
 
-.settings-dropdown:hover .dropdown-menu {
+.profile-settings-dropdown:hover .profile-dropdown-menu {
     display: block;
     transform: translateY(0);
     opacity: 1;
     animation: fadeInDown 0.3s ease;
 }
 
-.dropdown-item {
+.profile-dropdown-item {
     display: flex;
     align-items: center;
     padding: 14px 18px;
@@ -323,19 +325,19 @@ body {
     transition: background 0.3s, transform 0.2s;
 }
 
-    .dropdown-item i {
+    .profile-dropdown-item i {
         margin-right: 10px;
         font-size: 16px;
         color: #aaa;
         transition: color 0.3s;
     }
 
-    .dropdown-item:hover {
+    .profile-dropdown-item:hover {
         background: rgba(142, 45, 226, 0.2);
         transform: translateX(5px);
     }
 
-        .dropdown-item:hover i {
+        .profile-dropdown-item:hover i {
             color: rgba(142, 45, 226, 1);
         }
 
@@ -1223,4 +1225,12 @@ textarea:focus {
 .section-header .see-all:hover {
     color: #00a8ff;
     text-decoration: underline;
+}
+
+/* Fix navbar z-index */
+.navbar.fixed-top {
+    position: fixed !important;
+    top: 0 !important;
+    z-index: 10000 !important;
+    width: 100% !important;
 }
