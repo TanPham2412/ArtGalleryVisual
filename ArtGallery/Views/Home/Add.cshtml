@@ -1,63 +1,72 @@
 ﻿@model ArtGallery.Models.Tranh
 @using System.Security.Claims
 
-<link rel="stylesheet" href="~/css/add.css">
+<link rel="stylesheet" href="~/css/add.css?v=2">
 
-@if (TempData["SuccessMessage"] != null)
-{
-    <div class="alert alert-success alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-5" role="alert" style="z-index: 1050;">
-        <i class="fas fa-check-circle me-2"></i>
-        @TempData["SuccessMessage"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+                    <i class="fas fa-check-circle me-2"></i>
+                    @TempData["SuccessMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
 
-@if (!User.Identity.IsAuthenticated)
-{
-    <div class="alert alert-danger mt-5">
-        <i class="fas fa-exclamation-circle me-2"></i>
-        Vui lòng <a href="@Url.Action("Login", "Account")">đăng nhập</a> để thực hiện chức năng này
-    </div>
-}
-else
-{
-    <div class="container mt-4">
-        <div class="row justify-content-center">
-            <div class="col-md-8">
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    @TempData["ErrorMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            @if (!User.Identity.IsAuthenticated)
+            {
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    Vui lòng <a href="@Url.Action("Login", "Account")" class="alert-link">đăng nhập</a> để thực hiện chức năng này
+                </div>
+            }
+            else
+            {
                 <div class="upload-form">
-                    <h3 class="text-center mb-4 pt-4">Đăng tranh mới</h3>
+                    <h3 class="text-center">Đăng tranh mới</h3>
 
-                    <form id="addForm" asp-controller="Home" asp-action="Add" method="post" enctype="multipart/form-data">
+                    <form id="addForm" method="post" action="/Home/Add" enctype="multipart/form-data">
                         @Html.AntiForgeryToken()
-                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-
-                        <input type="hidden" asp-for="MaNguoiDung" value="@User.FindFirst(ClaimTypes.NameIdentifier)?.Value" />
+                        <input type="hidden" name="MaNguoiDung" value="@User.FindFirst(ClaimTypes.NameIdentifier)?.Value" />
 
                         <div class="mb-3">
-                            <label asp-for="TieuDe" class="form-label required">Tiêu đề</label>
-                            <input asp-for="TieuDe" class="form-control" required />
-                            <span asp-validation-for="TieuDe" class="text-danger"></span>
+                            <label class="form-label required">Tiêu đề</label>
+                            <input type="text" name="TieuDe" class="form-control" placeholder="Nhập tiêu đề tác phẩm..." required />
                         </div>
 
                         <div class="mb-3">
-                            <label asp-for="MoTa" class="form-label">Mô tả</label>
-                            <textarea asp-for="MoTa" class="form-control" rows="3"></textarea>
-                            <span asp-validation-for="MoTa" class="text-danger"></span>
+                            <label class="form-label">Mô tả</label>
+                            <textarea name="MoTa" class="form-control" rows="4" placeholder="Mô tả về tác phẩm của bạn..."></textarea>
+                            <div class="text-muted">Mô tả giúp người xem hiểu rõ hơn về tác phẩm và ý tưởng của bạn</div>
                         </div>
 
-                        <div class="mb-3">
-                            <label asp-for="Gia" class="form-label required">Giá (VNĐ)</label>
-                            <input asp-for="Gia" class="form-control" type="number" min="0" required />
-                            <span asp-validation-for="Gia" class="text-danger"></span>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label required">Giá (VNĐ)</label>
+                                    <input type="number" name="Gia" class="form-control" min="0" placeholder="Nhập giá tác phẩm..." required />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label required">Số lượng</label>
+                                    <input type="number" name="SoLuongTon" class="form-control" min="1" value="1" required />
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="mb-3">
-                            <label asp-for="SoLuongTon" class="form-label required">Số lượng</label>
-                            <input asp-for="SoLuongTon" class="form-control" type="number" min="1" value="1" required />
-                            <span asp-validation-for="SoLuongTon" class="text-danger"></span>
-                        </div>
-
-                        <div class="mb-3">
+                        <div class="mb-4">
                             <label class="form-label required">Thể loại</label>
                             <select name="SelectedCategories" class="form-select" multiple required>
                                 @foreach (var category in ViewBag.Categories)
@@ -65,90 +74,110 @@ else
                                     <option value="@category.Value">@category.Text</option>
                                 }
                             </select>
-                            <small class="text-muted">Giữ Ctrl để chọn nhiều thể loại</small>
+                            <div class="text-muted">Giữ Ctrl để chọn nhiều thể loại cho tác phẩm</div>
                         </div>
 
-                        <div class="form-group">
+                        <div class="mb-4">
                             <label class="form-label">Tags</label>
                             <div class="tags-input">
-                                <input name="TagsInput" class="form-control" placeholder="Nhập tags" />
+                                <input name="TagsInput" class="form-control" placeholder="Nhập tags (ví dụ: #digital #art #fantasy)" />
                             </div>
                             <div class="recommended-tags">
-                                <label>Recommended tags</label>
-                                <div class="tag-suggestions pt-2">
+                                <label class="fw-bold mb-2" style="color: #aaa;">Gợi ý tags</label>
+                                <div class="tag-suggestions">
                                     <span class="tag-item">#fantasy</span>
                                     <span class="tag-item">#digital</span>
                                     <span class="tag-item">#illustration</span>
+                                    <span class="tag-item">#artwork</span>
+                                    <span class="tag-item">#landscape</span>
+                                    <span class="tag-item">#portrait</span>
+                                    <span class="tag-item">#anime</span>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="mb-3">
+                        <div class="mb-4">
                             <label class="form-label required">Hình ảnh</label>
                             <input type="file" name="ImageFile" class="form-control" accept="image/*" required />
+                            <div class="text-muted">Hỗ trợ các định dạng JPG, PNG, GIF. Kích thước tối đa 10MB</div>
                         </div>
+                        
                         <!-- Warning Section -->
                         <div class="warning-section">
                             <div class="warning-title">Lưu ý khi đăng tác phẩm:</div>
                             <ul class="warning-list">
-                                <li>Không đăng tải nội dung phản cảm, bạo lực, máu me</li>
+                                <li>Không đăng tải nội dung phản cảm, bạo lực</li>
                                 <li>Không đăng tải hình ảnh vi phạm bản quyền hoặc sở hữu trí tuệ</li>
                                 <li>Không đăng tải nội dung chính trị, tôn giáo nhạy cảm</li>
                                 <li>Không đăng tải nội dung quảng cáo, spam</li>
                             </ul>
                             <div class="terms-note">
-                                Vi phạm các điều khoản trên có thể dẫn đến việc tài khoản bị khóa. Xem thêm
+                                Vi phạm các điều khoản trên có thể dẫn đến việc tài khoản bị khóa.
                                 <a href="#" class="terms-link">Điều khoản sử dụng</a>
                             </div>
                         </div>
 
-                        <div class="text-center mt-4">
+                        <div class="text-center mt-5">
                             <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-upload me-2"></i>Đăng tranh
                             </button>
-                            <a asp-action="Index" class="btn btn-secondary ms-2">
+                            <a href="/Home/Index" class="btn btn-secondary ms-3">
                                 <i class="fas fa-arrow-left me-2"></i>Quay lại
                             </a>
                         </div>
                     </form>
                 </div>
-            </div>
+            }
         </div>
     </div>
-}
+</div>
 
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
-
     <script>
-        $(document).ready(function () {
-            $('#addForm').on('submit', function (e) {
-                e.preventDefault();
-                var formData = new FormData(this);
-
-                $.ajax({
-                    url: '@Url.Action("Add", "Home")',
-                    type: 'POST',
-                    data: formData,
-                    processData: false,
-                    contentType: false,
-                    success: function (response) {
-                        // Reload trang để hiển thị thông báo
-                        location.reload();
-                    },
-                    error: function (xhr, status, error) {
-                        console.error('Error:', error);
-                        alert('Có lỗi xảy ra khi đăng tranh');
-                    }
-                });
+        $(document).ready(function() {
+            // Thêm tag khi click vào tag gợi ý
+            $('.tag-item').on('click', function() {
+                var tagInput = $('input[name="TagsInput"]');
+                var currentValue = tagInput.val();
+                var newTag = $(this).text();
+                
+                if (currentValue) {
+                    tagInput.val(currentValue + ' ' + newTag);
+                } else {
+                    tagInput.val(newTag);
+                }
             });
-
-            // Tự động ẩn thông báo sau 3 giây
+            
+            // Tự động ẩn thông báo sau 5 giây
             setTimeout(function() {
-                $('.alert').alert('close');
-            }, 3000);
+                $('.alert').fadeOut(500);
+            }, 5000);
+
+            // Validate form trước khi submit
+            $('#addForm').on('submit', function(e) {
+                var imageFile = $('input[name="ImageFile"]')[0].files[0];
+                if (!imageFile) {
+                    e.preventDefault();
+                    alert('Vui lòng chọn file ảnh');
+                    return false;
+                }
+                
+                var title = $('input[name="TieuDe"]').val().trim();
+                if (!title) {
+                    e.preventDefault();
+                    alert('Vui lòng nhập tiêu đề');
+                    return false;
+                }
+                
+                var categories = $('select[name="SelectedCategories"]').val();
+                if (!categories || categories.length === 0) {
+                    e.preventDefault();
+                    alert('Vui lòng chọn ít nhất một thể loại');
+                    return false;
+                }
+                
+                return true;
+            });
         });
     </script>
 }
