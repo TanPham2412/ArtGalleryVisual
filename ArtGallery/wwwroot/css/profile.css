@@ -70,7 +70,8 @@ body {
     padding: 30px 40px;
     position: relative;
     z-index: 2;
-    margin-top: -200px;
+    margin-top: -130px;
+    padding-bottom: 20px;
 }
 
 .profile-avatar {
