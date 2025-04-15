@@ -3,7 +3,6 @@
 
 <link rel="stylesheet" href="~/css/add.css">
 
-
 @if (TempData["SuccessMessage"] != null)
 {
     <div class="alert alert-success alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-5" role="alert" style="z-index: 1050;">
@@ -22,11 +21,11 @@
 }
 else
 {
-    <div class="container mt-5">
+    <div class="container mt-4">
         <div class="row justify-content-center">
             <div class="col-md-8">
                 <div class="upload-form">
-                    <h3 class="text-center fw-bold">Đăng tranh mới</h3>
+                    <h3 class="text-center mb-4 pt-4">Đăng tranh mới</h3>
 
                     <form id="addForm" asp-controller="Home" asp-action="Add" method="post" enctype="multipart/form-data">
                         @Html.AntiForgeryToken()
@@ -34,38 +33,32 @@ else
 
                         <input type="hidden" asp-for="MaNguoiDung" value="@User.FindFirst(ClaimTypes.NameIdentifier)?.Value" />
 
-                        <div class="form-group">
-                            <label class="field-label">Tiêu đề <span class="required">*</span></label>
-                            <input asp-for="TieuDe" class="form-control" placeholder="Nhập tiêu đề tác phẩm" required />
+                        <div class="mb-3">
+                            <label asp-for="TieuDe" class="form-label required">Tiêu đề</label>
+                            <input asp-for="TieuDe" class="form-control" required />
                             <span asp-validation-for="TieuDe" class="text-danger"></span>
                         </div>
 
-                        <div class="form-group">
-                            <label class="field-label">Mô tả</label>
-                            <textarea asp-for="MoTa" class="form-control" rows="4" placeholder="Mô tả về tác phẩm của bạn"></textarea>
+                        <div class="mb-3">
+                            <label asp-for="MoTa" class="form-label">Mô tả</label>
+                            <textarea asp-for="MoTa" class="form-control" rows="3"></textarea>
                             <span asp-validation-for="MoTa" class="text-danger"></span>
-                            <small class="text-muted">Mô tả giúp người xem hiểu rõ hơn về tác phẩm của bạn</small>
                         </div>
 
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label class="field-label">Giá (VNĐ) <span class="required">*</span></label>
-                                    <input asp-for="Gia" class="form-control" type="number" min="0" placeholder="Nhập giá" required />
-                                    <span asp-validation-for="Gia" class="text-danger"></span>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label class="field-label">Số lượng <span class="required">*</span></label>
-                                    <input asp-for="SoLuongTon" class="form-control" type="number" min="1" value="1" required />
-                                    <span asp-validation-for="SoLuongTon" class="text-danger"></span>
-                                </div>
-                            </div>
+                        <div class="mb-3">
+                            <label asp-for="Gia" class="form-label required">Giá (VNĐ)</label>
+                            <input asp-for="Gia" class="form-control" type="number" min="0" required />
+                            <span asp-validation-for="Gia" class="text-danger"></span>
                         </div>
 
-                        <div class="form-group">
-                            <label class="field-label">Thể loại <span class="required">*</span></label>
+                        <div class="mb-3">
+                            <label asp-for="SoLuongTon" class="form-label required">Số lượng</label>
+                            <input asp-for="SoLuongTon" class="form-control" type="number" min="1" value="1" required />
+                            <span asp-validation-for="SoLuongTon" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label required">Thể loại</label>
                             <select name="SelectedCategories" class="form-select" multiple required>
                                 @foreach (var category in ViewBag.Categories)
                                 {
@@ -76,50 +69,44 @@ else
                         </div>
 
                         <div class="form-group">
-                            <label class="field-label">Tags</label>
+                            <label class="form-label">Tags</label>
                             <div class="tags-input">
-                                <input name="TagsInput" class="form-control" placeholder="Nhập tags (ví dụ: #digital #art)" />
+                                <input name="TagsInput" class="form-control" placeholder="Nhập tags" />
                             </div>
-                            <small class="text-muted">Mỗi tag bắt đầu bằng dấu # và cách nhau bằng khoảng trắng</small>
                             <div class="recommended-tags">
-                                <label class="fw-bold mb-2">Gợi ý tags</label>
-                                <div class="tag-suggestions">
-                                    <span class="tag-item clickable-tag">#fantasy</span>
-                                    <span class="tag-item clickable-tag">#digital</span>
-                                    <span class="tag-item clickable-tag">#illustration</span>
-                                    <span class="tag-item clickable-tag">#artwork</span>
-                                    <span class="tag-item clickable-tag">#landscape</span>
-                                    <span class="tag-item clickable-tag">#portrait</span>
-                                    <span class="tag-item clickable-tag">#anime</span>
+                                <label>Recommended tags</label>
+                                <div class="tag-suggestions pt-2">
+                                    <span class="tag-item">#fantasy</span>
+                                    <span class="tag-item">#digital</span>
+                                    <span class="tag-item">#illustration</span>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="form-group">
-                            <label class="field-label">Hình ảnh <span class="required">*</span></label>
+                        <div class="mb-3">
+                            <label class="form-label required">Hình ảnh</label>
                             <input type="file" name="ImageFile" class="form-control" accept="image/*" required />
                         </div>
-                        
                         <!-- Warning Section -->
                         <div class="warning-section">
                             <div class="warning-title">Lưu ý khi đăng tác phẩm:</div>
                             <ul class="warning-list">
-                                <li>Không đăng tải nội dung phản cảm</li>
+                                <li>Không đăng tải nội dung phản cảm, bạo lực, máu me</li>
                                 <li>Không đăng tải hình ảnh vi phạm bản quyền hoặc sở hữu trí tuệ</li>
                                 <li>Không đăng tải nội dung chính trị, tôn giáo nhạy cảm</li>
                                 <li>Không đăng tải nội dung quảng cáo, spam</li>
                             </ul>
                             <div class="terms-note">
-                                Vi phạm các điều khoản trên có thể dẫn đến việc tài khoản bị khóa.
+                                Vi phạm các điều khoản trên có thể dẫn đến việc tài khoản bị khóa. Xem thêm
                                 <a href="#" class="terms-link">Điều khoản sử dụng</a>
                             </div>
                         </div>
 
                         <div class="text-center mt-4">
-                            <button type="submit" class="btn-primary">
+                            <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-upload me-2"></i>Đăng tranh
                             </button>
-                            <a asp-action="Index" class="btn-primary ms-2">
+                            <a asp-action="Index" class="btn btn-secondary ms-2">
                                 <i class="fas fa-arrow-left me-2"></i>Quay lại
                             </a>
                         </div>
@@ -134,5 +121,34 @@ else
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
-    <script src="~/js/add.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            $('#addForm').on('submit', function (e) {
+                e.preventDefault();
+                var formData = new FormData(this);
+
+                $.ajax({
+                    url: '@Url.Action("Add", "Home")',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        // Reload trang để hiển thị thông báo
+                        location.reload();
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Error:', error);
+                        alert('Có lỗi xảy ra khi đăng tranh');
+                    }
+                });
+            });
+
+            // Tự động ẩn thông báo sau 3 giây
+            setTimeout(function() {
+                $('.alert').alert('close');
+            }, 3000);
+        });
+    </script>
 }
