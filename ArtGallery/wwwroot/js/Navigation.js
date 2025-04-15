@@ -112,18 +112,21 @@
             const artworksToDisplay = artworks.slice(0, maxArtworksToShow);
             
             artworksToDisplay.forEach(item => {
-                // Định dạng giá tiền đẹp hơn
-                const formattedPrice = new Intl.NumberFormat('vi-VN').format(item.gia) + 'đ';
+                // Kiểm tra dữ liệu hợp lệ trước khi hiển thị
+                const title = item.tieuDe || 'Chưa có tiêu đề';
+                const artist = item.nguoiDung || 'Không xác định';
+                const price = item.gia ? new Intl.NumberFormat('vi-VN').format(item.gia) + 'đ' : 'Liên hệ';
+                const imagePath = item.duongDanAnh || '/images/default.png';
                 
                 html += `
                 <a href="/Artwork/Display/${item.maTranh}" class="search-result-item prevent-lightbox">
                     <div class="search-result-image">
-                        <img src="${item.duongDanAnh}" alt="${item.tieuDe}" class="search-thumbnail">
+                        <img src="${imagePath}" alt="${title}" class="search-thumbnail" onerror="this.src='/images/default.png'">
                     </div>
                     <div class="search-result-info">
-                        <div class="search-result-title">${item.tieuDe}</div>
-                        <div class="search-result-artist">${item.nguoiDung}</div>
-                        <div class="search-result-price">${formattedPrice}</div>
+                        <div class="search-result-title">${title}</div>
+                        <div class="search-result-artist">${artist}</div>
+                        <div class="search-result-price">${price}</div>
                     </div>
                 </a>
                 `;
@@ -145,21 +148,26 @@
             }
             
             usersToDisplay.forEach(user => {
+                // Kiểm tra dữ liệu hợp lệ trước khi hiển thị
+                const username = user.tenNguoiDung || 'Người dùng';
+                const userLoginName = user.tenDangNhap || 'user';
+                const avatarPath = user.anhDaiDien || '/images/authors/default/default-image.png';
+                
                 html += `
                 <a href="/User/Profile/${user.id}" class="search-result-item prevent-lightbox">
                     <div class="search-result-avatar">
-                        <img src="${user.anhDaiDien || '/images/authors/default/default-image.png'}" alt="${user.tenNguoiDung}" class="search-avatar">
+                        <img src="${avatarPath}" alt="${username}" class="search-avatar" onerror="this.src='/images/authors/default/default-image.png'">
                     </div>
                     <div class="search-result-info">
-                        <div class="search-result-name">${user.tenNguoiDung}</div>
-                        <div class="search-result-username">@${user.tenDangNhap}</div>
+                        <div class="search-result-name">${username}</div>
+                        <div class="search-result-username">@${userLoginName}</div>
                     </div>
                 </a>
                 `;
             });
         }
         
-        if (html === '') {
+        if (users?.length === 0 && artworks?.length === 0) {
             html = '<div class="search-no-results">Không tìm thấy kết quả</div>';
         }
         

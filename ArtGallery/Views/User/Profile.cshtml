@@ -1,332 +1,395 @@
-  @model ArtGallery.Models.NguoiDung  
-  @using System.Text.Json  
-  @{  
-      ViewData["Title"] = Model.TenNguoiDung;  
-      var mediaJson = Json.Serialize(Model.Media.Select(m => new { loaiMedia = m.LoaiMedia, duongDan = m.DuongDan }));  
-  }  
+@model ArtGallery.Models.NguoiDung
+@using System.Text.Json
+@{
+    ViewData["Title"] = Model.TenNguoiDung;
+    var mediaJson = Json.Serialize(Model.Media.Select(m => new { loaiMedia = m.LoaiMedia, duongDan = m.DuongDan }));
+}
 
-  <link rel="stylesheet" href="~/css/profile.css">  
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">  
+<link rel="stylesheet" href="~/css/profile.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
-  <div class="profile-container">  
-      <!-- Cover Image Section -->  
-      <div class="cover-section">  
-          @if (!string.IsNullOrEmpty(Model.CoverImage))  
-          {  
-              <img src="/images/authors/coverimages/@Model.UserName/@Model.CoverImage" alt="Cover Image">  
-          }  
-          <div class="cover-placeholder">  
-              <i class="fas fa-edit"></i>  
-              <span>Chọn ảnh bìa và tùy chỉnh hồ sơ của bạn!</span>  
-          </div>  
-      </div>  
+<div class="profile-container">
+    <!-- Profile Header -->
+    <div class="profile-header">
+        <!-- Cover Image Section -->
+        <div class="profile-cover-photo">
+            @if (!string.IsNullOrEmpty(Model.CoverImage))
+            {
+                <img src="/images/authors/coverimages/@Model.UserName/@Model.CoverImage" alt="Cover Image">
+            }
+            <div class="gradient-overlay"></div>
+        </div>
 
-      <!-- Profile Info Section -->  
-      <div class="profile-info">  
-          <div class="profile-avatar">  
-              <img src="@Model.GetAvatarPath()" alt="@Model.TenNguoiDung">  
-          </div>  
-          <div class="profile-details">  
-              <h1 class="profile-name">@Model.TenNguoiDung</h1>  
-              <div class="profile-stats">  
-                  <span class="stat-item">  
-                      <span class="stat-number">@ViewBag.FollowingCount</span> Đang theo dõi  
-                  </span>  
-                  <span class="stat-divider">·</span>  
-                  <span class="stat-item">  
-                      <span class="stat-number">@ViewBag.FollowersCount</span> Người theo dõi  
-                  </span>  
-              </div>  
+        <div class="profile-actions">
+            @if (ViewBag.IsOwnProfile)
+            {
+                <a href="#" class="edit-profile-btn" onclick="openEditProfileModal()">
+                    <i class="fas fa-edit"></i> Chỉnh sửa hồ sơ
+                </a>
+                <div class="profile-settings-dropdown">
+                    <button class="profile-settings-btn">
+                        <i class="fas fa-ellipsis-h"></i>
+                    </button>
+                    <div class="profile-dropdown-menu">
+                        <a href="#" class="profile-dropdown-item">
+                            <i class="fas fa-share-alt"></i> Chia sẻ hồ sơ
+                        </a>
+                        <a href="#" class="profile-dropdown-item">
+                            <i class="fas fa-cog"></i> Cài đặt tài khoản
+                        </a>
+                    </div>
+                </div>
+            }
+            else
+            {
+                @if (User.Identity.IsAuthenticated && Model.Id != ViewBag.CurrentUserId)
+                {
+                    <button class="follow-button-primary @(ViewBag.IsFollowing ? "following" : "")"
+                            onclick="toggleFollow(event, '@Model.Id')">
+                        <span class="follow-text">Theo dõi</span>
+                        <span class="following-text">Đang theo dõi</span>
+                    </button>
+                }
+                <button class="share-profile-btn"><i class="fas fa-share"></i></button>
+            }
+        </div>
 
-              <!-- Thêm phần địa chỉ -->  
-              @if (!string.IsNullOrEmpty(Model.DiaChi) && Model.HienThiDiaChi == "Public")  
-              {  
-                  <div class="profile-location">  
-                      <i class="fas fa-map-marker-alt"></i>  
-                      <span>@Model.DiaChi</span>  
-                  </div>  
-              }  
+        <!-- Profile Info Section -->
+        <div class="profile-info">
+            <div class="profile-avatar">
+                <img src="@Model.GetAvatarPath()" alt="@Model.TenNguoiDung">
+                <div class="photo-overlay">
+                    <button class="change-photo-btn" onclick="openEditProfileModal()">
+                        <i class="fas fa-camera"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="profile-details">
+                <div class="profile-type">Hồ sơ</div>
+                <h1 class="profile-name">@Model.TenNguoiDung</h1>
+                <div class="profile-stats">
+                    <div class="stat">
+                        <span class="stat-count">@ViewBag.FollowingCount</span> Đang theo dõi
+                    </div>
+                    <div class="stat">
+                        <span class="stat-count">@ViewBag.FollowersCount</span> Người theo dõi
+                    </div>
+                </div>
 
-              <!-- Thêm phần social media -->  
-              @if (Model.Media != null && Model.Media.Any())  
-              {  
-                  <div class="social-media-links">  
-                      @foreach (var media in Model.Media)  
-                      {  
-                          <a href="@media.DuongDan" target="_blank" class="social-media-link">  
-                              @switch (media.LoaiMedia)  
-                              {  
-                                  case "X":  
-                                      <i class="fab fa-x"></i>  
-                                      break;  
-                                  case "Instagram":  
-                                      <i class="fab fa-instagram"></i>  
-                                      break;  
-                                  case "Facebook":  
-                                      <i class="fab fa-facebook"></i>  
-                                      break;  
-                                  case "Tiktok":  
-                                      <i class="fab fa-tiktok"></i>  
-                                      break;  
-                                  case "Website":  
-                                      <i class="fas fa-link"></i>  
-                                      break;  
-                              }  
-                          </a>  
-                      }  
-                  </div>  
-              }  
+                <!-- Thêm phần địa chỉ -->
+                @if (!string.IsNullOrEmpty(Model.DiaChi) && Model.HienThiDiaChi == "Public")
+                {
+                    <div class="profile-location">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>@Model.DiaChi</span>
+                    </div>
+                }
 
-              <!-- Thêm nút Xem thêm -->  
-              <button class="see-more-btn" onclick="showMoreUserInfo()">  
-                  Xem thêm <i class="fas fa-chevron-right"></i>  
-              </button>  
+                <!-- Thêm phần social media -->
+                @if (Model.Media != null && Model.Media.Any())
+                {
+                    <div class="social-media-links">
+                        @foreach (var media in Model.Media)
+                        {
+                            <a href="@media.DuongDan" target="_blank" class="social-media-link">
+                                @switch (media.LoaiMedia)
+                                {
+                                    case "X":
+                                        <i class="fab fa-x"></i>
+                                        break;
+                                    case "Instagram":
+                                        <i class="fab fa-instagram"></i>
+                                        break;
+                                    case "Facebook":
+                                        <i class="fab fa-facebook"></i>
+                                        break;
+                                    case "Tiktok":
+                                        <i class="fab fa-tiktok"></i>
+                                        break;
+                                    case "Website":
+                                        <i class="fas fa-link"></i>
+                                        break;
+                                }
+                            </a>
+                        }
+                    </div>
+                }
+                <a href="#" class="see-all-media">Xem tất cả</a>
+            </div>
+        </div>
+    </div>
 
-          </div>  
-          <div class="profile-actions">  
-              @if (ViewBag.IsOwnProfile)
-              {
-                  <button class="edit-profile-btn" onclick="openEditProfileModal()">Chỉnh sửa hồ sơ</button>
-                  <button class="share-profile-btn"><i class="fas fa-share"></i></button>
-              }
-              else
-              {
-                  @if (User.Identity.IsAuthenticated && Model.Id != ViewBag.CurrentUserId)
-                  {
-                      <button class="follow-button-primary @(ViewBag.IsFollowing ? "following" : "")" 
-                              onclick="toggleFollow(event, '@Model.Id')">
-                          <span class="follow-text">Theo dõi</span>
-                          <span class="following-text">Đang theo dõi</span>
-                      </button>
-                  }
-                  <button class="share-profile-btn"><i class="fas fa-share"></i></button>
-              }
-          </div>  
-      </div>  
+    <!-- Tab Content -->
+    <div class="profile-content">
+        <div class="tab-content active" id="overview">
+            <!-- Featured Section -->
+            <div class="section">
+                <div class="section-header">
+                    <h2>Nổi bật</h2>
+                    <a href="#" class="see-all">Xem tất cả</a>
+                </div>
+                <div class="featured-grid">
+                    <div class="add-featured">
+                        <i class="fas fa-plus"></i>
+                        <span>Thêm</span>
+                    </div>
+                </div>
+            </div>
 
-      <!-- Navigation Tabs -->  
-      <div class="profile-nav">  
-          <a href="#" class="nav-link active">Trang chủ</a>  
-          <a href="#" class="nav-link">Yêu thích</a>  
-      </div>  
+            <!-- Gallery Section -->
+            <div class="section">
+                <div class="section-header">
+                    <h2>Ảnh của bạn</h2>
+                    <a href="#" class="see-all">Xem tất cả</a>
+                </div>
+                <div class="gallery-grid">
+                    @foreach (var artwork in Model.Tranhs)
+                    {
+                        <div class="gallery-item">
+                            <a href="@Url.Action("Display", "Artwork", new { id = artwork.MaTranh })">
+                                <img src="@artwork.DuongDanAnh" alt="@artwork.TieuDe">
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
 
-      <!-- Featured Section -->  
-      <div class="featured-section">  
-          <div class="section-header">  
-              <h3>Nổi bật</h3>  
-              <button class="featured-settings">Cài đặt nổi bật</button>  
-          </div>  
-          <div class="featured-grid">  
-              <div class="add-featured">  
-                  <i class="fas fa-plus"></i>  
-                  <span>Thêm</span>  
-              </div>  
-          </div>  
-      </div>  
+        <div class="tab-content" id="playlists">
+            <div class="section">
+                <div class="section-header">
+                    <h2>Playlist của bạn</h2>
+                    <a href="#" class="create-btn">
+                        <i class="fas fa-plus"></i> Tạo playlist mới
+                    </a>
+                </div>
+                <div class="playlist-grid">
+                    <div class="no-content">
+                        <i class="fas fa-music"></i>
+                        <p>Bạn chưa có playlist nào</p>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-      <!-- Gallery Section -->  
-      <div class="gallery-header">  
-          <h3>Ảnh của bạn</h3>  
-      </div>  
-      <div class="gallery-section">  
-          <div class="gallery-grid">  
-              @foreach (var artwork in Model.Tranhs)  
-              {  
-                  <div class="gallery-item">  
-                      <a href="@Url.Action("Display", "Artwork", new { id = artwork.MaTranh })">  
-                          <img src="@artwork.DuongDanAnh" alt="@artwork.TieuDe">  
-                      </a>  
-                  </div>  
-              }  
-          </div>  
-      </div>  
-  </div>  
+        <div class="tab-content" id="favorites">
+            <div class="section">
+                <div class="section-header">
+                    <h2>Bài hát yêu thích</h2>
+                </div>
+                <div class="music-grid">
+                    <div class="no-content">
+                        <i class="fas fa-heart"></i>
+                        <p>Bạn chưa có bài hát yêu thích nào</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-  <!-- Edit Profile Modal -->  
-  <div id="editProfileModal" class="modal">  
-      <div class="modal-content">  
-          <div class="modal-header">  
-              <h3>Chỉnh sửa hồ sơ</h3>  
-              <span class="close" onclick="closeEditProfileModal()">&times;</span>  
-          </div>  
-          <form id="editProfileForm" method="post" action="@Url.Action("UpdateProfile", "User")" enctype="multipart/form-data">  
-              @Html.AntiForgeryToken()  
-              <input type="hidden" name="Id" value="@Model.Id" />  
-              <input type="hidden" name="TenDangNhap" value="@Model.UserName" />  
-              <input type="hidden" id="existingMediaData" value='@Html.Raw(mediaJson)' />  
+<!-- Edit Profile Modal -->
+<div id="editProfileModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Chỉnh sửa hồ sơ</h3>
+            <span class="close" onclick="closeEditProfileModal()">&times;</span>
+        </div>
+        <form id="editProfileForm" method="post" action="@Url.Action("UpdateProfile", "User")" enctype="multipart/form-data">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="Id" value="@Model.Id" />
+            <input type="hidden" name="TenDangNhap" value="@Model.UserName" />
+            <input type="hidden" id="existingMediaData" value='@Html.Raw(mediaJson)' />
+
+            <!-- Cover Image Section -->
+            <div class="cover-image-section">
+                <input type="file" id="coverImage" name="coverImage" accept="image/*" hidden>
+                <div class="cover-preview-container">
+                    @if (!string.IsNullOrEmpty(Model.CoverImage))
+                    {
+                        <img id="coverPreview" src="/images/authors/coverimages/@Model.UserName/@Model.CoverImage" alt="Cover Image">
+                    }
+                    else
+                    {
+                        <img id="coverPreview" style="display: none;" alt="Cover Image">
+                    }
+                </div>
+                <div class="cover-placeholder" onclick="document.getElementById('coverImage').click()">
+                    <i class="fas fa-edit"></i>
+                    <span>Chọn ảnh bìa và tùy chỉnh hồ sơ của bạn!</span>
+                </div>
+            </div>
+
+            <!-- Profile Image Section -->
+            <div class="form-group">
+                <label>Ảnh đại diện</label>
+                <div class="profile-image-container">
+                    <img id="profilePreview" src="@Model.GetAvatarPath()" alt="Ảnh đại diện">
+                    <div class="edit-icon" onclick="document.getElementById('profileImage').click()">
+                        <i class="fas fa-pencil-alt"></i>
+                    </div>
+                    <input type="file" id="profileImage" name="profileImage" accept="image/*" hidden>
+                </div>
+            </div>
+
+            <!-- Nickname Section -->
+            <div class="form-group">
+                <label for="nickname">Tên hiển thị</label>
+                <div class="input-container">
+                    <input type="text" id="nickname" name="TenNguoiDung" value="@Model.TenNguoiDung" maxlength="50">
+                </div>
+            </div>
+
+            <!-- Các phần còn lại của form giữ nguyên -->
+            <!-- Self Introduction Section -->
+            <div class="form-group">
+                <label for="selfIntro">Giới thiệu bản thân</label>
+                <textarea id="selfIntro" name="MoTa" rows="3">@Model.MoTa</textarea>
+            </div>
+
+            <!-- Social Media Section -->
+            <div class="form-group">
+                <label>Mạng xã hội</label>
+                <div id="socialMediaContainer">
+                    @if (Model.Media != null && Model.Media.Any())
+                    {
+                        @foreach (var media in Model.Media)
+                        {
+                            <div class="social-media-item">
+                                <select name="LoaiMedia[]">
+                                    <option value="X" selected="@(media.LoaiMedia == "X")">X</option>
+                                    <option value="Facebook" selected="@(media.LoaiMedia == "Facebook")">Facebook</option>
+                                    <option value="Instagram" selected="@(media.LoaiMedia == "Instagram")">Instagram</option>
+                                    <option value="Tiktok" selected="@(media.LoaiMedia == "Tiktok")">Tiktok</option>
+                                    <option value="Website" selected="@(media.LoaiMedia == "Website")">Website</option>
+                                </select>
+                                <input type="text" name="DuongDan[]" placeholder="ID" value="@media.DuongDan" />
+                                <button type="button" class="remove-media">×</button>
+                            </div>
+                        }
+                    }
+                </div>
+                <button type="button" onclick="addMediaField()" class="add-media">Add media</button>
+            </div>
+
+            <!-- Gender Section -->
+            <div class="form-group">
+                <label>Giới tính</label>
+                <div class="gender-row">
+                    <div class="radio-options">
+                        <label class="radio-option">
+                            <input type="radio" name="GioiTinh" value="Nam" @(Model.GioiTinh == "Nam" ? "checked" : "")>
+                            <span>Nam</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="GioiTinh" value="Nữ" @(Model.GioiTinh == "Nữ" ? "checked" : "")>
+                            <span>Nữ</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="GioiTinh" value="Khác" @(Model.GioiTinh == "Khác" ? "checked" : "")>
+                            <span>Khác</span>
+                        </label>
+                    </div>
+                    <div class="privacy-select-wrapper">
+                        <select class="privacy-select" name="HienThiGioiTinh">
+                            <option value="Public" selected="@(Model.HienThiGioiTinh == "Public")">Công khai</option>
+                            <option value="Private" selected="@(Model.HienThiGioiTinh == "Private")">Riêng tư</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Location Section -->
+            <div class="form-group">
+                <label>Vị trí</label>
+                <div class="select-row">
+                    <div class="main-select-wrapper">
+                        <select class="main-select" name="DiaChi" id="locationSelect">
+                            <option value="">--</option>
+                        </select>
+                        <input type="hidden" id="currentLocation" value="@Model.DiaChi" />
+                    </div>
+                    <div class="privacy-select-wrapper">
+                        <select class="privacy-select" name="HienThiDiaChi">
+                            <option value="Public" selected="@(Model.HienThiDiaChi == "Public")">Công khai</option>
+                            <option value="Private" selected="@(Model.HienThiDiaChi == "Private")">Riêng tư</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Thêm hidden input để lưu ngày sinh hiện tại -->
+            <input type="hidden" id="currentBirthDate" value="@(Model.NgaySinh?.ToString("yyyy-MM-dd"))" />
+
+            <!-- Birth Year Section -->
+            <div class="form-group">
+                <label>Năm sinh</label>
+                <div class="select-row">
+                    <div class="main-select-wrapper">
+                        <select class="main-select" name="BirthYear">
+                            <option value="">--</option>
+                        </select>
+                    </div>
+                    <div class="privacy-select-wrapper">
+                        <select class="privacy-select" name="HienThiNamSinh">
+                            <option value="Public" selected="@(Model.HienThiNamSinh == "Public")">Công khai</option>
+                            <option value="Private" selected="@(Model.HienThiNamSinh == "Private")">Riêng tư</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Birthday Section -->
+            <div class="form-group">
+                <label>Ngày sinh</label>
+                <div class="birthday-row">
+                    <div class="month-select-wrapper">
+                        <select class="month-select" name="BirthMonth">
+                            <option value="">--</option>
+                        </select>
+                    </div>
+                    <div class="day-select-wrapper">
+                        <select class="day-select" name="BirthDay">
+                            <option value="">--</option>
+                        </select>
+                    </div>
+                    <div class="privacy-select-wrapper">
+                        <select class="privacy-select" name="HienThiNgaySinh">
+                            <option value="Public" selected="@(Model.HienThiNgaySinh == "Public")">Công khai</option>
+                            <option value="Private" selected="@(Model.HienThiNgaySinh == "Private")">Riêng tư</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Buttons -->
+            <div class="modal-footer">
+                <button type="submit" class="save-btn">Lưu thay đổi</button>
+                <button type="button" class="cancel-btn" onclick="closeEditProfileModal()">Hủy</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/profile.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Đảm bảo navbar hoạt động đúng
+            const navbar = document.querySelector('.navbar.fixed-top');
+            if (navbar) {
+                navbar.style.zIndex = 10000;
+            }
             
-              <!-- Cover Image Section -->  
-              <div class="cover-image-section">  
-                  <input type="file" id="coverImage" name="coverImage" accept="image/*" hidden>  
-                  <div class="cover-preview-container">  
-                      @if (!string.IsNullOrEmpty(Model.CoverImage))  
-                      {  
-                          <img id="coverPreview"   
-                               src="/images/authors/coverimages/@Model.UserName/@Model.CoverImage"   
-                               alt="Cover Image">  
-                      }  
-                      else  
-                      {  
-                          <img id="coverPreview" style="display: none;" alt="Cover Image">  
-                      }  
-                  </div>  
-                  <div class="cover-placeholder" onclick="document.getElementById('coverImage').click()">  
-                      <i class="fas fa-edit"></i>  
-                      <span>Chọn ảnh bìa và tùy chỉnh hồ sơ của bạn!</span>  
-                  </div>  
-              </div>  
-
-              <!-- Profile Image Section -->  
-              <div class="form-group">  
-                  <label>Ảnh đại diện</label>  
-                  <div class="profile-image-container">  
-                      <img id="profilePreview" src="@Model.GetAvatarPath()" alt="Ảnh đại diện">  
-                      <div class="edit-icon" onclick="document.getElementById('profileImage').click()">  
-                          <i class="fas fa-pencil-alt"></i>  
-                      </div>  
-                      <input type="file" id="profileImage" name="profileImage" accept="image/*" hidden>  
-                  </div>  
-              </div>  
-
-              <!-- Nickname Section -->  
-              <div class="form-group">  
-                  <label for="nickname">Tên hiển thị</label>  
-                  <div class="input-container">  
-                      <input type="text" id="nickname" name="TenNguoiDung" value="@Model.TenNguoiDung" maxlength="50">  
-                  </div>  
-              </div>  
-
-              <!-- Self Introduction Section -->  
-              <div class="form-group">  
-                  <label for="selfIntro">Giới thiệu bản thân</label>  
-                  <textarea id="selfIntro" name="MoTa" rows="3">@Model.MoTa</textarea>  
-              </div>  
-
-              <!-- Social Media Section -->  
-              <div class="form-group">  
-                  <label>Mạng xã hội</label>  
-                  <div id="socialMediaContainer">  
-                      @if (Model.Media != null && Model.Media.Any())  
-                      {  
-                          @foreach (var media in Model.Media)  
-                          {  
-                              <div class="social-media-item">  
-                                  <select name="LoaiMedia[]">  
-                                      <option value="X" selected="@(media.LoaiMedia == "X")">X</option>  
-                                      <option value="Facebook" selected="@(media.LoaiMedia == "Facebook")">Facebook</option>  
-                                      <option value="Instagram" selected="@(media.LoaiMedia == "Instagram")">Instagram</option>  
-                                      <option value="Tiktok" selected="@(media.LoaiMedia == "Tiktok")">Tiktok</option>  
-                                      <option value="Website" selected="@(media.LoaiMedia == "Website")">Website</option>  
-                                  </select>  
-                                  <input type="text" name="DuongDan[]" placeholder="ID" value="@media.DuongDan" />  
-                                  <button type="button" class="remove-media">×</button>  
-                              </div>  
-                          }  
-                      }  
-                  </div>  
-                  <button type="button" onclick="addMediaField()" class="add-media">Add media</button>  
-              </div>  
-
-
-              <!-- Gender Section -->  
-              <div class="form-group">  
-                  <label>Giới tính</label>  
-                  <div class="gender-row">  
-                      <div class="radio-options">  
-                          <label class="radio-option">  
-                              <input type="radio" name="GioiTinh" value="Nam" @(Model.GioiTinh == "Nam" ? "checked" : "")>  
-                              <span>Nam</span>  
-                          </label>  
-                          <label class="radio-option">  
-                              <input type="radio" name="GioiTinh" value="Nữ" @(Model.GioiTinh == "Nữ" ? "checked" : "")>  
-                              <span>Nữ</span>  
-                          </label>  
-                          <label class="radio-option">  
-                              <input type="radio" name="GioiTinh" value="Khác" @(Model.GioiTinh == "Khác" ? "checked" : "")>  
-                              <span>Khác</span>  
-                          </label>  
-                      </div>  
-                      <div class="privacy-select-wrapper">  
-                          <select class="privacy-select" name="HienThiGioiTinh">  
-                              <option value="Public" selected="@(Model.HienThiGioiTinh == "Public")">Công khai</option>  
-                              <option value="Private" selected="@(Model.HienThiGioiTinh == "Private")">Riêng tư</option>  
-                          </select>  
-                      </div>  
-                  </div>  
-              </div>  
-
-              <!-- Location Section -->  
-              <div class="form-group">  
-                  <label>Vị trí</label>  
-                  <div class="select-row">  
-                      <div class="main-select-wrapper">  
-                          <select class="main-select" name="DiaChi" id="locationSelect">  
-                              <option value="">--</option>  
-                          </select>  
-                          <input type="hidden" id="currentLocation" value="@Model.DiaChi" />  
-                      </div>  
-                      <div class="privacy-select-wrapper">  
-                          <select class="privacy-select" name="HienThiDiaChi">  
-                              <option value="Public" selected="@(Model.HienThiDiaChi == "Public")">Công khai</option>  
-                              <option value="Private" selected="@(Model.HienThiDiaChi == "Private")">Riêng tư</option>  
-                          </select>  
-                      </div>  
-                  </div>  
-              </div>  
-
-              <!-- Thêm hidden input để lưu ngày sinh hiện tại -->  
-              <input type="hidden" id="currentBirthDate" value="@(Model.NgaySinh?.ToString("yyyy-MM-dd"))" />  
-
-             <!-- Birth Year Section -->  
-              <div class="form-group">  
-                  <label>Năm sinh</label>  
-                  <div class="select-row">  
-                      <div class="main-select-wrapper">  
-                          <select class="main-select" name="BirthYear">  
-                              <option value="">--</option>  
-                          </select>  
-                      </div>  
-                      <div class="privacy-select-wrapper">  
-                          <select class="privacy-select" name="HienThiNamSinh">  
-                              <option value="Public" selected="@(Model.HienThiNamSinh == "Public")">Công khai</option>  
-                              <option value="Private" selected="@(Model.HienThiNamSinh == "Private")">Riêng tư</option>  
-                          </select>  
-                      </div>  
-                  </div>  
-              </div>  
-
-              <!-- Birthday Section -->  
-              <div class="form-group">  
-                  <label>Ngày sinh</label>  
-                  <div class="birthday-row">  
-                      <div class="month-select-wrapper">  
-                          <select class="month-select" name="BirthMonth">  
-                              <option value="">--</option>  
-                          </select>  
-                      </div>  
-                      <div class="day-select-wrapper">  
-                          <select class="day-select" name="BirthDay">  
-                              <option value="">--</option>  
-                          </select>  
-                      </div>  
-                      <div class="privacy-select-wrapper">  
-                          <select class="privacy-select" name="HienThiNgaySinh">  
-                              <option value="Public" selected="@(Model.HienThiNgaySinh == "Public")">Công khai</option>  
-                              <option value="Private" selected="@(Model.HienThiNgaySinh == "Private")">Riêng tư</option>  
-                          </select>  
-                      </div>  
-                  </div>  
-              </div>  
-
-              <!-- Footer Buttons -->  
-              <div class="modal-footer">  
-                  <button type="submit" class="save-btn">Lưu thay đổi</button>  
-                  <button type="button" class="cancel-btn" onclick="closeEditProfileModal()">Hủy</button>  
-              </div>  
-          </form>  
-      </div>  
-  </div>  
-
-  @section Scripts {  
-      <script src="~/js/profile.js"></script>  
-  }  
+            // Thêm padding-top cho body
+            document.body.style.paddingTop = '56px';
+            
+            // Xử lý xung đột đường dẫn mặc định
+            document.querySelectorAll('.navbar a[href="#"]').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                });
+            });
+        });
+    </script>
+}  
