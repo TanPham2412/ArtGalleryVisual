@@ -1,7 +1,4 @@
-﻿body {
-}
-
-/* Navbar */
+﻿/* Navbar */
 .navbar {
     background-color: #1a1a1a !important;
     box-shadow: 0 1px 10px rgba(0, 0, 0, 0.2);
@@ -58,7 +55,7 @@
     padding: 10px 16px;
     background-color: #333;
     border: 1px solid #444;
-    color: #e0e0e0;
+    color: #fff;
     font-size: 14px;
     width: 100%;
     box-shadow: none;
@@ -72,7 +69,7 @@
 }
 
 .search-box input::placeholder {
-    color: #999;
+    color: #aaa;
     font-size: 14px;
 }
 
@@ -161,19 +158,24 @@
     padding: 6px 16px;
     font-size: 14px;
     font-weight: 700 !important;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
     text-decoration: none;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     height: 36px;
     white-space: nowrap;
+    position: relative;
+    overflow: hidden;
 }
 
 .btn-pixiv:hover {
-    background-color: #444 !important;
-    color: #fff !important;
-    text-decoration: none;
+    background-color: #00a8ff !important; 
+    color: #ffffff !important;
+    border-color: #00a8ff !important;
+    box-shadow: 0 0 10px rgba(0, 168, 255, 0.3);
+    transform: translateY(-2px);
+    transition: all 0.3s;
 }
 
 .btn-pixiv i {
@@ -198,7 +200,7 @@
 }
 
 .icon-link:hover {
-    color: #fff;
+    color: #00a8ff !important;
 }
 
 /* User avatar */
@@ -314,8 +316,8 @@
 }
 
     .dropdown-item:hover {
-        color: #ffffff !important;
-        background-color: #333333;
+        background-color: rgba(0, 168, 255, 0.1) !important;
+        color: #00a8ff !important;
     }
 
 .dropdown-item i {
@@ -379,8 +381,8 @@
 }
 
 .category-item:hover {
-    background-color: #333333;
-    color: #00a8ff;
+    background-color: rgba(0, 168, 255, 0.1) !important;
+    color: #00a8ff !important;
 }
 
 .category-item.home {
@@ -625,4 +627,56 @@
     height: 1px;
     background-color: #333;
     margin: 4px 0;
+}
+
+/* Hiệu ứng ripple khi hover */
+.btn-pixiv:after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 5px;
+    height: 5px;
+    background: rgba(0, 168, 255, 0.5);
+    opacity: 0;
+    border-radius: 100%;
+    transform: scale(1, 1) translate(-50%, -50%);
+    transform-origin: 50% 50%;
+}
+
+.btn-pixiv:hover:after {
+    animation: ripple 1s ease-out;
+}
+
+@keyframes ripple {
+    0% {
+        transform: scale(0, 0) translate(-50%, -50%);
+        opacity: 0.5;
+    }
+    100% {
+        transform: scale(20, 20) translate(-50%, -50%);
+        opacity: 0;
+    }
+}
+
+/* Hiệu ứng hover cho notification link */
+.notification-link:hover i {
+    color: #00a8ff !important;
+}
+
+/* Thêm hiệu ứng cho search-view-more */
+.search-view-more:hover {
+    background-color: rgba(0, 168, 255, 0.1) !important;
+    color: #00a8ff !important;
+}
+
+/* Thêm hiệu ứng hover cho tất cả các nút chung */
+button:hover, 
+select:hover, 
+input[type="file"]::file-selector-button:hover,
+input[type="file"]::-webkit-file-upload-button:hover {
+    background-color: #00a8ff !important;
+    color: #ffffff !important;
+    border-color: #00a8ff !important;
+    box-shadow: 0 0 10px rgba(0, 168, 255, 0.3);
 }

@@ -995,9 +995,9 @@ textarea:focus {
     outline: none;
 }
 
-/* Cập nhật nút follow cho phù hợp với thiết kế mới */
+/* Cập nhật nút follow cho phù hợp với thiết kế ArtGallery */
 .follow-button-primary {
-    background: linear-gradient(to right, #00a8ff, #0077cc);
+    background: #00a8ff;
     color: white;
     border: none;
     border-radius: 30px;
@@ -1008,21 +1008,26 @@ textarea:focus {
     white-space: nowrap;
 }
 
-    .follow-button-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(0, 168, 255, 0.3);
-    }
+.follow-button-primary:hover {
+    background: #0077cc;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 168, 255, 0.3);
+}
 
-    .follow-button-primary.following {
-        background: rgba(255, 255, 255, 0.08);
-        color: #fff;
-        border: 1px solid rgba(255, 255, 255, 0.15);
-    }
+.follow-button-primary.following {
+    background-color: transparent;
+    color: #00a8ff;
+    border: 1px solid #00a8ff;
+}
 
-        .follow-button-primary:not(.following) .following-text,
-        .follow-button-primary.following .follow-text {
-            display: none;
-        }
+.follow-button-primary.following:hover {
+    background-color: rgba(0, 168, 255, 0.1);
+}
+
+.follow-button-primary:not(.following) .following-text,
+.follow-button-primary.following .follow-text {
+    display: none;
+}
 
 /* Animations */
 @keyframes pulse {

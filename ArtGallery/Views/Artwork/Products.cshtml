@@ -4,242 +4,226 @@
     var sortOrder = Context.Request.Query["sortOrder"].ToString();
     var searchString = Context.Request.Query["searchString"].ToString();
     
-    // Sắp xếp ID
-    var idSort = string.IsNullOrEmpty(sortOrder) ? "id_asc" : (sortOrder == "id_asc" ? "id_desc" : "id_asc");
+    // Xác định sắp xếp hiện tại
+    string currentSortName = "Mới nhất";
+    string currentSortIcon = "fa-sort";
     
-    // Các sắp xếp khác
-    var titleSort = sortOrder == "title_asc" ? "title_desc" : "title_asc";
-    var artistSort = sortOrder == "artist_asc" ? "artist_desc" : "artist_asc";
-    var categorySort = sortOrder == "category_asc" ? "category_desc" : "category_asc";
-    var priceSort = sortOrder == "price_asc" ? "price_desc" : "price_asc";
-    var quantitySort = sortOrder == "quantity_asc" ? "quantity_desc" : "quantity_asc";
-    var dateSort = sortOrder == "date_asc" ? "date_desc" : "date_asc";
+    if (sortOrder == "price_asc") { currentSortName = "Giá tăng dần"; currentSortIcon = "fa-sort-up"; }
+    else if (sortOrder == "price_desc") { currentSortName = "Giá giảm dần"; currentSortIcon = "fa-sort-down"; }
+    else if (sortOrder == "title_asc") { currentSortName = "Tên A-Z"; currentSortIcon = "fa-sort-up"; }
+    else if (sortOrder == "title_desc") { currentSortName = "Tên Z-A"; currentSortIcon = "fa-sort-down"; }
+    else if (sortOrder == "date_asc") { currentSortName = "Cũ nhất"; currentSortIcon = "fa-sort-up"; }
+    else if (sortOrder == "date_desc" || string.IsNullOrEmpty(sortOrder)) { currentSortName = "Mới nhất"; currentSortIcon = "fa-sort-down"; }
 }
-<link rel="stylesheet" href="~/css/admin.css">
+
+<link rel="stylesheet" href="~/css/products.css">
 @Html.AntiForgeryToken()
 
+<!-- New header design with swapped positions -->
+<div class="product-header">
+    <div class="container">
+        <div class="header-top">
+            <a href="@Url.Action("Index", "Home")" class="return-home-btn">
+                <i class="fas fa-arrow-left"></i> Về trang chủ
+            </a>
+            
+            <h1 class="product-title">Tác Phẩm Nghệ Thuật</h1>
+            
+            <div class="spacer"></div>
+        </div>
 
-<div class="container mt-5 pt-5">
-    <h1 class="text-center mb-4">Danh sách Tranh</h1>
-    
-    <div class="d-flex justify-content-between mb-4">
-        <a asp-controller="Home" asp-action="Index" class="btn btn-primary">
-            <i class="fas fa-arrow-left"></i> Về trang chủ
-        </a>
-        
-        <!-- Box tìm kiếm chung -->
-        <form asp-action="Products" method="get" class="d-flex">
-            <div class="input-group">
-                <input type="text" name="searchString" value="@searchString" class="form-control" placeholder="Tìm kiếm...">
-                <button type="submit" class="btn btn-outline-primary">
-                    <i class="fas fa-search"></i>
-                </button>
-                @if (!string.IsNullOrEmpty(searchString))
-                {
-                    <a asp-action="Products" class="btn btn-outline-secondary">
-                        <i class="fas fa-times"></i>
-                    </a>
-                }
-                <!-- Giữ lại sortOrder khi tìm kiếm -->
-                <input type="hidden" name="sortOrder" value="@sortOrder" />
+        <div class="product-search-container">
+            <div class="product-search-input-wrapper">
+                <form asp-action="Products" method="get" class="d-flex align-items-center">
+                    <input type="text" name="searchString" value="@searchString" class="product-search-input" placeholder="Tìm kiếm tác phẩm...">
+                    <input type="hidden" name="sortOrder" value="@sortOrder" />
+                </form>
             </div>
-        </form>
+            
+            <button type="submit" class="product-search-button">
+                <i class="fas fa-search"></i>
+            </button>
+            
+            <div class="product-sort-dropdown">
+                <div class="product-sort-button">
+                    <i class="fas @currentSortIcon"></i>
+                    <span>@currentSortName</span>
+                </div>
+                <div class="product-sort-content">
+                    <a asp-action="Products" asp-route-sortOrder="date_desc" asp-route-searchString="@searchString" 
+                       class="product-sort-item @(sortOrder == "date_desc" || string.IsNullOrEmpty(sortOrder) ? "active" : "")">
+                        Mới nhất
+                        <i class="fas fa-sort-down"></i>
+                    </a>
+                    <a asp-action="Products" asp-route-sortOrder="date_asc" asp-route-searchString="@searchString"
+                       class="product-sort-item @(sortOrder == "date_asc" ? "active" : "")">
+                        Cũ nhất
+                        <i class="fas fa-sort-up"></i>
+                    </a>
+                    <a asp-action="Products" asp-route-sortOrder="price_asc" asp-route-searchString="@searchString"
+                       class="product-sort-item @(sortOrder == "price_asc" ? "active" : "")">
+                        Giá thấp đến cao
+                        <i class="fas fa-sort-up"></i>
+                    </a>
+                    <a asp-action="Products" asp-route-sortOrder="price_desc" asp-route-searchString="@searchString"
+                       class="product-sort-item @(sortOrder == "price_desc" ? "active" : "")">
+                        Giá cao đến thấp
+                        <i class="fas fa-sort-down"></i>
+                    </a>
+                    <a asp-action="Products" asp-route-sortOrder="title_asc" asp-route-searchString="@searchString"
+                       class="product-sort-item @(sortOrder == "title_asc" ? "active" : "")">
+                        Tên A-Z
+                        <i class="fas fa-sort-up"></i>
+                    </a>
+                    <a asp-action="Products" asp-route-sortOrder="title_desc" asp-route-searchString="@searchString"
+                       class="product-sort-item @(sortOrder == "title_desc" ? "active" : "")">
+                        Tên Z-A
+                        <i class="fas fa-sort-down"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
+</div>
 
-    <!-- Thông báo bộ lọc nếu có -->
-    @if (!string.IsNullOrEmpty(ViewBag.CategoryName))
+<div class="container">
+    <!-- Hiển thị bộ lọc và tìm kiếm hiện tại -->
+    @if (!string.IsNullOrEmpty(ViewBag.CategoryName) || !string.IsNullOrEmpty(searchString))
     {
-        <div class="alert alert-info d-flex justify-content-between align-items-center">
-            <span>Đang lọc theo thể loại: <strong>@ViewBag.CategoryName</strong></span>
-            <a asp-action="Products" class="btn btn-sm btn-outline-dark">Xóa bộ lọc</a>
+        <div class="filter-tags mb-4">
+            @if (!string.IsNullOrEmpty(ViewBag.CategoryName))
+            {
+                <div class="filter-tag">
+                    <span>Thể loại: @ViewBag.CategoryName</span>
+                    <a asp-action="Products" asp-route-sortOrder="@sortOrder" asp-route-searchString="@searchString"><i class="fas fa-times"></i></a>
+                </div>
+            }
+            
+            @if (!string.IsNullOrEmpty(searchString))
+            {
+                <div class="filter-tag">
+                    <span>Tìm kiếm: @searchString</span>
+                    <a asp-action="Products" asp-route-sortOrder="@sortOrder"><i class="fas fa-times"></i></a>
+                </div>
+            }
         </div>
     }
 
     @if (Model == null || !Model.Any())
     {
-        <div class="alert alert-info">
-            Không có tranh nào trong hệ thống.
+        <div class="empty-state">
+            <i class="fas fa-search"></i>
+            <p>Không tìm thấy tác phẩm nào phù hợp với tiêu chí tìm kiếm của bạn.</p>
+            <a asp-action="Products" class="btn btn-primary mt-3">Xem tất cả tác phẩm</a>
         </div>
     }
     else
     {
-        <div class="table-responsive">
-            <table class="table table-striped table-hover">
-                <thead class="table-dark">
-                    <tr>
-                        <th>
-                            <a asp-action="Products" asp-route-sortOrder="@idSort" asp-route-searchString="@searchString" class="text-white text-decoration-none">
-                                ID
-                                @if (sortOrder == "id_asc")
+        <div class="product-grid">
+            @foreach (var item in Model)
+            {
+                <div class="product-item">
+                    <div class="product-item-image">
+                        <img src="@item.DuongDanAnh" alt="@item.TieuDe" />
+                    </div>
+                    <div class="product-item-details">
+                        <div class="product-item-title">@item.TieuDe</div>
+                        <div class="product-item-artist">
+                            <div class="product-artist-avatar">
+                                <img src="@item.MaNguoiDungNavigation.GetAvatarPath()" alt="@item.MaNguoiDungNavigation.TenNguoiDung">
+                            </div>
+                            <span>@item.MaNguoiDungNavigation.TenNguoiDung</span>
+                        </div>
+                        
+                        @if (item.MaTheLoais != null && item.MaTheLoais.Any())
+                        {
+                            <div class="product-category-tags">
+                                @foreach (var theLoai in item.MaTheLoais.Take(3))
                                 {
-                                    <i class="fas fa-sort-up"></i>
+                                    <span class="product-category-tag">@theLoai.TenTheLoai</span>
                                 }
-                                else if (sortOrder == "id_desc")
+                                @if (item.MaTheLoais.Count > 3)
                                 {
-                                    <i class="fas fa-sort-down"></i>
+                                    <span class="product-category-tag">+@(item.MaTheLoais.Count - 3)</span>
                                 }
-                                else
-                                {
-                                    <i class="fas fa-sort"></i>
-                                }
+                            </div>
+                        }
+                        
+                        <div class="product-item-price">@item.Gia.ToString("#,##0") VNĐ</div>
+                        <div class="product-item-meta">
+                            <i class="fas fa-box"></i> Còn lại: @item.SoLuongTon
+                            <span class="ms-3"><i class="far fa-calendar-alt"></i> @(item.NgayDang.HasValue ? item.NgayDang.Value.ToString("dd/MM/yyyy") : "N/A")</span>
+                        </div>
+                        
+                        <div class="product-item-actions">
+                            <a asp-action="Display" asp-route-id="@item.MaTranh" class="btn product-view-btn">
+                                <i class="fas fa-eye"></i> Chi tiết
                             </a>
-                        </th>
-                        <th>Ảnh</th>
-                        <th>
-                            <a asp-action="Products" asp-route-sortOrder="@titleSort" asp-route-searchString="@searchString" class="text-white text-decoration-none">
-                                Tiêu đề
-                                @if (sortOrder == "title_asc")
-                                {
-                                    <i class="fas fa-sort-up"></i>
-                                }
-                                else if (sortOrder == "title_desc")
-                                {
-                                    <i class="fas fa-sort-down"></i>
-                                }
-                                else
-                                {
-                                    <i class="fas fa-sort"></i>
-                                }
+                            <a asp-controller="Order" asp-action="Display" asp-route-id="@item.MaTranh" class="btn product-buy-btn">
+                                <i class="fas fa-shopping-cart"></i> Mua ngay
                             </a>
-                        </th>
-                        <th>
-                            <a asp-action="Products" asp-route-sortOrder="@artistSort" asp-route-searchString="@searchString" class="text-white text-decoration-none">
-                                Người đăng
-                                @if (sortOrder == "artist_asc")
-                                {
-                                    <i class="fas fa-sort-up"></i>
-                                }
-                                else if (sortOrder == "artist_desc")
-                                {
-                                    <i class="fas fa-sort-down"></i>
-                                }
-                                else
-                                {
-                                    <i class="fas fa-sort"></i>
-                                }
-                            </a>
-                        </th>
-                        <th>
-                            <a asp-action="Products" asp-route-sortOrder="@categorySort" asp-route-searchString="@searchString" class="text-white text-decoration-none">
-                                Thể loại
-                                @if (sortOrder == "category_asc")
-                                {
-                                    <i class="fas fa-sort-up"></i>
-                                }
-                                else if (sortOrder == "category_desc")
-                                {
-                                    <i class="fas fa-sort-down"></i>
-                                }
-                                else
-                                {
-                                    <i class="fas fa-sort"></i>
-                                }
-                            </a>
-                        </th>
-                        <th>
-                            <a asp-action="Products" asp-route-sortOrder="@priceSort" asp-route-searchString="@searchString" class="text-white text-decoration-none">
-                                Giá
-                                @if (sortOrder == "price_asc")
-                                {
-                                    <i class="fas fa-sort-up"></i>
-                                }
-                                else if (sortOrder == "price_desc")
-                                {
-                                    <i class="fas fa-sort-down"></i>
-                                }
-                                else
-                                {
-                                    <i class="fas fa-sort"></i>
-                                }
-                            </a>
-                        </th>
-                        <th>
-                            <a asp-action="Products" asp-route-sortOrder="@quantitySort" asp-route-searchString="@searchString" class="text-white text-decoration-none">
-                                Số lượng
-                                @if (sortOrder == "quantity_asc")
-                                {
-                                    <i class="fas fa-sort-up"></i>
-                                }
-                                else if (sortOrder == "quantity_desc")
-                                {
-                                    <i class="fas fa-sort-down"></i>
-                                }
-                                else
-                                {
-                                    <i class="fas fa-sort"></i>
-                                }
-                            </a>
-                        </th>
-                        <th>
-                            <a asp-action="Products" asp-route-sortOrder="@dateSort" asp-route-searchString="@searchString" class="text-white text-decoration-none">
-                                Ngày đăng
-                                @if (sortOrder == "date_asc")
-                                {
-                                    <i class="fas fa-sort-up"></i>
-                                }
-                                else if (sortOrder == "date_desc")
-                                {
-                                    <i class="fas fa-sort-down"></i>
-                                }
-                                else
-                                {
-                                    <i class="fas fa-sort"></i>
-                                }
-                            </a>
-                        </th>
-                        <th>Thao tác</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var item in Model)
-                    {
-                        <tr>
-                            <td>@item.MaTranh</td>
-                            <td>
-                                <img src="@item.DuongDanAnh" alt="@item.TieuDe" style="width:60px; height: 60px; object-fit: cover;" />
-                            </td>
-                            <td>@item.TieuDe</td>
-                            <td>@item.MaNguoiDungNavigation.TenNguoiDung</td>
-                            <td>
-                                @if (item.MaTheLoais != null && item.MaTheLoais.Any())
-                                {
-                                    <div class="d-flex flex-wrap gap-1">
-                                        @foreach (var theLoai in item.MaTheLoais.Take(2))
-                                        {
-                                            <span class="badge bg-info text-dark">@theLoai.TenTheLoai</span>
-                                        }
-                                        @if (item.MaTheLoais.Count > 2)
-                                        {
-                                            <span class="badge bg-secondary">+@(item.MaTheLoais.Count - 2)</span>
-                                        }
-                                    </div>
-                                }
-                                else
-                                {
-                                    <span class="text-muted">Chưa phân loại</span>
-                                }
-                            </td>
-                            <td>@item.Gia.ToString("#,##0") VND</td>
-                            <td>@item.SoLuongTon</td>
-                            <td>@(item.NgayDang.HasValue ? item.NgayDang.Value.ToString("dd/MM/yyyy") : "N/A")</td>
-                            <td>
-                                <div class="btn-group">
-                                    <a asp-action="Display" asp-route-id="@item.MaTranh" class="btn btn-sm btn-info">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                    <a asp-controller="Order" asp-action="Display" asp-route-id="@item.MaTranh" class="btn btn-sm btn-success">
-                                        <i class="fas fa-shopping-cart"></i>
-                                    </a>
-                                </div>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+                        </div>
+                    </div>
+                </div>
+            }
         </div>
     }
 </div>
 
 @section Scripts {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Hiệu ứng đỗ bóng khi hover
+            $('.product-item').hover(
+                function() {
+                    $(this).css('box-shadow', '0 12px 30px rgba(0, 168, 255, 0.2)');
+                },
+                function() {
+                    $(this).css('box-shadow', '0 8px 20px rgba(0, 0, 0, 0.2)');
+                }
+            );
+            
+            // Submit form khi nhấn Enter trong input tìm kiếm
+            $('.product-search-input').keydown(function(e) {
+                if (e.keyCode === 13) {
+                    $(this).closest('form').submit();
+                }
+            });
+            
+            // Submit form khi nhấn nút tìm kiếm
+            $('.product-search-button').click(function() {
+                $(this).closest('.product-search-container').find('form').submit();
+            });
+            
+            // Xử lý dropdown sắp xếp để khắc phục vấn đề không thể chọn
+            var dropdownTimeout;
+            
+            $('.product-sort-dropdown').hover(
+                function() {
+                    clearTimeout(dropdownTimeout);
+                    $(this).find('.product-sort-content').show();
+                },
+                function() {
+                    var dropdown = $(this);
+                    dropdownTimeout = setTimeout(function() {
+                        dropdown.find('.product-sort-content').hide();
+                    }, 300); // Tạo độ trễ 300ms để người dùng có thời gian di chuyển chuột
+                }
+            );
+            
+            // Thêm xử lý riêng cho nội dung dropdown
+            $('.product-sort-content').hover(
+                function() {
+                    clearTimeout(dropdownTimeout);
+                },
+                function() {
+                    var dropdown = $(this);
+                    dropdownTimeout = setTimeout(function() {
+                        dropdown.hide();
+                    }, 300);
+                }
+            );
+        });
+    </script>
 } 
