@@ -13,5 +13,5 @@ To get the source code to your computer, run the following command in the termin
 ## 📊 RepoBeats Analytics
 
 <p align="center">
-  <https://repobeats.axiom.co/api/embed/d2fd449cf12eb010947325731445c985db76b96f.svg" alt="RepoBeats analytics" />
+    <img src="https://repobeats.axiom.co/api/embed/d2fd449cf12eb010947325731445c985db76b96f.svg" alt="RepoBeats analytics" />
 </p>
