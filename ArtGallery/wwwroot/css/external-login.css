@@ -1,0 +1,136 @@
+﻿body {
+    background-color: #121212;
+    color: #e0e0e0;
+    font-family: Arial, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+.external-login-container {
+    max-width: 500px;
+    margin: 80px auto;
+    padding: 30px;
+    background-color: #1a1a1a;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    border: 1px solid #333;
+}
+
+h1 {
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: #fff;
+    text-align: center;
+}
+
+h2 {
+    font-size: 20px;
+    color: #e0e0e0;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+hr {
+    border: none;
+    height: 1px;
+    background-color: #333;
+    margin: 20px 0;
+}
+
+p.text-info {
+    font-size: 16px;
+    line-height: 1.5;
+    margin-bottom: 25px;
+    padding: 15px;
+    background-color: rgba(0, 168, 255, 0.1);
+    border-radius: 8px;
+}
+
+p.text-info strong {
+    color: #00a8ff;
+}
+
+.form-floating {
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.form-control {
+    background-color: #2a2a2a;
+    border: 1px solid #444;
+    color: #fff;
+    border-radius: 8px;
+    padding: 15px;
+    width: 100%;
+    height: 50px;
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    background-color: #333;
+    border-color: #00a8ff;
+    box-shadow: 0 0 0 3px rgba(0, 168, 255, 0.25);
+    outline: none;
+}
+
+.form-label {
+    position: absolute;
+    top: 0;
+    left: 10px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    color: #aaa;
+    transition: all 0.3s;
+    transform-origin: 0 0;
+    pointer-events: none;
+}
+
+.form-control:focus ~ .form-label,
+.form-control:not(:placeholder-shown) ~ .form-label {
+    transform: translateY(-25px) scale(0.85);
+    color: #00a8ff;
+}
+
+.text-danger {
+    color: #ff6b6b;
+    font-size: 14px;
+    margin-top: 5px;
+    display: block;
+}
+
+.btn-primary {
+    background: linear-gradient(to right, #00a8ff, #0077cc);
+    color: white;
+    border: none;
+    border-radius: 30px;
+    padding: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+    transition: all 0.3s ease;
+    margin-top: 10px;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 168, 255, 0.3);
+}
+
+.validation-summary-errors ul {
+    list-style-type: none;
+    padding: 15px;
+    background-color: rgba(255, 107, 107, 0.1);
+    border-radius: 8px;
+    border-left: 3px solid #ff6b6b;
+    margin-bottom: 20px;
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+    .external-login-container {
+        margin: 20px 15px;
+        padding: 20px;
+    }
+}

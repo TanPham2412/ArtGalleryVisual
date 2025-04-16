@@ -2,26 +2,39 @@
     ViewData["Title"] = "Đang chờ xét duyệt nghệ sĩ";
 }
 
-<link rel="stylesheet" href="~/css/register-artist.css">
+<link rel="stylesheet" href="~/css/pending-artist-approval.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="card">
-                <div class="card-header bg-white">
-                    <h3 class="card-title mb-0">Đang chờ xét duyệt nghệ sĩ</h3>
+                <div class="card-header">
+                    <h3 class="card-title">Đang chờ xét duyệt nghệ sĩ</h3>
                 </div>
                 <div class="card-body text-center py-5">
-                    <div class="waiting-approval-icon mb-4">
-                        <i class="fas fa-hourglass-half fa-5x text-warning"></i>
+                    <div class="waiting-approval-icon">
+                        <i class="fas fa-hourglass-half"></i>
                     </div>
-                    <h4 class="mb-3">Bạn đã đăng ký trở thành nghệ sĩ</h4>
-                    <p class="mb-4">Hồ sơ của bạn đang được xem xét. Vui lòng đợi quản trị viên phê duyệt.</p>
-                    <p class="text-muted">Sau khi được phê duyệt, bạn sẽ có thể đăng tải các tác phẩm nghệ thuật của mình.</p>
+                    
+                    <h4>Đơn đăng ký nghệ sĩ đã được tiếp nhận</h4>
+                    <p>Hồ sơ của bạn đang được đội ngũ ArtGallery xem xét. Chúng tôi sẽ thông báo cho bạn trong thời gian sớm nhất.</p>
+                    <p class="text-muted">Sau khi được phê duyệt, bạn sẽ có thể đăng tải và bán các tác phẩm nghệ thuật của mình.</p>
+                    
+                    <div class="approval-status">
+                        <div class="status-bar">
+                            <div class="status-progress"></div>
+                        </div>
+                        <div class="status-labels">
+                            <div class="status-label">Đã nhận đơn</div>
+                            <div class="status-label">Đang xét duyệt</div>
+                            <div class="status-label">Phê duyệt</div>
+                        </div>
+                    </div>
 
                     <div class="mt-4">
-                        <a href="@Url.Action("Profile", "User")" class="btn btn-primary" style="min-width: 250px; white-space: nowrap;">
-                            <i class="fas fa-user me-2"></i>Xem trang cá nhân
+                        <a href="@Url.Action("Profile", "User")" class="btn btn-primary">
+                            <i class="fas fa-user me-2"></i>Quay về trang cá nhân
                         </a>
                     </div>
                 </div>
