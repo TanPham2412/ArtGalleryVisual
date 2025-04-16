@@ -5,7 +5,7 @@
     var mediaJson = Json.Serialize(Model.Media.Select(m => new { loaiMedia = m.LoaiMedia, duongDan = m.DuongDan }));
 }
 
-<link rel="stylesheet" href="~/css/profile.css">
+<link rel="stylesheet" href="~/css/profile.css?v=2">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
 <div class="profile-container">
@@ -138,19 +138,35 @@
             <!-- Gallery Section -->
             <div class="section">
                 <div class="section-header">
-                    <h2>Ảnh của bạn</h2>
-                    <a href="#" class="see-all">Xem tất cả</a>
+                    @if (ViewBag.IsOwnProfile)
+                    {
+                        <h2>Ảnh của bạn</h2>
+                    }
+                    else
+                    {
+                        <h2>Ảnh của @Model.TenNguoiDung</h2>
+                    }
+                    <a href="@Url.Action("Gallery", "User", new { id = Model.Id })" class="see-all">Xem tất cả</a>
                 </div>
                 <div class="gallery-grid">
-                    @foreach (var artwork in Model.Tranhs)
+                    @foreach (var artwork in Model.Tranhs.Take(8))
                     {
                         <div class="gallery-item">
                             <a href="@Url.Action("Display", "Artwork", new { id = artwork.MaTranh })">
                                 <img src="@artwork.DuongDanAnh" alt="@artwork.TieuDe">
+                                <div class="gallery-item-title">@artwork.TieuDe</div>
                             </a>
                         </div>
                     }
                 </div>
+                @if (Model.Tranhs.Count() > 8)
+                {
+                    <div class="see-all-container">
+                        <a href="@Url.Action("Gallery", "User", new { id = Model.Id })" class="see-all-btn">
+                            <i class="fas fa-th-large"></i> Xem tất cả @Model.Tranhs.Count() tác phẩm
+                        </a>
+                    </div>
+                }
             </div>
         </div>
 
