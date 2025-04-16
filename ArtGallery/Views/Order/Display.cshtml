@@ -135,20 +135,23 @@
                 <!-- Nội dung tab -->
                 <div class="tab-content pt-3" id="paymentTabContent">
                     <!-- Tab chuyển khoản -->
+                    <!-- Tab VNPay -->
                     <div class="tab-pane fade show active" id="transfer-content" role="tabpanel">
                         <div class="text-center">
-                            <p>Quét mã QR để thanh toán số tiền: <strong class="text-danger" id="qrAmountText">400.000 VND</strong></p>
-                            <div class="qr-container p-3 border rounded mx-auto" style="max-width: 250px;">
-                                <img src="https://api.qrserver.com/v1/create-qr-code/?data=ArtGallery_Payment_@Model.MaTranh&size=200x200" class="img-fluid" alt="Mã QR thanh toán">
-                            </div>
-                            <p class="mt-3 text-muted small">Sau khi quét mã thành công, hệ thống sẽ tự động xác nhận đơn hàng</p>
-                            
-                            <!-- Nút giả lập quét mã thành công (trong thực tế sẽ có webhook xác nhận) -->
-                            <button id="btnSimulateQRPayment" class="btn btn-success mt-2">
-                                <i class="fas fa-check me-2"></i>Giả lập thanh toán thành công
-                            </button>
+                            <p>Thanh toán số tiền: <strong class="text-danger" id="qrAmountText">400.000 VND</strong></p>
+                            <form method="post" action="@Url.Action("CreatePaymentUrlVnpay", "Payment")" id="vnpayForm">
+                                <input type="hidden" name="OrderType" value="Tranh">
+                                <input type="hidden" name="amount" id="vnpayAmount" value="" />
+                                <input type="hidden" name="OrderDescription" value="VNPAY">
+                                <button type="submit" class="btn btn-primary mt-2">
+                                    <i class="fas fa-credit-card me-2"></i>Thanh toán qua VNPay
+                                </button>
+                            </form>
+
+                            <p class="mt-3 text-muted small">Bạn sẽ được chuyển đến cổng thanh toán VNPay để hoàn tất giao dịch.</p>
                         </div>
-                                </div>
+                    </div>
+
 
                     <!-- Tab thanh toán khi nhận hàng -->
                     <div class="tab-pane fade" id="cod-content" role="tabpanel">
@@ -196,7 +199,15 @@
             function formatCurrency(amount) {
                 return new Intl.NumberFormat('vi-VN').format(amount);
             }
-            
+                    // Khi submit form VNPay, cập nhật số tiền động
+        $('#vnpayForm').on('submit', function () {
+            var quantity = parseInt($('#quantity').val());
+            var price = parseFloat('@artwork.Gia');
+            var total = quantity * price;
+
+            $('#vnpayAmount').val(total);
+        });
+
             $('#decrease').click(function() {
                 let value = parseInt(quantityInput.val());
                 if (value > 1) {
