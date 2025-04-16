@@ -13,7 +13,7 @@
     // Kiểm tra quyền sở hữu
     var isOwner = currentUserId != null && Model.MaNguoiDung == currentUserId;
     
-    // Kiểm tra quyền admin
+    // Kiểm tra quyền admin 
     var isAdmin = User.IsInRole("Admin");
     
     // Có thể sửa/xóa nếu là admin hoặc chủ sở hữu
@@ -23,8 +23,7 @@
 }
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-<link rel="stylesheet" href="~/css/style.css">
-<link rel="stylesheet" href="~/css/display.css">
+<link rel="stylesheet" href="~/css/display.css?v=2">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
 
@@ -80,7 +79,15 @@
                     <img src="@Model.MaNguoiDungNavigation.GetAvatarPath()" alt="Artist" class="artist-avatar">
                     <div class="artist-details ms-3">
                         <h5 class="artist-name mb-0">@Model.MaNguoiDungNavigation.TenNguoiDung</h5>
-                        <a href="#" class="follow-btn">Follow</a>
+                        @if (User.Identity.IsAuthenticated && currentUserId != Model.MaNguoiDung)
+                        {
+                            var isFollowing = await _context.TheoDois.AnyAsync(t => t.MaNguoiTheoDoi == currentUserId && t.MaNguoiDuocTheoDoi == Model.MaNguoiDung);
+                            <button class="follow-btn @(isFollowing ? "following" : "")" 
+                                    onclick="toggleFollow(event, '@Model.MaNguoiDung')">
+                                <span class="follow-text">Theo dõi</span>
+                                <span class="following-text">Đang theo dõi</span>
+                            </button>
+                        }
                     </div>
                 </div>
 
@@ -211,6 +218,34 @@
                 },
                 error: function() {
                     alert('Có lỗi xảy ra khi thực hiện thao tác');
+                }
+            });
+        }
+        
+        function toggleFollow(event, userId) {
+            event.preventDefault();
+            var button = event.currentTarget;
+            
+            $.ajax({
+                url: '/User/ToggleFollow',
+                type: 'POST',
+                data: { followedUserId: userId },
+                headers: {
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function(response) {
+                    if (response.success) {
+                        if (response.isFollowing) {
+                            button.classList.add('following');
+                        } else {
+                            button.classList.remove('following');
+                        }
+                    } else {
+                        alert(response.message);
+                    }
+                },
+                error: function() {
+                    alert('Có lỗi xảy ra khi thực hiện thao tác theo dõi');
                 }
             });
         }
