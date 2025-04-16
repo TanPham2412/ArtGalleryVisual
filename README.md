@@ -1,9 +1,17 @@
-﻿# ArtGalleryVisual
+# 🎵 PiaoYue ArtGallery
 
-## Cấu hình Google Authentication
+PiaoYue ArtGallery is an open source art trading and gallery platform project
 
-Để cài đặt Google Authentication:
+---
 
-1. Sử dụng PowerShell để set biến môi trường:
-[System.Environment]::SetEnvironmentVariable("GOOGLE_CLIENT_ID", "your_client_id", "User")
-[System.Environment]::SetEnvironmentVariable("GOOGLE_CLIENT_SECRET", "your_client_secret", "User")
+## 🚀 Clone Project
+
+To get the source code to your computer, run the following command in the terminal:
+<br>
+**git clone https://github.com/TanPham2412/ArtGalleryVisual.git**
+
+## 📊 RepoBeats Analytics
+
+<p align="center">
+  <https://repobeats.axiom.co/api/embed/d2fd449cf12eb010947325731445c985db76b96f.svg" alt="RepoBeats analytics" />
+</p>
