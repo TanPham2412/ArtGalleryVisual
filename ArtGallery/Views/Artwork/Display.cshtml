@@ -76,9 +76,13 @@
             <div class="art-info">
                 <!-- Artist Info -->
                 <div class="artist-profile d-flex align-items-center mb-4">
-                    <img src="@Model.MaNguoiDungNavigation.GetAvatarPath()" alt="Artist" class="artist-avatar">
+                    <a href="@Url.Action("Profile", "User", new { id = Model.MaNguoiDung })" class="artist-avatar-link">
+                        <img src="@Model.MaNguoiDungNavigation.GetAvatarPath()" alt="Artist" class="artist-avatar">
+                    </a>
                     <div class="artist-details ms-3">
-                        <h5 class="artist-name mb-0">@Model.MaNguoiDungNavigation.TenNguoiDung</h5>
+                        <a href="@Url.Action("Profile", "User", new { id = Model.MaNguoiDung })" class="artist-name-link">
+                            <h5 class="artist-name mb-0">@Model.MaNguoiDungNavigation.TenNguoiDung</h5>
+                        </a>
                         @if (User.Identity.IsAuthenticated && currentUserId != Model.MaNguoiDung)
                         {
                             var isFollowing = await _context.TheoDois.AnyAsync(t => t.MaNguoiTheoDoi == currentUserId && t.MaNguoiDuocTheoDoi == Model.MaNguoiDung);
@@ -93,6 +97,15 @@
 
                 <!-- Art Details -->
                 <h2 class="art-title mb-3">@Model.TieuDe</h2>
+
+                <!-- Thêm phần mô tả sản phẩm -->
+                @if (!string.IsNullOrEmpty(Model.MoTa))
+                {
+                    <div class="art-description mb-4">
+                        @Model.MoTa
+                    </div>
+                }
+
                 <div class="art-price mb-4">
                     <span class="price-label">Giá:</span>
                     <span class="price-amount">@Model.Gia.ToString("N0") VND</span>

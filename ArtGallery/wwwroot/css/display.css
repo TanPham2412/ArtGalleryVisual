@@ -374,3 +374,41 @@ body {
 .btn-close {
     color: #fff;
 }
+
+/* Artist avatar link */
+.artist-avatar-link {
+    display: block;
+    text-decoration: none;
+    border-radius: 50%;
+    overflow: hidden;
+    transition: transform 0.2s;
+}
+
+.artist-avatar-link:hover {
+    transform: scale(1.05);
+}
+
+/* Artist name link */
+.artist-name-link {
+    text-decoration: none;
+    color: inherit;
+    transition: color 0.2s;
+}
+
+.artist-name-link:hover {
+    color: #00a8ff;
+}
+
+/* Art description */
+.art-description {
+    color: #aaa;
+    font-size: 15px;
+    line-height: 1.5;
+    padding: 5px 0;
+    border-top: 1px solid #333;
+    border-bottom: 1px solid #333;
+    background-color: rgba(0, 0, 0, 0.1);
+    padding: 12px;
+    border-radius: 6px;
+    font-style: italic;
+}
