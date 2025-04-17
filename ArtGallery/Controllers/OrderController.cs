@@ -5,6 +5,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using ArtGallery.Models.VNPAY;
 
 namespace ArtGallery.Controllers
 {
@@ -166,9 +167,34 @@ namespace ArtGallery.Controllers
         }
 
         // Action hiển thị trang đặt hàng thành công
+        [HttpGet]
         public IActionResult OrderSuccess()
         {
-            return View();
+            var vnp_TxnRef = Request.Query["vnp_TxnRef"];
+            var vnp_TransactionNo = Request.Query["vnp_TransactionNo"];
+            var vnp_OrderInfo = Request.Query["vnp_OrderInfo"];
+            var vnp_ResponseCode = Request.Query["vnp_ResponseCode"];
+
+            // Check missing params
+            if (string.IsNullOrEmpty(vnp_TxnRef) ||
+                string.IsNullOrEmpty(vnp_TransactionNo) ||
+                string.IsNullOrEmpty(vnp_OrderInfo) ||
+                string.IsNullOrEmpty(vnp_ResponseCode))
+            {
+                // Có thể redirect về trang thông báo lỗi
+                return RedirectToAction("PaymentError");
+            }
+
+            var paymentResponse = new PaymentResponseModel
+            {
+                OrderId = vnp_TxnRef,
+                TransactionId = vnp_TransactionNo,
+                OrderDescription = vnp_OrderInfo,
+                VnPayResponseCode = vnp_ResponseCode,
+                PaymentMethod = "VNPAY"
+            };
+
+            return View(paymentResponse);
         }
 
         public async Task<IActionResult> History()

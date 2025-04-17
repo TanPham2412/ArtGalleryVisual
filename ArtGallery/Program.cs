@@ -10,6 +10,7 @@ using ArtGallery.Services;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using ArtGallery.Services.VNPAY;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -98,7 +99,8 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 // Đăng ký NotificationRepository
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
-
+//VNPAY
+builder.Services.AddScoped<IVnPayService, VnPayService>();
 var app = builder.Build();
 
 // Seed Roles và Admin user

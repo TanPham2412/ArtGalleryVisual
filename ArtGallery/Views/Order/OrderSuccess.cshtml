@@ -1,26 +1,26 @@
-@{
-    ViewData["Title"] = "Đặt hàng thành công";
-}
+@model ArtGallery.Models.VNPAY.PaymentResponseModel
 
-<link rel="stylesheet" href="~/css/style.css">
-
-
-<div class="container mt-5 pt-5">
-    <div class="card shadow-sm">
-        <div class="card-body text-center py-5">
-            <div class="text-success mb-4">
-                <i class="fas fa-check-circle fa-5x"></i>
-            </div>
-            <h2 class="mb-4">Đặt hàng thành công!</h2>
-            <p class="lead mb-4">Cảm ơn bạn đã đặt hàng. Chúng tôi sẽ liên hệ với bạn để xác nhận đơn hàng.</p>
-            <div class="d-flex justify-content-center gap-3">
-                <a asp-controller="Home" asp-action="Index" class="btn btn-outline-primary">
-                    <i class="fas fa-home me-2"></i>Về trang chủ
-                </a>
-                <a asp-controller="Order" asp-action="History" class="btn btn-primary">
-                    <i class="fas fa-history me-2"></i>Xem lịch sử đặt hàng
-                </a>
-            </div>
-        </div>
+@if (Model == null)
+{
+    <div class="alert alert-danger mt-4">
+        <h2>Không tìm thấy thông tin thanh toán.</h2>
+        <a href="/" class="btn btn-secondary mt-3">Về trang chủ</a>
     </div>
-</div> 
+}
+else
+{
+    <link rel="stylesheet" href="~/css/style.css">
+    <div class="container mt-4">
+        <div class="alert @(Model.VnPayResponseCode == "00" ? "alert-success" : "alert-danger")">
+            <h2>@(Model.VnPayResponseCode == "00" ? "Thanh toán thành công!" : "Thanh toán thất bại!")</h2>
+        </div>
+
+        <p><strong>Mã đơn hàng:</strong> @Model.OrderId</p>
+        <p><strong>Mã giao dịch VNPAY:</strong> @Model.TransactionId</p>
+        <p><strong>Phương thức thanh toán:</strong> @Model.PaymentMethod</p>
+        <p><strong>Mô tả đơn hàng:</strong> @Model.OrderDescription</p>
+        <p><strong>Trạng thái giao dịch:</strong> @(Model.VnPayResponseCode == "00" ? "Thành công" : "Thất bại")</p>
+
+        <a href="/" class="btn btn-primary mt-3">Quay lại trang chủ</a>
+    </div>
+}
