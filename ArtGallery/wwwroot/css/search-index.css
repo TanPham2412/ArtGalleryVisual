@@ -1,6 +1,7 @@
 ﻿/* Cập nhật search-index.css theo phong cách của style.css */
 .search-view {
     /* Đặt scope cho tất cả style tìm kiếm */
+    background-color: #131313;
 }
 
 /* Search Container */
@@ -11,65 +12,64 @@
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 15px;
+    background-color: #131313;
 }
 
 /* Navigation cho phần tìm kiếm - hoàn toàn tách biệt */
 .search-tag-container {
     border-bottom: 1px solid #e7e7e7;
-    margin-top: 80px;
+    margin-top: 60px;
+    border-bottom: none;
     padding: 0;
-    background-color: #fff;
+    background-color: #1a1a1a;
     width: 100%;
-    display: block;
-    position: relative;
-    z-index: 1;
+    position: sticky;
+    top: 70px;
+    z-index: 100;
+    box-shadow: 0 1px 5px rgba(0,0,0,0.2);
 }
 
 .search-tag {
     display: flex;
     justify-content: flex-start;
     align-items: center;
-    margin: 0;
+    margin-bottom: 24px;
     padding: 0;
     max-width: 1200px;
     margin-left: auto;
     margin-right: auto;
     overflow-x: auto;
-    height: 46px;
+    height: 50px;
     -ms-overflow-style: none;
     scrollbar-width: none;
-}
-
-.search-tag::-webkit-scrollbar {
-    display: none;
 }
 
 .search-tag-items {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 12px 20px;
+    padding: 12px 25px;
     text-decoration: none;
-    font-size: 14px;
-    font-weight: bold;
-    color: #666;
+    font-size: 15px;
+    font-weight: 500;
+    color: #9e9e9e;
     background-color: transparent !important;
     border-radius: 0;
     position: relative;
-    transition: color 0.2s;
+    transition: all 0.25s ease;
     white-space: nowrap;
     height: 100%;
 }
 
 .search-tag-items:hover {
-    color: #0096fa;
+    color: #ffffff;
     background-color: transparent;
     text-decoration: none;
 }
 
 .search-tag-items.active {
     color: #0096fa;
-    font-weight: bold;
+    font-weight: 600;
 }
 
 .search-tag-items.active::after {
@@ -80,6 +80,7 @@
     width: 100%;
     height: 3px;
     background-color: #0096fa;
+    border-radius: 0;
 }
 
 /* Màu riêng cho từng tag */
@@ -119,7 +120,7 @@
 .search-view .section-title {
     font-size: 16px;
     font-weight: 500;
-    color: #333;
+    color: #fff ;
     display: flex;
     align-items: center;
     margin-bottom: 16px;
@@ -189,13 +190,13 @@
 .search-view .user-name {
     font-size: 16px;
     font-weight: 700;
-    color: #333;
+    color: #ffffff;
     margin-bottom: 4px;
 }
 
 .search-view .user-description {
     font-size: 13px;
-    color: #666;
+    color: #ccc;
     line-height: 1.4;
     word-break: break-word;
     margin-bottom: 8px;
@@ -274,13 +275,19 @@
     padding-bottom: 100%;
     border-radius: 8px;
     overflow: hidden;
+    border: 1px solid #333;
+    transition: all 0.3s ease;
+    cursor: pointer;
 }
 
 .search-view .artwork-link {
     display: block;
     position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
+    z-index: 3;
 }
 
 .search-view .artwork-image {
@@ -290,6 +297,7 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
+    transition: transform 0.6s ease;
 }
 
 .search-view .artwork-overlay {
@@ -299,25 +307,61 @@
 }
 
 .search-view .like-button {
-    background-color: white;
-    border: none;
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    position: absolute !important;
+    bottom: 10px !important;
+    right: 10px !important;
+    background-color: white !important;
+    border: none !important;
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2) !important;
+    opacity: 0.9 !important;
+    z-index: 10 !important;
+}
+
+.search-view .like-button:hover {
+    transform: scale(1.12);
+    opacity: 1;
 }
 
 .search-view .like-button i {
-    color: #666;
-    font-size: 14px;
+    font-size: 18px !important;
+    color: #777 !important;
+    transition: color 0.3s ease !important;
+}
+
+.search-view .like-button i.fas,
+.search-view .like-button.active i {
+    color: #ff4060 !important;
+}
+
+/* Thêm animation cho trái tim */
+@keyframes heartPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.3); }
+    100% { transform: scale(1); }
 }
 
 .search-view .like-button i.fas {
-    color: #ff4060;
+    animation: heartPulse 0.5s ease;
+}
+
+/* Thêm animation khi click */
+@keyframes heartbeat {
+    0% { transform: scale(1); }
+    25% { transform: scale(1.3); }
+    50% { transform: scale(0.9); }
+    75% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+.search-view .like-button.active i {
+    animation: heartbeat 0.5s ease-in-out;
 }
 
 .search-view .artwork-caption {
@@ -326,7 +370,7 @@
 
 .search-view .artwork-title {
     font-size: 14px;
-    color: #333;
+    color: #ffffff;
     text-decoration: none;
     display: block;
     white-space: nowrap;
@@ -339,31 +383,34 @@
 .sort-options {
     display: flex;
     align-items: center;
-    margin: 15px 0;
-    padding-bottom: 10px;
-    border-bottom: 1px solid #f0f0f0;
+    margin: 20px 0;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #2a2a2a;
     width: 100%;
 }
 
 .sort-option {
-    padding: 6px 16px;
-    margin-right: 8px;
-    color: #666;
+    padding: 8px 18px;
+    margin-right: 10px;
+    color: #555;
     text-decoration: none;
     border-radius: 30px;
     font-size: 14px;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
     background-color: #f5f5f5;
+    font-weight: 500;
 }
 
 .sort-option:hover {
     color: #0096fa;
     background-color: rgba(0, 150, 250, 0.1);
+    transform: translateY(-2px);
 }
 
 .sort-option.active {
     color: #fff;
     background-color: #0096fa;
+    box-shadow: 0 3px 8px rgba(0, 150, 250, 0.25);
 }
 
 .search-option-btn {
@@ -390,7 +437,7 @@
     align-items: center;
     font-size: 18px;
     font-weight: 600;
-    color: #333;
+    color: #ffffff !important;
 }
 
 .results-count .badge {
@@ -401,15 +448,22 @@
 
 /* Artwork Grid styles */
 .search-view .pic-item {
-    margin-bottom: 15px;
+    margin-bottom: 25px;
+    transition: transform 0.2s;
+    position: relative;
+    background-color: #1a1a1a;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.2);
 }
 
 .search-view .image-wrapper {
     position: relative;
     width: 100%;
-    padding-top: 75%;
-    border-radius: 12px;
+    padding-top: 75%; /* Tỷ lệ 4:3 */
+    border-radius: 12px 12px 0 0;
     overflow: hidden;
+    margin-bottom: 0;
 }
 
 .search-view .image-wrapper img {
@@ -441,7 +495,12 @@
 }
 
 .search-view .img-info {
-    margin-top: 8px;
+    margin-top: 0;
+    background-color: #1a1a1a !important;
+    border-radius: 0 0 12px 12px;
+    padding: 10px 15px;
+    position: relative;
+    z-index: 2;
 }
 
 .search-view .art-link {
@@ -518,93 +577,13 @@
     margin-bottom: 30px;
 }
 
-.search-view .pic-item {
-    margin-bottom: 15px;
-    transition: transform 0.2s;
-    position: relative;
-}
-
 .search-view .pic-item:hover {
     transform: translateY(-5px);
 }
 
-.search-view .image-wrapper {
-    position: relative;
-    width: 100%;
-    padding-top: 75%; /* Tỷ lệ 4:3 */
-    border-radius: 12px;
-    overflow: hidden;
-}
-
-.search-view .image-wrapper img {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.search-view .like-button {
-    position: absolute;
-    bottom: 10px;
-    right: 10px;
-    background-color: white;
-    border: none;
-    width: 34px;
-    height: 34px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    opacity: 0.9;
-    transition: all 0.2s;
-}
-
-.search-view .like-button:hover {
-    transform: scale(1.1);
-    opacity: 1;
-}
-
-.search-view .like-button i {
-    font-size: 16px;
-    color: #777;
-    transition: transform 0.3s;
-}
-
-.search-view .like-button.active i,
-.search-view .like-button i.fas {
-    color: #ff4060;
-}
-
-.search-view .like-count {
-    position: absolute;
-    bottom: 10px;
-    left: 10px;
-    background: rgba(255, 255, 255, 0.9);
-    padding: 3px 8px;
-    border-radius: 20px;
-    font-size: 12px;
-    color: #666;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-}
-
-.search-view .like-count i {
-    color: #ff4060;
-    font-size: 12px;
-}
-
-.search-view .img-info {
-    margin-top: 8px;
-}
-
 .search-view .img-title {
     font-size: 14px;
-    color: #333;
+    color: #ffffff;
     margin-bottom: 5px;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -615,29 +594,33 @@
 .search-view .artist-info {
     display: flex;
     align-items: center;
-    margin-top: 5px;
+    margin-top: 8px;
+    padding: 5px 0;
 }
 
 .search-view .artist-avatar {
-    width: 24px;
-    height: 24px;
+    width: 28px;
+    height: 28px;
     border-radius: 50%;
     overflow: hidden;
-    margin-right: 6px;
+    margin-right: 8px;
+    border: 2px solid #333;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
 }
 
 .search-view .artist-avatar img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    transition: all 0.3s ease;
 }
 
 .search-view .artist-name {
-    font-size: 12px;
-    color: #666;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    font-size: 13px;
+    color: #aaaaaa;
+    font-weight: 400;
+    transition: color 0.3s ease;
 }
 
 .search-view .art-link {
@@ -654,7 +637,7 @@
     color: #0096fa;
 }
 
-/* Cập nhật style cho nút like trong tab tác giả */
+/* Thêm style cho nút like trong tab tác giả */
 .search-view .artwork-overlay .like-button {
     position: absolute;
     bottom: 10px;
@@ -721,4 +704,192 @@
 .search-view .follow-button-primary.loading {
     opacity: 0.7;
     pointer-events: none;
+}
+
+/* Thêm CSS cho hiển thị tag */
+.search-tag-info {
+    margin: 15px 0;
+    display: flex;
+    align-items: center;
+}
+
+.active-tag {
+    display: inline-flex;
+    align-items: center;
+    background: rgba(0, 168, 255, 0.1);
+    border: 1px solid rgba(0, 168, 255, 0.3);
+    border-radius: 20px;
+    padding: 6px 12px;
+    margin-right: 10px;
+}
+
+.tag-label {
+    font-size: 14px;
+    color: #aaa;
+    margin-right: 5px;
+}
+
+.tag-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #00a8ff;
+}
+
+.tag-clear {
+    margin-left: 8px;
+    color: #aaa;
+    font-size: 12px;
+}
+
+.tag-clear:hover {
+    color: #ff4444;
+}
+
+.artwork-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+}
+
+.artwork-tag {
+    font-size: 12px;
+    color: #00a8ff;
+    background: rgba(0, 168, 255, 0.1);
+    padding: 2px 8px;
+    border-radius: 12px;
+    text-decoration: none;
+    transition: all 0.2s;
+    font-weight: 500;
+}
+
+.artwork-tag:hover {
+    background: rgba(0, 168, 255, 0.2);
+    color: #ffffff;
+}
+
+.more-tags {
+    font-size: 12px;
+    color: #888888;
+}
+
+/* Thêm background đồng nhất cho toàn bộ trang */
+body {
+    background-color: #131313;
+}
+
+.img-info {
+    padding: 15px;
+    background: linear-gradient(to bottom, #1a1a1a, #1a1a1a);
+}
+
+/* Thêm hiệu ứng animation cho ảnh tác phẩm khi hover */
+.search-view .artwork-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s ease;
+}
+
+.search-view .artwork-image-container:hover .artwork-image {
+    transform: scale(1.08);
+}
+
+/* Thêm overlay gradient khi hover */
+.search-view .artwork-image-container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(to bottom, rgba(0,0,0,0) 60%, rgba(0,0,0,0.7) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.search-view .artwork-image-container:hover::after {
+    opacity: 1;
+}
+
+/* Hiệu ứng đẹp hơn cho container ảnh */
+.search-view .artwork-image-container {
+    position: relative;
+    width: 100%;
+    padding-bottom: 100%;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #333;
+    transition: all 0.3s ease;
+}
+
+.search-view .artwork-image-container:hover {
+    border-color: rgba(0, 168, 255, 0.3);
+}
+
+/* Hiệu ứng cho ảnh đại diện tác giả */
+.search-view .artist-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    overflow: hidden;
+    margin-right: 8px;
+    border: 2px solid #333;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+
+.search-view .pic-item:hover .artist-avatar {
+    border-color: #00a8ff;
+    transform: scale(1.1);
+}
+
+.search-view .artist-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: all 0.3s ease;
+}
+
+.search-view .pic-item:hover .artist-avatar img {
+    filter: brightness(1.1);
+}
+
+/* Hiệu ứng cho tên tác giả */
+.search-view .artist-name {
+    font-size: 13px;
+    color: #aaaaaa;
+    font-weight: 400;
+    transition: color 0.3s ease;
+}
+
+.search-view .pic-item:hover .artist-name {
+    color: #00a8ff;
+}
+
+/* Thêm hiệu ứng "view" khi hover */
+.search-view .artwork-image-container:hover::before {
+    content: '\f06e';
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #fff;
+    font-size: 24px;
+    opacity: 0.9;
+    z-index: 4;
+    text-shadow: 0 2px 5px rgba(0,0,0,0.5);
+    pointer-events: none;
+}
+
+/* Thêm hiệu ứng zoom in */
+.search-view .artwork-image-container:hover .artwork-image {
+    transform: scale(1.1);
 }

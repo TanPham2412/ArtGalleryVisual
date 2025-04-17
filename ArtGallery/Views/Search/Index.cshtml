@@ -16,28 +16,28 @@
         <div class="container-fluid mt-5">
             <div class="search-tag-container">
                 <div class="search-tag">
-                    <a href="@Url.Action("Index", "Search", new { q = Model.Query, category = "Top", sortBy = Model.SortBy })"
+                    <a href="@Url.Action("Index", "Search", new { q = Model.Query, tag = Model.Tag, category = "Top", sortBy = Model.SortBy })"
                        class="search-tag-items home @(Model.Category == "Top" ? "active" : "")">Home</a>
 
-                    <a href="@Url.Action("Index", "Search", new { q = Model.Query, category = "Illustrations", sortBy = Model.SortBy })"
+                    <a href="@Url.Action("Index", "Search", new { q = Model.Query, tag = Model.Tag, category = "Illustrations", sortBy = Model.SortBy })"
                        class="search-tag-items illustration @(Model.Category == "Illustrations" ? "active" : "")">Illustrations</a>
 
-                    <a href="@Url.Action("Index", "Search", new { q = Model.Query, category = "Concept", sortBy = Model.SortBy })"
+                    <a href="@Url.Action("Index", "Search", new { q = Model.Query, tag = Model.Tag, category = "Concept", sortBy = Model.SortBy })"
                        class="search-tag-items concept @(Model.Category == "Concept" ? "active" : "")">Concept</a>
 
-                    <a href="@Url.Action("Index", "Search", new { q = Model.Query, category = "Anime/Manga", sortBy = Model.SortBy })"
+                    <a href="@Url.Action("Index", "Search", new { q = Model.Query, tag = Model.Tag, category = "Anime/Manga", sortBy = Model.SortBy })"
                        class="search-tag-items anime @(Model.Category == "Anime/Manga" ? "active" : "")">Anime/Manga</a>
 
-                    <a href="@Url.Action("Index", "Search", new { q = Model.Query, category = "Pixel", sortBy = Model.SortBy })"
+                    <a href="@Url.Action("Index", "Search", new { q = Model.Query, tag = Model.Tag, category = "Pixel", sortBy = Model.SortBy })"
                        class="search-tag-items pixel @(Model.Category == "Pixel" ? "active" : "")">Pixel</a>
 
-                    <a href="@Url.Action("Index", "Search", new { q = Model.Query, category = "Vector", sortBy = Model.SortBy })"
+                    <a href="@Url.Action("Index", "Search", new { q = Model.Query, tag = Model.Tag, category = "Vector", sortBy = Model.SortBy })"
                        class="search-tag-items vector @(Model.Category == "Vector" ? "active" : "")">Vector</a>
 
-                    <a href="@Url.Action("Index", "Search", new { q = Model.Query, category = "Low-Poly", sortBy = Model.SortBy })"
+                    <a href="@Url.Action("Index", "Search", new { q = Model.Query, tag = Model.Tag, category = "Low-Poly", sortBy = Model.SortBy })"
                        class="search-tag-items lowpoly @(Model.Category == "Low-Poly" ? "active" : "")">Low-Poly</a>
 
-                    <a href="@Url.Action("Index", "Search", new { q = Model.Query, category = "Artists", sortBy = Model.SortBy })"
+                    <a href="@Url.Action("Index", "Search", new { q = Model.Query, tag = Model.Tag, category = "Artists", sortBy = Model.SortBy })"
                        class="search-tag-items artists @(Model.Category == "Artists" ? "active" : "")">Tác giả</a>
                 </div>
             </div>
@@ -45,13 +45,13 @@
 
         <!-- Sort options -->
         <div class="sort-options">
-            <a href="@Url.Action("Index", "Search", new { q = Model.Query, category = Model.Category, sortBy = "all" })"
+            <a href="@Url.Action("Index", "Search", new { q = Model.Query, tag = Model.Tag, category = Model.Category, sortBy = "all" })"
                class="sort-option @(Model.SortBy == "all" ? "active" : "")">Tất cả</a>
 
-            <a href="@Url.Action("Index", "Search", new { q = Model.Query, category = Model.Category, sortBy = "newest" })"
+            <a href="@Url.Action("Index", "Search", new { q = Model.Query, tag = Model.Tag, category = Model.Category, sortBy = "newest" })"
                class="sort-option @(Model.SortBy == "newest" ? "active" : "")">Mới nhất</a>
 
-            <a href="@Url.Action("Index", "Search", new { q = Model.Query, category = Model.Category, sortBy = "oldest" })"
+            <a href="@Url.Action("Index", "Search", new { q = Model.Query, tag = Model.Tag, category = Model.Category, sortBy = "oldest" })"
                class="sort-option @(Model.SortBy == "oldest" ? "active" : "")">Cũ nhất</a>
 
             <div class="ms-auto">
@@ -60,6 +60,19 @@
                 </button>
             </div>
         </div>
+
+        @if (!string.IsNullOrEmpty(Model.Tag))
+        {
+            <div class="search-tag-info">
+                <div class="active-tag">
+                    <span class="tag-label">Tag:</span>
+                    <span class="tag-name">#@Model.Tag</span>
+                    <a href="@Url.Action("Index", "Search", new { q = Model.Query, category = Model.Category, sortBy = Model.SortBy })" class="tag-clear">
+                        <i class="fas fa-times"></i>
+                    </a>
+                </div>
+            </div>
+        }
 
         @if (Model.Category == "Artists")
         {
@@ -156,7 +169,8 @@
                                             </div>
                                         }
                                         <button class="like-button @(artwork.LuotThiches.Any(l => l.MaNguoiDung == Context.User.FindFirstValue(ClaimTypes.NameIdentifier)) ? "active" : "")" 
-                                                onclick="toggleLike(this, @artwork.MaTranh)">
+                                                onclick="event.preventDefault(); toggleLike(this, @artwork.MaTranh)"
+                                                data-artwork-id="@artwork.MaTranh">
                                             <i class="@(artwork.LuotThiches.Any(l => l.MaNguoiDung == Context.User.FindFirstValue(ClaimTypes.NameIdentifier)) ? "fas" : "far") fa-heart"></i>
                                         </button>
                                     </div>
@@ -171,6 +185,23 @@
                                             </div>
                                             <span class="artist-name">@artwork.MaNguoiDungNavigation.TenNguoiDung</span>
                                         </div>
+
+                                        @if (artwork.MaTags != null && artwork.MaTags.Any())
+                                        {
+                                            <div class="artwork-tags">
+                                                @foreach (var tag in artwork.MaTags.Take(3))
+                                                {
+                                                    <a href="@Url.Action("Index", "Search", new { q = Model.Query, tag = tag.TenTag, category = Model.Category, sortBy = Model.SortBy == "all" ? "newest" : Model.SortBy })" 
+                                                       class="artwork-tag">
+                                                        #@tag.TenTag
+                                                    </a>
+                                                }
+                                                @if (artwork.MaTags.Count > 3)
+                                                {
+                                                    <span class="more-tags">+@(artwork.MaTags.Count - 3)</span>
+                                                }
+                                            </div>
+                                        }
                                     </div>
                                 </div>
                             </div>

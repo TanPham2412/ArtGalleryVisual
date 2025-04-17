@@ -61,8 +61,15 @@
             console.log('Search query:', query);
 
             if (query) {
-                // Chuyển hướng đến trang kết quả tìm kiếm
-                window.location.href = '/Search/Index?q=' + encodeURIComponent(query);
+                // Kiểm tra nếu query bắt đầu bằng # hoặc có chứa #tag
+                if (query.startsWith('#') || query.match(/#\w+/)) {
+                    // Xử lý tìm kiếm theo tag
+                    const tagQuery = query.startsWith('#') ? query.substring(1) : query.match(/#(\w+)/)[1];
+                    window.location.href = '/Search/Index?tag=' + encodeURIComponent(tagQuery);
+                } else {
+                    // Tìm kiếm bình thường
+                    window.location.href = '/Search/Index?q=' + encodeURIComponent(query);
+                }
             }
         }
     });
@@ -361,3 +368,30 @@ document.addEventListener('DOMContentLoaded', function () {
         navbar.style.minHeight = '56px';
     }
 });
+
+// Thêm hàm xử lý tìm kiếm theo tag
+function performSearchByTag(tag) {
+    console.log("Tìm kiếm theo tag:", tag);
+    
+    $.ajax({
+        url: '/Search/SearchByTag',
+        type: 'GET',
+        data: { tag: tag },
+        success: function(data) {
+            console.log("Kết quả tìm kiếm theo tag:", data);
+            
+            if (data && data.artworks?.length > 0) {
+                renderSearchResults('', [], data.artworks);
+                searchResults.show();
+            } else {
+                searchResults.html('<div class="p-3 text-center">Không tìm thấy tác phẩm nào với tag này</div>');
+                searchResults.show();
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error("Lỗi khi tìm kiếm theo tag:", error);
+            searchResults.html('<div class="p-3 text-center text-danger">Đã xảy ra lỗi khi tìm kiếm</div>');
+            searchResults.show();
+        }
+    });
+}
