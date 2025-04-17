@@ -169,7 +169,8 @@
                                             </div>
                                         }
                                         <button class="like-button @(artwork.LuotThiches.Any(l => l.MaNguoiDung == Context.User.FindFirstValue(ClaimTypes.NameIdentifier)) ? "active" : "")" 
-                                                onclick="toggleLike(this, @artwork.MaTranh)">
+                                                onclick="event.preventDefault(); toggleLike(this, @artwork.MaTranh)"
+                                                data-artwork-id="@artwork.MaTranh">
                                             <i class="@(artwork.LuotThiches.Any(l => l.MaNguoiDung == Context.User.FindFirstValue(ClaimTypes.NameIdentifier)) ? "fas" : "far") fa-heart"></i>
                                         </button>
                                     </div>

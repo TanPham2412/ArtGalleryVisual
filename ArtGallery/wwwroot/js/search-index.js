@@ -97,30 +97,44 @@ function toggleFollow(event, artistId) {
         });
 }
 
-// Hàm toggle Like
+// Thay thế toàn bộ hàm toggleLike bằng version đơn giản hơn này
 function toggleLike(button, artworkId) {
-    $.ajax({
-        url: '/Artwork/ToggleLike',
-        type: 'POST',
-        data: { artworkId: artworkId },
+    // Chặn hành vi mặc định của button
+    event.stopPropagation();
+    
+    // Thay đổi UI ngay lập tức
+    const icon = button.querySelector('i');
+    if (icon.classList.contains('far')) {
+        icon.classList.remove('far');
+        icon.classList.add('fas');
+        button.classList.add('active');
+    } else {
+        icon.classList.remove('fas');
+        icon.classList.add('far');
+        button.classList.remove('active');
+    }
+    
+    // Thêm hiệu ứng animation
+    icon.style.animation = 'none';
+    setTimeout(() => {
+        icon.style.animation = '';
+    }, 10);
+    
+    // Gửi request đến server 
+    fetch('/Artwork/ToggleLike', {
+        method: 'POST',
         headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
             'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
         },
-        success: function (response) {
-            if (response.success) {
-                // Cập nhật tất cả các nút like cho cùng một ảnh trong trang
-                updateAllLikeButtons(artworkId, response.liked);
-            } else {
-                if (response.message && response.message.includes("đăng nhập")) {
-                    window.location.href = '/Identity/Account/Login';
-                } else {
-                    alert(response.message || 'Có lỗi xảy ra');
-                }
-            }
-        },
-        error: function () {
-            alert('Có lỗi xảy ra khi thực hiện thao tác like');
-        }
+        body: 'artworkId=' + artworkId
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Like toggled successfully', data);
+    })
+    .catch(error => {
+        console.error('Error toggling like:', error);
     });
 }
 
