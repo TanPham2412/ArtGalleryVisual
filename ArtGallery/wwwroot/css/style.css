@@ -380,7 +380,7 @@
 /* Image Info */
 .img-info {
     padding: 15px;
-    background: linear-gradient(to bottom, #1a1a1a, #232323);
+    background: linear-gradient(to bottom, #1a1a1a, #1a1a1a);
 }
 
 .artwork-title {
