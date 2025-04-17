@@ -153,3 +153,22 @@ document.addEventListener('DOMContentLoaded', function () {
         console.log('jQuery đã sẵn sàng');
     }
 });
+
+// Thêm đoạn code này để giữ tag khi chuyển trang
+$(document).ready(function() {
+    // Lấy tag từ URL hiện tại nếu có
+    const urlParams = new URLSearchParams(window.location.search);
+    const tagParam = urlParams.get('tag');
+    
+    // Đảm bảo tất cả các link thể loại đều giữ tag
+    if (tagParam) {
+        $('a.search-tag-items').each(function() {
+            let href = $(this).attr('href');
+            if (href.indexOf('tag=') === -1) {
+                href += (href.indexOf('?') !== -1) ? '&' : '?';
+                href += 'tag=' + encodeURIComponent(tagParam);
+                $(this).attr('href', href);
+            }
+        });
+    }
+});

@@ -5,12 +5,15 @@ namespace ArtGallery.ViewModels
     public class SearchViewModel
     {
         public string Query { get; set; }
+        public string Tag { get; set; }
         public string Category { get; set; } = "Top";
         public string SortBy { get; set; } = "newest";
         public IEnumerable<Tranh> Artworks { get; set; } = new List<Tranh>();
         public IEnumerable<NguoiDung> Artists { get; set; } = new List<NguoiDung>();
         public int TotalResults => Category == "Artists" ? Artists.Count() : Artworks.Count();
         public IEnumerable<TheLoai> Categories { get; set; } = new List<TheLoai>();
+        public bool IsTagSearch { get; set; }
+        public List<TheTag> Tags { get; set; } = new List<TheTag>();
 
         private readonly string _currentUserId;
         private readonly IEnumerable<TheoDoi> _follows;

@@ -722,3 +722,69 @@
     opacity: 0.7;
     pointer-events: none;
 }
+
+/* Thêm CSS cho hiển thị tag */
+.search-tag-info {
+    margin: 15px 0;
+    display: flex;
+    align-items: center;
+}
+
+.active-tag {
+    display: inline-flex;
+    align-items: center;
+    background: rgba(0, 168, 255, 0.1);
+    border: 1px solid rgba(0, 168, 255, 0.3);
+    border-radius: 20px;
+    padding: 6px 12px;
+    margin-right: 10px;
+}
+
+.tag-label {
+    font-size: 14px;
+    color: #aaa;
+    margin-right: 5px;
+}
+
+.tag-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #00a8ff;
+}
+
+.tag-clear {
+    margin-left: 8px;
+    color: #aaa;
+    font-size: 12px;
+}
+
+.tag-clear:hover {
+    color: #ff4444;
+}
+
+.artwork-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.artwork-tag {
+    font-size: 12px;
+    color: #00a8ff;
+    background: rgba(0, 168, 255, 0.1);
+    padding: 2px 8px;
+    border-radius: 12px;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.artwork-tag:hover {
+    background: rgba(0, 168, 255, 0.2);
+    color: #00a8ff;
+}
+
+.more-tags {
+    font-size: 12px;
+    color: #aaa;
+}

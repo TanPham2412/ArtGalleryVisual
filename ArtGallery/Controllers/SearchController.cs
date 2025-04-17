@@ -72,17 +72,60 @@ namespace ArtGallery.Controllers
             }
         }
 
-        public async Task<IActionResult> Index(string q, string category = "Top", string sortBy = "newest")
+        [HttpGet]
+        public async Task<IActionResult> SearchByTag(string tag)
+        {
+            if (string.IsNullOrEmpty(tag))
+            {
+                return Json(new { artworks = new object[0] });
+            }
+
+            try
+            {
+                tag = tag.Trim().ToLower();
+
+                // Tìm tranh theo tag
+                var artworks = await _context.Tranhs
+                    .Where(t => t.MaTags.Any(tagItem => tagItem.TenTag.ToLower() == tag))
+                    .Include(t => t.MaNguoiDungNavigation)
+                    .Take(5)
+                    .Select(t => new 
+                    {
+                        maTranh = t.MaTranh,
+                        tieuDe = t.TieuDe,
+                        gia = t.Gia,
+                        giaGoc = t.Gia * 1.1m,
+                        duongDanAnh = t.DuongDanAnh,
+                        soLuongTon = t.SoLuongTon,
+                        nguoiDung = t.MaNguoiDungNavigation.TenNguoiDung
+                    })
+                    .ToListAsync();
+
+                _logger.LogInformation("Tìm kiếm theo tag: {Tag}, kết quả: {ArtworksCount} tranh", 
+                    tag, artworks.Count);
+
+                return Json(new { artworks });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi tìm kiếm theo tag: {Tag}", tag);
+                return Json(new { artworks = new object[0] });
+            }
+        }
+
+        public async Task<IActionResult> Index(string q, string tag, string category = "Top", string sortBy = "newest")
         {
             try
             {
                 // Xử lý trường hợp tìm kiếm toàn bộ
-                bool isShowAll = string.IsNullOrEmpty(q) || sortBy == "all";
+                bool isShowAll = (string.IsNullOrEmpty(q) && string.IsNullOrEmpty(tag)) || sortBy == "all";
                 string searchQuery = isShowAll ? string.Empty : q?.Trim().ToLower();
+                string searchTag = isShowAll ? string.Empty : tag?.Trim().ToLower();
                 
                 var viewModel = new SearchViewModel
                 {
                     Query = searchQuery,
+                    Tag = searchTag,
                     Category = category,
                     SortBy = sortBy
                 };
@@ -98,6 +141,7 @@ namespace ArtGallery.Controllers
                     viewModel = new SearchViewModel(currentUserId, follows)
                     {
                         Query = searchQuery,
+                        Tag = searchTag,
                         Category = category,
                         SortBy = sortBy
                     };
@@ -124,19 +168,26 @@ namespace ArtGallery.Controllers
                 }
                 else
                 {
-                    // Tìm kiếm artwork như cũ
+                    // Tìm kiếm artwork với điều kiện tag
                     viewModel.Artists = new List<NguoiDung>();
                     var query = _context.Tranhs
                         .Include(t => t.MaNguoiDungNavigation)
                         .Include(t => t.LuotThiches)
                         .Include(t => t.MaTheLoais)
+                        .Include(t => t.MaTags)
                         .AsQueryable();
 
-                    // Chỉ áp dụng tìm kiếm nếu không phải hiển thị tất cả
-                    if (!isShowAll)
+                    // Áp dụng tìm kiếm theo query text
+                    if (!string.IsNullOrEmpty(searchQuery))
                     {
                         query = query.Where(t => t.TieuDe.ToLower().Contains(searchQuery) ||
                                               (t.MoTa != null && t.MoTa.ToLower().Contains(searchQuery)));
+                    }
+
+                    // Áp dụng tìm kiếm theo tag
+                    if (!string.IsNullOrEmpty(searchTag))
+                    {
+                        query = query.Where(t => t.MaTags.Any(tagItem => tagItem.TenTag.ToLower() == searchTag));
                     }
 
                     // Lọc theo danh mục
@@ -174,7 +225,7 @@ namespace ArtGallery.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Lỗi khi tìm kiếm với từ khóa: {Query}", q);
+                _logger.LogError(ex, "Lỗi khi tìm kiếm với từ khóa: {Query} hoặc tag: {Tag}", q, tag);
                 TempData["ErrorMessage"] = "Đã xảy ra lỗi trong quá trình tìm kiếm. Vui lòng thử lại sau.";
                 return RedirectToAction("Index", "Home");
             }
