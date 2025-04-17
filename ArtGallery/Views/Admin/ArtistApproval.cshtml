@@ -6,59 +6,72 @@
     var token = Antiforgery.GetAndStoreTokens(Context).RequestToken;
 }
 
+<link rel="stylesheet" href="~/css/artist-approval.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
 <div class="container mt-5">
-    <div class="row">
-        <div class="col-md-12">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
             <div class="card">
-                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                    <h4 class="mb-0">Thông tin đăng ký nghệ sĩ</h4>
-                    <a href="@Url.Action("Index", "Home")" class="btn btn-light">Quay lại</a>
+                <div class="card-header">
+                    <h4>Thông tin đăng ký nghệ sĩ</h4>
+                    <a href="@Url.Action("Index", "Admin")" class="btn btn-back">
+                        <i class="fas fa-arrow-left me-2"></i>Quay lại
+                    </a>
                 </div>
                 <div class="card-body">
-                    <div class="row">
+                    <div class="row artist-info-container">
                         <div class="col-md-3 text-center">
-                            <img src="@Model.AvatarPath" alt="@Model.ArtistName" class="img-fluid rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
+                            <div class="artist-avatar">
+                                <img src="@Model.AvatarPath" alt="@Model.ArtistName">
+                            </div>
                         </div>
                         <div class="col-md-9">
-                            <h4>@Model.ArtistName</h4>
-                            <div class="mt-4">
-                                <div class="row mb-3">
-                                    <div class="col-md-3 fw-bold">ID Người dùng:</div>
-                                    <div class="col-md-9">@Model.UserId</div>
+                            <h3 class="artist-name">@Model.ArtistName</h3>
+                            
+                            <div class="artist-details">
+                                <div class="row mb-4">
+                                    <div class="col-md-12">
+                                        <div class="info-label">ID Người dùng</div>
+                                        <div class="info-value">@Model.UserId</div>
+                                    </div>
                                 </div>
-                                <div class="row mb-3">
-                                    <div class="col-md-3 fw-bold">Địa chỉ:</div>
-                                    <div class="col-md-9">@Model.Address</div>
+                                
+                                <div class="row mb-4">
+                                    <div class="col-md-6">
+                                        <div class="info-label">Địa chỉ</div>
+                                        <div class="info-value">@Model.Address</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="info-label">Số điện thoại</div>
+                                        <div class="info-value">@Model.PhoneNumber</div>
+                                    </div>
                                 </div>
-                                <div class="row mb-3">
-                                    <div class="col-md-3 fw-bold">Số điện thoại:</div>
-                                    <div class="col-md-9">@Model.PhoneNumber</div>
-                                </div>
-                                <div class="row mb-3">
-                                    <div class="col-md-3 fw-bold">Mô tả về bản thân:</div>
-                                    <div class="col-md-9">
-                                        <p style="white-space: pre-line;">@Model.Description</p>
+                                
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="info-label">Mô tả về bản thân</div>
+                                        <div class="description-box">
+                                            @Model.Description
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="row mt-5">
-                        <div class="col-md-6 d-flex justify-content-end">
-                            <form action="@Url.Action("ApproveArtist", "Admin")" method="post">
-                                <input type="hidden" name="userId" value="@Model.UserId" />
-                                @Html.AntiForgeryToken()
-                                <button type="submit" class="btn btn-success btn-lg px-5">
-                                    <i class="fas fa-check-circle me-2"></i> Chấp thuận
-                                </button>
-                            </form>
-                        </div>
-                        <div class="col-md-6">
-                            <button type="button" class="btn btn-danger btn-lg px-5" id="rejectBtn">
-                                <i class="fas fa-times-circle me-2"></i> Từ chối
+                    <div class="action-buttons">
+                        <form action="@Url.Action("ApproveArtist", "Admin")" method="post">
+                            <input type="hidden" name="userId" value="@Model.UserId" />
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-approve">
+                                <i class="fas fa-check-circle me-2"></i> Chấp thuận
                             </button>
-                        </div>
+                        </form>
+                        
+                        <button type="button" class="btn btn-reject" id="rejectBtn">
+                            <i class="fas fa-times-circle me-2"></i> Từ chối
+                        </button>
                     </div>
                 </div>
             </div>

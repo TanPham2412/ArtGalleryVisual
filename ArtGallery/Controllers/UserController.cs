@@ -222,5 +222,77 @@ namespace ArtGallery.Controllers
 
             return View();
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize]
+        public async Task<IActionResult> ToggleFollow(string followedUserId)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(followedUserId))
+                {
+                    return Json(new { success = false, message = "ID người dùng không hợp lệ" });
+                }
+
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (currentUser == null)
+                {
+                    return Json(new { success = false, message = "Bạn cần đăng nhập để thực hiện thao tác này" });
+                }
+
+                // Không thể tự theo dõi chính mình
+                if (currentUser.Id == followedUserId)
+                {
+                    return Json(new { success = false, message = "Bạn không thể theo dõi chính mình" });
+                }
+
+                // Kiểm tra xem đã theo dõi hay chưa
+                var existingFollow = await _context.TheoDois
+                    .FirstOrDefaultAsync(t => t.MaNguoiTheoDoi == currentUser.Id && t.MaNguoiDuocTheoDoi == followedUserId);
+
+                bool isFollowing = false;
+
+                if (existingFollow != null)
+                {
+                    // Nếu đã theo dõi, hủy theo dõi
+                    _context.TheoDois.Remove(existingFollow);
+                    isFollowing = false;
+                }
+                else
+                {
+                    // Nếu chưa theo dõi, tạo mới
+                    var newFollow = new TheoDoi
+                    {
+                        MaNguoiTheoDoi = currentUser.Id,
+                        MaNguoiDuocTheoDoi = followedUserId,
+                        NgayTheoDoi = DateTime.Now
+                    };
+
+                    await _context.TheoDois.AddAsync(newFollow);
+                    isFollowing = true;
+
+                    // Gửi thông báo cho người được theo dõi
+                    await _notificationRepository.CreateNotification(
+                        followedUserId,
+                        currentUser.Id,
+                        "Có người theo dõi mới",
+                        $"{currentUser.TenNguoiDung} đã bắt đầu theo dõi bạn",
+                        $"/User/Profile/{currentUser.Id}",
+                        "follow",
+                        currentUser.GetAvatarPath()
+                    );
+                }
+
+                await _context.SaveChangesAsync();
+
+                return Json(new { success = true, isFollowing });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi theo dõi/hủy theo dõi người dùng {UserId}", followedUserId);
+                return Json(new { success = false, message = "Có lỗi xảy ra khi thực hiện thao tác" });
+            }
+        }
     }
 }

@@ -36,9 +36,9 @@ namespace ArtGallery.Controllers
             {
                 return RedirectToAction("LoginRegister");
             }
-            
+
             var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            
+
             // Tạo view model thay vì dùng ViewBag để tránh lỗi dynamic
             var viewModel = new HomeIndexViewModel
             {
@@ -46,7 +46,7 @@ namespace ArtGallery.Controllers
                 MostLikedArtworks = await _homeRepository.GetMostLikedArtworks(12),
                 ActiveCategory = "Home"
             };
-            
+
             return View(viewModel);
         }
 
@@ -56,7 +56,7 @@ namespace ArtGallery.Controllers
             // Lấy danh sách các external login providers
             var externalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
             ViewData["ExternalLogins"] = externalLogins;
-            
+
             return View();
         }
 
@@ -64,19 +64,19 @@ namespace ArtGallery.Controllers
         [HttpGet]
         public async Task<IActionResult> Add()
         {
-            try 
+            try
             {
                 // Debug thông tin xác thực
                 var isAuthenticated = User.Identity.IsAuthenticated;
                 var userId = _userManager.GetUserId(User);
                 var claimUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                 var customClaim = User.FindFirst("UserId")?.Value;
-                
+
                 _logger.LogInformation($"Debug Auth: IsAuthenticated={isAuthenticated}, " +
                                        $"UserManager.GetUserId={userId}, " +
                                        $"ClaimTypes.NameIdentifier={claimUserId}, " +
                                        $"CustomClaim UserId={customClaim}");
-                
+
                 ViewBag.Categories = await _homeRepository.GetCategories();
                 return View();
             }
@@ -112,14 +112,14 @@ namespace ArtGallery.Controllers
                     ViewBag.Categories = await _homeRepository.GetCategories();
                     return View(tranh);
                 }
-                
+
                 // Gán ID người dùng cho tranh
                 tranh.MaNguoiDung = currentUserId;
                 _logger.LogInformation($"Đã gán MaNguoiDung = {currentUserId} cho tranh mới");
 
                 if (!ModelState.IsValid)
                 {
-                    _logger.LogWarning("ModelState không hợp lệ: {@ModelState}", 
+                    _logger.LogWarning("ModelState không hợp lệ: {@ModelState}",
                         ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
                     ViewBag.Categories = await _homeRepository.GetCategories();
                     return View(tranh);
@@ -135,7 +135,7 @@ namespace ArtGallery.Controllers
 
                 _logger.LogInformation("Người dùng hiện tại: {UserId}", currentUserId);
 
-                var result = await _homeRepository.AddArtwork(tranh, ImageFile, TagsInput, SelectedCategories, currentUserId);  
+                var result = await _homeRepository.AddArtwork(tranh, ImageFile, TagsInput, SelectedCategories, currentUserId);
 
                 if (result.success)
                 {
@@ -168,7 +168,7 @@ namespace ArtGallery.Controllers
                 return Json(new List<object>());
             }
 
-            try 
+            try
             {
                 string currentUserId = null;
                 if (User.Identity.IsAuthenticated)
@@ -177,7 +177,7 @@ namespace ArtGallery.Controllers
                 }
 
                 var users = await _context.Users
-                    .Where(u => (u.TenNguoiDung != null && u.TenNguoiDung.Contains(query)) || 
+                    .Where(u => (u.TenNguoiDung != null && u.TenNguoiDung.Contains(query)) ||
                                (u.UserName != null && u.UserName.Contains(query)))
                     .Select(u => new {
                         maNguoiDung = u.Id,
@@ -185,7 +185,7 @@ namespace ArtGallery.Controllers
                         tenDangNhap = u.UserName,
                         anhDaiDien = u.AnhDaiDien,
                         daTheoDoi = currentUserId != null && _context.TheoDois
-                            .Any(t => t.MaNguoiTheoDoi == currentUserId && 
+                            .Any(t => t.MaNguoiTheoDoi == currentUserId &&
                                      t.MaNguoiDuocTheoDoi == u.Id)
                     })
                     .Take(10)
@@ -239,8 +239,9 @@ namespace ArtGallery.Controllers
 
                 var followerCount = await _context.TheoDois.CountAsync(t => t.MaNguoiDuocTheoDoi == userId);
 
-                return Json(new { 
-                    success = true, 
+                return Json(new
+                {
+                    success = true,
                     message = existingFollow != null ? "Đã hủy theo dõi" : "Đã theo dõi",
                     followerCount = followerCount
                 });
@@ -263,7 +264,7 @@ namespace ArtGallery.Controllers
         public async Task<IActionResult> LogoutDirect()
         {
             await _signInManager.SignOutAsync();
-            
+
             return RedirectToAction("LoginRegister", "Home");
         }
 
@@ -281,15 +282,15 @@ namespace ArtGallery.Controllers
             {
                 return RedirectToAction("LoginRegister");
             }
-            
+
             // Xử lý tên danh mục
             if (string.IsNullOrEmpty(name))
             {
                 return RedirectToAction("Index");
             }
-            
+
             var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            
+
             // Tạo view model với dữ liệu đã lọc theo thể loại
             var viewModel = new HomeIndexViewModel
             {
@@ -297,7 +298,7 @@ namespace ArtGallery.Controllers
                 MostLikedArtworks = await _homeRepository.GetMostLikedArtworksByCategory(12, name),
                 ActiveCategory = name
             };
-            
+
             // Sử dụng cùng view Index nhưng với dữ liệu khác
             return View("Index", viewModel);
         }
@@ -309,18 +310,19 @@ namespace ArtGallery.Controllers
             {
                 return Json(new { success = false, message = "Cần đăng nhập để thực hiện chức năng này" });
             }
-            
+
             var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            
+
             try
             {
                 var followingArtworks = await _homeRepository.GetRandomArtworksFromFollowingByCategory(currentUserId, 12, category);
                 var mostLikedArtworks = await _homeRepository.GetMostLikedArtworksByCategory(12, category);
-                
-                return Json(new { 
-                    success = true, 
-                    followingArtworks = followingArtworks, 
-                    mostLikedArtworks = mostLikedArtworks 
+
+                return Json(new
+                {
+                    success = true,
+                    followingArtworks = followingArtworks,
+                    mostLikedArtworks = mostLikedArtworks
                 });
             }
             catch (Exception ex)
