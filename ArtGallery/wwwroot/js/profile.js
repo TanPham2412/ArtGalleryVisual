@@ -452,3 +452,32 @@ document.getElementById('editProfileForm').addEventListener('submit', async func
         alert('Có lỗi xảy ra khi cập nhật thông tin');
     }
 });
+
+function openViewAllInfoModal() {
+    const modal = document.getElementById('viewAllInfoModal');
+    if (modal) {
+        modal.style.display = 'block';
+        document.body.classList.add('modal-open');
+    } else {
+        console.error('Modal element not found');
+    }
+}
+
+function closeViewAllInfoModal() {
+    document.getElementById('viewAllInfoModal').style.display = 'none';
+    document.body.classList.remove('modal-open');
+}
+
+// Cập nhật sự kiện cho nút "Xem tất cả"
+document.addEventListener('DOMContentLoaded', function() {
+    // Các sự kiện đã có...
+    
+    // Thêm sự kiện cho nút xem tất cả thông tin
+    const seeAllMediaBtn = document.querySelector('.see-all-media');
+    if (seeAllMediaBtn) {
+        seeAllMediaBtn.onclick = function(e) {
+            e.preventDefault();
+            openViewAllInfoModal();
+        };
+    }
+});

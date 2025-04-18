@@ -75,14 +75,6 @@
                     </div>
                 </div>
 
-                <!-- Thêm phần địa chỉ -->
-                @if (!string.IsNullOrEmpty(Model.DiaChi) && Model.HienThiDiaChi == "Public")
-                {
-                    <div class="profile-location">
-                        <i class="fas fa-map-marker-alt"></i>
-                        <span>@Model.DiaChi</span>
-                    </div>
-                }
 
                 <!-- Thêm phần social media -->
                 @if (Model.Media != null && Model.Media.Any())
@@ -113,7 +105,9 @@
                         }
                     </div>
                 }
-                <a href="#" class="see-all-media">Xem tất cả</a>
+                <a href="#" class="see-all-media" onclick="openViewAllInfoModal(); return false;">
+                    <i class="fas fa-info-circle"></i> Xem tất cả
+                </a>
             </div>
         </div>
     </div>
@@ -167,37 +161,6 @@
                         </a>
                     </div>
                 }
-            </div>
-        </div>
-
-        <div class="tab-content" id="playlists">
-            <div class="section">
-                <div class="section-header">
-                    <h2>Playlist của bạn</h2>
-                    <a href="#" class="create-btn">
-                        <i class="fas fa-plus"></i> Tạo playlist mới
-                    </a>
-                </div>
-                <div class="playlist-grid">
-                    <div class="no-content">
-                        <i class="fas fa-music"></i>
-                        <p>Bạn chưa có playlist nào</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="tab-content" id="favorites">
-            <div class="section">
-                <div class="section-header">
-                    <h2>Bài hát yêu thích</h2>
-                </div>
-                <div class="music-grid">
-                    <div class="no-content">
-                        <i class="fas fa-heart"></i>
-                        <p>Bạn chưa có bài hát yêu thích nào</p>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
@@ -386,6 +349,97 @@
     </div>
 </div>
 
+<!-- View All Info Modal -->
+<div id="viewAllInfoModal" class="modal">
+    <div class="modal-content user-info-modal">
+        <span class="close" onclick="closeViewAllInfoModal()">&times;</span>
+        
+        <div class="user-info-center">
+            <div class="user-avatar">
+                <img src="@Model.GetAvatarPath()" alt="@Model.TenNguoiDung">
+            </div>
+            
+            <h2 class="user-name">@Model.TenNguoiDung</h2>
+            
+            @if (!ViewBag.IsOwnProfile && User.Identity.IsAuthenticated)
+            {
+                <div class="follow-button-container">
+                    <button class="follow-button-primary @(ViewBag.IsFollowing ? "following" : "")"
+                            onclick="toggleFollow(event, '@Model.Id')">
+                        <span class="follow-text">Theo dõi</span>
+                        <span class="following-text">Đang theo dõi</span>
+                    </button>
+                </div>
+            }
+            
+            <div class="user-profile-divider"></div>
+            
+            @if (!string.IsNullOrEmpty(Model.DiaChi) && Model.HienThiDiaChi == "Public")
+            {
+                <div class="user-location">
+                    <i class="fas fa-map-marker-alt"></i> @Model.DiaChi
+                </div>
+            }
+            
+            <div class="user-social-links">
+                @if (Model.Media != null && Model.Media.Any())
+                {
+                    @foreach (var media in Model.Media)
+                    {
+                        <a href="@media.DuongDan" target="_blank" class="social-btn">
+                            @switch (media.LoaiMedia)
+                            {
+                                case "X":
+                                    <i class="fab fa-x"></i>
+                                    break;
+                                case "Instagram":
+                                    <i class="fab fa-instagram"></i>
+                                    break;
+                                case "Facebook":
+                                    <i class="fab fa-facebook"></i>
+                                    break;
+                                case "Tiktok":
+                                    <i class="fab fa-tiktok"></i>
+                                    break;
+                                case "Website":
+                                    <i class="fas fa-link"></i>
+                                    break;
+                            }
+                        </a>
+                    }
+                }
+            </div>
+            
+            @if (!string.IsNullOrEmpty(Model.MoTa))
+            {
+                <div class="user-description">
+                    <p>@Model.MoTa</p>
+                </div>
+            }
+            
+            <div class="user-profile-divider"></div>
+            
+            <div class="user-info-details">
+                @if (Model.NgaySinh.HasValue && Model.HienThiNgaySinh == "Public")
+                {
+                    <div class="info-row no-border">
+                        <div class="info-label">Sinh nhật</div>
+                        <div class="info-value">@(Model.NgaySinh.HasValue ? Model.NgaySinh.Value.ToString("MMMM d") : "")</div>
+                    </div>
+                }
+                
+                @if (!string.IsNullOrEmpty(Model.GioiTinh) && Model.HienThiGioiTinh == "Public")
+                {
+                    <div class="info-row no-border">
+                        <div class="info-label">Giới tính</div>
+                        <div class="info-value">@Model.GioiTinh</div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script src="~/js/profile.js"></script>
     <script>
@@ -405,6 +459,31 @@
                     e.preventDefault();
                 });
             });
+
+            const seeAllMediaBtn = document.querySelector('.see-all-media');
+            if (seeAllMediaBtn) {
+                seeAllMediaBtn.onclick = function(e) {
+                    e.preventDefault();
+                    openViewAllInfoModal();
+                };
+            }
+
+            // Thêm hàm mở/đóng modal thông tin chi tiết
+            window.openViewAllInfoModal = function() {
+                const modal = document.getElementById('viewAllInfoModal');
+                if (modal) {
+                    modal.style.display = 'block';
+                    document.body.classList.add('modal-open');
+                }
+            };
+            
+            window.closeViewAllInfoModal = function() {
+                const modal = document.getElementById('viewAllInfoModal');
+                if (modal) {
+                    modal.style.display = 'none';
+                    document.body.classList.remove('modal-open');
+                }
+            };
         });
     </script>
 }  
