@@ -52,7 +52,7 @@
                     <span class="category-label">Thể loại:</span>
                     @foreach (var category in Model.MaTheLoais)
                     {
-                        <a asp-controller="Artwork" asp-action="ByCategory" asp-route-id="@category.MaTheLoai" class="category-name me-2">
+                        <a href="@Url.Action("Display", "TheLoais", new { id = category.MaTheLoai })" class="category-name me-2">
                             @category.TenTheLoai
                         </a>
                     }
@@ -62,7 +62,7 @@
                     <div class="tags-container">
                         @foreach (var tag in Model.MaTags)
                         {
-                            <a asp-controller="Artwork" asp-action="ByTag" asp-route-id="@tag.MaTag" class="tag-link">
+                            <a href="@Url.Action("Index", "Search", new { tag = tag.TenTag, sortBy = "newest" })" class="tag-link">
                                 #@tag.TenTag
                             </a>
                         }
@@ -134,7 +134,7 @@
                             @foreach (var work in ViewBag.OtherWorks)
                             {
                                 <div class="col-4">
-                                    <a asp-action="Display" asp-route-id="@work.MaTranh" class="other-work-item">
+                                    <a asp-controller="Artwork" asp-action="Display" asp-route-id="@work.MaTranh" class="other-work-item">
                                         <img src="@work.DuongDanAnh" alt="@work.TieuDe" class="img-fluid rounded">
                                         <div class="work-info">
                                             <p class="work-name">@work.TieuDe</p>
@@ -143,7 +143,7 @@
                                 </div>
                             }
                         </div>
-                        <a asp-controller="Profile" asp-action="Gallery" asp-route-id="@Model.MaNguoiDung"
+                        <a href="@Url.Action("Gallery", "User", new { id = Model.MaNguoiDung })" 
                            class="view-all-link mt-3 d-block text-center">
                             Xem tất cả tác phẩm của @Model.MaNguoiDungNavigation.TenNguoiDung
                         </a>

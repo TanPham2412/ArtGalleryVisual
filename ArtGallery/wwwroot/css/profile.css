@@ -658,6 +658,10 @@ body.modal-open {
     background-color: rgba(0, 0, 0, 0.8);
     backdrop-filter: blur(5px);
     z-index: 9999;
+    padding-top: 60px;
+    scrollbar-width: none !important; 
+    -ms-overflow-style: none !important;
+    overflow: hidden !important;
 }
 
 .modal-content {
@@ -1316,4 +1320,351 @@ textarea:focus {
     top: 0 !important;
     z-index: 10000 !important;
     width: 100% !important;
+}
+
+/* View All Info Modal Styles */
+.user-info-content {
+    padding: 0 10px;
+}
+
+.info-value {
+    padding: 8px 12px;
+    background-color: #333;
+    border-radius: 4px;
+    color: #e0e0e0;
+    margin-top: 5px;
+    font-size: 14px;
+}
+
+.social-media-info {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.social-media-item.view-only {
+    display: flex;
+    align-items: center;
+    background-color: #333;
+    border-radius: 4px;
+    padding: 8px 12px;
+}
+
+.media-type {
+    min-width: 100px;
+    color: #aaa;
+}
+
+.media-link {
+    flex: 1;
+}
+
+.media-link a {
+    color: #00a8ff;
+    text-decoration: none;
+    word-break: break-all;
+}
+
+.media-link a:hover {
+    text-decoration: underline;
+}
+
+.profile-image-container.view-only {
+    margin: 0 auto;
+    width: 100px;
+    height: 100px;
+}
+
+/* Cập nhật cho nút xem tất cả */
+.see-all-media {
+    display: inline-block;
+    border-radius: 4px;
+    margin-top: 8px;
+}
+
+.see-all-media:hover {
+    background-color: rgba(0, 168, 255, 0.2);
+}
+
+/* Cập nhật style cho modal "Xem tất cả" */
+.user-info-modal {
+    background-color: #1a1a1a;
+    color: #e0e0e0;
+    width: 480px;
+    height: auto !important;
+    max-width: 95%;
+    max-height: 90vh !important;
+    border-radius: 25px;
+    margin: 5vh auto;
+    padding: 20px 15px;
+    box-shadow: 0 5px 30px rgba(0, 0, 0, 0.6);
+    position: relative;
+    text-align: center;
+    border: 1px solid #333;
+    z-index: 10000;
+    overflow: hidden !important;
+    scrollbar-width: none !important; /* Firefox */
+    -ms-overflow-style: none !important; /* IE/Edge */
+}
+
+.user-info-modal::-webkit-scrollbar,
+.user-info-modal *::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+}
+
+.user-info-modal * {
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+}
+
+.user-info-modal .close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    color: #aaa;
+    font-size: 24px;
+    cursor: pointer;
+    z-index: 5;
+    transition: color 0.2s ease;
+    margin-top: 0px;
+}
+
+.user-info-modal .close:hover {
+    color: #fff;
+}
+
+.user-info-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0;
+    justify-content: center;
+    gap: 10px;
+}
+
+/* Ảnh đại diện lớn hơn */
+.user-avatar-image {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    overflow: hidden;
+    margin-bottom: 16px;
+    border: 4px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+}
+
+.user-avatar-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.user-name {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: #fff;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.user-location {
+    color: #aaa;
+    font-size: 13px;
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.user-social-links {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin: 10px 0;
+}
+
+.social-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.08);
+    color: #aaa;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.social-btn:hover {
+    background-color: rgba(0, 168, 255, 0.1);
+    color: #00a8ff;
+    transform: translateY(-2px);
+    border-color: rgba(0, 168, 255, 0.3);
+}
+
+.user-description {
+    color: #aaa;
+    font-size: 13px;
+    line-height: 1.5;
+    margin: 8px 15px;
+    max-height: none;
+    overflow: visible;
+    padding: 0;
+    text-align: center;
+}
+
+.user-profile-divider {
+    width: 85%;
+    margin: 8px 0;
+}
+
+.user-info-details {
+    width: 100%;
+    padding: 0 20px;
+    overflow: visible;
+}
+
+.info-row {
+    padding: 6px 20px;
+}
+
+.info-label {
+    font-weight: 600;
+    color: #aaa;
+    font-size: 13px;
+}
+
+.info-value {
+    color: #e0e0e0;
+    font-size: 13px;
+    background-color: transparent;
+}
+
+.home-icon, .email-icon {
+    color: #555;
+}
+
+/* Cập nhật Follow button trong modal */
+.user-info-modal .follow-button-container {
+    margin-bottom: 15px;
+}
+
+.user-info-modal .follow-button-primary {
+    background: #00a8ff;
+    color: white;
+    border: none;
+    border-radius: 30px;
+    padding: 6px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.user-info-modal .follow-button-primary:hover {
+    background: #0077cc;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 168, 255, 0.3);
+}
+
+.user-info-modal .follow-button-primary.following {
+    background-color: transparent;
+    color: #00a8ff;
+    border: 1px solid #00a8ff;
+}
+
+.user-info-modal .follow-button-primary.following:hover {
+    background-color: rgba(0, 168, 255, 0.1);
+}
+
+.user-info-modal .follow-button-primary:not(.following) .following-text,
+.user-info-modal .follow-button-primary.following .follow-text {
+    display: none;
+}
+
+/* Điều chỉnh divider trong modal thông tin */
+.user-info-modal .user-profile-divider {
+    height: 1px;
+    background-color: #333;
+    width: 90%;
+    margin: 8px 0;
+}
+
+/* Xóa viền dưới cho các info-row */
+.user-info-modal .info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 15px;
+    border-bottom: none;
+}
+
+/* Thêm class no-border để xác nhận không có đường viền */
+.user-info-modal .info-row.no-border {
+    border-bottom: none;
+}
+
+/* Ẩn thanh lăn ở tất cả các modal */
+.user-info-modal {
+    overflow: visible;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+}
+
+.user-info-modal::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+}
+
+.user-description {
+    max-height: none;
+    overflow: visible;
+}
+
+.user-info-details {
+    overflow: visible;
+}
+
+.modal-content {
+    overflow-y: visible;
+}
+
+body.modal-open {
+    overflow: hidden !important;
+    height: 100vh !important;
+    position: fixed !important;
+    width: 100% !important;
+}
+
+/* Chỉ ẩn thanh lăn cho viewAllInfoModal */
+#viewAllInfoModal {
+    scrollbar-width: none !important; 
+    -ms-overflow-style: none !important;
+    overflow: visible !important;
+}
+
+#viewAllInfoModal::-webkit-scrollbar,
+#viewAllInfoModal *::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+}
+
+#viewAllInfoModal * {
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+}
+
+/* Đưa lại thanh lăn cho editProfileModal */
+#editProfileModal .modal-content {
+    overflow-y: auto !important;
+}
+
+/* Duy trì khả năng cuộn cho form chỉnh sửa */
+#editProfileForm {
+    overflow-y: visible !important;
 }
