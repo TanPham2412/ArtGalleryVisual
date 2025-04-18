@@ -658,6 +658,7 @@ body.modal-open {
     background-color: rgba(0, 0, 0, 0.8);
     backdrop-filter: blur(5px);
     z-index: 9999;
+    padding-top: 60px;
 }
 
 .modal-content {
@@ -1388,17 +1389,19 @@ textarea:focus {
 .user-info-modal {
     background-color: #1a1a1a;
     color: #e0e0e0;
-    width: 380px;
-    max-width: 95%;
-    max-height: 90vh;
+    width: 600px;
+    height: 600px;
+    max-width: 100%;
+    max-height: 100%;
     border-radius: 20px;
-    margin: 5vh auto;
+    margin: 10vh auto;
     padding: 0;
     box-shadow: 0 5px 30px rgba(0, 0, 0, 0.6);
     position: relative;
     overflow-y: auto;
     text-align: center;
     border: 1px solid #333;
+    z-index: 10000;
 }
 
 .user-info-modal .close {
@@ -1410,6 +1413,7 @@ textarea:focus {
     cursor: pointer;
     z-index: 5;
     transition: color 0.2s ease;
+    margin-top: 0px;
 }
 
 .user-info-modal .close:hover {
@@ -1421,10 +1425,11 @@ textarea:focus {
     flex-direction: column;
     align-items: center;
     padding: 36px 0 12px;
+    margin-top: 50px;
 }
 
 /* Ảnh đại diện lớn hơn */
-.user-avatar {
+.user-avatar-image {
     width: 120px;
     height: 120px;
     border-radius: 50%;
@@ -1434,7 +1439,7 @@ textarea:focus {
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
 }
 
-.user-avatar img {
+.user-avatar-image img {
     width: 100%;
     height: 100%;
     object-fit: cover;
