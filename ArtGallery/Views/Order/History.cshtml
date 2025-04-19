@@ -4,8 +4,8 @@
     ViewData["Title"] = "Lịch sử đặt hàng";
 }
 
-<link rel="stylesheet" href="~/css/style.css">
-<link rel="stylesheet" href="~/css/order.css">
+<link rel="stylesheet" href="~/css/order.css?v=2">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
 <div class="container mt-5 pt-5">
     <h2 class="mb-4">Lịch sử đặt hàng</h2>
@@ -14,7 +14,10 @@
     {
         <div class="alert alert-info text-center py-5">
             <i class="fas fa-shopping-cart fa-3x mb-3"></i>
-            <p class="mb-0">Bạn chưa có đơn hàng nào</p>
+            <p class="mb-3">Bạn chưa có đơn hàng nào</p>
+            <a href="/Artwork" class="btn btn-primary">
+                <i class="fas fa-paint-brush me-2"></i>Khám phá tác phẩm
+            </a>
         </div>
     }
     else
@@ -22,7 +25,7 @@
         <div class="card shadow-sm">
             <div class="card-body">
                 <div class="table-responsive">
-                    <table class="table table-hover">
+                    <table class="table">
                         <thead>
                             <tr>
                                 <th>Mã đơn</th>
@@ -31,7 +34,7 @@
                                 <th>Tổng tiền</th>
                                 <th>Ngày mua</th>
                                 <th>Trạng thái</th>
-                                <th>Phương thức thanh toán</th>
+                                <th>Thanh toán</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -62,20 +65,26 @@
                                         }
                                     </td>
                                     <td>@item.SoLuong</td>
-                                    <td>@item.SoTien.ToString("N0") VND</td>
+                                    <td class="text-danger fw-bold">@item.SoTien.ToString("N0") VND</td>
                                     <td>@item.NgayMua?.ToString("dd/MM/yyyy HH:mm")</td>
                                     <td>
                                         @if (item.TrangThai == "Đã hoàn thành")
                                         {
-                                            <span class="badge bg-success">Đã hoàn thành</span>
+                                            <span class="badge bg-success">
+                                                <i class="fas fa-check-circle me-1"></i>Đã hoàn thành
+                                            </span>
                                         }
                                         else if (item.TrangThai == "Chờ xác nhận")
                                         {
-                                            <span class="badge bg-warning text-dark">Chờ xác nhận</span>
+                                            <span class="badge bg-warning text-dark">
+                                                <i class="fas fa-clock me-1"></i>Chờ xác nhận
+                                            </span>
                                         }
                                         else
                                         {
-                                            <span class="badge bg-secondary">@item.TrangThai</span>
+                                            <span class="badge bg-secondary">
+                                                <i class="fas fa-info-circle me-1"></i>@item.TrangThai
+                                            </span>
                                         }
                                     </td>
                                     <td>
@@ -84,13 +93,13 @@
                                             @if (item.PhuongThucThanhToan == "chuyển khoản")
                                             {
                                                 <span class="badge bg-info">
-                                                    <i class="fas fa-qrcode me-1"></i> Chuyển khoản
+                                                    <i class="fas fa-qrcode me-1"></i>Chuyển khoản
                                                 </span>
                                             }
                                             else
                                             {
                                                 <span class="badge bg-secondary">
-                                                    <i class="fas fa-money-bill-wave me-1"></i> COD
+                                                    <i class="fas fa-money-bill-wave me-1"></i>COD
                                                 </span>
                                             }
                                         }

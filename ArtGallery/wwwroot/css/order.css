@@ -1,21 +1,251 @@
+/* Phong cách chung theo ArtGallery dark theme */
+body {
+    background-color: #121212;
+    color: #e0e0e0;
+}
+
+.container {
+    padding-top: 40px;
+}
+
+.card {
+    background-color: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.card-body {
+    padding: 24px;
+}
+
+h2, h4, h5 {
+    color: #fff;
+    font-weight: 700;
+}
+
+/* Artwork preview section */
 .artwork-preview {
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid #333;
     padding-bottom: 1.5rem;
     margin-bottom: 1.5rem;
 }
 
 .artwork-image {
-    width: 120px;
-    min-width: 120px;
-    height: 90px;
+    width: 140px;
+    min-width: 140px;
+    height: 100px;
     overflow: hidden;
     border-radius: 8px;
+    border: 1px solid #333;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
 .artwork-image img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.artwork-image:hover img {
+    transform: scale(1.05);
+}
+
+.artwork-info h4 {
+    font-size: 20px;
+    margin-bottom: 8px;
+}
+
+.artwork-info .text-muted {
+    color: #aaa !important;
+}
+
+.price {
+    font-size: 16px;
+    margin-top: 10px;
+}
+
+.text-danger {
+    color: #00a8ff !important;
+}
+
+/* Form controls */
+.form-control {
+    background-color: #333;
+    border: 1px solid #444;
+    color: #e0e0e0 !important;
+    border-radius: 8px;
+}
+
+.form-control:focus {
+    background-color: #3a3a3a;
+    color: #fff !important;
+    border-color: #00a8ff;
+    box-shadow: 0 0 0 0.25rem rgba(0, 168, 255, 0.25);
+}
+
+.form-label {
+    color: #e0e0e0;
+    font-weight: 500;
+}
+
+.input-group .btn {
+    background-color: #333;
+    border-color: #444;
+    color: #e0e0e0;
+}
+
+.input-group .btn:hover {
+    background-color: #00a8ff;
+    border-color: #00a8ff;
+    color: white;
+}
+
+/* Alert styles */
+.alert-info {
+    background-color: rgba(0, 168, 255, 0.1);
+    border: 1px solid rgba(0, 168, 255, 0.2);
+    color: #e0e0e0;
+    border-radius: 8px;
+}
+
+/* Buttons */
+.btn-primary {
+    background: linear-gradient(to right, #00a8ff, #0077cc);
+    border: none;
+    color: white;
+    border-radius: 30px;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(to right, #0077cc, #005299);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 168, 255, 0.3);
+}
+
+.btn-success {
+    background: linear-gradient(to right, #28a745, #218838);
+    border: none;
+    color: white;
+    border-radius: 30px;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+.btn-success:hover {
+    background: linear-gradient(to right, #218838, #1e7e34);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+}
+
+.btn-danger {
+    background: linear-gradient(to right, #dc3545, #c82333);
+    border: none;
+    color: white;
+    border-radius: 30px;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+.btn-danger:hover {
+    background: linear-gradient(to right, #c82333, #bd2130);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(220, 53, 69, 0.3);
+}
+
+.btn-outline-secondary {
+    border-color: #444;
+    color: #e0e0e0;
+}
+
+.btn-outline-secondary:hover {
+    background-color: #00a8ff;
+    border-color: #00a8ff;
+    color: white;
+}
+
+/* Order summary */
+.text-danger {
+    color: #00a8ff !important;
+}
+
+hr {
+    border-color: #333;
+    opacity: 0.5;
+}
+
+/* Modal styles */
+.modal-content {
+    background-color: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 12px;
+    color: #e0e0e0;
+}
+
+.modal-header {
+    border-bottom: 1px solid #333;
+}
+
+.modal-footer {
+    border-top: 1px solid #333;
+}
+
+/* Tab navigation */
+#paymentTabs .nav-link {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    color: #aaa;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border-radius: 0;
+    border: none;
+    border-bottom: 2px solid transparent;
+}
+
+#paymentTabs .nav-link.active {
+    background-color: transparent;
+    color: #00a8ff;
+    border-bottom: 2px solid #00a8ff;
+    font-weight: 600;
+}
+
+#paymentTabs .nav-link:hover:not(.active) {
+    color: #e0e0e0;
+    border-bottom: 2px solid rgba(0, 168, 255, 0.3);
+}
+
+.tab-content {
+    min-height: 300px;
+    padding: 20px 0;
+}
+
+/* Animation */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s;
+}
+
+/* Modal để hiển thị mã QR */
+.qr-container {
+    background-color: #1a1a1a;
+    border-radius: 8px;
+    border: 1px solid #333;
+    padding: 20px;
+    transition: all 0.3s ease;
+}
+
+.qr-container:hover {
+    transform: scale(1.03);
+    box-shadow: 0 8px 20px rgba(0, 168, 255, 0.2);
+    border-color: rgba(0, 168, 255, 0.3);
 }
 
 .total-price {
@@ -129,4 +359,224 @@
 
 .fade-in {
     animation: fadeIn 0.5s;
+}
+
+/* Fixing black text to be white */
+body, p, span, label, input, select, textarea, .form-control, .text-muted {
+    color: #e0e0e0;
+}
+
+/* Màu chữ cho modal */
+.modal, .modal-title, .modal-body, .modal-content p {
+    color: #e0e0e0;
+}
+
+/* Màu chữ cho số lượng input */
+#quantity {
+    color: #e0e0e0 !important;
+}
+
+/* Đảm bảo chữ trong các phần thông tin đều trắng */
+.artwork-info p, .card-body h4, .card-body span {
+    color: #e0e0e0;
+}
+
+/* Đảm bảo thành tiền hiển thị trắng */
+.total-price, .total-price span:not(.text-danger) {
+    color: #e0e0e0 !important;
+}
+
+/* Fix cho button close trên modal */
+.btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+/* Styles cho trang lịch sử đặt hàng */
+.table {
+    color: #e0e0e0;
+    margin-bottom: 0;
+    border-collapse: separate;
+    border-spacing: 0 8px;
+}
+
+.table thead th {
+    border-bottom: 1px solid #333;
+    color: #00a8ff;
+    font-weight: 600;
+    padding: 12px 15px;
+    background-color: rgba(0, 0, 0, 0.2);
+}
+
+.table tbody tr {
+    background-color: #000000;
+    transition: all 0.2s ease;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    border: 1px solid #333;
+}
+
+.table tbody tr:hover {
+    background-color: #111111;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    border: 1px solid #444;
+}
+
+.table tbody td {
+    padding: 12px 15px;
+    vertical-align: middle;
+    border-top: none;
+    border-bottom: none;
+    color: #ffffff;
+    border-color: #000000;
+}
+
+.order-thumb-container {
+    width: 60px;
+    height: 60px;
+    min-width: 60px;
+    overflow: hidden;
+    border-radius: 8px;
+    border: 1px solid #333;
+    background-color: #151515;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+}
+
+.order-artwork-thumbnail {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.order-thumb-container:hover .order-artwork-thumbnail {
+    transform: scale(1.1);
+}
+
+.order-artwork-title {
+    color: #e0e0e0;
+    max-width: 180px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.badge {
+    padding: 6px 12px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.badge.bg-success {
+    background: linear-gradient(to right, #28a745, #218838) !important;
+}
+
+.badge.bg-warning {
+    background: linear-gradient(to right, #ffc107, #e0a800) !important;
+    color: #212529 !important;
+}
+
+.badge.bg-secondary {
+    background: linear-gradient(to right, #6c757d, #5a6268) !important;
+}
+
+.badge.bg-info {
+    background: linear-gradient(to right, #00a8ff, #0077cc) !important;
+    color: white !important;
+}
+
+.table-responsive {
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+/* Tùy chỉnh khi không có đơn hàng */
+.alert-info {
+    background-color: rgba(0, 168, 255, 0.1);
+    border: 1px solid rgba(0, 168, 255, 0.2);
+    color: #e0e0e0;
+    border-radius: 12px;
+    padding: 30px;
+}
+
+.fa-shopping-cart {
+    color: #00a8ff;
+    opacity: 0.7;
+}
+
+/* Làm cho tiêu đề bảng nổi bật hơn */
+.table thead th {
+    background-color: #121212;
+    color: #00a8ff;
+    font-weight: 600;
+    padding: 12px 15px;
+    border-bottom: 2px solid #00a8ff;
+    text-transform: uppercase;
+    font-size: 14px;
+    letter-spacing: 1px;
+}
+
+/* Đảm bảo background đen cho các hàng bảng */
+.table tbody tr,
+table tbody tr,
+.table tr,
+table tr {
+    background-color: #000000 !important;
+    border: 1px solid #333 !important;
+    color: #ffffff !important;
+}
+
+.table tbody tr:hover,
+table tbody tr:hover {
+    background-color: #111111 !important;
+    border: 1px solid #444 !important;
+}
+
+/* Đảm bảo tất cả các ô td có nền đen */
+.table td,
+table td,
+.table tbody td,
+table tbody td {
+    background-color: #000000 !important;
+    color: #ffffff !important;
+    border-color: #333 !important;
+}
+
+/* Đảm bảo các hàng trắng không xuất hiện */
+tr, tbody tr, thead tr {
+    background-color: #000000 !important;
+}
+
+/* Đảm bảo màu chữ trong hàng trắng */
+.table tr *, 
+table tr * {
+    color: #ffffff !important;
+}
+
+/* Chỉ để tiêu đề bảng màu xanh */
+.table thead th,
+table thead th {
+    color: #00a8ff !important;
+    background-color: #121212 !important;
+    border-bottom: 2px solid #00a8ff !important;
+}
+
+/* Đảm bảo màu nền của các badge không bị ảnh hưởng */
+.badge.bg-success {
+    background: linear-gradient(to right, #28a745, #218838) !important;
+    color: white !important;
+}
+
+.badge.bg-warning {
+    background: linear-gradient(to right, #ffc107, #e0a800) !important;
+    color: #212529 !important;
+}
+
+.badge {
+    color: white !important;
+}
+
+/* Đảm bảo màu của giá tiền */
+.text-danger, 
+td .text-danger {
+    color: #00a8ff !important;
 } 
