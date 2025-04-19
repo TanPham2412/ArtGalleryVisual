@@ -42,6 +42,9 @@ public partial class ArtGalleryContext : IdentityDbContext<NguoiDung, IdentityRo
     public virtual DbSet<NguoiDung> NguoiDungs { get; set; }
 
     public virtual DbSet<ThongBao> ThongBaos { get; set; }
+
+    public virtual DbSet<PhanHoiBinhLuan> PhanHoiBinhLuans { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -69,6 +72,7 @@ public partial class ArtGalleryContext : IdentityDbContext<NguoiDung, IdentityRo
                 .HasColumnType("datetime")
                 .HasColumnName("ngay_binh_luan");
             entity.Property(e => e.NoiDung).HasColumnName("noi_dung");
+            entity.Property(e => e.Rating).HasColumnName("rating").HasDefaultValue(0);
 
             entity.HasOne(d => d.MaNguoiDungNavigation).WithMany(p => p.BinhLuans)
                 .HasForeignKey(d => d.MaNguoiDung)
@@ -399,6 +403,34 @@ public partial class ArtGalleryContext : IdentityDbContext<NguoiDung, IdentityRo
                 .WithMany()
                 .HasForeignKey(d => d.MaNguoiGui)
                 .HasConstraintName("FK_ThongBao_AspNetUsers_NguoiGui");
+        });
+
+        modelBuilder.Entity<PhanHoiBinhLuan>(entity =>
+        {
+            entity.HasKey(e => e.MaPhanHoi).HasName("PK__phan_hoi_binh_luan__ID");
+            
+            entity.ToTable("phan_hoi_binh_luan");
+            
+            entity.Property(e => e.MaPhanHoi).HasColumnName("ma_phan_hoi");
+            entity.Property(e => e.MaBinhLuan).HasColumnName("ma_binh_luan");
+            entity.Property(e => e.MaNguoiDung).HasColumnName("ma_nguoi_dung");
+            entity.Property(e => e.NoiDung).HasColumnName("noi_dung");
+            entity.Property(e => e.NgayPhanHoi)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("ngay_phan_hoi");
+            
+            entity.HasOne(d => d.MaBinhLuanNavigation)
+                .WithMany()
+                .HasForeignKey(d => d.MaBinhLuan)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__phan_hoi__ma_binh_luan");
+            
+            entity.HasOne(d => d.MaNguoiDungNavigation)
+                .WithMany()
+                .HasForeignKey(d => d.MaNguoiDung)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__phan_hoi__ma_nguoi_dung");
         });
 
         OnModelCreatingPartial(modelBuilder);

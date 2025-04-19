@@ -14,6 +14,8 @@ public partial class BinhLuan
     public string NoiDung { get; set; } = null!;
 
     public DateTime? NgayBinhLuan { get; set; }
+    
+    public int Rating { get; set; } = 0;
 
     public virtual NguoiDung MaNguoiDungNavigation { get; set; } = null!;
 
