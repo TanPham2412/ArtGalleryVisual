@@ -23,6 +23,7 @@ body {
     width: 100%;
     height: auto;
     display: block;
+    cursor: pointer;
 }
 
 /* Artist Profile Section */
@@ -411,4 +412,69 @@ body {
     padding: 12px;
     border-radius: 6px;
     font-style: italic;
+}
+
+/* CSS cho artwork modal */
+.artwork-modal {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
+    background-color: rgba(0, 0, 0, 0.95);
+    margin: 0;
+    text-align: center;
+    overflow: hidden !important;
+    box-shadow: none;
+    position: relative;
+    border: none;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.artwork-modal-content {
+    max-width: 90% !important;
+    max-height: 90vh !important;
+    object-fit: contain;
+    display: block;
+    border-radius: 0;
+    margin: 0 auto;
+    border: none;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+}
+
+.artwork-modal .close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    color: #fff;
+    font-size: 35px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 1001;
+    transition: color 0.2s;
+    background: rgba(0, 0, 0, 0.5);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.artwork-modal .close:hover {
+    color: #00a8ff;
+}
+
+/* Con trỏ tay khi hover lên ảnh */
+.art-image img {
+    cursor: pointer;
+}
+
+/* Ngăn cuộn trang khi modal hiển thị */
+body.no-scroll {
+    overflow: hidden;
 }
