@@ -154,6 +154,97 @@
     </div>
 </div>
 
+<!-- Thêm phần bình luận và đánh giá sau phần thông tin về tranh -->
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-12">
+            <div class="comments-section">
+                <h3 class="section-title mb-4">Đánh giá & Bình luận</h3>
+                
+                <!-- Form đánh giá và bình luận -->
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <div class="comment-form-container mb-4">
+                        <form id="commentForm" asp-action="AddComment" asp-controller="Artwork" method="post">
+                            <input type="hidden" name="MaTranh" value="@Model.MaTranh" />
+                            
+                            <div class="rating-selection mb-3">
+                                <label class="form-label">Đánh giá của bạn:</label>
+                                <div class="rating-stars">
+                                    <i class="far fa-star" data-rating="1"></i>
+                                    <i class="far fa-star" data-rating="2"></i>
+                                    <i class="far fa-star" data-rating="3"></i>
+                                    <i class="far fa-star" data-rating="4"></i>
+                                    <i class="far fa-star" data-rating="5"></i>
+                                </div>
+                                <input type="hidden" name="Rating" id="selectedRating" value="0" />
+                            </div>
+                            
+                            <div class="form-group mb-3">
+                                <textarea class="form-control" id="commentContent" name="NoiDung" rows="3" 
+                                          placeholder="Nhập bình luận của bạn về tác phẩm này"></textarea>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane me-2"></i>Gửi bình luận
+                            </button>
+                        </form>
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-info mb-4">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Vui lòng <a href="@Url.Action("Login", "Account")" class="alert-link">đăng nhập</a> để đánh giá và bình luận
+                    </div>
+                }
+                
+                <!-- Danh sách bình luận -->
+                <div class="comments-list">
+                    <h4 class="mb-3">Tất cả bình luận (@ViewBag.Comments?.Count ?? 0)</h4>
+                    
+                    @if (ViewBag.Comments != null && ViewBag.Comments.Count > 0)
+                    {
+                        @foreach (var comment in ViewBag.Comments)
+                        {
+                            <div class="comment-item">
+                                <div class="comment-header">
+                                    <div class="d-flex align-items-center">
+                                        <img src="@comment.MaNguoiDungNavigation.GetAvatarPath()" alt="@comment.MaNguoiDungNavigation.TenNguoiDung" class="commenter-avatar" />
+                                        <div class="commenter-info">
+                                            <h5 class="commenter-name">@comment.MaNguoiDungNavigation.TenNguoiDung</h5>
+                                            <div class="comment-date">@comment.NgayBinhLuan?.ToString("dd/MM/yyyy HH:mm")</div>
+                                        </div>
+                                    </div>
+                                    <div class="comment-rating">
+                                        @if (comment.Rating > 0)
+                                        {
+                                            @for (int i = 1; i <= 5; i++)
+                                            {
+                                                <i class="@(i <= comment.Rating ? "fas fa-star" : "far fa-star")"></i>
+                                            }
+                                        }
+                                    </div>
+                                </div>
+                                <div class="comment-content">
+                                    @comment.NoiDung
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="no-comments text-center py-4">
+                            <i class="far fa-comment-dots fa-3x mb-3"></i>
+                            <p>Chưa có bình luận nào cho tác phẩm này</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 @if (canEditOrDelete)
 {
     <div class="modal fade" id="deleteModal" tabindex="-1">
@@ -309,6 +400,42 @@
                     }
                 });
             }
+        });
+
+        // Thêm code xử lý rating stars
+        $(document).ready(function() {
+            // Xử lý rating stars
+            $('.rating-stars i').on('click', function() {
+                const rating = $(this).data('rating');
+                $('#selectedRating').val(rating);
+                
+                // Reset tất cả các sao về trạng thái chưa chọn
+                $('.rating-stars i').removeClass('fas').addClass('far');
+                
+                // Thêm class active cho các sao được chọn
+                $('.rating-stars i').each(function() {
+                    if ($(this).data('rating') <= rating) {
+                        $(this).removeClass('far').addClass('fas');
+                    }
+                });
+            });
+            
+            // Hiệu ứng hover
+            $('.rating-stars i').on('mouseenter', function() {
+                const hoverRating = $(this).data('rating');
+                
+                // Tô màu các sao khi hover
+                $('.rating-stars i').each(function() {
+                    if ($(this).data('rating') <= hoverRating) {
+                        $(this).addClass('hover');
+                    } else {
+                        $(this).removeClass('hover');
+                    }
+                });
+            }).on('mouseleave', function() {
+                // Xóa hover khi di chuột ra khỏi
+                $('.rating-stars i').removeClass('hover');
+            });
         });
     </script>
 }

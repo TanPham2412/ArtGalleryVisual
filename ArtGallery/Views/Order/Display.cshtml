@@ -423,5 +423,34 @@
             });
         }
         });
+
+            $(document).ready(function() {
+            // Xử lý sự kiện khi người dùng chọn đánh giá sao
+            $('.rating-stars i').on('click', function() {
+                const rating = $(this).data('rating');
+                $('#selectedRating').val(rating);
+
+                // Cập nhật hiển thị sao
+                $('.rating-stars i').removeClass('fas').addClass('far');
+                $('.rating-stars i').each(function() {
+                    if ($(this).data('rating') <= rating) {
+                        $(this).removeClass('far').addClass('fas');
+                    }
+                });
+            });
+
+            // Hiển thị sao khi hover
+            $('.rating-stars i').on('mouseenter', function() {
+                const rating = $(this).data('rating');
+
+                $('.rating-stars i').each(function() {
+                    if ($(this).data('rating') <= rating) {
+                        $(this).addClass('hover');
+                    }
+                });
+            }).on('mouseleave', function() {
+                $('.rating-stars i').removeClass('hover');
+            });
+        });
     </script>
 }

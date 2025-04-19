@@ -327,7 +327,8 @@ namespace ArtGallery.Migrations
                     ma_tranh = table.Column<int>(type: "int", nullable: false),
                     ma_nguoi_dung = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     noi_dung = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ngay_binh_luan = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "(getdate())")
+                    ngay_binh_luan = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "(getdate())"),
+                    rating = table.Column<int>(type: "int", nullable: false, defaultValue: 0)
                 },
                 constraints: table =>
                 {

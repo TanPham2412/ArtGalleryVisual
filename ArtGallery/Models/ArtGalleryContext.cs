@@ -69,6 +69,7 @@ public partial class ArtGalleryContext : IdentityDbContext<NguoiDung, IdentityRo
                 .HasColumnType("datetime")
                 .HasColumnName("ngay_binh_luan");
             entity.Property(e => e.NoiDung).HasColumnName("noi_dung");
+            entity.Property(e => e.Rating).HasColumnName("rating").HasDefaultValue(0);
 
             entity.HasOne(d => d.MaNguoiDungNavigation).WithMany(p => p.BinhLuans)
                 .HasForeignKey(d => d.MaNguoiDung)

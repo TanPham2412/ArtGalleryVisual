@@ -28,6 +28,16 @@ namespace ArtGallery.Controllers
                 return NotFound();
 
             ViewBag.OtherWorks = result.otherWorks;
+            
+            // Lấy danh sách bình luận và sắp xếp theo thời gian mới nhất
+            var comments = await _context.BinhLuans
+                .Include(b => b.MaNguoiDungNavigation)
+                .Where(b => b.MaTranh == id)
+                .OrderByDescending(b => b.NgayBinhLuan)
+                .ToListAsync();
+            
+            ViewBag.Comments = comments;
+            
             return View(result.artwork);
         }
 
@@ -259,6 +269,44 @@ namespace ArtGallery.Controllers
                 _logger.LogError(ex, "Lỗi khi lấy danh sách tranh");
                 TempData["ErrorMessage"] = "Có lỗi xảy ra khi tải danh sách tranh";
                 return RedirectToAction("Index", "Home");
+            }
+        }
+
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddComment(BinhLuan model, int Rating)
+        {
+            if (model == null || string.IsNullOrEmpty(model.NoiDung))
+            {
+                TempData["ErrorMessage"] = "Nội dung bình luận không được để trống";
+                return RedirectToAction("Display", new { id = model.MaTranh });
+            }
+            
+            try
+            {
+                var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                
+                var comment = new BinhLuan
+                {
+                    MaTranh = model.MaTranh,
+                    MaNguoiDung = currentUserId,
+                    NoiDung = model.NoiDung,
+                    NgayBinhLuan = DateTime.Now,
+                    Rating = Rating // Thêm trường Rating vào bảng BinhLuan
+                };
+                
+                _context.BinhLuans.Add(comment);
+                await _context.SaveChangesAsync();
+                
+                TempData["SuccessMessage"] = "Bình luận của bạn đã được gửi thành công!";
+                return RedirectToAction("Display", new { id = model.MaTranh });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi thêm bình luận");
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi gửi bình luận";
+                return RedirectToAction("Display", new { id = model.MaTranh });
             }
         }
     }

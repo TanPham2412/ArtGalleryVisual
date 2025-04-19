@@ -110,19 +110,26 @@ body {
     border-radius: 8px;
     padding: 14px;
     font-size: 15px;
-    color: #fff;
+    color: #e0e0e0 !important;
     transition: all 0.3s ease;
+}
+
+.form-control::placeholder {
+    color: #888 !important;
+    opacity: 1;
 }
 
 .form-control:focus {
     border-color: #00a8ff;
     box-shadow: 0 0 0 3px rgba(0, 168, 255, 0.15);
     background-color: #333;
+    color: #ffffff !important;
 }
 
 textarea.form-control {
     min-height: 120px;
     resize: vertical;
+    color: #e0e0e0 !important;
 }
 
 .form-text {
