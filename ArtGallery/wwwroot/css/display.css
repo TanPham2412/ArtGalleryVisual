@@ -643,3 +643,141 @@ body.no-scroll {
     color: #ffffff !important; /* Trắng sáng hơn khi focus */
     box-shadow: 0 0 0 0.25rem rgba(0, 168, 255, 0.25);
 }
+
+/* CSS cho phần phản hồi bình luận */
+.btn-reply {
+    background: transparent;
+    border: none;
+    color: #888;
+    font-size: 13px;
+    padding: 3px 8px;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.btn-reply:hover {
+    color: #00a8ff;
+}
+
+.reply-form-container {
+    padding-left: 40px;
+    margin-top: 8px;
+}
+
+.reply-avatar {
+    width: 32px;
+    min-width: 32px;
+    margin-right: 8px;
+}
+
+.reply-user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.reply-input-container {
+    flex: 1;
+}
+
+.reply-input {
+    background-color: #2a2a2a;
+    border: 1px solid #444;
+    border-radius: 18px;
+    color: #e0e0e0 !important;
+    font-size: 14px;
+    padding: 8px 15px;
+}
+
+.reply-input:focus {
+    background-color: #333;
+    color: #fff !important;
+    border-color: #00a8ff;
+}
+
+.reply-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.btn-cancel-reply, .btn-submit-reply {
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-size: 13px;
+    transition: all 0.2s;
+}
+
+.btn-cancel-reply {
+    background: transparent;
+    border: none;
+    color: #888;
+}
+
+.btn-cancel-reply:hover {
+    color: #e0e0e0;
+}
+
+.btn-submit-reply {
+    background: #00a8ff;
+    border: none;
+    color: white;
+}
+
+.btn-submit-reply:hover {
+    background: #0077cc;
+}
+
+/* Phần hiển thị phản hồi */
+.replies-container {
+    padding-left: 40px;
+    margin-top: 10px;
+}
+
+.reply-item {
+    margin-bottom: 8px;
+}
+
+.reply-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    margin-right: 8px;
+    object-fit: cover;
+}
+
+.reply-content {
+    flex: 1;
+}
+
+.reply-bubble {
+    background-color: #2a2a2a;
+    padding: 8px 12px;
+    border-radius: 12px;
+    display: inline-block;
+    max-width: 100%;
+}
+
+.reply-username {
+    font-size: 13px;
+    margin-bottom: 2px;
+    color: #e0e0e0;
+    font-weight: 600;
+}
+
+.reply-text {
+    font-size: 14px;
+    color: #e0e0e0;
+    word-break: break-word;
+}
+
+.reply-meta {
+    margin-top: 2px;
+    padding-left: 8px;
+}
+
+.reply-time {
+    font-size: 11px;
+    color: #888;
+}

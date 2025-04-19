@@ -499,6 +499,33 @@ namespace ArtGallery.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "phan_hoi_binh_luan",
+                columns: table => new
+                {
+                    ma_phan_hoi = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ma_binh_luan = table.Column<int>(type: "int", nullable: false),
+                    ma_nguoi_dung = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    noi_dung = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ngay_phan_hoi = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "(getdate())")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK__phan_hoi_binh_luan__ID", x => x.ma_phan_hoi);
+                    table.ForeignKey(
+                        name: "FK__phan_hoi_binh_luan__ma_binh_luan",
+                        column: x => x.ma_binh_luan,
+                        principalTable: "binh_luan",
+                        principalColumn: "ma_binh_luan",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK__phan_hoi_binh_luan__ma_nguoi_dung",
+                        column: x => x.ma_nguoi_dung,
+                        principalTable: "nguoi_dung",
+                        principalColumn: "Id");
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_binh_luan_ma_nguoi_dung",
                 table: "binh_luan",
@@ -562,6 +589,16 @@ namespace ArtGallery.Migrations
                 name: "IX_noi_bat_ma_tranh",
                 table: "noi_bat",
                 column: "ma_tranh");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_phan_hoi_binh_luan_ma_binh_luan",
+                table: "phan_hoi_binh_luan",
+                column: "ma_binh_luan");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_phan_hoi_binh_luan_ma_nguoi_dung",
+                table: "phan_hoi_binh_luan",
+                column: "ma_nguoi_dung");
 
             migrationBuilder.CreateIndex(
                 name: "IX_role_claims_RoleId",
@@ -637,9 +674,6 @@ namespace ArtGallery.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "binh_luan");
-
-            migrationBuilder.DropTable(
                 name: "doanh_thu");
 
             migrationBuilder.DropTable(
@@ -656,6 +690,9 @@ namespace ArtGallery.Migrations
 
             migrationBuilder.DropTable(
                 name: "noi_bat");
+
+            migrationBuilder.DropTable(
+                name: "phan_hoi_binh_luan");
 
             migrationBuilder.DropTable(
                 name: "role_claims");
@@ -685,16 +722,19 @@ namespace ArtGallery.Migrations
                 name: "user_tokens");
 
             migrationBuilder.DropTable(
+                name: "binh_luan");
+
+            migrationBuilder.DropTable(
                 name: "the_loai");
 
             migrationBuilder.DropTable(
                 name: "the_tag");
 
             migrationBuilder.DropTable(
-                name: "tranh");
+                name: "roles");
 
             migrationBuilder.DropTable(
-                name: "roles");
+                name: "tranh");
 
             migrationBuilder.DropTable(
                 name: "nguoi_dung");

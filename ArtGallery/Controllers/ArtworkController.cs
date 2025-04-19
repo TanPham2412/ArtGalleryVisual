@@ -38,6 +38,23 @@ namespace ArtGallery.Controllers
             
             ViewBag.Comments = comments;
             
+            // Lấy tất cả phản hồi cho bình luận
+            if (comments.Any())
+            {
+                var commentIds = comments.Select(c => c.MaBinhLuan).ToList();
+                var replies = await _context.PhanHoiBinhLuans
+                    .Include(r => r.MaNguoiDungNavigation)
+                    .Where(r => commentIds.Contains(r.MaBinhLuan))
+                    .OrderBy(r => r.NgayPhanHoi)
+                    .ToListAsync();
+                    
+                // Nhóm phản hồi theo MaBinhLuan
+                var repliesByCommentId = replies.GroupBy(r => r.MaBinhLuan)
+                    .ToDictionary(g => g.Key, g => g.ToList());
+                    
+                ViewBag.Replies = repliesByCommentId;
+            }
+            
             return View(result.artwork);
         }
 
@@ -307,6 +324,43 @@ namespace ArtGallery.Controllers
                 _logger.LogError(ex, "Lỗi khi thêm bình luận");
                 TempData["ErrorMessage"] = "Có lỗi xảy ra khi gửi bình luận";
                 return RedirectToAction("Display", new { id = model.MaTranh });
+            }
+        }
+
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddReply(int MaBinhLuan, int MaTranh, string NoiDung)
+        {
+            if (string.IsNullOrEmpty(NoiDung))
+            {
+                TempData["ErrorMessage"] = "Nội dung phản hồi không được để trống";
+                return RedirectToAction("Display", new { id = MaTranh });
+            }
+            
+            try
+            {
+                var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                
+                var reply = new PhanHoiBinhLuan
+                {
+                    MaBinhLuan = MaBinhLuan,
+                    MaNguoiDung = currentUserId,
+                    NoiDung = NoiDung,
+                    NgayPhanHoi = DateTime.Now
+                };
+                
+                _context.PhanHoiBinhLuans.Add(reply);
+                await _context.SaveChangesAsync();
+                
+                TempData["SuccessMessage"] = "Phản hồi của bạn đã được gửi thành công!";
+                return RedirectToAction("Display", new { id = MaTranh });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi thêm phản hồi bình luận");
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi gửi phản hồi";
+                return RedirectToAction("Display", new { id = MaTranh });
             }
         }
     }

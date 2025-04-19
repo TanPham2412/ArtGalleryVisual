@@ -201,7 +201,7 @@
                 
                 <!-- Danh sách bình luận -->
                 <div class="comments-list">
-                    <h4 class="mb-3">Tất cả bình luận (@ViewBag.Comments?.Count ?? 0)</h4>
+                    <h4 class="mb-3">Tất cả bình luận (@ViewBag.Comments?.Count=)</h4>
                     
                     @if (ViewBag.Comments != null && ViewBag.Comments.Count > 0)
                     {
@@ -229,6 +229,58 @@
                                 <div class="comment-content">
                                     @comment.NoiDung
                                 </div>
+                                <div class="comment-actions mt-2">
+                                    @if (User.Identity.IsAuthenticated)
+                                    {
+                                        <button class="btn-reply" onclick="toggleReplyForm(@comment.MaBinhLuan)">
+                                            <i class="fas fa-reply me-1"></i>Phản hồi
+                                        </button>
+                                    }
+                                </div>
+                                
+                                <!-- Form phản hồi (ẩn ban đầu) -->
+                                <div class="reply-form-container mt-2" id="replyForm-@comment.MaBinhLuan" style="display:none;">
+                                    <form class="reply-form" asp-action="AddReply" asp-controller="Artwork" method="post">
+                                        <input type="hidden" name="MaBinhLuan" value="@comment.MaBinhLuan" />
+                                        <input type="hidden" name="MaTranh" value="@Model.MaTranh" />
+                                        <div class="d-flex">
+                                            <div class="reply-avatar">
+                                                <img src="@currentUser?.GetAvatarPath()" alt="Avatar" class="reply-user-avatar" />
+                                            </div>
+                                            <div class="reply-input-container">
+                                                <textarea class="form-control reply-input" name="NoiDung" placeholder="Viết phản hồi..." rows="1"></textarea>
+                                                <div class="reply-actions mt-2">
+                                                    <button type="button" class="btn-cancel-reply" onclick="hideReplyForm(@comment.MaBinhLuan)">Hủy</button>
+                                                    <button type="submit" class="btn-submit-reply">Gửi</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                                
+                                <!-- Hiển thị phản hồi cho bình luận -->
+                                @if (ViewBag.Replies != null && ViewBag.Replies.ContainsKey(comment.MaBinhLuan))
+                                {
+                                    <div class="replies-container mt-2">
+                                        @foreach (var reply in ViewBag.Replies[comment.MaBinhLuan])
+                                        {
+                                            <div class="reply-item">
+                                                <div class="d-flex align-items-start">
+                                                    <img src="@reply.MaNguoiDungNavigation.GetAvatarPath()" alt="@reply.MaNguoiDungNavigation.TenNguoiDung" class="reply-avatar" />
+                                                    <div class="reply-content">
+                                                        <div class="reply-bubble">
+                                                            <h6 class="reply-username">@reply.MaNguoiDungNavigation.TenNguoiDung</h6>
+                                                            <p class="reply-text mb-0">@reply.NoiDung</p>
+                                                        </div>
+                                                        <div class="reply-meta">
+                                                            <span class="reply-time">@reply.NgayPhanHoi?.ToString("dd/MM/yyyy HH:mm")</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                }
                             </div>
                         }
                     }
@@ -437,6 +489,28 @@
                 $('.rating-stars i').removeClass('hover');
             });
         });
+
+                function toggleReplyForm(commentId) {
+            const replyForm = document.getElementById(`replyForm-${commentId}`);
+            if (replyForm) {
+                replyForm.style.display = 'block';
+                // Focus vào ô input
+                setTimeout(() => {
+                    const textarea = replyForm.querySelector('textarea');
+                    if (textarea) textarea.focus();
+                }, 100);
+            }
+        }
+
+        function hideReplyForm(commentId) {
+            const replyForm = document.getElementById(`replyForm-${commentId}`);
+            if (replyForm) {
+                replyForm.style.display = 'none';
+                // Clear nội dung
+                const textarea = replyForm.querySelector('textarea');
+                if (textarea) textarea.value = '';
+            }
+        }
     </script>
 }
 
