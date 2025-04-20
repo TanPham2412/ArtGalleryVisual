@@ -186,6 +186,33 @@ namespace ArtGallery.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "tin_nhan",
+                columns: table => new
+                {
+                    ma_tin_nhan = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ma_nguoi_gui = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    ma_nguoi_nhan = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    noi_dung = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    thoi_gian = table.Column<DateTime>(type: "datetime", nullable: false, defaultValueSql: "(getdate())"),
+                    da_doc = table.Column<bool>(type: "bit", nullable: false, defaultValue: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK__tin_nhan__ID", x => x.ma_tin_nhan);
+                    table.ForeignKey(
+                        name: "FK__tin_nhan__ma_nguoi_gui",
+                        column: x => x.ma_nguoi_gui,
+                        principalTable: "nguoi_dung",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK__tin_nhan__ma_nguoi_nhan",
+                        column: x => x.ma_nguoi_nhan,
+                        principalTable: "nguoi_dung",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "tranh",
                 columns: table => new
                 {
@@ -639,6 +666,16 @@ namespace ArtGallery.Migrations
                 column: "ma_nguoi_nhan");
 
             migrationBuilder.CreateIndex(
+                name: "IX_tin_nhan_ma_nguoi_gui",
+                table: "tin_nhan",
+                column: "ma_nguoi_gui");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_tin_nhan_ma_nguoi_nhan",
+                table: "tin_nhan",
+                column: "ma_nguoi_nhan");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_tranh_ma_nguoi_dung",
                 table: "tranh",
                 column: "ma_nguoi_dung");
@@ -701,6 +738,9 @@ namespace ArtGallery.Migrations
 
             migrationBuilder.DropTable(
                 name: "ThongBao");
+
+            migrationBuilder.DropTable(
+                name: "tin_nhan");
 
             migrationBuilder.DropTable(
                 name: "tranh_the_loai");

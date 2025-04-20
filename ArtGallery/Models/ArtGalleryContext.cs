@@ -45,6 +45,8 @@ public partial class ArtGalleryContext : IdentityDbContext<NguoiDung, IdentityRo
 
     public virtual DbSet<PhanHoiBinhLuan> PhanHoiBinhLuans { get; set; }
 
+    public virtual DbSet<TinNhan> TinNhans { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -432,6 +434,38 @@ public partial class ArtGalleryContext : IdentityDbContext<NguoiDung, IdentityRo
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__phan_hoi__ma_nguoi_dung");
         });
+
+        modelBuilder.Entity<TinNhan>(entity =>
+        {
+            entity.HasKey(e => e.MaTinNhan).HasName("PK__tin_nhan__ID");
+
+            entity.ToTable("tin_nhan");
+
+            entity.Property(e => e.MaTinNhan).HasColumnName("ma_tin_nhan");
+            entity.Property(e => e.MaNguoiGui).HasColumnName("ma_nguoi_gui");
+            entity.Property(e => e.MaNguoiNhan).HasColumnName("ma_nguoi_nhan");
+            entity.Property(e => e.NoiDung).HasColumnName("noi_dung");
+            entity.Property(e => e.ThoiGian)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("thoi_gian");
+            entity.Property(e => e.DaDoc)
+                .HasDefaultValue(false)
+                .HasColumnName("da_doc");
+
+            entity.HasOne(d => d.NguoiGui)
+                .WithMany()
+                .HasForeignKey(d => d.MaNguoiGui)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__tin_nhan__ma_nguoi_gui");
+
+            entity.HasOne(d => d.NguoiNhan)
+                .WithMany()
+                .HasForeignKey(d => d.MaNguoiNhan)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__tin_nhan__ma_nguoi_nhan");
+        });
+
 
         OnModelCreatingPartial(modelBuilder);
     }

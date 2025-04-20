@@ -292,6 +292,118 @@
         $(this).removeClass('unread');
         $(this).find('.notification-status').remove();
     });
+
+    // Xử lý dropdown tin nhắn
+    $('#messageDropdown').on('click', function(e) {
+        e.stopPropagation();
+        $('#messageDropdownMenu').toggle();
+        
+        // Tải tin nhắn khi mở dropdown
+        if ($('#messageDropdownMenu').is(':visible')) {
+            loadMessages();
+        }
+    });
+
+    // Ẩn dropdown tin nhắn khi click ra ngoài
+    $(document).on('click', function(e) {
+        if (!$('#messageDropdown').is(e.target) && 
+            !$('#messageDropdownMenu').is(e.target) && 
+            $('#messageDropdownMenu').has(e.target).length === 0) {
+            $('#messageDropdownMenu').hide();
+        }
+    });
+
+    // Hàm tải tin nhắn
+    function loadMessages() {
+        $('#messageList').html('<div class="message-loading"><div class="spinner-border spinner-border-sm text-primary" role="status"><span class="visually-hidden">Đang tải...</span></div></div>');
+        
+        $.ajax({
+            url: '/Messages/GetRecentMessages',
+            type: 'GET',
+            success: function(data) {
+                renderMessages(data);
+                updateUnreadMessageCount(data.unreadCount);
+            },
+            error: function() {
+                $('#messageList').html('<div class="message-empty"><i class="fas fa-comment-slash"></i><div>Không thể tải tin nhắn</div></div>');
+            }
+        });
+    }
+
+    // Hàm render tin nhắn
+    function renderMessages(data) {
+        if (!data.messages || data.messages.length === 0) {
+            $('#messageList').html('<div class="message-empty"><i class="fas fa-comment-slash"></i><div>Chưa có tin nhắn nào</div></div>');
+            return;
+        }
+        
+        let html = '';
+        data.messages.forEach(function(message) {
+            const isUnread = !message.daDoc;
+            html += `
+            <a href="/Messages/Conversation/${message.maNguoiGui}" class="message-item ${isUnread ? 'unread' : ''}">
+                <div class="message-avatar">
+                    <img src="${message.avatarNguoiGui || '/images/authors/default/default-image.png'}" alt="Avatar">
+                </div>
+                <div class="message-content">
+                    <div class="message-sender">${message.tenNguoiGui}</div>
+                    <div class="message-text">${message.noiDung}</div>
+                    <div class="message-time">${formatMessageTime(new Date(message.thoiGian))}</div>
+                </div>
+                ${isUnread ? '<div class="message-status"></div>' : ''}
+            </a>
+            `;
+        });
+        
+        $('#messageList').html(html);
+    }
+
+    // Hàm cập nhật số tin nhắn chưa đọc
+    function updateUnreadMessageCount(count) {
+        const badge = $('#unreadMessageBadge');
+        if (count > 0) {
+            badge.text(count > 9 ? '9+' : count);
+            badge.show();
+        } else {
+            badge.hide();
+        }
+    }
+
+    // Hàm định dạng thời gian tin nhắn
+    function formatMessageTime(date) {
+        const now = new Date();
+        const diff = Math.floor((now - date) / 1000 / 60); // Số phút
+        
+        if (diff < 1) return 'Vừa xong';
+        if (diff < 60) return `${diff} phút trước`;
+        
+        const diffHours = Math.floor(diff / 60);
+        if (diffHours < 24) return `${diffHours} giờ trước`;
+        
+        const diffDays = Math.floor(diffHours / 24);
+        if (diffDays < 7) return `${diffDays} ngày trước`;
+        
+        return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+    }
+
+    // Kiểm tra tin nhắn mới định kỳ
+    function checkNewMessages() {
+        $.ajax({
+            url: '/Messages/GetUnreadCount',
+            type: 'GET',
+            success: function(data) {
+                updateUnreadMessageCount(data.count);
+            }
+        });
+    }
+
+    // Kiểm tra tin nhắn mới mỗi 30 giây
+    setInterval(checkNewMessages, 30000);
+
+    // Kiểm tra tin nhắn khi tải trang
+    $(document).ready(function() {
+        checkNewMessages();
+    });
 });
 
 // Giữ hàm toggleFollow ở bên ngoài document.ready
