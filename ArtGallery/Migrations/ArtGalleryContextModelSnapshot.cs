@@ -912,17 +912,16 @@ namespace ArtGallery.Migrations
             modelBuilder.Entity("ArtGallery.Models.PhanHoiBinhLuan", b =>
                 {
                     b.HasOne("ArtGallery.Models.BinhLuan", "MaBinhLuanNavigation")
-                        .WithMany("PhanHoiBinhLuans")
+                        .WithMany()
                         .HasForeignKey("MaBinhLuan")
-                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("FK__phan_hoi_binh_luan__ma_binh_luan");
+                        .HasConstraintName("FK__phan_hoi__ma_binh_luan");
 
                     b.HasOne("ArtGallery.Models.NguoiDung", "MaNguoiDungNavigation")
                         .WithMany()
                         .HasForeignKey("MaNguoiDung")
                         .IsRequired()
-                        .HasConstraintName("FK__phan_hoi_binh_luan__ma_nguoi_dung");
+                        .HasConstraintName("FK__phan_hoi__ma_nguoi_dung");
 
                     b.Navigation("MaBinhLuanNavigation");
 
@@ -1061,11 +1060,6 @@ namespace ArtGallery.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("FK__tranh_the__ma_tr__08A03ED0");
-                });
-
-            modelBuilder.Entity("ArtGallery.Models.BinhLuan", b =>
-                {
-                    b.Navigation("PhanHoiBinhLuans");
                 });
 
             modelBuilder.Entity("ArtGallery.Models.NguoiDung", b =>
