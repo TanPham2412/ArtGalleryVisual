@@ -13,7 +13,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
 
-@{  
+@{
     var token = Antiforgery.GetAndStoreTokens(Context).RequestToken;
 }
 
@@ -110,9 +110,9 @@
                             @{
                                 var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                                 var isLiked = await DbContext.LuotThiches
-                                    .AnyAsync(lt => lt.MaTranh == item.MaTranh && lt.MaNguoiDung == currentUserId);
+                                .AnyAsync(lt => lt.MaTranh == item.MaTranh && lt.MaNguoiDung == currentUserId);
                             }
-                            <button class="like-button @(isLiked ? "active" : "")" 
+                            <button class="like-button @(isLiked ? "active" : "")"
                                     onclick="toggleLike(this, @item.MaTranh)">
                                 <i class="@(isLiked ? "fas" : "far") fa-heart"></i>
                             </button>
@@ -130,7 +130,7 @@
                             </div>
                         </div>
                     </div>
-                </div>  
+                </div>
             }
         </div>
     </div>
@@ -155,14 +155,14 @@
                             @{
                                 var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                                 var isLiked = await DbContext.LuotThiches
-                                    .AnyAsync(lt => lt.MaTranh == item.MaTranh && lt.MaNguoiDung == currentUserId);
+                                .AnyAsync(lt => lt.MaTranh == item.MaTranh && lt.MaNguoiDung == currentUserId);
                                 var likeCount = item.LuotThiches.Count;
                             }
-                            <button class="like-button @(isLiked ? "active" : "")" 
+                            <button class="like-button @(isLiked ? "active" : "")"
                                     onclick="toggleLike(this, @item.MaTranh)">
                                 <i class="@(isLiked ? "fas" : "far") fa-heart"></i>
                             </button>
-                            
+
                             <!-- Hiển thị số lượt thích -->
                             <div class="like-count">
                                 @likeCount <i class="fas fa-heart"></i>

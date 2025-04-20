@@ -555,6 +555,52 @@ namespace ArtGallery.Migrations
                     b.ToTable("ThongBao", (string)null);
                 });
 
+            modelBuilder.Entity("ArtGallery.Models.TinNhan", b =>
+                {
+                    b.Property<int>("MaTinNhan")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("ma_tin_nhan");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MaTinNhan"));
+
+                    b.Property<bool>("DaDoc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false)
+                        .HasColumnName("da_doc");
+
+                    b.Property<string>("MaNguoiGui")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("ma_nguoi_gui");
+
+                    b.Property<string>("MaNguoiNhan")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)")
+                        .HasColumnName("ma_nguoi_nhan");
+
+                    b.Property<string>("NoiDung")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("noi_dung");
+
+                    b.Property<DateTime>("ThoiGian")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasColumnName("thoi_gian")
+                        .HasDefaultValueSql("(getdate())");
+
+                    b.HasKey("MaTinNhan")
+                        .HasName("PK__tin_nhan__ID");
+
+                    b.HasIndex("MaNguoiGui");
+
+                    b.HasIndex("MaNguoiNhan");
+
+                    b.ToTable("tin_nhan", (string)null);
+                });
+
             modelBuilder.Entity("ArtGallery.Models.Tranh", b =>
                 {
                     b.Property<int>("MaTranh")
@@ -912,17 +958,16 @@ namespace ArtGallery.Migrations
             modelBuilder.Entity("ArtGallery.Models.PhanHoiBinhLuan", b =>
                 {
                     b.HasOne("ArtGallery.Models.BinhLuan", "MaBinhLuanNavigation")
-                        .WithMany("PhanHoiBinhLuans")
+                        .WithMany()
                         .HasForeignKey("MaBinhLuan")
-                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
-                        .HasConstraintName("FK__phan_hoi_binh_luan__ma_binh_luan");
+                        .HasConstraintName("FK__phan_hoi__ma_binh_luan");
 
                     b.HasOne("ArtGallery.Models.NguoiDung", "MaNguoiDungNavigation")
                         .WithMany()
                         .HasForeignKey("MaNguoiDung")
                         .IsRequired()
-                        .HasConstraintName("FK__phan_hoi_binh_luan__ma_nguoi_dung");
+                        .HasConstraintName("FK__phan_hoi__ma_nguoi_dung");
 
                     b.Navigation("MaBinhLuanNavigation");
 
@@ -964,6 +1009,25 @@ namespace ArtGallery.Migrations
                     b.Navigation("MaNguoiGuiNavigation");
 
                     b.Navigation("MaNguoiNhanNavigation");
+                });
+
+            modelBuilder.Entity("ArtGallery.Models.TinNhan", b =>
+                {
+                    b.HasOne("ArtGallery.Models.NguoiDung", "NguoiGui")
+                        .WithMany()
+                        .HasForeignKey("MaNguoiGui")
+                        .IsRequired()
+                        .HasConstraintName("FK__tin_nhan__ma_nguoi_gui");
+
+                    b.HasOne("ArtGallery.Models.NguoiDung", "NguoiNhan")
+                        .WithMany()
+                        .HasForeignKey("MaNguoiNhan")
+                        .IsRequired()
+                        .HasConstraintName("FK__tin_nhan__ma_nguoi_nhan");
+
+                    b.Navigation("NguoiGui");
+
+                    b.Navigation("NguoiNhan");
                 });
 
             modelBuilder.Entity("ArtGallery.Models.Tranh", b =>
@@ -1061,11 +1125,6 @@ namespace ArtGallery.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("FK__tranh_the__ma_tr__08A03ED0");
-                });
-
-            modelBuilder.Entity("ArtGallery.Models.BinhLuan", b =>
-                {
-                    b.Navigation("PhanHoiBinhLuans");
                 });
 
             modelBuilder.Entity("ArtGallery.Models.NguoiDung", b =>

@@ -117,7 +117,32 @@
             @if (currentUser != null)
             {
                 <div class="nav-icons d-flex align-items-center">
-                    <a href="#" class="icon-link me-3"><i class="far fa-envelope"></i></a>
+                    <div class="position-relative message-dropdown">
+                        <a href="#" class="icon-link me-3" id="messageDropdown">
+                            <i class="far fa-envelope"></i>
+                            <span class="message-badge" id="unreadMessageBadge" style="display: none;">0</span>
+                        </a>
+                        
+                        <div class="dropdown-menu message-dropdown-menu" id="messageDropdownMenu">
+                            <div class="message-header">
+                                <div class="message-title">Tin nhắn</div>
+                                <div class="message-actions">
+                                    <a href="/Messages/Index" class="view-all-messages"><i class="fas fa-external-link-alt"></i></a>
+                                </div>
+                            </div>
+                            <div class="message-list" id="messageList">
+                                <!-- Danh sách tin nhắn sẽ được hiển thị ở đây -->
+                                <div class="message-loading">
+                                    <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                        <span class="visually-hidden">Đang tải...</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="message-footer">
+                                <a href="/Messages/Index" class="view-all-messages">Xem tất cả tin nhắn</a>
+                            </div>
+                        </div>
+                    </div>
                     <div class="position-relative">
                         <a href="#" class="icon-link me-3 notification-link position-relative" id="notificationDropdown">
                             <i class="far fa-bell"></i>
