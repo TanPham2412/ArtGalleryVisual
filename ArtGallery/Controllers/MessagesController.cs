@@ -335,32 +335,42 @@ namespace ArtGallery.Controllers
             return result.OrderByDescending(c => ((dynamic)c).lastMessageTime).ToList();
         }
 
-        // API tìm kiếm người dùng
+        // API tìm kiếm người dùng - cải tiến từ HomeController
         [HttpGet]
         public async Task<IActionResult> SearchUsers(string query)
         {
-            if (string.IsNullOrWhiteSpace(query))
+            if (string.IsNullOrEmpty(query))
             {
                 return Json(new { users = new List<object>() });
             }
 
-            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            try
+            {
+                var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                
+                // Dùng truy vấn trực tiếp như trong HomeController
+                var users = await _userManager.Users
+                    .Where(u => u.Id != currentUserId &&
+                           ((u.TenNguoiDung != null && u.TenNguoiDung.Contains(query)) ||
+                            (u.UserName != null && u.UserName.Contains(query)) ||
+                            (u.Email != null && u.Email.Contains(query))))
+                    .Select(u => new {
+                        userId = u.Id,
+                        userName = u.TenNguoiDung ?? u.UserName,
+                        username = u.UserName,
+                        email = u.Email,
+                        avatar = u.GetAvatarPath()
+                    })
+                    .Take(10)
+                    .ToListAsync();
 
-            var users = await _userManager.Users
-                .Where(u => u.Id != currentUserId &&
-                           (u.TenNguoiDung.Contains(query) ||
-                           u.UserName.Contains(query) ||
-                           u.Email.Contains(query)))
-                .Take(10)
-                .Select(u => new {
-                    userId = u.Id,
-                    userName = u.TenNguoiDung,
-                    username = u.UserName,
-                    avatar = u.GetAvatarPath()
-                })
-                .ToListAsync();
-
-            return Json(new { users });
+                return Json(new { users });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Lỗi khi tìm kiếm người dùng: {ex}");
+                return Json(new { users = new List<object>() });
+            }
         }
     }
 }

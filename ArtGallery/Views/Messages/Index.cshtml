@@ -3,6 +3,8 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
+@Html.AntiForgeryToken()
+
 <link href="~/css/message.css" rel="stylesheet" />
 
 <div class="message-container">
@@ -58,22 +60,88 @@
                     <input type="text" id="recipientInput" placeholder="Tìm kiếm người dùng..." autocomplete="off">
                 </div>
             </div>
-            <div class="recipient-results" id="recipientResults"></div>
+            <div class="recipient-results" id="recipientResults">
+                <!-- Kết quả tìm kiếm sẽ hiển thị ở đây -->
+                <div class="text-center p-3">Hãy nhập tên người dùng để tìm kiếm</div>
+            </div>
         </div>
     </div>
 </div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
+    // Đơn giản hóa phần tìm kiếm người dùng
     document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('recipientInput').addEventListener('input', function() {
+            var query = this.value.trim();
+            
+            if (query.length > 0) {
+                document.getElementById('recipientResults').innerHTML = '<div class="text-center p-3">Đang tìm kiếm...</div>';
+                
+                $.ajax({
+                    url: '/Messages/SearchUsers',
+                    type: 'GET',
+                    data: { query: query },
+                    success: function(data) {
+                        var resultsHtml = '';
+                        
+                        if (!data.users || data.users.length === 0) {
+                            resultsHtml = '<div class="text-center p-3">Không tìm thấy người dùng nào</div>';
+                        } else {
+                            for (var i = 0; i < data.users.length; i++) {
+                                var user = data.users[i];
+                                resultsHtml += '<div class="recipient-item" data-user-id="' + user.userId + '">' +
+                                    '<div class="recipient-avatar">' +
+                                    '<img src="' + user.avatar + '" alt="" onerror="this.src=\'/images/authors/default/default-image.png\'">' +
+                                    '</div>' +
+                                    '<div class="recipient-info">' +
+                                    '<div class="recipient-name">' + user.userName + '</div>' +
+                                    '<div class="recipient-username">' + (user.username || user.email || '') + '</div>' +
+                                    '</div>' +
+                                    '</div>';
+                            }
+                        }
+                        
+                        $('#recipientResults').html(resultsHtml);
+                        
+                        $('.recipient-item').click(function() {
+                            var userId = $(this).data('user-id');
+                            $('#newMessageModal').hide();
+                            $('#recipientInput').val('');
+                            openConversation(userId);
+                        });
+                    },
+                    error: function() {
+                        $('#recipientResults').html('<div class="text-center p-3">Lỗi tìm kiếm người dùng</div>');
+                    }
+                });
+            } else {
+                $('#recipientResults').html('<div class="text-center p-3">Hãy nhập tên người dùng để tìm kiếm</div>');
+            }
+        });
+        
+        // Xử lý sự kiện khi nhấp vào nút bút chì
         document.getElementById('newMessageBtn').addEventListener('click', function() {
             document.getElementById('newMessageModal').style.display = 'flex';
             document.getElementById('recipientInput').focus();
         });
         
+        // Đóng form tin nhắn mới khi click vào nút đóng
         document.getElementById('closeNewMessageBtn').addEventListener('click', function() {
             document.getElementById('newMessageModal').style.display = 'none';
             document.getElementById('recipientInput').value = '';
+            document.getElementById('recipientResults').innerHTML = 
+                '<div class="text-center p-3">Hãy nhập tên người dùng để tìm kiếm</div>';
+        });
+        
+        // Đóng form khi click ra ngoài
+        document.getElementById('newMessageModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.style.display = 'none';
+                document.getElementById('recipientInput').value = '';
+                document.getElementById('recipientResults').innerHTML = 
+                    '<div class="text-center p-3">Hãy nhập tên người dùng để tìm kiếm</div>';
+            }
         });
     });
 </script>

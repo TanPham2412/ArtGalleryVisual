@@ -65,6 +65,12 @@
             currentUserId = data.userId;
         }
     });
+
+    // Thêm sự kiện click cho các cuộc trò chuyện
+    $(document).on('click', '.conversation-item', function() {
+        const userId = $(this).data('user-id');
+        openConversation(userId);
+    });
 });
 
 // Load danh sách cuộc trò chuyện
@@ -73,256 +79,285 @@ function loadConversations() {
         url: '/Messages/GetConversations',
         type: 'GET',
         success: function(data) {
-            renderConversations(data.conversations || []);
+            renderConversations(data.conversations);
         },
         error: function() {
-            $('#conversationList').html('<div class="text-center p-3">Không thể tải tin nhắn</div>');
+            $('#conversationList').html('<div class="text-center p-3">Không thể tải cuộc trò chuyện</div>');
         }
     });
 }
 
 // Render danh sách cuộc trò chuyện
 function renderConversations(conversations) {
-    if (conversations.length === 0) {
+    if (!conversations || conversations.length === 0) {
         $('#conversationList').html('<div class="text-center p-3">Chưa có cuộc trò chuyện nào</div>');
         return;
     }
     
     let html = '';
-    conversations.forEach(function(conv) {
-        const lastMessageTime = formatConversationTime(new Date(conv.lastMessageTime));
-        const isOnline = conv.isOnline ? '<div class="online-indicator"></div>' : '';
-        const unreadBadge = conv.unreadCount > 0 ? '<div class="conversation-unread"></div>' : '';
-        
+    for (const conv of conversations) {
         html += `
-        <div class="conversation-item" data-user-id="${conv.userId}" onclick="openConversation('${conv.userId}')">
-            <div class="conversation-avatar">
-                <img src="${conv.avatar}" alt="${conv.userName}" onerror="this.src='/images/authors/default/default-image.png'">
-                ${isOnline}
-            </div>
-            <div class="conversation-content">
-                <div class="conversation-header">
-                    <div class="conversation-name">${conv.userName}</div>
-                    <div class="conversation-time">${lastMessageTime}</div>
+            <div class="conversation-item" data-user-id="${conv.userId}">
+                <div class="conversation-avatar">
+                    <img src="${conv.avatar}" alt="" onerror="this.src='/images/authors/default/default-image.png'">
+                    <span class="status-indicator ${conv.isOnline ? 'online' : ''}"></span>
                 </div>
-                <div class="conversation-message">
-                    <div class="conversation-preview">${conv.lastMessage || 'Chưa có tin nhắn'}</div>
-                    ${unreadBadge}
+                <div class="conversation-info">
+                    <div class="conversation-header">
+                        <span class="conversation-name">${conv.userName}</span>
+                        <span class="conversation-time">${formatTime(conv.lastMessageTime)}</span>
+                    </div>
+                    <div class="conversation-preview">
+                        <span class="conversation-last-message">${conv.lastMessage || 'Chưa có tin nhắn'}</span>
+                        ${conv.unreadCount > 0 ? `<span class="unread-badge">${conv.unreadCount}</span>` : ''}
+                    </div>
                 </div>
             </div>
-        </div>
         `;
-    });
+    }
     
     $('#conversationList').html(html);
 }
 
 // Mở cuộc trò chuyện
 function openConversation(userId) {
-    // Đánh dấu cuộc trò chuyện được chọn
-    $('.conversation-item').removeClass('active');
-    $(`.conversation-item[data-user-id="${userId}"]`).addClass('active');
-    
-    // Tải thông tin người dùng và tin nhắn mà không hiển thị spinner
+    // Lấy thông tin người dùng
     $.ajax({
-        url: `/Messages/GetUserInfo/${userId}`,
+        url: '/Messages/GetUserInfo',
         type: 'GET',
+        data: { id: userId },
         success: function(userData) {
-            // Sau khi có thông tin người dùng, tải tin nhắn
-            loadMessages(userId, userData);
+            // Lấy tin nhắn trong cuộc trò chuyện
+            $.ajax({
+                url: '/Messages/GetConversation',
+                type: 'GET',
+                data: { userId: userId },
+                success: function(messages) {
+                    renderConversation(userData, messages);
+                    // Đánh dấu cuộc trò chuyện hiện tại
+                    $('.conversation-item').removeClass('active');
+                    $(`.conversation-item[data-user-id="${userId}"]`).addClass('active');
+                },
+                error: function() {
+                    $('#messageContent').html('<div class="error-message">Không thể tải tin nhắn</div>');
+                }
+            });
         },
         error: function() {
-            $('#messageContent').html('<div class="text-center p-3 mt-5">Không thể tải thông tin người dùng</div>');
+            $('#messageContent').html('<div class="error-message">Không thể tải thông tin người dùng</div>');
         }
     });
 }
 
-// Tải tin nhắn
-function loadMessages(userId, userData) {
+// Hiển thị cuộc trò chuyện và tin nhắn
+function renderConversation(user, messages) {
+    // Xác định ID người dùng hiện tại
+    let currentUserId = '';
     $.ajax({
-        url: `/Messages/GetConversation/${userId}`,
+        url: '/Messages/GetCurrentUserId',
         type: 'GET',
-        success: function(messages) {
-            renderChat(userData, messages);
-        },
-        error: function() {
-            $('#messageContent').html('<div class="text-center p-3 mt-5">Không thể tải tin nhắn</div>');
+        async: false,
+        success: function(data) {
+            currentUserId = data.userId;
         }
     });
-}
-
-// Render giao diện chat
-function renderChat(user, messages) {
-    const isOnline = user.isOnline ? 'online' : '';
-    const lastActive = user.isOnline ? 'Đang hoạt động' : `Hoạt động ${formatLastActive(new Date(user.lastActive))}`;
     
     let html = `
-    <div class="chat-area">
         <div class="chat-header">
             <div class="chat-user-info">
                 <div class="chat-avatar">
-                    <img src="${user.avatar}" alt="${user.userName}" onerror="this.src='/images/authors/default/default-image.png'">
+                    <img src="${user.avatar}" alt="" onerror="this.src='/images/authors/default/default-image.png'">
+                    <span class="status-indicator ${user.isOnline ? 'online' : ''}"></span>
                 </div>
-                <div class="chat-user-details">
+                <div class="chat-user">
                     <div class="chat-username">${user.userName}</div>
-                    <div class="chat-status ${isOnline}">${lastActive}</div>
+                    <div class="chat-status">${user.isOnline ? 'Đang hoạt động' : 'Hoạt động vừa xong'}</div>
                 </div>
             </div>
             <div class="chat-actions">
-                <button class="chat-action-btn"><i class="fas fa-phone-alt"></i></button>
-                <button class="chat-action-btn"><i class="fas fa-video"></i></button>
-                <button class="chat-action-btn"><i class="fas fa-info-circle"></i></button>
+                <button type="button" class="btn-icon">
+                    <i class="fas fa-info-circle"></i>
+                </button>
             </div>
         </div>
+        <div class="chat-messages" id="chatMessages">`;
+    
+    // Thêm các tin nhắn
+    if (messages && messages.length > 0) {
+        let lastDate = '';
         
-        <div class="chat-messages" id="chatMessages">
-            ${renderMessages(messages)}
-        </div>
-        
-        <div class="message-input-area">
-            <div class="message-input-container">
-                <textarea class="message-input" id="messageInput" placeholder="Aa" rows="1"></textarea>
-                <div class="message-action-buttons">
-                    <div class="message-action"><i class="far fa-smile"></i></div>
-                    <div class="message-action"><i class="fas fa-paperclip"></i></div>
-                    <div class="message-action"><i class="far fa-image"></i></div>
+        for (const message of messages) {
+            // Kiểm tra nếu ngày thay đổi, hiển thị phân cách ngày
+            const messageDate = new Date(message.thoiGian).toLocaleDateString('vi-VN');
+            if (messageDate !== lastDate) {
+                html += `<div class="message-date-separator">
+                    <span>${messageDate}</span>
+                </div>`;
+                lastDate = messageDate;
+            }
+            
+            // Xác định tin nhắn của mình hay của người khác
+            const isMyMessage = message.maNguoiGui === currentUserId;
+            
+            html += `
+                <div class="chat-message-item ${isMyMessage ? 'my-message' : 'other-message'}">
+                    ${!isMyMessage ? `
+                    <div class="message-avatar">
+                        <img src="${user.avatar}" alt="" onerror="this.src='/images/authors/default/default-image.png'">
+                    </div>` : ''}
+                    <div class="message-content">
+                        <div class="message-bubble">
+                            <div class="message-text">${message.noiDung}</div>
+                        </div>
+                        <div class="message-time">${formatTime(message.thoiGian)}</div>
+                    </div>
                 </div>
-            </div>
-            <div class="send-button" onclick="sendMessage('${user.userId}')">
+            `;
+        }
+    } else {
+        html += `<div class="empty-conversation">
+            <div class="empty-icon">
                 <i class="far fa-paper-plane"></i>
             </div>
+            <div class="empty-text">Hãy bắt đầu cuộc trò chuyện</div>
+        </div>`;
+    }
+    
+    html += `</div>
+        <div class="chat-input">
+            <div class="input-actions">
+                <button type="button" class="btn-icon">
+                    <i class="far fa-image"></i>
+                </button>
+                <button type="button" class="btn-icon">
+                    <i class="far fa-smile"></i>
+                </button>
+            </div>
+            <div class="message-input-wrapper">
+                <input type="text" id="messageInput" placeholder="Aa" autocomplete="off">
+            </div>
+            <button type="button" class="send-btn" id="sendMessageBtn" data-receiver-id="${user.userId}">
+                <i class="fas fa-paper-plane"></i>
+            </button>
         </div>
-    </div>
     `;
     
     $('#messageContent').html(html);
     
-    // Scroll đến tin nhắn cuối cùng
+    // Cuộn xuống tin nhắn cuối cùng
     const chatMessages = document.getElementById('chatMessages');
     if (chatMessages) {
         chatMessages.scrollTop = chatMessages.scrollHeight;
     }
     
-    // Xử lý nhấn Enter để gửi tin nhắn
-    $('#messageInput').on('keydown', function(e) {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            sendMessage(user.userId);
-        }
+    // Thêm sự kiện gửi tin nhắn
+    setupSendMessage(user.userId);
+}
+
+// Thiết lập sự kiện gửi tin nhắn
+function setupSendMessage(receiverId) {
+    // Gửi tin nhắn khi nhấn nút gửi
+    $('#sendMessageBtn').click(function() {
+        sendMessage(receiverId);
     });
     
-    // Tự động điều chỉnh chiều cao của textarea
-    $('#messageInput').on('input', function() {
-        this.style.height = 'auto';
-        this.style.height = (this.scrollHeight) + 'px';
+    // Gửi tin nhắn khi nhấn Enter
+    $('#messageInput').keypress(function(e) {
+        if (e.which === 13) {
+            sendMessage(receiverId);
+            return false;
+        }
     });
 }
 
-// Render tin nhắn
-function renderMessages(messages) {
-    if (!messages || messages.length === 0) {
-        return '<div class="text-center p-3">Hãy bắt đầu cuộc trò chuyện</div>';
-    }
-    
-    let html = '';
-    let currentDate = '';
-    let currentUser = '';
-    
-    messages.forEach(function(msg, index) {
-        const messageDate = formatMessageDate(new Date(msg.thoiGian));
-        const isOwn = msg.maNguoiGui === currentUserId; // Biến currentUserId cần được định nghĩa ở đâu đó
-        
-        // Thêm ngày nếu khác ngày
-        if (messageDate !== currentDate) {
-            html += `<div class="message-date">${messageDate}</div>`;
-            currentDate = messageDate;
-            currentUser = ''; // Reset để tin nhắn không bị gộp nhóm khi ngày mới
-        }
-        
-        // Kiểm tra nếu tin nhắn mới từ người gửi khác, bắt đầu nhóm tin nhắn mới
-        if (currentUser !== msg.maNguoiGui) {
-            // Nếu đã có nhóm trước đó, đóng nhóm đó lại
-            if (currentUser !== '') {
-                html += `</div>`;
-            }
-            
-            // Bắt đầu nhóm tin nhắn mới
-            html += `<div class="message-group ${isOwn ? 'own' : ''}">`;
-            currentUser = msg.maNguoiGui;
-        }
-        
-        // Thêm tin nhắn vào nhóm
-        html += `
-            <div class="message-bubble">${msg.noiDung}</div>
-        `;
-        
-        // Nếu là tin nhắn cuối cùng trong nhóm hoặc cuối danh sách, thêm thời gian
-        const nextMsg = messages[index + 1];
-        if (!nextMsg || nextMsg.maNguoiGui !== msg.maNguoiGui) {
-            html += `<div class="message-time">${formatMessageTime(new Date(msg.thoiGian))}</div>`;
-        }
-        
-        // Nếu là tin nhắn cuối cùng hoặc tin nhắn tiếp theo từ người khác, đóng nhóm
-        if (!nextMsg || nextMsg.maNguoiGui !== msg.maNguoiGui) {
-            html += `</div>`;
-        }
-    });
-    
-    return html;
-}
-
-// Gửi tin nhắn
+// Hàm gửi tin nhắn
 function sendMessage(receiverId) {
-    const content = $('#messageInput').val().trim();
-    if (!content) return;
+    const input = $('#messageInput');
+    const message = input.val().trim();
     
-    // Clear input và reset height
-    $('#messageInput').val('').css('height', 'auto');
+    if (message.length === 0) return;
     
-    // Thêm tin nhắn tạm thời vào giao diện
-    const tempMessage = {
-        noiDung: content,
-        thoiGian: new Date(),
-        maNguoiGui: currentUserId, // Biến currentUserId cần được định nghĩa ở đâu đó
-        daDoc: false
-    };
+    // Xóa nội dung input
+    input.val('');
     
-    // Thêm tin nhắn mới vào cuối danh sách tin nhắn
-    const chatMessages = document.getElementById('chatMessages');
-    const tempMessageHtml = `
-        <div class="message-group own">
-            <div class="message-bubble">${content}</div>
-            <div class="message-time">${formatMessageTime(new Date())}</div>
-        </div>
-    `;
+    // Lấy token antiforgery
+    const token = $('input[name="__RequestVerificationToken"]').val();
     
-    // Nếu không có tin nhắn nào, xóa thông báo "Hãy bắt đầu cuộc trò chuyện"
-    if (chatMessages.innerHTML.includes('Hãy bắt đầu cuộc trò chuyện')) {
-        chatMessages.innerHTML = '';
-    }
-    
-    chatMessages.innerHTML += tempMessageHtml;
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-    
-    // Gửi tin nhắn lên server
+    // Gửi tin nhắn đến server
     $.ajax({
         url: '/Messages/SendMessage',
         type: 'POST',
         data: {
             receiverId: receiverId,
-            message: content
+            message: message,
+            __RequestVerificationToken: token
         },
-        headers: {
-            'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
-        },
-        success: function(response) {
-            // Cập nhật lại danh sách cuộc trò chuyện
-            loadConversations();
+        success: function(data) {
+            if (data.success) {
+                // Thêm tin nhắn vào danh sách tin nhắn
+                appendMyMessage(data.message);
+                // Cập nhật danh sách cuộc trò chuyện
+                loadConversations();
+            }
         },
         error: function() {
-            alert('Không thể gửi tin nhắn. Vui lòng thử lại sau.');
+            alert('Gửi tin nhắn thất bại');
         }
     });
+}
+
+// Thêm tin nhắn của mình vào danh sách tin nhắn
+function appendMyMessage(message) {
+    const html = `
+        <div class="chat-message-item my-message">
+            <div class="message-content">
+                <div class="message-bubble">
+                    <div class="message-text">${message.noiDung}</div>
+                </div>
+                <div class="message-time">${formatTime(message.thoiGian)}</div>
+            </div>
+        </div>
+    `;
+    
+    $('#chatMessages').append(html);
+    
+    // Cuộn xuống tin nhắn cuối cùng
+    const chatMessages = document.getElementById('chatMessages');
+    if (chatMessages) {
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+}
+
+// Định dạng thời gian
+function formatTime(timeString) {
+    if (!timeString) return '';
+    
+    const date = new Date(timeString);
+    const now = new Date();
+    const diffDays = Math.floor((now - date) / (1000 * 60 * 60 * 24));
+    
+    // Nếu là ngày hôm nay, hiển thị giờ:phút
+    if (diffDays === 0) {
+        const hours = date.getHours().toString().padStart(2, '0');
+        const minutes = date.getMinutes().toString().padStart(2, '0');
+        return `${hours}:${minutes}`;
+    }
+    
+    // Nếu là ngày hôm qua, hiển thị "Hôm qua"
+    if (diffDays === 1) {
+        return 'Hôm qua';
+    }
+    
+    // Nếu trong tuần này, hiển thị tên thứ
+    if (diffDays < 7) {
+        const days = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+        return days[date.getDay()];
+    }
+    
+    // Nếu trước đó, hiển thị ngày/tháng
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    return `${day}/${month}`;
 }
 
 // Tìm kiếm cuộc trò chuyện
@@ -400,16 +435,20 @@ let currentUserId = '';
 // Biến toàn cục để lưu người nhận tin nhắn đã chọn
 let selectedRecipients = [];
 
-// Hàm tìm kiếm người dùng
+// Hàm tìm kiếm người dùng - điều chỉnh để tìm kiếm chính xác hơn
 function searchUsers(query) {
+    console.log("Tìm kiếm người dùng với từ khóa:", query);
+    
     $.ajax({
         url: '/Messages/SearchUsers',
         type: 'GET',
         data: { query: query },
         success: function(data) {
+            console.log("Kết quả tìm kiếm:", data);
             renderUserResults(data.users || []);
         },
-        error: function() {
+        error: function(err) {
+            console.error("Lỗi tìm kiếm:", err);
             $('#recipientResults').html('<div class="text-center p-3">Không thể tìm kiếm người dùng</div>');
         }
     });
