@@ -334,5 +334,33 @@ namespace ArtGallery.Controllers
             // Sắp xếp theo thời gian tin nhắn mới nhất
             return result.OrderByDescending(c => ((dynamic)c).lastMessageTime).ToList();
         }
+
+        // API tìm kiếm người dùng
+        [HttpGet]
+        public async Task<IActionResult> SearchUsers(string query)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+            {
+                return Json(new { users = new List<object>() });
+            }
+
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var users = await _userManager.Users
+                .Where(u => u.Id != currentUserId &&
+                           (u.TenNguoiDung.Contains(query) ||
+                           u.UserName.Contains(query) ||
+                           u.Email.Contains(query)))
+                .Take(10)
+                .Select(u => new {
+                    userId = u.Id,
+                    userName = u.TenNguoiDung,
+                    username = u.UserName,
+                    avatar = u.GetAvatarPath()
+                })
+                .ToListAsync();
+
+            return Json(new { users });
+        }
     }
 }

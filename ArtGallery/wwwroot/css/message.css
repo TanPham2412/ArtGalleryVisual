@@ -435,3 +435,161 @@ body {
         max-height: 50%;
     }
 }
+
+/* Tạo tin nhắn mới */
+.new-message-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 10001;
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+.new-message-container {
+    width: 450px;
+    max-width: 90%;
+    background-color: #1e1e1e;
+    border-radius: 8px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+    z-index: 10002;
+}
+
+.new-message-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    border-bottom: 1px solid #333;
+    background-color: #252525;
+}
+
+.new-message-header h3 {
+    font-size: 18px;
+    margin: 0;
+    color: #e0e0e0;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    color: #aaa;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.close-btn:hover {
+    color: #fff;
+}
+
+.new-message-body {
+    padding: 20px;
+}
+
+.recipient-input-container {
+    display: flex;
+    align-items: center;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #333;
+}
+
+.recipient-input-container label {
+    font-size: 16px;
+    margin-right: 10px;
+    color: #aaa;
+}
+
+.recipient-input-wrapper {
+    flex: 1;
+}
+
+.recipient-input-wrapper input {
+    width: 100%;
+    background: none;
+    border: none;
+    color: #e0e0e0;
+    font-size: 16px;
+    outline: none;
+}
+
+.recipient-results {
+    max-height: 300px;
+    overflow-y: auto;
+    margin-top: 10px;
+}
+
+.recipient-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: background-color 0.2s;
+}
+
+.recipient-item:hover {
+    background-color: #333;
+}
+
+.recipient-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    overflow: hidden;
+    margin-right: 12px;
+}
+
+.recipient-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.recipient-info {
+    flex: 1;
+}
+
+.recipient-name {
+    font-weight: 600;
+    color: #e0e0e0;
+    margin-bottom: 2px;
+}
+
+.recipient-username {
+    font-size: 13px;
+    color: #aaa;
+}
+
+.recipient-selected {
+    margin-top: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.recipient-badge {
+    display: inline-flex;
+    align-items: center;
+    background-color: #333;
+    border-radius: 16px;
+    padding: 5px 10px;
+}
+
+.recipient-badge-name {
+    color: #e0e0e0;
+    margin-right: 5px;
+}
+
+.recipient-badge-remove {
+    color: #aaa;
+    cursor: pointer;
+}
+
+.recipient-badge-remove:hover {
+    color: #fff;
+}

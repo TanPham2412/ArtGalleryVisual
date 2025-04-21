@@ -10,10 +10,10 @@
         <div class="sidebar-header">
             <h3>Đoạn chat</h3>
             <div class="sidebar-actions">
-                <button type="button" class="btn-icon">
+                <button type="button" class="btn-icon" id="moreOptionsBtn">
                     <i class="fas fa-ellipsis-h"></i>
                 </button>
-                <button type="button" class="btn-icon">
+                <button type="button" class="btn-icon" id="newMessageBtn">
                     <i class="fas fa-edit"></i>
                 </button>
             </div>
@@ -41,5 +41,41 @@
         </div>
     </div>
 </div>
+
+<!-- Form tạo tin nhắn mới -->
+<div class="new-message-modal" id="newMessageModal">
+    <div class="new-message-container">
+        <div class="new-message-header">
+            <h3>Tin nhắn mới</h3>
+            <button type="button" class="close-btn" id="closeNewMessageBtn">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="new-message-body">
+            <div class="recipient-input-container">
+                <label>Đến:</label>
+                <div class="recipient-input-wrapper">
+                    <input type="text" id="recipientInput" placeholder="Tìm kiếm người dùng..." autocomplete="off">
+                </div>
+            </div>
+            <div class="recipient-results" id="recipientResults"></div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('newMessageBtn').addEventListener('click', function() {
+            document.getElementById('newMessageModal').style.display = 'flex';
+            document.getElementById('recipientInput').focus();
+        });
+        
+        document.getElementById('closeNewMessageBtn').addEventListener('click', function() {
+            document.getElementById('newMessageModal').style.display = 'none';
+            document.getElementById('recipientInput').value = '';
+        });
+    });
+</script>
 
 <script src="~/js/message.js"></script> 

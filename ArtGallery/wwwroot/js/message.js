@@ -1,10 +1,10 @@
 ﻿$(document).ready(function() {
+    console.log("Document ready");
+    
     // Tab chuyển đổi giữa hộp thư và cộng đồng
     $('.tab-button').on('click', function() {
         $('.tab-button').removeClass('active');
         $(this).addClass('active');
-        
-        // Có thể thêm logic chuyển tab ở đây
     });
     
     // Load danh sách cuộc trò chuyện
@@ -17,6 +17,52 @@
             searchConversations(query);
         } else {
             loadConversations();
+        }
+    });
+    
+    // Xử lý mở form tin nhắn mới - ĐẶT TRONG document.ready
+    $('#newMessageBtn').on('click', function() {
+        console.log("Nút bút chì được nhấn");
+        $('#newMessageModal').css('display', 'flex');
+        $('#recipientInput').focus();
+    });
+    
+    // Kiểm tra phần tử có tồn tại không
+    console.log("Nút bút chì có tồn tại:", $('#newMessageBtn').length > 0);
+    console.log("Modal có tồn tại:", $('#newMessageModal').length > 0);
+    
+    // Đóng form tin nhắn mới - ĐẶT TRONG document.ready
+    $('#closeNewMessageBtn').on('click', function() {
+        $('#newMessageModal').hide();
+        $('#recipientInput').val('');
+        $('#recipientResults').empty();
+    });
+    
+    // Ẩn form khi click ra ngoài - ĐẶT TRONG document.ready
+    $(document).on('click', function(e) {
+        if ($(e.target).hasClass('new-message-modal')) {
+            $('#newMessageModal').hide();
+            $('#recipientInput').val('');
+            $('#recipientResults').empty();
+        }
+    });
+    
+    // Xử lý tìm kiếm người dùng khi nhập vào ô Đến - ĐẶT TRONG document.ready
+    $('#recipientInput').on('input', function() {
+        const query = $(this).val().trim();
+        if (query.length > 0) {
+            searchUsers(query);
+        } else {
+            $('#recipientResults').empty();
+        }
+    });
+
+    // Lấy ID người dùng hiện tại
+    $.ajax({
+        url: '/Messages/GetCurrentUserId',
+        type: 'GET',
+        success: function(data) {
+            currentUserId = data.userId;
         }
     });
 });
@@ -351,13 +397,67 @@ function formatLastActive(date) {
 // Cần thêm biến lưu ID người dùng hiện tại
 let currentUserId = '';
 
-// Khi trang được tải, lấy ID người dùng hiện tại
-$(document).ready(function() {
+// Biến toàn cục để lưu người nhận tin nhắn đã chọn
+let selectedRecipients = [];
+
+// Hàm tìm kiếm người dùng
+function searchUsers(query) {
     $.ajax({
-        url: '/Messages/GetCurrentUserId',
+        url: '/Messages/SearchUsers',
         type: 'GET',
+        data: { query: query },
         success: function(data) {
-            currentUserId = data.userId;
+            renderUserResults(data.users || []);
+        },
+        error: function() {
+            $('#recipientResults').html('<div class="text-center p-3">Không thể tìm kiếm người dùng</div>');
         }
+    });
+}
+
+// Hiển thị kết quả tìm kiếm người dùng
+function renderUserResults(users) {
+    if (users.length === 0) {
+        $('#recipientResults').html('<div class="text-center p-3">Không tìm thấy người dùng nào</div>');
+        return;
+    }
+    
+    let html = '';
+    users.forEach(function(user) {
+        html += `
+        <div class="recipient-item" data-user-id="${user.userId}" data-user-name="${user.userName}">
+            <div class="recipient-avatar">
+                <img src="${user.avatar}" alt="${user.userName}" onerror="this.src='/images/authors/default/default-image.png'">
+            </div>
+            <div class="recipient-info">
+                <div class="recipient-name">${user.userName}</div>
+                <div class="recipient-username">@${user.username || user.userId}</div>
+            </div>
+        </div>
+        `;
+    });
+    
+    $('#recipientResults').html(html);
+    
+    // Xử lý sự kiện khi chọn người dùng
+    $('.recipient-item').on('click', function() {
+        const userId = $(this).data('user-id');
+        const userName = $(this).data('user-name');
+        
+        // Mở cuộc trò chuyện với người dùng được chọn
+        $('#newMessageModal').hide();
+        $('#recipientInput').val('');
+        $('#recipientResults').empty();
+        
+        openConversation(userId);
+    });
+}
+
+$(function() {
+    // Đăng ký lại sự kiện cho nút bút chì sau khi trang đã tải hoàn toàn
+    $(document).on('click', '#newMessageBtn', function() {
+        console.log("Nút bút chì được nhấn");
+        $('#newMessageModal').css('display', 'flex');
+        $('#recipientInput').focus();
     });
 });
