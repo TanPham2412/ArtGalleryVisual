@@ -68,6 +68,71 @@
     </div>
 </div>
 
+<!-- Template cho phần header chat -->
+<template id="chatHeaderTemplate">
+    <div class="chat-header">
+        <div class="chat-user-info">
+            <div class="chat-avatar">
+                <img src="" alt="" onerror="this.src='/images/authors/default/default-image.png'">
+                <span class="status-indicator"></span>
+            </div>
+            <div class="chat-user">
+                <div class="chat-username"></div>
+            </div>
+        </div>
+        <div class="chat-actions">
+            <button type="button" class="btn-icon">
+                <i class="fas fa-info-circle"></i>
+            </button>
+        </div>
+    </div>
+</template>
+
+<!-- Template cho tin nhắn -->
+<template id="messageTemplate">
+    <div class="chat-message-item">
+        <div class="message-avatar">
+            <img src="" alt="" onerror="this.src='/images/authors/default/default-image.png'">
+        </div>
+        <div class="message-content">
+            <div class="message-bubble">
+                <div class="message-text"></div>
+            </div>
+            <div class="message-time"></div>
+        </div>
+    </div>
+</template>
+
+<!-- Template cho khi không có tin nhắn -->
+<template id="emptyConversationTemplate">
+    <div class="empty-conversation">
+        <div class="empty-icon">
+            <i class="far fa-paper-plane"></i>
+        </div>
+        <div class="empty-text">Hãy bắt đầu cuộc trò chuyện</div>
+    </div>
+</template>
+
+<!-- Template cho phần nhập tin nhắn -->
+<template id="chatInputTemplate">
+    <div class="chat-input">
+        <div class="input-actions">
+            <button type="button" class="btn-icon">
+                <i class="far fa-image"></i>
+            </button>
+            <button type="button" class="btn-icon">
+                <i class="far fa-smile"></i>
+            </button>
+        </div>
+        <div class="message-input-wrapper">
+            <input type="text" id="messageInput" placeholder="Aa" autocomplete="off">
+        </div>
+        <button type="button" class="send-btn" id="sendMessageBtn">
+            <i class="fas fa-paper-plane"></i>
+        </button>
+    </div>
+</template>
+
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     // Đơn giản hóa phần tìm kiếm người dùng

@@ -149,7 +149,7 @@ function openConversation(userId) {
     });
 }
 
-// Hiển thị cuộc trò chuyện và tin nhắn
+// Hiển thị cuộc trò chuyện và tin nhắn - sử dụng template từ HTML
 function renderConversation(user, messages) {
     // Xác định ID người dùng hiện tại
     let currentUserId = '';
@@ -162,25 +162,26 @@ function renderConversation(user, messages) {
         }
     });
     
-    let html = `
-        <div class="chat-header">
-            <div class="chat-user-info">
-                <div class="chat-avatar">
-                    <img src="${user.avatar}" alt="" onerror="this.src='/images/authors/default/default-image.png'">
-                    <span class="status-indicator ${user.isOnline ? 'online' : ''}"></span>
-                </div>
-                <div class="chat-user">
-                    <div class="chat-username">${user.userName}</div>
-                    <div class="chat-status">${user.isOnline ? 'Đang hoạt động' : 'Hoạt động vừa xong'}</div>
-                </div>
-            </div>
-            <div class="chat-actions">
-                <button type="button" class="btn-icon">
-                    <i class="fas fa-info-circle"></i>
-                </button>
-            </div>
-        </div>
-        <div class="chat-messages" id="chatMessages">`;
+    // Tạo container cho nội dung chat
+    let html = document.createElement('div');
+    
+    // Thêm header chat từ template
+    const headerTemplate = document.getElementById('chatHeaderTemplate');
+    const headerClone = document.importNode(headerTemplate.content, true);
+    // Cập nhật thông tin user
+    const headerAvatar = headerClone.querySelector('.chat-avatar img');
+    headerAvatar.src = user.avatar;
+    const statusIndicator = headerClone.querySelector('.status-indicator');
+    if (user.isOnline) {
+        statusIndicator.classList.add('online');
+    }
+    headerClone.querySelector('.chat-username').textContent = user.userName;
+    html.appendChild(headerClone);
+    
+    // Thêm container tin nhắn
+    const chatMessages = document.createElement('div');
+    chatMessages.className = 'chat-messages';
+    chatMessages.id = 'chatMessages';
     
     // Thêm các tin nhắn
     if (messages && messages.length > 0) {
@@ -190,64 +191,61 @@ function renderConversation(user, messages) {
             // Kiểm tra nếu ngày thay đổi, hiển thị phân cách ngày
             const messageDate = new Date(message.thoiGian).toLocaleDateString('vi-VN');
             if (messageDate !== lastDate) {
-                html += `<div class="message-date-separator">
-                    <span>${messageDate}</span>
-                </div>`;
+                const dateSeparator = document.createElement('div');
+                dateSeparator.className = 'message-date-separator';
+                dateSeparator.innerHTML = `<span>${messageDate}</span>`;
+                chatMessages.appendChild(dateSeparator);
                 lastDate = messageDate;
             }
             
             // Xác định tin nhắn của mình hay của người khác
             const isMyMessage = message.maNguoiGui === currentUserId;
             
-            html += `
-                <div class="chat-message-item ${isMyMessage ? 'my-message' : 'other-message'}">
-                    ${!isMyMessage ? `
-                    <div class="message-avatar">
-                        <img src="${user.avatar}" alt="" onerror="this.src='/images/authors/default/default-image.png'">
-                    </div>` : ''}
-                    <div class="message-content">
-                        <div class="message-bubble">
-                            <div class="message-text">${message.noiDung}</div>
-                        </div>
-                        <div class="message-time">${formatTime(message.thoiGian)}</div>
-                    </div>
-                </div>
-            `;
+            // Tạo tin nhắn từ template
+            const messageTemplate = document.getElementById('messageTemplate');
+            const messageClone = document.importNode(messageTemplate.content, true);
+            const messageItem = messageClone.querySelector('.chat-message-item');
+            
+            if (isMyMessage) {
+                messageItem.classList.add('my-message');
+                // Xóa avatar nếu là tin nhắn của mình
+                const avatar = messageClone.querySelector('.message-avatar');
+                messageItem.removeChild(avatar);
+            } else {
+                messageItem.classList.add('other-message');
+                // Cập nhật avatar
+                const avatar = messageClone.querySelector('.message-avatar img');
+                avatar.src = user.avatar;
+            }
+            
+            // Cập nhật nội dung tin nhắn
+            messageClone.querySelector('.message-text').textContent = message.noiDung;
+            messageClone.querySelector('.message-time').textContent = formatTime(message.thoiGian);
+            
+            chatMessages.appendChild(messageClone);
         }
     } else {
-        html += `<div class="empty-conversation">
-            <div class="empty-icon">
-                <i class="far fa-paper-plane"></i>
-            </div>
-            <div class="empty-text">Hãy bắt đầu cuộc trò chuyện</div>
-        </div>`;
+        // Không có tin nhắn, hiển thị trạng thái trống
+        const emptyTemplate = document.getElementById('emptyConversationTemplate');
+        chatMessages.appendChild(document.importNode(emptyTemplate.content, true));
     }
     
-    html += `</div>
-        <div class="chat-input">
-            <div class="input-actions">
-                <button type="button" class="btn-icon">
-                    <i class="far fa-image"></i>
-                </button>
-                <button type="button" class="btn-icon">
-                    <i class="far fa-smile"></i>
-                </button>
-            </div>
-            <div class="message-input-wrapper">
-                <input type="text" id="messageInput" placeholder="Aa" autocomplete="off">
-            </div>
-            <button type="button" class="send-btn" id="sendMessageBtn" data-receiver-id="${user.userId}">
-                <i class="fas fa-paper-plane"></i>
-            </button>
-        </div>
-    `;
+    html.appendChild(chatMessages);
     
-    $('#messageContent').html(html);
+    // Thêm phần nhập tin nhắn
+    const inputTemplate = document.getElementById('chatInputTemplate');
+    const inputClone = document.importNode(inputTemplate.content, true);
+    const sendButton = inputClone.querySelector('#sendMessageBtn');
+    sendButton.setAttribute('data-receiver-id', user.userId);
+    html.appendChild(inputClone);
+    
+    // Cập nhật UI
+    $('#messageContent').html(html.innerHTML);
     
     // Cuộn xuống tin nhắn cuối cùng
-    const chatMessages = document.getElementById('chatMessages');
-    if (chatMessages) {
-        chatMessages.scrollTop = chatMessages.scrollHeight;
+    const chatMessagesElement = document.getElementById('chatMessages');
+    if (chatMessagesElement) {
+        chatMessagesElement.scrollTop = chatMessagesElement.scrollHeight;
     }
     
     // Thêm sự kiện gửi tin nhắn
@@ -306,20 +304,23 @@ function sendMessage(receiverId) {
     });
 }
 
-// Thêm tin nhắn của mình vào danh sách tin nhắn
+// Sửa hàm appendMyMessage để sử dụng template
 function appendMyMessage(message) {
-    const html = `
-        <div class="chat-message-item my-message">
-            <div class="message-content">
-                <div class="message-bubble">
-                    <div class="message-text">${message.noiDung}</div>
-                </div>
-                <div class="message-time">${formatTime(message.thoiGian)}</div>
-            </div>
-        </div>
-    `;
+    const messageTemplate = document.getElementById('messageTemplate');
+    const messageClone = document.importNode(messageTemplate.content, true);
+    const messageItem = messageClone.querySelector('.chat-message-item');
     
-    $('#chatMessages').append(html);
+    messageItem.classList.add('my-message');
+    // Xóa avatar vì là tin nhắn của mình
+    const avatar = messageClone.querySelector('.message-avatar');
+    messageItem.removeChild(avatar);
+    
+    // Cập nhật nội dung tin nhắn
+    messageClone.querySelector('.message-text').textContent = message.noiDung;
+    messageClone.querySelector('.message-time').textContent = formatTime(message.thoiGian);
+    
+    // Thêm vào danh sách tin nhắn
+    document.getElementById('chatMessages').appendChild(messageClone);
     
     // Cuộn xuống tin nhắn cuối cùng
     const chatMessages = document.getElementById('chatMessages');
