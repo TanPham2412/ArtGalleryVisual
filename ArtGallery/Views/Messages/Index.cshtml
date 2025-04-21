@@ -1,0 +1,45 @@
+@{
+    ViewData["Title"] = "Tin nhắn";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link href="~/css/message.css" rel="stylesheet" />
+
+<div class="message-container">
+    <div class="message-sidebar">
+        <div class="sidebar-header">
+            <h3>Đoạn chat</h3>
+            <div class="sidebar-actions">
+                <button type="button" class="btn-icon">
+                    <i class="fas fa-ellipsis-h"></i>
+                </button>
+                <button type="button" class="btn-icon">
+                    <i class="fas fa-edit"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div class="sidebar-search">
+            <div class="search-input">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Tìm kiếm trên PiaoYue" id="searchConversation">
+            </div>
+        </div>
+        
+        <div class="conversation-list" id="conversationList">
+            <!-- Đây là nơi hiển thị danh sách cuộc trò chuyện -->
+        </div>
+    </div>
+    
+    <div class="message-content" id="messageContent">
+        <div class="welcome-screen">
+            <div class="welcome-icon">
+                <i class="far fa-comment-dots"></i>
+            </div>
+            <h2>Tin nhắn của bạn</h2>
+            <p>Gửi ảnh, tin nhắn và nhiều nội dung khác cho bạn bè hoặc nhóm.</p>
+        </div>
+    </div>
+</div>
+
+<script src="~/js/message.js"></script> 
