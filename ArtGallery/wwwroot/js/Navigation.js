@@ -404,6 +404,12 @@
     $(document).ready(function() {
         checkNewMessages();
     });
+
+    // Thêm vào cuối document.ready
+    $('.view-all-messages').on('click', function(e) {
+        e.preventDefault();
+        window.location.href = '/Messages/Index';
+    });
 });
 
 // Giữ hàm toggleFollow ở bên ngoài document.ready

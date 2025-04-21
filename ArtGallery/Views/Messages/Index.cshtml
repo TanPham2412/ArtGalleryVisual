@@ -1,0 +1,234 @@
+@{
+    ViewData["Title"] = "Tin nhắn";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@Html.AntiForgeryToken()
+
+<link href="~/css/message.css" rel="stylesheet" />
+
+<div class="message-container">
+    <div class="message-sidebar">
+        <div class="sidebar-header">
+            <h3>Đoạn chat</h3>
+        </div>
+        
+        <div class="sidebar-search">
+            <div class="search-input">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Tìm kiếm trên PiaoYue" id="searchConversation">
+            </div>
+        </div>
+        
+        <div class="conversation-list" id="conversationList">
+            <!-- Đây là nơi hiển thị danh sách cuộc trò chuyện -->
+        </div>
+    </div>
+    
+    <div class="message-content" id="messageContent">
+        <div class="welcome-screen">
+            <div class="welcome-icon">
+                <i class="far fa-comment-dots"></i>
+            </div>
+            <h2>Tin nhắn của bạn</h2>
+            <p>Gửi ảnh, tin nhắn và nhiều nội dung khác cho bạn bè hoặc nhóm.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Form tạo tin nhắn mới -->
+<div class="new-message-modal" id="newMessageModal">
+    <div class="new-message-container">
+        <div class="new-message-header">
+            <h3>Tin nhắn mới</h3>
+            <button type="button" class="close-btn" id="closeNewMessageBtn">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Template cho phần header chat -->
+<template id="chatHeaderTemplate">
+    <div class="chat-header">
+        <div class="chat-user-info">
+            <div class="chat-avatar">
+                <img src="" alt="" onerror="this.src='/images/authors/default/default-image.png'">
+                <span class="status-indicator"></span>
+            </div>
+            <div class="chat-user">
+                <div class="chat-username"></div>
+            </div>
+        </div>
+        <div class="chat-actions">
+            <button type="button" class="btn-icon">
+                <i class="fas fa-info-circle"></i>
+            </button>
+        </div>
+    </div>
+</template>
+
+<!-- Template cho tin nhắn -->
+<template id="messageTemplate">
+    <div class="chat-message-item">
+        <div class="message-avatar">
+            <img src="" alt="" onerror="this.src='/images/authors/default/default-image.png'">
+        </div>
+        <div class="message-content">
+            <div class="message-bubble">
+                <div class="message-text"></div>
+            </div>
+            <div class="message-time"></div>
+        </div>
+    </div>
+</template>
+
+<!-- Template cho khi không có tin nhắn -->
+<template id="emptyConversationTemplate">
+    <div class="empty-conversation">
+        <div class="empty-icon">
+            <i class="far fa-paper-plane"></i>
+        </div>
+        <div class="empty-text">Hãy bắt đầu cuộc trò chuyện</div>
+    </div>
+</template>
+
+<!-- Template cho phần nhập tin nhắn -->
+<template id="chatInputTemplate">
+    <div class="chat-input">
+        <div class="input-actions">
+            <button type="button" class="btn-icon">
+                <i class="far fa-image"></i>
+            </button>
+            <button type="button" class="btn-icon">
+                <i class="far fa-smile"></i>
+            </button>
+        </div>
+        <div class="message-input-wrapper">
+            <input type="text" id="messageInput" placeholder="Aa" autocomplete="off">
+        </div>
+        <button type="button" class="send-btn" id="sendMessageBtn">
+            <i class="fas fa-paper-plane"></i>
+        </button>
+    </div>
+</template>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    // Đơn giản hóa phần tìm kiếm người dùng
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('recipientInput').addEventListener('input', function() {
+            var query = this.value.trim();
+            
+            if (query.length > 0) {
+                document.getElementById('recipientResults').innerHTML = '<div class="text-center p-3">Đang tìm kiếm...</div>';
+                
+                $.ajax({
+                    url: '/Messages/SearchUsers',
+                    type: 'GET',
+                    data: { query: query },
+                    success: function(data) {
+                        var resultsHtml = '';
+                        
+                        if (!data.users || data.users.length === 0) {
+                            resultsHtml = '<div class="text-center p-3">Không tìm thấy người dùng nào</div>';
+                        } else {
+                            for (var i = 0; i < data.users.length; i++) {
+                                var user = data.users[i];
+                                resultsHtml += '<div class="recipient-item" data-user-id="' + user.userId + '">' +
+                                    '<div class="recipient-avatar">' +
+                                    '<img src="' + user.avatar + '" alt="" onerror="this.src=\'/images/authors/default/default-image.png\'">' +
+                                    '</div>' +
+                                    '<div class="recipient-info">' +
+                                    '<div class="recipient-name">' + user.userName + '</div>' +
+                                    '<div class="recipient-username">' + (user.username || user.email || '') + '</div>' +
+                                    '</div>' +
+                                    '</div>';
+                            }
+                        }
+                        
+                        $('#recipientResults').html(resultsHtml);
+                        
+                        $('.recipient-item').click(function() {
+                            var userId = $(this).data('user-id');
+                            $('#newMessageModal').hide();
+                            $('#recipientInput').val('');
+                            openConversation(userId);
+                        });
+                    },
+                    error: function() {
+                        $('#recipientResults').html('<div class="text-center p-3">Lỗi tìm kiếm người dùng</div>');
+                    }
+                });
+            } else {
+                $('#recipientResults').html('<div class="text-center p-3">Hãy nhập tên người dùng để tìm kiếm</div>');
+            }
+        });
+        
+        // Xử lý sự kiện khi nhấp vào nút bút chì
+        document.getElementById('newMessageBtn').addEventListener('click', function() {
+            document.getElementById('newMessageModal').style.display = 'flex';
+            document.getElementById('recipientInput').focus();
+        });
+        
+        // Đóng form tin nhắn mới khi click vào nút đóng
+        document.getElementById('closeNewMessageBtn').addEventListener('click', function() {
+            document.getElementById('newMessageModal').style.display = 'none';
+            document.getElementById('recipientInput').value = '';
+            document.getElementById('recipientResults').innerHTML = 
+                '<div class="text-center p-3">Hãy nhập tên người dùng để tìm kiếm</div>';
+        });
+        
+        // Đóng form khi click ra ngoài
+        document.getElementById('newMessageModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.style.display = 'none';
+                document.getElementById('recipientInput').value = '';
+                document.getElementById('recipientResults').innerHTML = 
+                    '<div class="text-center p-3">Hãy nhập tên người dùng để tìm kiếm</div>';
+            }
+        });
+    });
+</script>
+
+<script src="~/js/message.js"></script>
+
+<!-- Thêm CSS inline để ẩn footer và thanh lăn -->
+<style>
+    .footer, footer, .site-footer, .footer-section, .footer-container {
+        display: none !important;
+    }
+    
+    ::-webkit-scrollbar {
+        width: 0;
+        display: none;
+    }
+    
+    .chat-messages, .conversation-list, body {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+    
+    /* Đảm bảo container tin nhắn chiếm đủ không gian */
+    .message-container {
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+    
+    body {
+        overflow: hidden;
+    }
+    
+    /* Điều chỉnh chiều cao của layout */
+    #layout-wrapper, .main-content {
+        margin-bottom: 0 !important;
+        padding-bottom: 0 !important;
+    }
+</style>
+
+<script>
+    // Đảm bảo footer không hiển thị khi trang tin nhắn được tải
+    $(document).ready(function() {
+        $('footer, .footer, .site-footer').remove();
+    });
+</script> 
