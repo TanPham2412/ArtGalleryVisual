@@ -11,14 +11,6 @@
     <div class="message-sidebar">
         <div class="sidebar-header">
             <h3>Đoạn chat</h3>
-            <div class="sidebar-actions">
-                <button type="button" class="btn-icon" id="moreOptionsBtn">
-                    <i class="fas fa-ellipsis-h"></i>
-                </button>
-                <button type="button" class="btn-icon" id="newMessageBtn">
-                    <i class="fas fa-edit"></i>
-                </button>
-            </div>
         </div>
         
         <div class="sidebar-search">
@@ -52,18 +44,6 @@
             <button type="button" class="close-btn" id="closeNewMessageBtn">
                 <i class="fas fa-times"></i>
             </button>
-        </div>
-        <div class="new-message-body">
-            <div class="recipient-input-container">
-                <label>Đến:</label>
-                <div class="recipient-input-wrapper">
-                    <input type="text" id="recipientInput" placeholder="Tìm kiếm người dùng..." autocomplete="off">
-                </div>
-            </div>
-            <div class="recipient-results" id="recipientResults">
-                <!-- Kết quả tìm kiếm sẽ hiển thị ở đây -->
-                <div class="text-center p-3">Hãy nhập tên người dùng để tìm kiếm</div>
-            </div>
         </div>
     </div>
 </div>
@@ -211,4 +191,44 @@
     });
 </script>
 
-<script src="~/js/message.js"></script> 
+<script src="~/js/message.js"></script>
+
+<!-- Thêm CSS inline để ẩn footer và thanh lăn -->
+<style>
+    .footer, footer, .site-footer, .footer-section, .footer-container {
+        display: none !important;
+    }
+    
+    ::-webkit-scrollbar {
+        width: 0;
+        display: none;
+    }
+    
+    .chat-messages, .conversation-list, body {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+    
+    /* Đảm bảo container tin nhắn chiếm đủ không gian */
+    .message-container {
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+    
+    body {
+        overflow: hidden;
+    }
+    
+    /* Điều chỉnh chiều cao của layout */
+    #layout-wrapper, .main-content {
+        margin-bottom: 0 !important;
+        padding-bottom: 0 !important;
+    }
+</style>
+
+<script>
+    // Đảm bảo footer không hiển thị khi trang tin nhắn được tải
+    $(document).ready(function() {
+        $('footer, .footer, .site-footer').remove();
+    });
+</script> 

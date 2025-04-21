@@ -2,6 +2,9 @@
 body {
     background-color: #1a1a1a;
     color: #e0e0e0;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
 }
 
 .message-container {
@@ -12,6 +15,7 @@ body {
     border-radius: 8px;
     overflow: hidden;
     margin-top: 56px;
+    margin-bottom: 0;
 }
 
 /* Sidebar bên trái */
@@ -99,6 +103,8 @@ body {
     overflow-y: auto;
     padding: 8px 0;
     border-top: 1px solid #333;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
 }
 
 .conversation-item {
@@ -245,6 +251,7 @@ body {
     flex-direction: column;
     height: 100%;
     width: 100%;
+    overflow: hidden;
 }
 
 .chat-header {
@@ -329,8 +336,10 @@ body {
     overflow-y: auto;
     padding: 8px;
     background-color: #131313;
-    height: calc(100vh - 250px);
+    height: calc(100vh - 175px);
     border: none !important;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
 }
 
 .message-date-separator {
@@ -432,9 +441,10 @@ body {
 .chat-input {
     display: flex;
     align-items: center;
-    padding: 10px 15px;
+    padding: 2px 10px;
     background-color: #1a1a1a;
     border-top: 1px solid #333;
+    margin-bottom: 0;
 }
 
 .input-actions {
@@ -447,7 +457,7 @@ body {
     flex: 1;
     background-color: #2a2a2a;
     border-radius: 20px;
-    padding: 5px 15px;
+    padding: 2px 10px;
 }
 
 #messageInput {
@@ -754,4 +764,47 @@ body {
 /* Điều chỉnh định dạng tin nhắn */
 .chat-message-item + .chat-message-item {
     margin-top: 3px;
+}
+
+/* Ẩn thanh lăn trong các phần scroll */
+::-webkit-scrollbar {
+    width: 0;  /* Ẩn thanh lăn cho Chrome, Safari và Opera */
+    display: none;  /* Ẩn thanh lăn cho Firefox */
+}
+
+.chat-messages, .conversation-list, body {
+    -ms-overflow-style: none;  /* Ẩn thanh lăn cho IE và Edge */
+    scrollbar-width: none;  /* Ẩn thanh lăn cho Firefox */
+}
+
+/* Giảm khoảng cách phần footer */
+.message-container {
+    margin-bottom: 0;
+    height: calc(100vh - 56px);  /* Chiếm hết không gian có sẵn */
+}
+
+/* Ẩn footer bằng CSS */
+.site-footer, 
+footer,
+.footer-section,
+.footer-container {
+    display: none !important;
+}
+
+/* Giảm khoảng cách giữa các phần */
+.chat-input {
+    padding: 2px 10px;  /* Giảm padding */
+}
+
+.message-input-wrapper {
+    padding: 2px 10px;  /* Giảm padding */
+}
+
+#layout-wrapper {
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+.main-content {
+    padding-bottom: 0 !important;
 }
