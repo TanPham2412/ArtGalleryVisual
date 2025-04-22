@@ -481,3 +481,26 @@ document.addEventListener('DOMContentLoaded', function() {
         };
     }
 });
+
+// Thêm hàm để mở cuộc trò chuyện với người dùng
+function openConversationWithUser(userId) {
+    // Ngăn chặn event mặc định
+    event.preventDefault();
+    
+    // Chuyển hướng đến trang tin nhắn với ID người dùng
+    window.location.href = '/Messages/Index/' + userId;
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Code hiện tại...
+    
+    // Thêm xử lý cho nút nhắn tin trong View All Info Modal
+    const messageButtonInModal = document.querySelector('.user-info-modal .message-button-primary');
+    if (messageButtonInModal) {
+        messageButtonInModal.addEventListener('click', function(e) {
+            e.preventDefault();
+            const userId = this.getAttribute('data-user-id');
+            openConversationWithUser(userId);
+        });
+    }
+});

@@ -152,7 +152,7 @@ function openConversation(userId) {
     
     // API đánh dấu tin nhắn đã đọc
     $.ajax({
-        url: '/Messages/MarkAsRead',
+        url: '/Messages/MarkConversationAsRead',
         type: 'POST',
         data: { userId: userId },
         headers: {
@@ -160,13 +160,10 @@ function openConversation(userId) {
         },
         success: function(response) {
             console.log("Đánh dấu tin nhắn đã đọc:", response);
-            
-            // Xóa badge trên UI ngay lập tức
-            $(`.conversation-item[data-user-id="${userId}"] .unread-badge`).remove();
         }
     });
     
-    // Tiếp tục xử lý hiển thị cuộc trò chuyện như trước
+    // Lấy thông tin người dùng và hiển thị cuộc trò chuyện
     $.ajax({
         url: '/Messages/GetUserInfo',
         type: 'GET',

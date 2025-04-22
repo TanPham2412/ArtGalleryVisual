@@ -5,7 +5,7 @@
     var mediaJson = Json.Serialize(Model.Media.Select(m => new { loaiMedia = m.LoaiMedia, duongDan = m.DuongDan }));
 }
 
-<link rel="stylesheet" href="~/css/profile.css?v=2">
+<link rel="stylesheet" href="~/css/profile.css?v=3">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
 <div class="profile-container">
@@ -49,6 +49,10 @@
                         <span class="follow-text">Theo dõi</span>
                         <span class="following-text">Đang theo dõi</span>
                     </button>
+                    
+                    <a href="/Messages/Index/@Model.Id" class="message-button-primary">
+                        <i class="fas fa-envelope"></i> Nhắn tin
+                    </a>
                 }
             }
         </div>
@@ -369,6 +373,10 @@
                         <span class="follow-text">Theo dõi</span>
                         <span class="following-text">Đang theo dõi</span>
                     </button>
+                    
+                    <a href="/Messages/Index/@Model.Id" class="message-button-primary">
+                        <i class="fas fa-envelope"></i> Nhắn tin
+                    </a>
                 </div>
             }
             
