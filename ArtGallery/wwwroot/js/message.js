@@ -1,5 +1,7 @@
-﻿$(document).ready(function() {
-    console.log("Document ready");
+﻿console.log("message.js được tải");
+
+$(document).ready(function() {
+    console.log("Document ready trong message.js");
     
     // Tab chuyển đổi giữa hộp thư và cộng đồng
     $('.tab-button').on('click', function() {
@@ -71,6 +73,31 @@
         const userId = $(this).data('user-id');
         openConversation(userId);
     });
+    
+    // THÊM MỚI: Kiểm tra và mở cuộc trò chuyện từ URL
+    function checkURLForConversation() {
+        console.log("Đang kiểm tra URL cho cuộc trò chuyện");
+        const url = window.location.pathname;
+        console.log("URL hiện tại:", url);
+        const urlParts = url.split('/');
+        console.log("Các phần của URL:", urlParts);
+        
+        // Kiểm tra xem URL có chứa ID người dùng không
+        if (urlParts.length > 3 && urlParts[1].toLowerCase() === "messages" && urlParts[2].toLowerCase() === "index") {
+            const userId = urlParts[3];
+            console.log("ID người dùng từ URL:", userId);
+            // Nếu có ID người dùng, tự động mở cuộc trò chuyện
+            if (userId) {
+                console.log("Đang mở cuộc trò chuyện với người dùng:", userId);
+                setTimeout(function() {
+                    openConversation(userId);
+                }, 500); // Thêm timeout để đảm bảo DOM đã được tải
+            }
+        }
+    }
+    
+    // Gọi hàm kiểm tra URL khi trang đã tải xong
+    checkURLForConversation();
 });
 
 // Load danh sách cuộc trò chuyện
@@ -121,29 +148,36 @@ function renderConversations(conversations) {
 
 // Mở cuộc trò chuyện
 function openConversation(userId) {
+    console.log("Đang mở cuộc trò chuyện với userId:", userId);
+    
     // Lấy thông tin người dùng
     $.ajax({
         url: '/Messages/GetUserInfo',
         type: 'GET',
         data: { id: userId },
         success: function(userData) {
+            console.log("Lấy thông tin người dùng thành công:", userData);
+            
             // Lấy tin nhắn trong cuộc trò chuyện
             $.ajax({
                 url: '/Messages/GetConversation',
                 type: 'GET',
                 data: { userId: userId },
                 success: function(messages) {
+                    console.log("Lấy tin nhắn thành công:", messages);
                     renderConversation(userData, messages);
                     // Đánh dấu cuộc trò chuyện hiện tại
                     $('.conversation-item').removeClass('active');
                     $(`.conversation-item[data-user-id="${userId}"]`).addClass('active');
                 },
-                error: function() {
+                error: function(err) {
+                    console.error("Lỗi khi lấy tin nhắn:", err);
                     $('#messageContent').html('<div class="error-message">Không thể tải tin nhắn</div>');
                 }
             });
         },
-        error: function() {
+        error: function(err) {
+            console.error("Lỗi khi lấy thông tin người dùng:", err);
             $('#messageContent').html('<div class="error-message">Không thể tải thông tin người dùng</div>');
         }
     });

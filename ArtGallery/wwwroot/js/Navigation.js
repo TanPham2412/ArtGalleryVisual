@@ -341,7 +341,7 @@
         data.messages.forEach(function(message) {
             const isUnread = !message.daDoc;
             html += `
-            <a href="/Messages/Conversation/${message.maNguoiGui}" class="message-item ${isUnread ? 'unread' : ''}">
+            <a href="/Messages/Index/${message.maNguoiGui}" class="message-item ${isUnread ? 'unread' : ''}">
                 <div class="message-avatar">
                     <img src="${message.avatarNguoiGui || '/images/authors/default/default-image.png'}" alt="Avatar">
                 </div>
