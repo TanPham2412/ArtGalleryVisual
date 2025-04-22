@@ -372,5 +372,66 @@ namespace ArtGallery.Controllers
                 return Json(new { users = new List<object>() });
             }
         }
+
+        // Thêm API mới để đánh dấu tất cả tin nhắn từ một người dùng là đã đọc
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> MarkAsRead(string userId)
+        {
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            
+            // Tìm tất cả tin nhắn chưa đọc từ người dùng này
+            var unreadMessages = await _context.TinNhans
+                .Where(m => m.MaNguoiGui == userId && 
+                          m.MaNguoiNhan == currentUserId && 
+                          !m.DaDoc)
+                .ToListAsync();
+            
+            // Đánh dấu là đã đọc
+            foreach (var message in unreadMessages)
+            {
+                message.DaDoc = true;
+            }
+            
+            // Lưu thay đổi
+            await _context.SaveChangesAsync();
+            
+            return Json(new { success = true, count = unreadMessages.Count });
+        }
+
+        // Thêm API chuyên dụng để đánh dấu toàn bộ tin nhắn trong cuộc trò chuyện là đã đọc
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> MarkConversationAsRead(string userId)
+        {
+            if (string.IsNullOrEmpty(userId))
+            {
+                return BadRequest("UserId không hợp lệ");
+            }
+            
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            
+            // Tìm và đánh dấu tất cả tin nhắn chưa đọc từ người này
+            var unreadMessages = await _context.TinNhans
+                .Where(m => m.MaNguoiGui == userId && 
+                            m.MaNguoiNhan == currentUserId && 
+                            m.DaDoc != true)
+                .ToListAsync();
+            
+            if (unreadMessages.Any())
+            {
+                foreach (var message in unreadMessages)
+                {
+                    message.DaDoc = true;
+                }
+                
+                await _context.SaveChangesAsync();
+            }
+            
+            return Json(new { 
+                success = true, 
+                markedCount = unreadMessages.Count 
+            });
+        }
     }
 }

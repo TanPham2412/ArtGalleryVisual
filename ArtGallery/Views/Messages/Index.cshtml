@@ -265,4 +265,35 @@
             }
         }
     });
+</script>
+
+<script>
+    $(document).ready(function() {
+        // Đánh dấu đã đọc tất cả tin nhắn khi click vào conversation-item
+        $(document).on('click', '.conversation-item', function() {
+            const userId = $(this).data('user-id');
+            
+            // Xóa badge ngay lập tức trên UI
+            $(this).find('.unread-badge').remove();
+            
+            // Gọi API đánh dấu đã đọc
+            $.ajax({
+                url: '/Messages/MarkConversationAsRead',
+                type: 'POST',
+                data: { userId: userId },
+                headers: {
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function(response) {
+                    console.log("Đánh dấu đã đọc thành công", response);
+                    
+                    // Cập nhật UI một lần nữa để đảm bảo
+                    loadConversations();
+                },
+                error: function(err) {
+                    console.error("Lỗi khi đánh dấu đã đọc:", err);
+                }
+            });
+        });
+    });
 </script> 

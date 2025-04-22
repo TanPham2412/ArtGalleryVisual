@@ -150,34 +150,46 @@ function renderConversations(conversations) {
 function openConversation(userId) {
     console.log("Đang mở cuộc trò chuyện với userId:", userId);
     
-    // Lấy thông tin người dùng
+    // API đánh dấu tin nhắn đã đọc
+    $.ajax({
+        url: '/Messages/MarkAsRead',
+        type: 'POST',
+        data: { userId: userId },
+        headers: {
+            'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+        },
+        success: function(response) {
+            console.log("Đánh dấu tin nhắn đã đọc:", response);
+            
+            // Xóa badge trên UI ngay lập tức
+            $(`.conversation-item[data-user-id="${userId}"] .unread-badge`).remove();
+        }
+    });
+    
+    // Tiếp tục xử lý hiển thị cuộc trò chuyện như trước
     $.ajax({
         url: '/Messages/GetUserInfo',
         type: 'GET',
         data: { id: userId },
         success: function(userData) {
-            console.log("Lấy thông tin người dùng thành công:", userData);
-            
-            // Lấy tin nhắn trong cuộc trò chuyện
             $.ajax({
                 url: '/Messages/GetConversation',
                 type: 'GET',
                 data: { userId: userId },
                 success: function(messages) {
-                    console.log("Lấy tin nhắn thành công:", messages);
                     renderConversation(userData, messages);
-                    // Đánh dấu cuộc trò chuyện hiện tại
                     $('.conversation-item').removeClass('active');
                     $(`.conversation-item[data-user-id="${userId}"]`).addClass('active');
+                    
+                    // Cập nhật lại danh sách cuộc trò chuyện
+                    loadConversations();
                 },
                 error: function(err) {
-                    console.error("Lỗi khi lấy tin nhắn:", err);
                     $('#messageContent').html('<div class="error-message">Không thể tải tin nhắn</div>');
                 }
             });
         },
         error: function(err) {
-            console.error("Lỗi khi lấy thông tin người dùng:", err);
             $('#messageContent').html('<div class="error-message">Không thể tải thông tin người dùng</div>');
         }
     });
