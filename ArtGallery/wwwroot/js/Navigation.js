@@ -277,17 +277,41 @@
     }
     
     // Đánh dấu thông báo đã đọc khi click vào thông báo
-    $('.notification-item').on('click', function() {
+    $('.notification-item').on('click', function(e) {
         const notificationId = $(this).data('id');
+        const notificationType = $(this).find('.notification-icon').attr('class')?.split(' ')[1];
         
-        $.ajax({
-            url: '/Notification/MarkAsRead',
-            type: 'POST',
-            data: { id: notificationId },
-            headers: {
-                'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
-            }
-        });
+        // Ngăn chặn hành vi mặc định cho thông báo đơn hàng
+        if (notificationType === 'order' || notificationType === 'cart') {
+            e.preventDefault();
+            
+            // Đánh dấu là đã đọc
+            $.ajax({
+                url: '/Notification/MarkAsRead',
+                type: 'POST',
+                data: { id: notificationId },
+                headers: {
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function() {
+                    // Chuyển hướng đến trang lịch sử đơn hàng với tab bán hàng
+                    window.location.href = '/Order/History';
+                    
+                    // Lưu active tab là "selling" vào localStorage
+                    localStorage.setItem('activeOrderTab', 'selling-tab');
+                }
+            });
+        } else {
+            // Hành vi thông thường cho các loại thông báo khác
+            $.ajax({
+                url: '/Notification/MarkAsRead',
+                type: 'POST',
+                data: { id: notificationId },
+                headers: {
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                }
+            });
+        }
         
         $(this).removeClass('unread');
         $(this).find('.notification-status').remove();
