@@ -143,22 +143,20 @@ namespace ArtGallery.Controllers
                         await _context.SaveChangesAsync();
                         
                         // Gửi thông báo cho người bán
-                        if (trangThai == "Đã xác nhận" || trangThai == "Đã hoàn thành")
-                        {
-                            var buyer = await _userManager.FindByIdAsync(userId);
-                            var sellerId = artwork.MaNguoiDung;
-                            
-                            // Tạo thông báo cho người bán
-                            await _notificationRepository.CreateNotification(
-                                receiverId: sellerId,
-                                senderId: userId,
-                                title: "Đơn hàng mới",
-                                content: $"{buyer.TenNguoiDung} đã đặt mua tác phẩm {artwork.TieuDe} với số lượng {soLuong}",
-                                url: "/Order/History",
-                                notificationType: "order",
-                                imageUrl: artwork.DuongDanAnh
-                            );
-                        }
+                        // Đối với đơn hàng mới (Đã đặt hàng), cần thông báo để người bán xác nhận
+                        var buyer = await _userManager.FindByIdAsync(userId);
+                        var sellerId = artwork.MaNguoiDung;
+                        
+                        // Tạo thông báo cho người bán
+                        await _notificationRepository.CreateNotification(
+                            receiverId: sellerId,
+                            senderId: userId,
+                            title: "Đơn hàng mới",
+                            content: $"{buyer.TenNguoiDung} đã đặt mua tác phẩm {artwork.TieuDe} với số lượng {soLuong}",
+                            url: "/Order/History",
+                            notificationType: "order",
+                            imageUrl: artwork.DuongDanAnh
+                        );
                         
                         return Json(new { success = true });
                     }
@@ -175,7 +173,7 @@ namespace ArtGallery.Controllers
                         SoLuong = soLuong,
                         SoTien = tongTien,
                         NgayMua = DateTime.Now,
-                        TrangThai = trangThai,
+                        TrangThai = trangThai, // Trạng thái sẽ là "Đã đặt hàng"
                         PhuongThucThanhToan = phuongThucThanhToan
                     };
                     
@@ -192,22 +190,19 @@ namespace ArtGallery.Controllers
                     await _context.SaveChangesAsync();
                     
                     // Gửi thông báo cho người bán khi đặt hàng mới
-                    if (trangThai == "Đã xác nhận" || trangThai == "Đã hoàn thành")
-                    {
-                        var buyer = await _userManager.FindByIdAsync(userId);
-                        var sellerId = artwork.MaNguoiDung;
-                        
-                        // Tạo thông báo cho người bán
-                        await _notificationRepository.CreateNotification(
-                            receiverId: sellerId,
-                            senderId: userId,
-                            title: "Đơn hàng mới",
-                            content: $"{buyer.TenNguoiDung} đã đặt mua tác phẩm {artwork.TieuDe} với số lượng {soLuong}",
-                            url: "/Order/History",
-                            notificationType: "order",
-                            imageUrl: artwork.DuongDanAnh
-                        );
-                    }
+                    var buyer = await _userManager.FindByIdAsync(userId);
+                    var sellerId = artwork.MaNguoiDung;
+                    
+                    // Tạo thông báo cho người bán
+                    await _notificationRepository.CreateNotification(
+                        receiverId: sellerId,
+                        senderId: userId,
+                        title: "Đơn hàng mới",
+                        content: $"{buyer.TenNguoiDung} đã đặt mua tác phẩm {artwork.TieuDe} với số lượng {soLuong}",
+                        url: "/Order/History",
+                        notificationType: "order",
+                        imageUrl: artwork.DuongDanAnh
+                    );
                     
                     return Json(new { success = true });
                 }
