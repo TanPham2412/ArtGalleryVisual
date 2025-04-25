@@ -396,6 +396,11 @@ namespace ArtGallery.Controllers
                 {
                     hasPermission = true;
                 }
+                // Thêm điều kiện cho người mua xác nhận đã nhận hàng
+                else if (order.MaNguoiMua == userId && status == "Đã hoàn thành" && order.TrangThai == "Đã xác nhận")
+                {
+                    hasPermission = true;
+                }
 
                 if (!hasPermission)
                 {
