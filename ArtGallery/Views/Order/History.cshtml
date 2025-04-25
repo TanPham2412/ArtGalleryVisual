@@ -15,9 +15,12 @@
                                           m.MaTranhNavigation.MaNguoiDung == currentUserId && 
                                           m.MaNguoiMua != currentUserId).ToList();
     
-    // Lấy đơn hàng đã hoàn thành của người dùng hiện tại
+    // Lấy đơn hàng đã hoàn thành, đã đặt hàng hoặc đã hủy của người dùng hiện tại
     var completedOrders = Model.Where(m => m.MaNguoiMua == currentUserId && 
-                                          (m.TrangThai == "Đã xác nhận" || m.TrangThai == "Đã hoàn thành")).ToList();
+                                          (m.TrangThai == "Đã xác nhận" || 
+                                           m.TrangThai == "Đã hoàn thành" || 
+                                           m.TrangThai == "Đã đặt hàng" ||
+                                           m.TrangThai == "Đã hủy")).ToList();
 }
 
 <link rel="stylesheet" href="~/css/order.css?v=2">
@@ -267,10 +270,22 @@
                                                 <i class="fas fa-check-circle me-1"></i>Đã hoàn thành
                                             </span>
                                         }
-                                                else if (item.TrangThai == "Đã xác nhận")
-                                                {
-                                                    <span class="badge bg-primary">
-                                                        <i class="fas fa-check me-1"></i>Đã xác nhận
+                                        else if (item.TrangThai == "Đã xác nhận")
+                                        {
+                                            <span class="badge bg-primary">
+                                                <i class="fas fa-check me-1"></i>Đã xác nhận
+                                            </span>
+                                        }
+                                        else if (item.TrangThai == "Đã đặt hàng")
+                                        {
+                                            <span class="badge bg-info">
+                                                <i class="fas fa-shopping-cart me-1"></i>Đã đặt hàng
+                                            </span>
+                                        }
+                                        else if (item.TrangThai == "Đã hủy")
+                                        {
+                                            <span class="badge bg-danger">
+                                                <i class="fas fa-times-circle me-1"></i>Đã hủy
                                             </span>
                                         }
                                     </td>
