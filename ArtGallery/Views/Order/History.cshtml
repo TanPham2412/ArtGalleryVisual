@@ -165,6 +165,12 @@
             else
             {
                 <div class="card shadow-sm">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Đơn bán hàng</h5>
+                        <button id="deleteAllSellerHistory" class="btn btn-danger btn-sm">
+                            <i class="fas fa-trash me-1"></i>Xóa tất cả lịch sử
+                        </button>
+                    </div>
                     <div class="card-body">
                         <div class="table-responsive">
                             <table class="table">
@@ -262,6 +268,12 @@
     else
     {
         <div class="card shadow-sm">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Lịch sử đơn hàng</h5>
+                <button id="deleteAllHistory" class="btn btn-danger btn-sm">
+                    <i class="fas fa-trash me-1"></i>Xóa tất cả lịch sử
+                </button>
+            </div>
             <div class="card-body">
                 <div class="table-responsive">
                     <table class="table">
@@ -841,6 +853,98 @@
                     }
                 });
             }
+        });
+
+        // Xử lý nút xóa tất cả lịch sử đặt hàng
+        $("#deleteAllHistory").on("click", function() {
+            Swal.fire({
+                title: 'Xác nhận xóa tất cả?',
+                text: "Bạn muốn xóa lịch sử? Chỉ có những giao dịch đã hoàn thành hoặc đã hủy mới có thể xóa.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Xóa tất cả',
+                cancelButtonText: 'Hủy'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Gửi ajax request để xóa tất cả
+                    $.ajax({
+                        url: '/Order/DeleteAllHistory',
+                        type: 'POST',
+                        success: function(response) {
+                            if (response.success) {
+                                Swal.fire({
+                                    title: 'Thành công!',
+                                    text: `Đã xóa ${response.count} đơn hàng khỏi lịch sử`,
+                                    icon: 'success'
+                                }).then(() => {
+                                    location.reload();
+                                });
+                            } else {
+                                Swal.fire({
+                                    title: 'Thông báo!',
+                                    text: response.message,
+                                    icon: 'info'
+                                });
+                            }
+                        },
+                        error: function() {
+                            Swal.fire({
+                                title: 'Lỗi!',
+                                text: 'Có lỗi xảy ra, vui lòng thử lại sau.',
+                                icon: 'error'
+                            });
+                        }
+                    });
+                }
+            });
+        });
+
+        // Xử lý nút xóa tất cả lịch sử bán hàng
+        $("#deleteAllSellerHistory").on("click", function() {
+            Swal.fire({
+                title: 'Xác nhận xóa tất cả?',
+                text: "Bạn muốn xóa lịch sử? Chỉ có những giao dịch đã hoàn thành hoặc đã hủy mới có thể xóa.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Xóa tất cả',
+                cancelButtonText: 'Hủy'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Gửi ajax request để xóa tất cả
+                    $.ajax({
+                        url: '/Order/DeleteAllSellerHistory',
+                        type: 'POST',
+                        success: function(response) {
+                            if (response.success) {
+                                Swal.fire({
+                                    title: 'Thành công!',
+                                    text: `Đã xóa ${response.count} đơn hàng khỏi lịch sử bán hàng`,
+                                    icon: 'success'
+                                }).then(() => {
+                                    location.reload();
+                                });
+                            } else {
+                                Swal.fire({
+                                    title: 'Thông báo!',
+                                    text: response.message,
+                                    icon: 'info'
+                                });
+                            }
+                        },
+                        error: function() {
+                            Swal.fire({
+                                title: 'Lỗi!',
+                                text: 'Có lỗi xảy ra, vui lòng thử lại sau.',
+                                icon: 'error'
+                            });
+                        }
+                    });
+                }
+            });
         });
         });
 </script>

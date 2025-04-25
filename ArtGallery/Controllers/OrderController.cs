@@ -536,5 +536,79 @@ namespace ArtGallery.Controllers
                 return Json(new { success = false, message = "Lỗi: " + ex.Message });
             }
         }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteAllHistory()
+        {
+            try
+            {
+                var userId = _userManager.GetUserId(User);
+                
+                // Tìm tất cả đơn hàng đã hoàn thành hoặc đã hủy mà người dùng là người mua
+                var completedOrCancelledOrders = await _context.GiaoDiches
+                    .Where(g => g.MaNguoiMua == userId && 
+                          (g.TrangThai == "Đã hoàn thành" || g.TrangThai == "Đã hủy") &&
+                          (g.IsHiddenByBuyer == false || g.IsHiddenByBuyer == null))
+                    .ToListAsync();
+
+                if (!completedOrCancelledOrders.Any())
+                {
+                    return Json(new { success = false, message = "Không có đơn hàng nào để xóa" });
+                }
+
+                // Đánh dấu tất cả là đã ẩn
+                foreach (var order in completedOrCancelledOrders)
+                {
+                    order.IsHiddenByBuyer = true;
+                }
+
+                _context.GiaoDiches.UpdateRange(completedOrCancelledOrders);
+                await _context.SaveChangesAsync();
+
+                return Json(new { success = true, message = "Đã xóa tất cả lịch sử đơn hàng", count = completedOrCancelledOrders.Count });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Lỗi: " + ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteAllSellerHistory()
+        {
+            try
+            {
+                var userId = _userManager.GetUserId(User);
+                
+                // Tìm tất cả đơn hàng đã hoàn thành hoặc đã hủy mà người dùng là người bán
+                var completedOrCancelledOrders = await _context.GiaoDiches
+                    .Include(g => g.MaTranhNavigation)
+                    .Where(g => g.MaTranhNavigation.MaNguoiDung == userId &&
+                          g.MaNguoiMua != userId &&
+                          (g.TrangThai == "Đã hoàn thành" || g.TrangThai == "Đã hủy") &&
+                          (g.IsHiddenBySeller == false || g.IsHiddenBySeller == null))
+                    .ToListAsync();
+
+                if (!completedOrCancelledOrders.Any())
+                {
+                    return Json(new { success = false, message = "Không có đơn hàng nào để xóa" });
+                }
+
+                // Đánh dấu tất cả là đã ẩn
+                foreach (var order in completedOrCancelledOrders)
+                {
+                    order.IsHiddenBySeller = true;
+                }
+
+                _context.GiaoDiches.UpdateRange(completedOrCancelledOrders);
+                await _context.SaveChangesAsync();
+
+                return Json(new { success = true, message = "Đã xóa tất cả lịch sử bán hàng", count = completedOrCancelledOrders.Count });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Lỗi: " + ex.Message });
+            }
+        }
     }
 }
