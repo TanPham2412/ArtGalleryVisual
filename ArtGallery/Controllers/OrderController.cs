@@ -144,19 +144,19 @@ namespace ArtGallery.Controllers
                         
                         // Gửi thông báo cho người bán
                         // Đối với đơn hàng mới (Đã đặt hàng), cần thông báo để người bán xác nhận
-                        var buyer = await _userManager.FindByIdAsync(userId);
-                        var sellerId = artwork.MaNguoiDung;
-                        
-                        // Tạo thông báo cho người bán
-                        await _notificationRepository.CreateNotification(
-                            receiverId: sellerId,
-                            senderId: userId,
-                            title: "Đơn hàng mới",
-                            content: $"{buyer.TenNguoiDung} đã đặt mua tác phẩm {artwork.TieuDe} với số lượng {soLuong}",
-                            url: "/Order/History",
-                            notificationType: "order",
-                            imageUrl: artwork.DuongDanAnh
-                        );
+                            var buyer = await _userManager.FindByIdAsync(userId);
+                            var sellerId = artwork.MaNguoiDung;
+                            
+                            // Tạo thông báo cho người bán
+                            await _notificationRepository.CreateNotification(
+                                receiverId: sellerId,
+                                senderId: userId,
+                                title: "Đơn hàng mới",
+                                content: $"{buyer.TenNguoiDung} đã đặt mua tác phẩm {artwork.TieuDe} với số lượng {soLuong}",
+                                url: "/Order/History",
+                                notificationType: "order",
+                                imageUrl: artwork.DuongDanAnh
+                            );
                         
                         return Json(new { success = true });
                     }
@@ -190,19 +190,19 @@ namespace ArtGallery.Controllers
                     await _context.SaveChangesAsync();
                     
                     // Gửi thông báo cho người bán khi đặt hàng mới
-                    var buyer = await _userManager.FindByIdAsync(userId);
-                    var sellerId = artwork.MaNguoiDung;
-                    
-                    // Tạo thông báo cho người bán
-                    await _notificationRepository.CreateNotification(
-                        receiverId: sellerId,
-                        senderId: userId,
-                        title: "Đơn hàng mới",
-                        content: $"{buyer.TenNguoiDung} đã đặt mua tác phẩm {artwork.TieuDe} với số lượng {soLuong}",
-                        url: "/Order/History",
-                        notificationType: "order",
-                        imageUrl: artwork.DuongDanAnh
-                    );
+                        var buyer = await _userManager.FindByIdAsync(userId);
+                        var sellerId = artwork.MaNguoiDung;
+                        
+                        // Tạo thông báo cho người bán
+                        await _notificationRepository.CreateNotification(
+                            receiverId: sellerId,
+                            senderId: userId,
+                            title: "Đơn hàng mới",
+                            content: $"{buyer.TenNguoiDung} đã đặt mua tác phẩm {artwork.TieuDe} với số lượng {soLuong}",
+                            url: "/Order/History",
+                            notificationType: "order",
+                            imageUrl: artwork.DuongDanAnh
+                        );
                     
                     return Json(new { success = true });
                 }
@@ -449,16 +449,16 @@ namespace ArtGallery.Controllers
                 else
                 {
                     // Các thông báo khác giữ nguyên như cũ
-                    var seller = await _userManager.FindByIdAsync(userId);
-                    await _notificationRepository.CreateNotification(
-                        receiverId: order.MaNguoiMua,
-                        senderId: userId,
-                        title: "Cập nhật đơn hàng",
-                        content: $"Đơn hàng #{order.MaGiaoDich} đã được cập nhật sang trạng thái {status}",
-                        url: "/Order/History",
-                        notificationType: "order",
-                        imageUrl: order.MaTranhNavigation.DuongDanAnh
-                    );
+                var seller = await _userManager.FindByIdAsync(userId);
+                await _notificationRepository.CreateNotification(
+                    receiverId: order.MaNguoiMua,
+                    senderId: userId,
+                    title: "Cập nhật đơn hàng",
+                    content: $"Đơn hàng #{order.MaGiaoDich} đã được cập nhật sang trạng thái {status}",
+                    url: "/Order/History",
+                    notificationType: "order",
+                    imageUrl: order.MaTranhNavigation.DuongDanAnh
+                );
                 }
 
                 return Json(new { success = true, message = $"Đã cập nhật trạng thái đơn hàng thành {status}" });

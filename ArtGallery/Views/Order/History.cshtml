@@ -946,6 +946,110 @@
                 }
             });
         });
+
+        // Thêm xử lý cho nút "Đã nhận hàng" 
+        $("#receiveOrder").on("click", function() {
+            if (selectedOrderStatus === "Đã xác nhận") {
+                Swal.fire({
+                    title: 'Xác nhận đã nhận hàng?',
+                    text: "Bạn xác nhận đã nhận được hàng phải không?",
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#28a745',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Xác nhận',
+                    cancelButtonText: 'Hủy'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Gửi ajax request để cập nhật trạng thái
+                        $.ajax({
+                            url: '/Order/UpdateOrderStatus',
+                            type: 'POST',
+                            data: {
+                                orderId: selectedOrderId,
+                                status: 'Đã hoàn thành'
+                            },
+                            success: function(response) {
+                                if (response.success) {
+                                    Swal.fire({
+                                        title: 'Thành công!',
+                                        text: 'Đã xác nhận nhận hàng thành công',
+                                        icon: 'success'
+                                    }).then(() => {
+                                        location.reload();
+                                    });
+                                } else {
+                                    Swal.fire({
+                                        title: 'Lỗi!',
+                                        text: response.message || 'Không thể cập nhật trạng thái đơn hàng',
+                                        icon: 'error'
+                                    });
+                                }
+                            },
+                            error: function(xhr) {
+                                Swal.fire({
+                                    title: 'Lỗi!',
+                                    text: 'Có lỗi xảy ra, vui lòng thử lại sau.',
+                                    icon: 'error'
+                                });
+                            }
+                        });
+                    }
+                });
+            }
         });
+
+        // Thêm xử lý cho nút "Đã giao hàng" trong menu ngữ cảnh của người bán
+        $("#deliverOrder").on("click", function() {
+            if (selectedOrderStatus === "Đã xác nhận") {
+                Swal.fire({
+                    title: 'Xác nhận đã giao hàng?',
+                    text: "Bạn xác nhận đã giao hàng đến người mua?",
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#28a745',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Xác nhận',
+                    cancelButtonText: 'Hủy'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Gửi ajax request để cập nhật trạng thái
+                        $.ajax({
+                            url: '/Order/UpdateOrderStatus',
+                            type: 'POST',
+                            data: {
+                                orderId: selectedOrderId,
+                                status: 'Đã hoàn thành'
+                            },
+                            success: function(response) {
+                                if (response.success) {
+                                    Swal.fire({
+                                        title: 'Thành công!',
+                                        text: 'Đã cập nhật trạng thái đơn hàng thành Đã hoàn thành',
+                                        icon: 'success'
+                                    }).then(() => {
+                                        location.reload();
+                                    });
+                                } else {
+                                    Swal.fire({
+                                        title: 'Lỗi!',
+                                        text: response.message || 'Không thể cập nhật trạng thái đơn hàng',
+                                        icon: 'error'
+                                    });
+                                }
+                            },
+                            error: function() {
+                                Swal.fire({
+                                    title: 'Lỗi!',
+                                    text: 'Có lỗi xảy ra, vui lòng thử lại sau.',
+                                    icon: 'error'
+                                });
+                            }
+                        });
+                    }
+                });
+            }
+        });
+    });
 </script>
 } 
