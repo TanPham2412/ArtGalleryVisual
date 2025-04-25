@@ -383,8 +383,21 @@ namespace ArtGallery.Controllers
                     return Json(new { success = false, message = "Không tìm thấy đơn hàng" });
                 }
 
-                // Kiểm tra quyền cập nhật (người bán là chủ tranh)
-                if (order.MaTranhNavigation.MaNguoiDung != userId)
+                // Kiểm tra quyền cập nhật (cho phép cả người bán và người mua hủy đơn)
+                bool hasPermission = false;
+                
+                // Người bán có quyền thực hiện mọi hành động
+                if (order.MaTranhNavigation.MaNguoiDung == userId)
+                {
+                    hasPermission = true;
+                }
+                // Người mua chỉ có quyền hủy đơn hàng của mình và đơn đó phải ở trạng thái "Đã đặt hàng"
+                else if (order.MaNguoiMua == userId && status == "Đã hủy" && order.TrangThai == "Đã đặt hàng")
+                {
+                    hasPermission = true;
+                }
+
+                if (!hasPermission)
                 {
                     return Json(new { success = false, message = "Bạn không có quyền cập nhật đơn hàng này" });
                 }
@@ -394,17 +407,52 @@ namespace ArtGallery.Controllers
                 _context.GiaoDiches.Update(order);
                 await _context.SaveChangesAsync();
 
-                // Gửi thông báo cho người mua
-                var seller = await _userManager.FindByIdAsync(userId);
-                await _notificationRepository.CreateNotification(
-                    receiverId: order.MaNguoiMua,
-                    senderId: userId,
-                    title: "Cập nhật đơn hàng",
-                    content: $"Đơn hàng #{order.MaGiaoDich} đã được cập nhật sang trạng thái {status}",
-                    url: "/Order/History",
-                    notificationType: "order",
-                    imageUrl: order.MaTranhNavigation.DuongDanAnh
-                );
+                // Gửi thông báo cho người liên quan
+                if (status == "Đã hủy")
+                {
+                    // Nếu người mua hủy, thông báo cho người bán
+                    if (order.MaNguoiMua == userId)
+                    {
+                        var buyer = await _userManager.FindByIdAsync(userId);
+                        await _notificationRepository.CreateNotification(
+                            receiverId: order.MaTranhNavigation.MaNguoiDung,
+                            senderId: userId,
+                            title: "Đơn hàng đã bị hủy",
+                            content: $"Người mua {buyer.TenNguoiDung} đã hủy đơn hàng #{order.MaGiaoDich}",
+                            url: "/Order/History",
+                            notificationType: "order",
+                            imageUrl: order.MaTranhNavigation.DuongDanAnh
+                        );
+                    }
+                    // Nếu người bán hủy, thông báo cho người mua
+                    else
+                    {
+                        var seller = await _userManager.FindByIdAsync(userId);
+                        await _notificationRepository.CreateNotification(
+                            receiverId: order.MaNguoiMua,
+                            senderId: userId,
+                            title: "Đơn hàng đã bị hủy",
+                            content: $"Người bán {seller.TenNguoiDung} đã hủy đơn hàng #{order.MaGiaoDich}",
+                            url: "/Order/History",
+                            notificationType: "order",
+                            imageUrl: order.MaTranhNavigation.DuongDanAnh
+                        );
+                    }
+                }
+                else
+                {
+                    // Các thông báo khác giữ nguyên như cũ
+                    var seller = await _userManager.FindByIdAsync(userId);
+                    await _notificationRepository.CreateNotification(
+                        receiverId: order.MaNguoiMua,
+                        senderId: userId,
+                        title: "Cập nhật đơn hàng",
+                        content: $"Đơn hàng #{order.MaGiaoDich} đã được cập nhật sang trạng thái {status}",
+                        url: "/Order/History",
+                        notificationType: "order",
+                        imageUrl: order.MaTranhNavigation.DuongDanAnh
+                    );
+                }
 
                 return Json(new { success = true, message = $"Đã cập nhật trạng thái đơn hàng thành {status}" });
             }
