@@ -373,8 +373,8 @@
             
             // Xử lý thanh toán QR thành công
             $("#btnSimulateQRPayment").click(function() {
-                // Lưu đơn hàng với trạng thái "Đã hoàn thành"
-                saveOrder("Đã hoàn thành", "chuyển khoản");
+                // Lưu đơn hàng với trạng thái "Chờ xác nhận"
+                saveOrder("Chờ xác nhận", "chuyển khoản");
             });
             
             // Xử lý thanh toán COD
@@ -391,7 +391,7 @@
                         maTranh: maTranh,
                         soLuong: soLuong,
                         tongTien: tongTien,
-                        trangThai: "Đã xác nhận",
+                        trangThai: "Chờ xác nhận",
                         phuongThucThanhToan: "thanh toán khi nhận hàng",
                         orderId: isInCart ? orderId : null
                     },

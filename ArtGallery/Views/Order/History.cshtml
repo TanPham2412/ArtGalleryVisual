@@ -177,11 +177,25 @@
                                                         <i class="fas fa-check me-1"></i>Đã xác nhận
                                                     </span>
                                                 }
+                                                else if (item.TrangThai == "Đã hủy")
+                                                {
+                                                    <span class="badge bg-danger">
+                                                        <i class="fas fa-times-circle me-1"></i>Đã hủy
+                                                    </span>
+                                                }
                                                 else if (item.TrangThai == "Chờ xác nhận")
                                                 {
-                                                    <span class="badge bg-warning text-dark">
-                                                        <i class="fas fa-clock me-1"></i>Chờ xác nhận
-                                                    </span>
+                                                    <div class="d-flex">
+                                                        <span class="badge bg-warning text-dark me-2">
+                                                            <i class="fas fa-clock me-1"></i>Chờ xác nhận
+                                                        </span>
+                                                        <button type="button" class="btn btn-success btn-sm btn-xacnhan" data-id="@item.MaGiaoDich">
+                                                            <i class="fas fa-check me-1"></i>Xác nhận
+                                                        </button>
+                                                        <button type="button" class="btn btn-danger btn-sm btn-huy" data-id="@item.MaGiaoDich">
+                                                            <i class="fas fa-times me-1"></i>Hủy
+                                                        </button>
+                                                    </div>
                                                 }
                                                 else
                                                 {
@@ -292,6 +306,7 @@
 @section Scripts {
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     $(document).ready(function() {
         // Xử lý tab trực tiếp
@@ -372,5 +387,111 @@
             $('#' + activeTab).tab('show');
         }
     });
+
+            $(document).ready(function() {
+                // Xử lý xác nhận đơn hàng
+            $(document).on('click', '.btn-xacnhan', function() {
+                var orderId = $(this).data('id');
+
+                Swal.fire({
+                    title: 'Xác nhận đơn hàng?',
+                    text: "Bạn có chắc muốn xác nhận đơn hàng này?",
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#28a745',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Xác nhận',
+                    cancelButtonText: 'Không'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Gửi ajax request để xác nhận
+                        $.ajax({
+                            url: '/Order/UpdateOrderStatus',
+                            type: 'POST',
+                            data: {
+                                orderId: orderId,
+                                status: 'Đã xác nhận'
+                            },
+                            success: function(response) {
+                                if (response.success) {
+                                    Swal.fire({
+                                        title: 'Thành công!',
+                                        text: 'Đã xác nhận đơn hàng',
+                                        icon: 'success'
+                                    }).then(() => {
+                                        location.reload();
+                                    });
+                                } else {
+                                    Swal.fire({
+                                        title: 'Lỗi!',
+                                        text: response.message,
+                                        icon: 'error'
+                                    });
+                                }
+                            },
+                            error: function() {
+                                Swal.fire({
+                                    title: 'Lỗi!',
+                                    text: 'Có lỗi xảy ra, vui lòng thử lại sau.',
+                                    icon: 'error'
+                                });
+                            }
+                        });
+                    }
+                });
+            });
+
+            // Xử lý hủy đơn hàng
+            $(document).on('click', '.btn-huy', function() {
+                var orderId = $(this).data('id');
+
+                Swal.fire({
+                    title: 'Xác nhận hủy đơn hàng?',
+                    text: "Đơn hàng sẽ bị hủy và không thể khôi phục. Bạn có chắc chắn?",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc3545',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Đồng ý hủy',
+                    cancelButtonText: 'Không hủy'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Gửi ajax request để hủy
+                        $.ajax({
+                            url: '/Order/UpdateOrderStatus',
+                            type: 'POST',
+                            data: {
+                                orderId: orderId,
+                                status: 'Đã hủy'
+                            },
+                            success: function(response) {
+                                if (response.success) {
+                                    Swal.fire({
+                                        title: 'Thành công!',
+                                        text: 'Đã hủy đơn hàng',
+                                        icon: 'success'
+                                    }).then(() => {
+                                        location.reload();
+                                    });
+                                } else {
+                                    Swal.fire({
+                                        title: 'Lỗi!',
+                                        text: response.message,
+                                        icon: 'error'
+                                    });
+                                }
+                            },
+                            error: function() {
+                                Swal.fire({
+                                    title: 'Lỗi!',
+                                    text: 'Có lỗi xảy ra, vui lòng thử lại sau.',
+                                    icon: 'error'
+                                });
+                            }
+                        });
+                    }
+                });
+            });
+        });
 </script>
 } 

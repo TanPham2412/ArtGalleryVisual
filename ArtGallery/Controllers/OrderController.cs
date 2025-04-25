@@ -260,8 +260,25 @@ namespace ArtGallery.Controllers
         public async Task<IActionResult> History()
         {
             var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var orders = await _orderRepository.GetOrdersByUserId(currentUserId);
-            return View(orders);
+
+            // Lấy đơn hàng mua của người dùng
+            var buyOrders = await _context.GiaoDiches
+                .Include(g => g.MaTranhNavigation)
+                .Include(g => g.MaNguoiMuaNavigation)
+                .Where(g => g.MaNguoiMua == currentUserId)
+                .ToListAsync();
+
+            // Lấy đơn hàng bán (người dùng là người tạo ra tranh)
+            var sellOrders = await _context.GiaoDiches
+                .Include(g => g.MaTranhNavigation)
+                .Include(g => g.MaNguoiMuaNavigation)
+                .Where(g => g.MaTranhNavigation.MaNguoiDung == currentUserId && g.MaNguoiMua != currentUserId)
+                .ToListAsync();
+
+            // Kết hợp danh sách
+            var allOrders = buyOrders.Concat(sellOrders).ToList();
+
+            return View(allOrders);
         }
 
         [HttpPost]
@@ -349,6 +366,52 @@ namespace ArtGallery.Controllers
                 await _context.SaveChangesAsync();
 
                 return Json(new { success = true, message = "Đã xóa sản phẩm khỏi giỏ hàng" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Lỗi: " + ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateOrderStatus(int orderId, string status)
+        {
+            try
+            {
+                var userId = _userManager.GetUserId(User);
+                var order = await _context.GiaoDiches
+                    .Include(g => g.MaTranhNavigation)
+                    .FirstOrDefaultAsync(g => g.MaGiaoDich == orderId);
+
+                if (order == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy đơn hàng" });
+                }
+
+                // Kiểm tra quyền cập nhật (người bán là chủ tranh)
+                if (order.MaTranhNavigation.MaNguoiDung != userId)
+                {
+                    return Json(new { success = false, message = "Bạn không có quyền cập nhật đơn hàng này" });
+                }
+
+                // Cập nhật trạng thái
+                order.TrangThai = status;
+                _context.GiaoDiches.Update(order);
+                await _context.SaveChangesAsync();
+
+                // Gửi thông báo cho người mua
+                var seller = await _userManager.FindByIdAsync(userId);
+                await _notificationRepository.CreateNotification(
+                    receiverId: order.MaNguoiMua,
+                    senderId: userId,
+                    title: "Cập nhật đơn hàng",
+                    content: $"Đơn hàng #{order.MaGiaoDich} đã được cập nhật sang trạng thái {status}",
+                    url: "/Order/History",
+                    notificationType: "order",
+                    imageUrl: order.MaTranhNavigation.DuongDanAnh
+                );
+
+                return Json(new { success = true, message = $"Đã cập nhật trạng thái đơn hàng thành {status}" });
             }
             catch (Exception ex)
             {
