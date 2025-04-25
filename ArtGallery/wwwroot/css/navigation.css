@@ -827,3 +827,39 @@ input[type="file"]::-webkit-file-upload-button:hover {
     margin-bottom: 10px;
     color: #555;
 }
+
+/* Add specific styles for the different notification types */
+.notification-icon.order {
+    background-color: #4caf50;
+}
+
+.notification-icon.cart {
+    background-color: #2196f3;
+}
+
+.notification-icon.like {
+    background-color: #f44336;
+}
+
+.notification-icon.comment {
+    background-color: #ff9800;
+}
+
+.notification-icon.follow {
+    background-color: #9c27b0;
+}
+
+.notification-icon.system {
+    background-color: #607d8b;
+}
+
+.notification-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 18px;
+}

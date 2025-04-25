@@ -16,13 +16,20 @@ namespace ArtGallery.Controllers
         private readonly ILogger<OrderController> _logger;
         private readonly UserManager<NguoiDung> _userManager;
         private readonly ArtGalleryContext _context;
+        private readonly INotificationRepository _notificationRepository;
 
-        public OrderController(IOrderRepository orderRepository, ILogger<OrderController> logger, UserManager<NguoiDung> userManager, ArtGalleryContext context)
+        public OrderController(
+            IOrderRepository orderRepository, 
+            ILogger<OrderController> logger, 
+            UserManager<NguoiDung> userManager, 
+            ArtGalleryContext context,
+            INotificationRepository notificationRepository)
         {
             _orderRepository = orderRepository;
             _logger = logger;
             _userManager = userManager;
             _context = context;
+            _notificationRepository = notificationRepository;
         }
 
         public async Task<IActionResult> Display(int id, int? orderId = null)
@@ -112,6 +119,16 @@ namespace ArtGallery.Controllers
                     return Json(new { success = false, message = "Bạn cần đăng nhập để đặt hàng" });
                 }
 
+                // Lấy thông tin tranh và người bán
+                var artwork = await _context.Tranhs
+                    .Include(t => t.MaNguoiDungNavigation)
+                    .FirstOrDefaultAsync(t => t.MaTranh == maTranh);
+                
+                if (artwork == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy tác phẩm" });
+                }
+
                 // Nếu có orderId (đang xác nhận đơn hàng từ giỏ hàng), cập nhật giao dịch hiện có
                 if (orderId.HasValue)
                 {
@@ -124,6 +141,24 @@ namespace ArtGallery.Controllers
                         
                         _context.GiaoDiches.Update(existingOrder);
                         await _context.SaveChangesAsync();
+                        
+                        // Gửi thông báo cho người bán
+                        if (trangThai == "Đã xác nhận" || trangThai == "Đã hoàn thành")
+                        {
+                            var buyer = await _userManager.FindByIdAsync(userId);
+                            var sellerId = artwork.MaNguoiDung;
+                            
+                            // Tạo thông báo cho người bán
+                            await _notificationRepository.CreateNotification(
+                                receiverId: sellerId,
+                                senderId: userId,
+                                title: "Đơn hàng mới",
+                                content: $"{buyer.TenNguoiDung} đã đặt mua tác phẩm {artwork.TieuDe} với số lượng {soLuong}",
+                                url: "/Order/History",
+                                notificationType: "order",
+                                imageUrl: artwork.DuongDanAnh
+                            );
+                        }
                         
                         return Json(new { success = true });
                     }
@@ -148,7 +183,6 @@ namespace ArtGallery.Controllers
                     _context.GiaoDiches.Add(giaoDich);
                     
                     // Cập nhật số lượng tranh còn lại
-                    var artwork = await _context.Tranhs.FindAsync(maTranh);
                     if (artwork != null)
                     {
                         artwork.SoLuongTon -= soLuong;
@@ -156,6 +190,24 @@ namespace ArtGallery.Controllers
                     }
                     
                     await _context.SaveChangesAsync();
+                    
+                    // Gửi thông báo cho người bán khi đặt hàng mới
+                    if (trangThai == "Đã xác nhận" || trangThai == "Đã hoàn thành")
+                    {
+                        var buyer = await _userManager.FindByIdAsync(userId);
+                        var sellerId = artwork.MaNguoiDung;
+                        
+                        // Tạo thông báo cho người bán
+                        await _notificationRepository.CreateNotification(
+                            receiverId: sellerId,
+                            senderId: userId,
+                            title: "Đơn hàng mới",
+                            content: $"{buyer.TenNguoiDung} đã đặt mua tác phẩm {artwork.TieuDe} với số lượng {soLuong}",
+                            url: "/Order/History",
+                            notificationType: "order",
+                            imageUrl: artwork.DuongDanAnh
+                        );
+                    }
                     
                     return Json(new { success = true });
                 }
@@ -224,6 +276,16 @@ namespace ArtGallery.Controllers
                     return Json(new { success = false, message = "Bạn cần đăng nhập để thêm vào giỏ hàng" });
                 }
 
+                // Lấy thông tin tranh và người bán
+                var artwork = await _context.Tranhs
+                    .Include(t => t.MaNguoiDungNavigation)
+                    .FirstOrDefaultAsync(t => t.MaTranh == maTranh);
+                
+                if (artwork == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy tác phẩm" });
+                }
+
                 // Tạo giao dịch mới với trạng thái "Chờ xác nhận"
                 var giaoDich = new GiaoDich
                 {
@@ -239,6 +301,20 @@ namespace ArtGallery.Controllers
                 // Thêm vào cơ sở dữ liệu
                 _context.GiaoDiches.Add(giaoDich);
                 await _context.SaveChangesAsync();
+
+                // Gửi thông báo cho người bán khi có người thêm sản phẩm vào giỏ hàng
+                var buyer = await _userManager.FindByIdAsync(userId);
+                var sellerId = artwork.MaNguoiDung;
+                
+                await _notificationRepository.CreateNotification(
+                    receiverId: sellerId,
+                    senderId: userId,
+                    title: "Sản phẩm được thêm vào giỏ hàng",
+                    content: $"{buyer.TenNguoiDung} đã thêm tác phẩm {artwork.TieuDe} vào giỏ hàng",
+                    url: "/Order/History",
+                    notificationType: "cart",
+                    imageUrl: artwork.DuongDanAnh
+                );
 
                 return Json(new { success = true, message = "Đã thêm vào giỏ hàng thành công" });
             }
