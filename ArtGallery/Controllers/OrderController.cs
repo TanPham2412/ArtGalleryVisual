@@ -170,19 +170,20 @@ namespace ArtGallery.Controllers
         [HttpGet]
         public IActionResult OrderSuccess()
         {
+            // Kiểm tra các tham số từ VNPay
             var vnp_TxnRef = Request.Query["vnp_TxnRef"];
             var vnp_TransactionNo = Request.Query["vnp_TransactionNo"];
             var vnp_OrderInfo = Request.Query["vnp_OrderInfo"];
             var vnp_ResponseCode = Request.Query["vnp_ResponseCode"];
 
-            // Check missing params
+            // Nếu không có tham số VNPay, có thể là thanh toán COD
             if (string.IsNullOrEmpty(vnp_TxnRef) ||
                 string.IsNullOrEmpty(vnp_TransactionNo) ||
                 string.IsNullOrEmpty(vnp_OrderInfo) ||
                 string.IsNullOrEmpty(vnp_ResponseCode))
             {
-                // Có thể redirect về trang thông báo lỗi
-                return RedirectToAction("PaymentError");
+                // Hiển thị view OrderSuccess mà không có model
+                return View();
             }
 
             var paymentResponse = new PaymentResponseModel
@@ -195,6 +196,13 @@ namespace ArtGallery.Controllers
             };
 
             return View(paymentResponse);
+        }
+
+        // Thêm action PaymentError nếu cần
+        [HttpGet]
+        public IActionResult PaymentError()
+        {
+            return View();
         }
 
         public async Task<IActionResult> History()

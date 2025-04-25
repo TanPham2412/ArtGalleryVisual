@@ -379,8 +379,49 @@
             
             // Xử lý thanh toán COD
             $("#btnConfirmCOD").click(function() {
-                // Lưu đơn hàng với trạng thái "Đã hoàn thành"
-                saveOrder("Đã hoàn thành", "thanh toán khi nhận hàng");
+                var maTranh = @Model.MaTranh;
+                var soLuong = parseInt($("#quantity").val());
+                var tongTien = soLuong * price;
+                
+                // Gửi Ajax request để lưu đơn hàng với phương thức COD
+                $.ajax({
+                    url: '/Order/PlaceOrder',
+                    type: 'POST',
+                    data: {
+                        maTranh: maTranh,
+                        soLuong: soLuong,
+                        tongTien: tongTien,
+                        trangThai: "Đã xác nhận",
+                        phuongThucThanhToan: "thanh toán khi nhận hàng",
+                        orderId: isInCart ? orderId : null
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            // Thông báo thành công rồi chuyển hướng
+                            Swal.fire({
+                                title: 'Đặt hàng thành công!',
+                                text: 'Đơn hàng của bạn đã được xác nhận.',
+                                icon: 'success',
+                                confirmButtonText: 'Xem chi tiết'
+                            }).then(() => {
+                                window.location.href = '/Order/History';
+                            });
+                        } else {
+                            Swal.fire({
+                                title: 'Lỗi!',
+                                text: response.message || 'Có lỗi xảy ra khi đặt hàng.',
+                                icon: 'error'
+                            });
+                        }
+                    },
+                    error: function() {
+                        Swal.fire({
+                            title: 'Lỗi!',
+                            text: 'Có lỗi xảy ra, vui lòng thử lại sau.',
+                            icon: 'error'
+                        });
+                    }
+                });
             });
             
             // Hàm lưu đơn hàng
