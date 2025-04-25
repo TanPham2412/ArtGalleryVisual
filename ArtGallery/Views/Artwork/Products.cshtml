@@ -1,8 +1,12 @@
+@using System.Security.Claims
 @model List<ArtGallery.Models.Tranh>
 @{
     ViewData["Title"] = "Danh sách sản phẩm";
     var sortOrder = Context.Request.Query["sortOrder"].ToString();
     var searchString = Context.Request.Query["searchString"].ToString();
+    
+    // Lấy user ID hiện tại
+    var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
     
     // Xác định sắp xếp hiện tại
     string currentSortName = "Mới nhất";
@@ -159,9 +163,12 @@
                             <a asp-action="Display" asp-route-id="@item.MaTranh" class="btn product-view-btn">
                                 <i class="fas fa-eye"></i> Chi tiết
                             </a>
-                            <a asp-controller="Order" asp-action="Display" asp-route-id="@item.MaTranh" class="btn product-buy-btn">
-                                <i class="fas fa-shopping-cart"></i> Mua ngay
-                            </a>
+                            @if (currentUserId != item.MaNguoiDung)
+                            {
+                                <a asp-controller="Order" asp-action="Display" asp-route-id="@item.MaTranh" class="btn product-buy-btn">
+                                    <i class="fas fa-shopping-cart"></i> Mua ngay
+                                </a>
+                            }
                         </div>
                     </div>
                 </div>
