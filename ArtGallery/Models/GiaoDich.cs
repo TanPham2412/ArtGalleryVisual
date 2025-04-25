@@ -21,6 +21,9 @@ public partial class GiaoDich
 
     public DateTime? NgayMua { get; set; }
 
+    public bool? IsHiddenByBuyer { get; set; }
+
+    public bool? IsHiddenBySeller { get; set; }
 
     public virtual NguoiDung MaNguoiMuaNavigation { get; set; } = null!;
 

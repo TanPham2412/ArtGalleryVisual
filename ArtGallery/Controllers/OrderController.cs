@@ -256,18 +256,20 @@ namespace ArtGallery.Controllers
         {
             var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            // Lấy đơn hàng mua của người dùng
+            // Lấy đơn hàng mua của người dùng (không bao gồm những đơn hàng đã ẩn)
             var buyOrders = await _context.GiaoDiches
                 .Include(g => g.MaTranhNavigation)
                 .Include(g => g.MaNguoiMuaNavigation)
-                .Where(g => g.MaNguoiMua == currentUserId)
+                .Where(g => g.MaNguoiMua == currentUserId && (g.IsHiddenByBuyer == false || g.IsHiddenByBuyer == null))
                 .ToListAsync();
 
             // Lấy đơn hàng bán (người dùng là người tạo ra tranh)
             var sellOrders = await _context.GiaoDiches
                 .Include(g => g.MaTranhNavigation)
                 .Include(g => g.MaNguoiMuaNavigation)
-                .Where(g => g.MaTranhNavigation.MaNguoiDung == currentUserId && g.MaNguoiMua != currentUserId)
+                .Where(g => g.MaTranhNavigation.MaNguoiDung == currentUserId && 
+                       g.MaNguoiMua != currentUserId && 
+                       (g.IsHiddenBySeller == false || g.IsHiddenBySeller == null))
                 .ToListAsync();
 
             // Kết hợp danh sách
@@ -460,6 +462,74 @@ namespace ArtGallery.Controllers
                 }
 
                 return Json(new { success = true, message = $"Đã cập nhật trạng thái đơn hàng thành {status}" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Lỗi: " + ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteHistory(int orderId)
+        {
+            try
+            {
+                var userId = _userManager.GetUserId(User);
+                var order = await _context.GiaoDiches
+                    .FirstOrDefaultAsync(g => g.MaGiaoDich == orderId && g.MaNguoiMua == userId);
+
+                if (order == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy đơn hàng" });
+                }
+
+                // Chỉ cho phép ẩn lịch sử đơn hàng đã hoàn thành hoặc đã hủy
+                if (order.TrangThai != "Đã hoàn thành" && order.TrangThai != "Đã hủy")
+                {
+                    return Json(new { success = false, message = "Chỉ có thể ẩn đơn hàng đã hoàn thành hoặc đã hủy" });
+                }
+
+                // Thay vì xóa đơn hàng, chỉ đánh dấu là đã ẩn
+                order.IsHiddenByBuyer = true;
+                _context.GiaoDiches.Update(order);
+                await _context.SaveChangesAsync();
+
+                return Json(new { success = true, message = "Đã ẩn đơn hàng khỏi lịch sử" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Lỗi: " + ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> HideSellerHistory(int orderId)
+        {
+            try
+            {
+                var userId = _userManager.GetUserId(User);
+                // Tìm đơn hàng mà người dùng hiện tại là người bán
+                var order = await _context.GiaoDiches
+                    .Include(g => g.MaTranhNavigation)
+                    .FirstOrDefaultAsync(g => g.MaGiaoDich == orderId && g.MaTranhNavigation.MaNguoiDung == userId);
+
+                if (order == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy đơn hàng" });
+                }
+
+                // Chỉ cho phép ẩn lịch sử đơn hàng đã hoàn thành hoặc đã hủy
+                if (order.TrangThai != "Đã hoàn thành" && order.TrangThai != "Đã hủy")
+                {
+                    return Json(new { success = false, message = "Chỉ có thể ẩn đơn hàng đã hoàn thành hoặc đã hủy" });
+                }
+
+                // Đánh dấu là đã ẩn bởi người bán
+                order.IsHiddenBySeller = true;
+                _context.GiaoDiches.Update(order);
+                await _context.SaveChangesAsync();
+
+                return Json(new { success = true, message = "Đã ẩn đơn hàng khỏi lịch sử" });
             }
             catch (Exception ex)
             {

@@ -125,6 +125,18 @@ public partial class ArtGalleryContext : IdentityDbContext<NguoiDung, IdentityRo
             entity.Property(e => e.SoTien)
                 .HasColumnType("decimal(18, 2)")
                 .HasColumnName("so_tien");
+            entity.Property(e => e.TrangThai)
+                .HasMaxLength(50)
+                .HasColumnName("trang_thai");
+            entity.Property(e => e.PhuongThucThanhToan)
+                .HasMaxLength(100)
+                .HasColumnName("phuong_thuc_thanh_toan");
+            entity.Property(e => e.IsHiddenByBuyer)
+                .HasDefaultValue(false)
+                .HasColumnName("is_hidden_by_buyer");
+            entity.Property(e => e.IsHiddenBySeller)
+                .HasDefaultValue(false)
+                .HasColumnName("is_hidden_by_seller");
 
             entity.HasOne(d => d.MaNguoiMuaNavigation)
                 .WithMany(p => p.GiaoDiches)

@@ -300,10 +300,10 @@
                                                 <i class="fas fa-check-circle me-1"></i>Đã hoàn thành
                                             </span>
                                         }
-                                        else if (item.TrangThai == "Đã xác nhận")
-                                        {
-                                            <span class="badge bg-primary">
-                                                <i class="fas fa-check me-1"></i>Đã xác nhận
+                                                else if (item.TrangThai == "Đã xác nhận")
+                                                {
+                                                    <span class="badge bg-primary">
+                                                        <i class="fas fa-check me-1"></i>Đã xác nhận
                                             </span>
                                         }
                                         else if (item.TrangThai == "Đã đặt hàng")
@@ -355,11 +355,17 @@
     <div class="context-menu-item" id="receiveOrder">
         <i class="fas fa-check-circle"></i> Đã nhận hàng
     </div>
+    <div class="context-menu-item" id="deleteHistory">
+        <i class="fas fa-trash"></i> Xóa lịch sử
+    </div>
 </div>
 
 <div id="sellerContextMenu" class="context-menu" style="display: none;">
     <div class="context-menu-item" id="deliverOrder">
         <i class="fas fa-truck"></i> Đã giao hàng
+    </div>
+    <div class="context-menu-item" id="deleteSellerHistory">
+        <i class="fas fa-trash"></i> Xóa
     </div>
 </div>
 
@@ -451,7 +457,7 @@
             $('#' + activeTab).tab('show');
         }
 
-        // Thay đổi phần xử lý chuột phải cho lịch sử đặt hàng
+        // Thêm phần xử lý chuột phải cho lịch sử đặt hàng (giữ nguyên, không thay đổi)
         $("#history .table tbody tr").on("contextmenu", function(e) {
             e.preventDefault();
             
@@ -470,34 +476,80 @@
             $(".table tr").removeClass("selected");
             row.addClass("selected");
             
+            // Ẩn tất cả các nút trước khi hiển thị
+            $("#cancelOrder").hide();
+            $("#receiveOrder").hide();
+            $("#deleteHistory").hide();
+            
             // Hiển thị menu ngữ cảnh dựa trên trạng thái đơn hàng
             if (selectedOrderStatus === "Đã xác nhận") {
-                // Hiển thị cả hai nút
+                // Hiển thị cả nút hủy và nút đã nhận hàng
                 $("#cancelOrder").show();
                 $("#receiveOrder").show();
-                
-                // Hiển thị context menu tại vị trí chuột
-                $("#contextMenu").css({
-                    top: e.pageY + "px",
-                    left: e.pageX + "px"
-                }).show();
             } 
             else if (selectedOrderStatus === "Đã đặt hàng") {
                 // Chỉ hiển thị nút hủy đơn hàng
                 $("#cancelOrder").show();
-                $("#receiveOrder").hide();
-                
-                // Hiển thị context menu tại vị trí chuột
-                $("#contextMenu").css({
-                    top: e.pageY + "px",
-                    left: e.pageX + "px"
-                }).show();
             }
+            else if (selectedOrderStatus === "Đã hoàn thành" || selectedOrderStatus === "Đã hủy") {
+                // Chỉ hiển thị nút xóa lịch sử
+                $("#deleteHistory").show();
+            }
+            
+            // Hiển thị context menu tại vị trí chuột
+            $("#contextMenu").css({
+                top: e.pageY + "px",
+                left: e.pageX + "px"
+            }).show();
+        });
+        
+        // Thêm phần xử lý chuột phải riêng biệt cho đơn bán hàng
+        $("#selling .table tbody tr").on("contextmenu", function(e) {
+            e.preventDefault();
+            
+            // Lấy thông tin đơn hàng từ hàng được click
+            var row = $(this);
+            selectedOrderId = row.find("td:first").text();
+            
+            // Lấy chính xác trạng thái
+            var statusText = "";
+            var statusBadge = row.find("td:eq(6) .badge");
+            if (statusBadge.length > 0) {
+                statusText = statusBadge.text().trim();
+            }
+            selectedOrderStatus = statusText;
+            
+            console.log("Seller Order ID:", selectedOrderId);
+            console.log("Seller Status:", selectedOrderStatus);
+            
+            // Đánh dấu hàng đang được chọn
+            $(".table tr").removeClass("selected");
+            row.addClass("selected");
+            
+            // Ẩn tất cả các nút menu ngữ cảnh
+            $("#deliverOrder").hide();
+            $("#deleteSellerHistory").hide();
+            
+            // Hiển thị menu ngữ cảnh dựa trên trạng thái đơn hàng
+            if (selectedOrderStatus === "Đã xác nhận") {
+                // Hiển thị nút giao hàng khi đơn đã xác nhận
+                $("#deliverOrder").show();
+            }
+            else if (selectedOrderStatus === "Đã hoàn thành" || selectedOrderStatus === "Đã hủy") {
+                // Hiển thị nút xóa khi đơn đã hoàn thành hoặc đã hủy
+                $("#deleteSellerHistory").show();
+            }
+            
+            // Hiển thị context menu tại vị trí chuột
+            $("#sellerContextMenu").css({
+                top: e.pageY + "px",
+                left: e.pageX + "px"
+            }).show();
         });
         
         // Đóng context menu khi click ra ngoài
         $(document).on("click", function() {
-            $("#contextMenu").hide();
+            $("#contextMenu, #sellerContextMenu").hide();
         });
         
         // Xử lý khi chọn hủy đơn hàng
@@ -585,157 +637,13 @@
             `)
             .appendTo("head");
 
-        // Xử lý xác nhận đơn hàng
-        $(document).on('click', '.btn-xacnhan', function() {
-            var orderId = $(this).data('id');
+                // Xử lý xác nhận đơn hàng
+            $(document).on('click', '.btn-xacnhan', function() {
+                var orderId = $(this).data('id');
 
-            Swal.fire({
-                title: 'Xác nhận đơn hàng?',
-                text: "Bạn có chắc muốn xác nhận đơn hàng này?",
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#28a745',
-                cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Xác nhận',
-                cancelButtonText: 'Không'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Gửi ajax request để xác nhận
-                    $.ajax({
-                        url: '/Order/UpdateOrderStatus',
-                        type: 'POST',
-                        data: {
-                            orderId: orderId,
-                            status: 'Đã xác nhận'
-                        },
-                        success: function(response) {
-                            if (response.success) {
-                                Swal.fire({
-                                    title: 'Thành công!',
-                                    text: 'Đã xác nhận đơn hàng',
-                                    icon: 'success'
-                                }).then(() => {
-                                    location.reload();
-                                });
-                            } else {
-                                Swal.fire({
-                                    title: 'Lỗi!',
-                                    text: response.message,
-                                    icon: 'error'
-                                });
-                            }
-                        },
-                        error: function() {
-                            Swal.fire({
-                                title: 'Lỗi!',
-                                text: 'Có lỗi xảy ra, vui lòng thử lại sau.',
-                                icon: 'error'
-                            });
-                        }
-                    });
-                }
-            });
-        });
-
-        // Xử lý hủy đơn hàng
-        $(document).on('click', '.btn-huy', function() {
-            var orderId = $(this).data('id');
-
-            Swal.fire({
-                title: 'Xác nhận hủy đơn hàng?',
-                text: "Đơn hàng sẽ bị hủy và không thể khôi phục. Bạn có chắc chắn?",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#dc3545',
-                cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Đồng ý hủy',
-                cancelButtonText: 'Không hủy'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Gửi ajax request để hủy
-                    $.ajax({
-                        url: '/Order/UpdateOrderStatus',
-                        type: 'POST',
-                        data: {
-                            orderId: orderId,
-                            status: 'Đã hủy'
-                        },
-                        success: function(response) {
-                            if (response.success) {
-                                Swal.fire({
-                                    title: 'Thành công!',
-                                    text: 'Đã hủy đơn hàng',
-                                    icon: 'success'
-                                }).then(() => {
-                                    location.reload();
-                                });
-                            } else {
-                                Swal.fire({
-                                    title: 'Lỗi!',
-                                    text: response.message,
-                                    icon: 'error'
-                                });
-                            }
-                        },
-                        error: function() {
-                            Swal.fire({
-                                title: 'Lỗi!',
-                                text: 'Có lỗi xảy ra, vui lòng thử lại sau.',
-                                icon: 'error'
-                            });
-                        }
-                    });
-                }
-            });
-        });
-
-        // Thay đổi phần xử lý chuột phải cho đơn bán hàng
-        $("#selling .table tbody tr").on("contextmenu", function(e) {
-            e.preventDefault();
-            
-            // Lấy thông tin đơn hàng từ hàng được click
-            var row = $(this);
-            selectedOrderId = row.find("td:first").text();
-            
-            // Lấy chính xác trạng thái
-            var statusText = "";
-            var statusBadge = row.find("td:eq(6) .badge");
-            if (statusBadge.length > 0) {
-                statusText = statusBadge.text().trim();
-            }
-            selectedOrderStatus = statusText;
-            
-            console.log("Seller Order ID:", selectedOrderId);
-            console.log("Seller Status:", selectedOrderStatus);
-            
-            // Đánh dấu hàng đang được chọn
-            $(".table tr").removeClass("selected");
-            row.addClass("selected");
-            
-            // Chỉ hiển thị menu ngữ cảnh khi trạng thái là "Đã xác nhận"
-            if (selectedOrderStatus === "Đã xác nhận") {
-                // Hiển thị context menu tại vị trí chuột
-                $("#sellerContextMenu").css({
-                    top: e.pageY + "px",
-                    left: e.pageX + "px"
-                }).show();
-            }
-        });
-
-        // Đóng context menu khi click ra ngoài
-        $(document).on("click", function() {
-            $("#contextMenu, #sellerContextMenu").hide();
-        });
-
-        // Xử lý khi chọn "Đã nhận hàng" từ người mua
-        $("#receiveOrder").on("click", function() {
-            console.log("Clicked Đã nhận hàng, status:", selectedOrderStatus);
-            
-            if (selectedOrderStatus === "Đã xác nhận") {
-                // Nếu đơn hàng ở trạng thái "Đã xác nhận" thì có thể đánh dấu đã nhận
                 Swal.fire({
-                    title: 'Xác nhận đã nhận hàng?',
-                    text: "Bạn xác nhận đã nhận được hàng?",
+                    title: 'Xác nhận đơn hàng?',
+                    text: "Bạn có chắc muốn xác nhận đơn hàng này?",
                     icon: 'question',
                     showCancelButton: true,
                     confirmButtonColor: '#28a745',
@@ -744,82 +652,19 @@
                     cancelButtonText: 'Không'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        // Gửi ajax request để cập nhật trạng thái
+                        // Gửi ajax request để xác nhận
                         $.ajax({
                             url: '/Order/UpdateOrderStatus',
                             type: 'POST',
                             data: {
-                                orderId: selectedOrderId,
-                                status: 'Đã hoàn thành'
-                            },
-                            success: function(response) {
-                                console.log("Update response:", response);
-                                if (response.success) {
-                                    Swal.fire({
-                                        title: 'Thành công!',
-                                        text: 'Đơn hàng đã được đánh dấu là đã hoàn thành',
-                                        icon: 'success'
-                                    }).then(() => {
-                                        location.reload();
-                                    });
-                                } else {
-                                    Swal.fire({
-                                        title: 'Lỗi!',
-                                        text: response.message,
-                                        icon: 'error'
-                                    });
-                                }
-                            },
-                            error: function(xhr, status, error) {
-                                console.error("Ajax error:", error);
-                                Swal.fire({
-                                    title: 'Lỗi!',
-                                    text: 'Có lỗi xảy ra, vui lòng thử lại sau.',
-                                    icon: 'error'
-                                });
-                            }
-                        });
-                    }
-                });
-            } else {
-                Swal.fire({
-                    title: 'Không thể xác nhận!',
-                    text: 'Bạn chỉ có thể xác nhận đã nhận hàng khi đơn hàng đã được xác nhận bởi người bán.',
-                    icon: 'warning',
-                    confirmButtonColor: '#3085d6',
-                    confirmButtonText: 'Đã hiểu'
-                });
-            }
-        });
-
-        // Xử lý khi người bán chọn "Đã giao hàng"
-        $("#deliverOrder").on("click", function() {
-            if (selectedOrderStatus === "Đã xác nhận") {
-                // Nếu đơn hàng đã được xác nhận, người bán có thể đánh dấu đã giao
-                Swal.fire({
-                    title: 'Xác nhận đã giao hàng?',
-                    text: "Bạn xác nhận đã giao hàng cho khách?",
-                    icon: 'question',
-                    showCancelButton: true,
-                    confirmButtonColor: '#28a745',
-                    cancelButtonColor: '#6c757d',
-                    confirmButtonText: 'Xác nhận',
-                    cancelButtonText: 'Không'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        // Gửi ajax request để cập nhật trạng thái
-                        $.ajax({
-                            url: '/Order/UpdateOrderStatus',
-                            type: 'POST',
-                            data: {
-                                orderId: selectedOrderId,
-                                status: 'Đã hoàn thành'
+                                orderId: orderId,
+                                status: 'Đã xác nhận'
                             },
                             success: function(response) {
                                 if (response.success) {
                                     Swal.fire({
                                         title: 'Thành công!',
-                                        text: 'Đơn hàng đã được đánh dấu là đã hoàn thành',
+                                        text: 'Đã xác nhận đơn hàng',
                                         icon: 'success'
                                     }).then(() => {
                                         location.reload();
@@ -842,16 +687,161 @@
                         });
                     }
                 });
-            } else {
+            });
+
+            // Xử lý hủy đơn hàng
+            $(document).on('click', '.btn-huy', function() {
+                var orderId = $(this).data('id');
+
                 Swal.fire({
-                    title: 'Không thể xác nhận!',
-                    text: 'Bạn chỉ có thể đánh dấu đã giao hàng khi đơn hàng đã được xác nhận.',
+                    title: 'Xác nhận hủy đơn hàng?',
+                    text: "Đơn hàng sẽ bị hủy và không thể khôi phục. Bạn có chắc chắn?",
                     icon: 'warning',
-                    confirmButtonColor: '#3085d6',
-                    confirmButtonText: 'Đã hiểu'
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc3545',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Đồng ý hủy',
+                    cancelButtonText: 'Không hủy'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Gửi ajax request để hủy
+                        $.ajax({
+                            url: '/Order/UpdateOrderStatus',
+                            type: 'POST',
+                            data: {
+                                orderId: orderId,
+                                status: 'Đã hủy'
+                            },
+                            success: function(response) {
+                                if (response.success) {
+                                    Swal.fire({
+                                        title: 'Thành công!',
+                                        text: 'Đã hủy đơn hàng',
+                                        icon: 'success'
+                                    }).then(() => {
+                                        location.reload();
+                                    });
+                                } else {
+                                    Swal.fire({
+                                        title: 'Lỗi!',
+                                        text: response.message,
+                                        icon: 'error'
+                                    });
+                                }
+                            },
+                            error: function() {
+                                Swal.fire({
+                                    title: 'Lỗi!',
+                                    text: 'Có lỗi xảy ra, vui lòng thử lại sau.',
+                                    icon: 'error'
+                                });
+                            }
+                        });
+                    }
+                });
+            });
+
+        // Thêm xử lý khi click vào nút xóa lịch sử
+        $("#deleteHistory").on("click", function() {
+            if (selectedOrderStatus === "Đã hoàn thành" || selectedOrderStatus === "Đã hủy") {
+                Swal.fire({
+                    title: 'Xác nhận xóa?',
+                    text: "Bạn có chắc muốn xóa đơn hàng này khỏi lịch sử?",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Xóa',
+                    cancelButtonText: 'Hủy'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Gửi ajax request để xóa
+                        $.ajax({
+                            url: '/Order/DeleteHistory',
+                            type: 'POST',
+                            data: {
+                                orderId: selectedOrderId
+                            },
+                            success: function(response) {
+                                if (response.success) {
+                                    Swal.fire({
+                                        title: 'Thành công!',
+                                        text: 'Đã xóa đơn hàng khỏi lịch sử',
+                                        icon: 'success'
+                                    }).then(() => {
+                                        location.reload();
+                                    });
+                                } else {
+                                    Swal.fire({
+                                        title: 'Lỗi!',
+                                        text: response.message,
+                                        icon: 'error'
+                                    });
+                                }
+                            },
+                            error: function() {
+                                Swal.fire({
+                                    title: 'Lỗi!',
+                                    text: 'Có lỗi xảy ra, vui lòng thử lại sau.',
+                                    icon: 'error'
+                                });
+                            }
+                        });
+                    }
                 });
             }
         });
-    });
+
+        // Thêm xử lý khi click vào nút xóa lịch sử của người bán
+        $("#deleteSellerHistory").on("click", function() {
+            if (selectedOrderStatus === "Đã hoàn thành" || selectedOrderStatus === "Đã hủy") {
+                Swal.fire({
+                    title: 'Xác nhận xóa?',
+                    text: "Bạn có chắc muốn xóa đơn hàng này khỏi danh sách bán hàng? Đơn hàng sẽ không hiển thị trong mục đơn bán hàng nữa.",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Xóa',
+                    cancelButtonText: 'Hủy'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Gửi ajax request để ẩn
+                        $.ajax({
+                            url: '/Order/HideSellerHistory',
+                            type: 'POST',
+                            data: {
+                                orderId: selectedOrderId
+                            },
+                            success: function(response) {
+                                if (response.success) {
+                                    Swal.fire({
+                                        title: 'Thành công!',
+                                        text: 'Đã xóa đơn hàng khỏi danh sách bán hàng',
+                                        icon: 'success'
+                                    }).then(() => {
+                                        location.reload();
+                                    });
+                                } else {
+                                    Swal.fire({
+                                        title: 'Lỗi!',
+                                        text: response.message,
+                                        icon: 'error'
+                                    });
+                                }
+                            },
+                            error: function() {
+                                Swal.fire({
+                                    title: 'Lỗi!',
+                                    text: 'Có lỗi xảy ra, vui lòng thử lại sau.',
+                                    icon: 'error'
+                                });
+                            }
+                        });
+                    }
+                });
+            }
+        });
+        });
 </script>
 } 
