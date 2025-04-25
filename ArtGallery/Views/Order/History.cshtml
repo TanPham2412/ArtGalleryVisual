@@ -451,7 +451,7 @@
             $('#' + activeTab).tab('show');
         }
 
-        // Ngăn chặn menu chuột phải mặc định
+        // Thay đổi phần xử lý chuột phải cho lịch sử đặt hàng
         $("#history .table tbody tr").on("contextmenu", function(e) {
             e.preventDefault();
             
@@ -466,15 +466,33 @@
             console.log("Order ID:", selectedOrderId);
             console.log("Status:", selectedOrderStatus);
             
-            // Hiển thị context menu tại vị trí chuột
-            $("#contextMenu").css({
-                top: e.pageY + "px",
-                left: e.pageX + "px"
-            }).show();
-            
             // Đánh dấu hàng đang được chọn
             $(".table tr").removeClass("selected");
             row.addClass("selected");
+            
+            // Hiển thị menu ngữ cảnh dựa trên trạng thái đơn hàng
+            if (selectedOrderStatus === "Đã xác nhận") {
+                // Hiển thị cả hai nút
+                $("#cancelOrder").show();
+                $("#receiveOrder").show();
+                
+                // Hiển thị context menu tại vị trí chuột
+                $("#contextMenu").css({
+                    top: e.pageY + "px",
+                    left: e.pageX + "px"
+                }).show();
+            } 
+            else if (selectedOrderStatus === "Đã đặt hàng") {
+                // Chỉ hiển thị nút hủy đơn hàng
+                $("#cancelOrder").show();
+                $("#receiveOrder").hide();
+                
+                // Hiển thị context menu tại vị trí chuột
+                $("#contextMenu").css({
+                    top: e.pageY + "px",
+                    left: e.pageX + "px"
+                }).show();
+            }
         });
         
         // Đóng context menu khi click ra ngoài
@@ -671,24 +689,37 @@
             });
         });
 
-        // Thêm xử lý chuột phải cho đơn bán hàng
+        // Thay đổi phần xử lý chuột phải cho đơn bán hàng
         $("#selling .table tbody tr").on("contextmenu", function(e) {
             e.preventDefault();
             
             // Lấy thông tin đơn hàng từ hàng được click
             var row = $(this);
             selectedOrderId = row.find("td:first").text();
-            selectedOrderStatus = row.find("td:eq(6) .badge").text().trim();
             
-            // Hiển thị context menu tại vị trí chuột
-            $("#sellerContextMenu").css({
-                top: e.pageY + "px",
-                left: e.pageX + "px"
-            }).show();
+            // Lấy chính xác trạng thái
+            var statusText = "";
+            var statusBadge = row.find("td:eq(6) .badge");
+            if (statusBadge.length > 0) {
+                statusText = statusBadge.text().trim();
+            }
+            selectedOrderStatus = statusText;
+            
+            console.log("Seller Order ID:", selectedOrderId);
+            console.log("Seller Status:", selectedOrderStatus);
             
             // Đánh dấu hàng đang được chọn
             $(".table tr").removeClass("selected");
             row.addClass("selected");
+            
+            // Chỉ hiển thị menu ngữ cảnh khi trạng thái là "Đã xác nhận"
+            if (selectedOrderStatus === "Đã xác nhận") {
+                // Hiển thị context menu tại vị trí chuột
+                $("#sellerContextMenu").css({
+                    top: e.pageY + "px",
+                    left: e.pageX + "px"
+                }).show();
+            }
         });
 
         // Đóng context menu khi click ra ngoài
