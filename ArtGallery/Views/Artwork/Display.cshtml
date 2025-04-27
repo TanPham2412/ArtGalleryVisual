@@ -261,20 +261,22 @@
                                     </div>
                                 </div>
                                 <div class="comment-content">
-                                    @comment.NoiDung
-                                    @if (!string.IsNullOrEmpty(comment.Sticker))
-                                    {
-                                        <div class="sticker-container">
-                                            <img src="@Url.Content(comment.Sticker)" alt="Sticker" class="comment-sticker" />
-                                        </div>
-                                    }
-                                    @if (!string.IsNullOrEmpty(comment.DuongDanAnh))
-                                    {
-                                        <div class="comment-image-container mt-2">
-                                            <img src="@Url.Content(comment.DuongDanAnh)" alt="Uploaded image" class="comment-image zoomable-image" 
-                                                 onclick="openImageModal('@Url.Content(comment.DuongDanAnh)')" />
-                                        </div>
-                                    }
+                                    <div class="comment-media-container">
+                                        @if (!string.IsNullOrEmpty(comment.Sticker))
+                                        {
+                                            <div class="sticker-container">
+                                                <img src="@Url.Content(comment.Sticker)" alt="Sticker" class="comment-sticker" />
+                                            </div>
+                                        }
+                                        @if (!string.IsNullOrEmpty(comment.DuongDanAnh))
+                                        {
+                                            <div class="comment-image-container">
+                                                <img src="@Url.Content(comment.DuongDanAnh)" alt="Uploaded image" class="comment-image zoomable-image"
+                                                     onclick="openImageModal('@Url.Content(comment.DuongDanAnh)')" />
+                                            </div>
+                                        }
+                                    </div>
+                                    <div class="comment-text">@comment.NoiDung</div>
                                 </div>
                                 <div class="comment-actions mt-2">
                                     @if (User.Identity.IsAuthenticated)
@@ -338,21 +340,23 @@
                                                     <img src="@reply.MaNguoiDungNavigation.GetAvatarPath()" alt="@reply.MaNguoiDungNavigation.TenNguoiDung" class="reply-avatar" />
                                                     <div class="reply-content">
                                                         <div class="reply-bubble">
+                                                            <div class="reply-media-container">
+                                                                @if (!string.IsNullOrEmpty(reply.Sticker))
+                                                                {
+                                                                    <div class="sticker-container">
+                                                                        <img src="@Url.Content(reply.Sticker)" alt="Sticker" class="reply-sticker" />
+                                                                    </div>
+                                                                }
+                                                                @if (!string.IsNullOrEmpty(reply.DuongDanAnh))
+                                                                {
+                                                                    <div class="reply-image-container">
+                                                                        <img src="@Url.Content(reply.DuongDanAnh)" alt="Uploaded image" class="reply-image zoomable-image"
+                                                                             onclick="openImageModal('@Url.Content(reply.DuongDanAnh)')" />
+                                                                    </div>
+                                                                }
+                                                            </div>
                                                             <h6 class="reply-username">@reply.MaNguoiDungNavigation.TenNguoiDung</h6>
                                                             <p class="reply-text mb-0">@reply.NoiDung</p>
-                                                            @if (!string.IsNullOrEmpty(reply.Sticker))
-                                                            {
-                                                                <div class="sticker-container">
-                                                                    <img src="@Url.Content(reply.Sticker)" alt="Sticker" class="reply-sticker" />
-                                                                </div>
-                                                            }
-                                                            @if (!string.IsNullOrEmpty(reply.DuongDanAnh))
-                                                            {
-                                                                <div class="reply-image-container mt-1">
-                                                                    <img src="@Url.Content(reply.DuongDanAnh)" alt="Uploaded image" class="reply-image zoomable-image" 
-                                                                         onclick="openImageModal('@Url.Content(reply.DuongDanAnh)')" />
-                                                                </div>
-                                                            }
                                                         </div>
                                                         <div class="reply-meta">
                                                             <span class="reply-time">@reply.NgayPhanHoi?.ToString("dd/MM/yyyy HH:mm")</span>
