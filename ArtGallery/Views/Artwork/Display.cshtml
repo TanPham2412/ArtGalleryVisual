@@ -528,49 +528,53 @@
 
 <!-- Thêm modal chỉnh sửa bình luận vào cuối file -->
 <div class="modal fade" id="editCommentModal" tabindex="-1" aria-labelledby="editCommentModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark text-white">
             <div class="modal-header">
                 <h5 class="modal-title" id="editCommentModalLabel">Chỉnh sửa bình luận</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close text-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <textarea id="editCommentContent" class="form-control" rows="4"></textarea>
-                
-                <!-- Thêm phần sticker và ảnh -->
-                <div class="comment-attachments mt-3">
-                    <div class="attachment-buttons">
-                        <label for="editImageInput" class="btn-attachment">
+                <form id="editCommentForm" enctype="multipart/form-data">
+                    <input type="hidden" id="editCommentId" value="" />
+                    <input type="hidden" id="editCommentOriginalImage" value="" />
+                    <input type="hidden" id="editCommentOriginalSticker" value="" />
+                    <input type="hidden" id="editArtworkId" value="@Model.MaTranh" />
+                    
+                    <div class="mb-3">
+                        <textarea id="editCommentContent" class="form-control bg-dark text-white" rows="3"></textarea>
+                    </div>
+                    
+                    <div class="d-flex mb-2">
+                        <button type="button" id="openEditImage" class="btn btn-outline-light me-2">
                             <i class="fas fa-image"></i> Ảnh
-                        </label>
-                        <button type="button" class="btn btn-primary" id="openEditStickerSelector">
-                            <i class="fas fa-smile"></i> Sticker
+                        </button>
+                        <button type="button" id="openEditStickerSelector" class="btn btn-outline-light">
+                            <i class="far fa-smile"></i> Sticker
                         </button>
                     </div>
-                    <div id="editImagePreviewContainer" class="d-none mt-2">
-                        <img id="editImagePreview" class="img-fluid rounded" style="max-height: 100px;" />
-                        <button type="button" class="btn-remove-attachment" id="removeEditImage">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
-                    <div id="editStickerPreviewContainer" class="d-none mt-2">
-                        <img id="editStickerPreview" class="img-fluid" style="max-height: 80px;" />
-                        <button type="button" class="btn-remove-attachment" id="removeEditSticker">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
-                    <input type="hidden" id="editStickerInput" />
+                    
                     <input type="file" id="editImageInput" class="d-none" accept="image/*" />
-                </div>
-                
-                <input type="hidden" id="editCommentId" value="" />
-                <input type="hidden" id="editCommentOriginalImage" value="" />
-                <input type="hidden" id="editCommentOriginalSticker" value="" />
-                <input type="hidden" id="editArtworkId" value="@Model.MaTranh" />
+                    <input type="hidden" id="editStickerInput" />
+                    
+                    <div id="editImagePreviewContainer" class="d-none mb-3">
+                        <img id="editImagePreview" class="img-thumbnail" style="max-width: 100px; max-height: 100px;" />
+                        <button type="button" id="removeEditImage" class="btn-remove-attachment">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    
+                    <div id="editStickerPreviewContainer" class="d-none mb-3">
+                        <img id="editStickerPreview" class="img-thumbnail" style="max-width: 100px; max-height: 100px;" />
+                        <button type="button" id="removeEditSticker" class="btn-remove-attachment">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                <button type="button" class="btn btn-primary" onclick="saveEditedComment()">Lưu thay đổi</button>
+                <button type="button" class="btn btn-primary" id="saveEditComment">Lưu thay đổi</button>
             </div>
         </div>
     </div>
@@ -578,21 +582,52 @@
 
 <!-- Thêm modal chỉnh sửa phản hồi vào cuối file -->
 <div class="modal fade" id="editReplyModal" tabindex="-1" aria-labelledby="editReplyModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark text-white">
             <div class="modal-header">
                 <h5 class="modal-title" id="editReplyModalLabel">Chỉnh sửa phản hồi</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close text-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <textarea id="editReplyContent" class="form-control" rows="3"></textarea>
-                <input type="hidden" id="editReplyId" value="" />
-                <input type="hidden" id="editReplyCommentId" value="" />
-                <input type="hidden" id="editReplyArtworkId" value="@Model.MaTranh" />
+                <form id="editReplyForm" enctype="multipart/form-data">
+                    <input type="hidden" id="editReplyId" name="replyId" />
+                    <input type="hidden" id="editReplyOriginalImage" name="originalImage" />
+                    <input type="hidden" id="editReplyOriginalSticker" name="originalSticker" />
+                    
+                    <div class="mb-3">
+                        <textarea id="editReplyContent" class="form-control bg-dark text-white" rows="3"></textarea>
+                    </div>
+                    
+                    <div class="d-flex mb-2">
+                        <button type="button" id="openEditReplyImage" class="btn btn-outline-light me-2">
+                            <i class="fas fa-image"></i> Ảnh
+                        </button>
+                        <button type="button" id="openEditReplySticker" class="btn btn-outline-light">
+                            <i class="far fa-smile"></i> Sticker
+                        </button>
+                    </div>
+                    
+                    <input type="file" id="editReplyImageInput" name="image" class="d-none" accept="image/*" />
+                    <input type="hidden" id="editReplyStickerInput" name="sticker" />
+                    
+                    <div id="editReplyImagePreviewContainer" class="d-none mb-3">
+                        <img id="editReplyImagePreview" class="img-thumbnail" style="max-width: 100px; max-height: 100px;" />
+                        <button type="button" id="removeEditReplyImage" class="btn-remove-attachment">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    
+                    <div id="editReplyStickerPreviewContainer" class="d-none mb-3">
+                        <img id="editReplyStickerPreview" class="img-thumbnail" style="max-width: 100px; max-height: 100px;" />
+                        <button type="button" id="removeEditReplySticker" class="btn-remove-attachment">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                <button type="button" class="btn btn-primary" onclick="saveEditedReply()">Lưu thay đổi</button>
+                <button type="button" class="btn btn-primary" id="saveEditReply">Lưu thay đổi</button>
             </div>
         </div>
     </div>

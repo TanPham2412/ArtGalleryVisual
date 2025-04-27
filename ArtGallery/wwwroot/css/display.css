@@ -792,36 +792,92 @@ body.no-scroll {
     gap: 10px;
 }
 
-.btn-attachment {
-    background: #333;
-    border: none;
-    color: #888;
-    padding: 6px 12px;
-    border-radius: 4px;
-    font-size: 14px;
-    transition: all 0.2s;
+/* Thống nhất giao diện cho nút sticker trong mọi trường hợp */
+button#openStickerSelector,
+button[id^="Sticker"], 
+.modal-body button, 
+button.btn-outline-light,
+label.btn-attachment {
+    border-radius: 4px !important;
+    background-color: transparent !important;
+    border: 1px solid rgba(255, 255, 255, 0.7) !important;
+    color: #fff !important;
+    padding: 6px 12px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    margin-right: 10px !important;
+    transition: all 0.3s ease !important;
 }
 
-.btn-attachment:hover {
-    background: #444;
-    color: #00a8ff;
+/* Ghi đè style cho các nút trong modal chỉnh sửa */
+#editCommentModal button, 
+#editReplyModal button {
+    border-radius: 4px !important;
 }
 
-.btn-remove-attachment {
-    position: absolute;
-    top: 0;
-    right: 0;
-    background: rgba(0, 0, 0, 0.7);
-    border: none;
-    color: #fff;
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    cursor: pointer;
+/* Sửa cụ thể nút sticker trong form chỉnh sửa bình luận */
+button.sticker-btn, 
+button[id*="Sticker"],
+button.btn-outline-light,
+.modal-body .btn-outline-light {
+    border-radius: 4px !important;
+    padding: 6px 12px !important;
+    text-align: center !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/* Đảm bảo icon nằm giữa nút */
+button i, label i {
+    margin-right: 4px;
+}
+
+/* Đặc biệt sửa cho nút sticker trong phần comment chính */
+.attachment-buttons .btn {
+    border-radius: 4px !important;
+    background-color: transparent !important;
+    border: 1px solid rgba(255, 255, 255, 0.7) !important;
+}
+
+/* Thống nhất hover cho tất cả nút */
+button#openStickerSelector:hover,
+button[id^="Sticker"]:hover, 
+.modal-body button:hover,
+button.btn-outline-light:hover,
+label.btn-attachment:hover,
+.attachment-buttons .btn:hover {
+    background-color: #007bff !important;
+    border-color: #007bff !important;
+    color: white !important;
+}
+
+/* Sửa nút trong form bình luận gốc */
+#commentForm button, 
+#commentForm label.btn-attachment {
+    background-color: transparent !important;
+    border: 1px solid rgba(255, 255, 255, 0.7) !important;
+    border-radius: 4px !important;
+    padding: 6px 12px !important;
+}
+
+/* Thêm style cho nút Sticker */
+.modal-body button[id*="Sticker"] {
+    width: auto !important;
+    height: auto !important;
+    border-radius: 4px !important;
+    padding: 6px 12px !important;
+}
+
+/* Màu nút trong modal footer */
+.modal-footer .btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.modal-footer .btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #0056b3;
 }
 
 #imagePreviewContainer, #stickerPreviewContainer {
