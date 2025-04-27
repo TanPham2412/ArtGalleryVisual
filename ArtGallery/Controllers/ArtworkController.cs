@@ -336,7 +336,7 @@ namespace ArtGallery.Controllers
             if (model == null || (string.IsNullOrEmpty(model.NoiDung) && CommentImage == null && string.IsNullOrEmpty(Sticker)))
             {
                 TempData["ErrorMessage"] = "Vui lòng nhập nội dung, chọn ảnh hoặc sticker";
-                return RedirectToAction("Display", new { id = model.MaTranh });
+                return RedirectToAction("Display", new { id = model.MaTranh, scrollToComments = true });
             }
             
             try
@@ -376,13 +376,13 @@ namespace ArtGallery.Controllers
                 await _context.SaveChangesAsync();
                 
                 TempData["SuccessMessage"] = "Bình luận của bạn đã được gửi thành công!";
-                return RedirectToAction("Display", new { id = model.MaTranh });
+                return RedirectToAction("Display", new { id = model.MaTranh, scrollToComments = true });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Lỗi khi thêm bình luận");
                 TempData["ErrorMessage"] = "Có lỗi xảy ra khi gửi bình luận";
-                return RedirectToAction("Display", new { id = model.MaTranh });
+                return RedirectToAction("Display", new { id = model.MaTranh, scrollToComments = true });
             }
         }
 

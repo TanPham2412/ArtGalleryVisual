@@ -926,3 +926,87 @@ function deleteReply(replyId, artworkId) {
         });
     }
 }
+
+// Lưu vị trí scroll
+function saveScrollPosition() {
+    sessionStorage.setItem('scrollPosition', window.scrollY);
+}
+
+// Khôi phục vị trí scroll
+function restoreScrollPosition() {
+    if (sessionStorage.getItem('scrollPosition') !== null) {
+        window.scrollTo(0, sessionStorage.getItem('scrollPosition'));
+        sessionStorage.removeItem('scrollPosition');
+    }
+}
+
+// Kiểm tra form trước khi submit
+document.addEventListener('DOMContentLoaded', function() {
+    // Kiểm tra form bình luận chính
+    const commentForm = document.getElementById('commentForm');
+    if (commentForm) {
+        commentForm.addEventListener('submit', function(e) {
+            // Ngăn form submit ngay lập tức để kiểm tra
+            e.preventDefault();
+            
+            const content = document.getElementById('commentContent').value.trim();
+            const imageInput = document.getElementById('imageInput');
+            const stickerInput = document.getElementById('stickerInput').value;
+            
+            if (content === '' && (!imageInput || !imageInput.files.length) && !stickerInput) {
+                alert('Vui lòng nhập nội dung, chọn ảnh hoặc sticker');
+                return false;
+            }
+            
+            // Lưu vị trí scroll
+            const scrollPosition = window.scrollY || window.pageYOffset;
+            localStorage.setItem('scrollPosition', scrollPosition);
+            
+            // Cho phép form submit nếu dữ liệu hợp lệ
+            commentForm.submit();
+        });
+    }
+    
+    // Khôi phục vị trí scroll sau khi trang tải lại
+    if (localStorage.getItem('scrollPosition')) {
+        const savedPosition = localStorage.getItem('scrollPosition');
+        window.scrollTo(0, savedPosition);
+        localStorage.removeItem('scrollPosition');
+    }
+    
+    // Xử lý tương tự cho các form phản hồi
+    const replyForms = document.querySelectorAll('.reply-form');
+    replyForms.forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const replyInput = form.querySelector('.reply-input').value.trim();
+            const imageInput = form.querySelector('.imageInputReply');
+            const stickerInput = form.querySelector('.stickerInputReply').value;
+            
+            if (replyInput === '' && (!imageInput || !imageInput.files.length) && !stickerInput) {
+                alert('Vui lòng nhập nội dung, chọn ảnh hoặc sticker');
+                return false;
+            }
+            
+            // Lưu vị trí scroll
+            const scrollPosition = window.scrollY || window.pageYOffset;
+            localStorage.setItem('scrollPosition', scrollPosition);
+            
+            // Submit form nếu dữ liệu hợp lệ
+            form.submit();
+        });
+    });
+});
+
+// Thêm vào cuối file nếu cần
+function showEditReplyModal(replyId, commentId, replyContent) {
+    // Thêm data attribute để lưu commentId
+    $('#editReplyForm').data('comment-id', commentId);
+    
+    $('#editReplyId').val(replyId);
+    $('#editReplyContent').val(replyContent);
+    
+    const editReplyModal = new bootstrap.Modal(document.getElementById('editReplyModal'));
+    editReplyModal.show();
+}

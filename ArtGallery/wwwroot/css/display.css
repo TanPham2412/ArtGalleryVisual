@@ -798,13 +798,13 @@ button[id^="Sticker"],
 .modal-body button, 
 button.btn-outline-light,
 label.btn-attachment {
-    border-radius: 4px !important;
     background-color: transparent !important;
     border: 1px solid rgba(255, 255, 255, 0.7) !important;
     color: #fff !important;
     padding: 6px 12px !important;
     display: inline-flex !important;
     align-items: center !important;
+    border-radius: 4px !important;
     margin-right: 10px !important;
     transition: all 0.3s ease !important;
 }
@@ -1212,16 +1212,92 @@ label.btn-attachment:hover,
     color: #ff4545;
 }
 
-/* Style cho modal chỉnh sửa phản hồi */
-#editReplyContent {
-    background-color: #333;
-    border: 1px solid #444;
-    color: #e0e0e0;
+/* Cải thiện giao diện nút sửa bình luận */
+.btn-edit-comment,
+.btn-edit-reply,
+.btn-toggle-hide,
+.btn-delete-comment,
+.btn-delete-reply {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+    margin-right: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 4px 8px;
+    border-radius: 4px;
 }
 
-#editReplyContent:focus {
-    background-color: #3a3a3a;
-    border-color: #00a8ff;
-    color: #fff;
-    box-shadow: 0 0 0 0.25rem rgba(0, 168, 255, 0.25);
+.btn-edit-comment:hover,
+.btn-edit-reply:hover {
+    color: #007bff !important;
+    background-color: rgba(0, 123, 255, 0.1);
+}
+
+.btn-toggle-hide:hover {
+    color: #ffc107 !important;
+    background-color: rgba(255, 193, 7, 0.1);
+}
+
+.btn-delete-comment:hover,
+.btn-delete-reply:hover {
+    color: #dc3545 !important;
+    background-color: rgba(220, 53, 69, 0.1);
+}
+
+/* Cải thiện giao diện cho modal chỉnh sửa */
+#editCommentModal .modal-content,
+#editReplyModal .modal-content {
+    background-color: #1a1a1a !important;
+    border: 1px solid #333;
+}
+
+#editCommentModal .modal-header,
+#editReplyModal .modal-header {
+    border-bottom: 1px solid #333;
+}
+
+#editCommentModal .modal-footer,
+#editReplyModal .modal-footer {
+    border-top: 1px solid #333;
+}
+
+/* Đồng bộ nút trong modal với phong cách chính */
+#openEditImage, 
+#openEditReplyImage,
+#openEditStickerSelector, 
+#openEditReplySticker {
+    background-color: transparent !important;
+    border: 1px solid rgba(255, 255, 255, 0.7) !important;
+    color: #fff !important;
+    border-radius: 4px;
+    padding: 6px 12px;
+    transition: all 0.3s ease;
+}
+
+#openEditImage:hover, 
+#openEditReplyImage:hover,
+#openEditStickerSelector:hover, 
+#openEditReplySticker:hover {
+    background-color: #007bff !important;
+    border-color: #007bff !important;
+}
+
+/* Thêm CSS để giữ scroll position */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Sửa màu chữ nút gửi bình luận thành xanh lam */
+.comment-form-container .btn-primary {
+    background-color: #121212;
+    border-color: #007bff;
+    color: #007bff !important;
+    transition: all 0.3s ease;
+}
+
+.comment-form-container .btn-primary:hover {
+    background-color: #007bff;
+    color: white !important;
 }
