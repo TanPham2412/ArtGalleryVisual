@@ -23,6 +23,8 @@ public partial class BinhLuan
 
     public bool IsHidden { get; set; } = false;
 
+    public bool DaChinhSua { get; set; } = false;
+
     public virtual NguoiDung MaNguoiDungNavigation { get; set; } = null!;
 
     public virtual Tranh MaTranhNavigation { get; set; } = null!;

@@ -1093,3 +1093,41 @@ body.no-scroll {
 .toast-body {
     background-color: #1e1e1e;
 }
+
+/* Style cho trạng thái đã chỉnh sửa */
+.edited-marker {
+    font-size: 12px;
+    color: #888;
+    font-weight: normal;
+    font-style: italic;
+    margin-left: 5px;
+}
+
+/* Style cho nút chỉnh sửa bình luận */
+.btn-edit-comment {
+    background: transparent;
+    border: none;
+    color: #888;
+    font-size: 13px;
+    padding: 3px 8px;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.btn-edit-comment:hover {
+    color: #00a8ff;
+}
+
+/* Style cho modal chỉnh sửa */
+#editCommentContent {
+    background-color: #333;
+    border: 1px solid #444;
+    color: #e0e0e0;
+}
+
+#editCommentContent:focus {
+    background-color: #3a3a3a;
+    border-color: #00a8ff;
+    color: #fff;
+    box-shadow: 0 0 0 0.25rem rgba(0, 168, 255, 0.25);
+}

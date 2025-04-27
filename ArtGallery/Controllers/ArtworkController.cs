@@ -521,5 +521,56 @@ namespace ArtGallery.Controllers
                 return Json(new { success = false, message = "Có lỗi xảy ra khi ẩn/hiện bình luận" });
             }
         }
+
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditComment(int commentId, int artworkId, string editedContent)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(editedContent))
+                {
+                    return Json(new { success = false, message = "Nội dung bình luận không được để trống" });
+                }
+                
+                var comment = await _context.BinhLuans.FindAsync(commentId);
+                if (comment == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy bình luận này" });
+                }
+                
+                var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var isAdmin = User.IsInRole("Admin");
+                
+                // Chỉ admin hoặc người viết bình luận mới có quyền sửa
+                if (isAdmin || comment.MaNguoiDung == currentUserId)
+                {
+                    // Lưu nội dung cũ trước khi cập nhật
+                    var originalContent = comment.NoiDung;
+                    
+                    // Cập nhật nội dung bình luận
+                    comment.NoiDung = editedContent;
+                    comment.DaChinhSua = true; // Đánh dấu đã chỉnh sửa
+                    await _context.SaveChangesAsync();
+                    
+                    return Json(new { 
+                        success = true, 
+                        message = "Đã cập nhật bình luận thành công",
+                        commentId = commentId,
+                        editedContent = editedContent
+                    });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Bạn không có quyền sửa bình luận này" });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi sửa bình luận");
+                return Json(new { success = false, message = "Có lỗi xảy ra khi sửa bình luận" });
+            }
+        }
     }
 }

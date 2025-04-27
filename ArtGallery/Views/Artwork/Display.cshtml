@@ -246,7 +246,13 @@
                                     <div class="d-flex align-items-center">
                                         <img src="@comment.MaNguoiDungNavigation.GetAvatarPath()" alt="@comment.MaNguoiDungNavigation.TenNguoiDung" class="commenter-avatar" />
                                         <div class="commenter-info">
-                                            <h5 class="commenter-name">@comment.MaNguoiDungNavigation.TenNguoiDung</h5>
+                                            <h5 class="commenter-name">
+                                                @comment.MaNguoiDungNavigation.TenNguoiDung
+                                                @if (comment.DaChinhSua)
+                                                {
+                                                    <span class="edited-marker">(đã chỉnh sửa)</span>
+                                                }
+                                            </h5>
                                             <div class="comment-date">@comment.NgayBinhLuan?.ToString("dd/MM/yyyy HH:mm")</div>
                                         </div>
                                     </div>
@@ -294,6 +300,9 @@
                                         @if (User.IsInRole("Admin") || comment.MaNguoiDung == currentUserId)
                                         {
                                             <div class="comment-admin-actions">
+                                                <button class="btn-edit-comment" onclick="showEditCommentModal(@comment.MaBinhLuan, '@comment.NoiDung')">
+                                                    <i class="fas fa-edit me-1"></i>Sửa
+                                                </button>
                                                 <button class="btn-toggle-hide" onclick="toggleHideComment(@comment.MaBinhLuan, @Model.MaTranh)">
                                                     <i class="fas @(comment.IsHidden ? "fa-eye" : "fa-eye-slash") me-1"></i>
                                                     @(comment.IsHidden ? "Hiện" : "Ẩn")
@@ -493,6 +502,27 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Thêm modal chỉnh sửa bình luận vào cuối file -->
+<div class="modal fade" id="editCommentModal" tabindex="-1" aria-labelledby="editCommentModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editCommentModalLabel">Chỉnh sửa bình luận</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <textarea id="editCommentContent" class="form-control" rows="4"></textarea>
+                <input type="hidden" id="editCommentId" value="" />
+                <input type="hidden" id="editArtworkId" value="@Model.MaTranh" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary" onclick="saveEditedComment()">Lưu thay đổi</button>
             </div>
         </div>
     </div>

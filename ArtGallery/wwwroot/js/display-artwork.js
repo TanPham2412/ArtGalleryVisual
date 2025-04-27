@@ -316,6 +316,74 @@ function toggleHideComment(commentId, artworkId) {
     });
 }
 
+// Hiển thị modal sửa bình luận
+function showEditCommentModal(commentId, commentContent) {
+    $('#editCommentId').val(commentId);
+    $('#editCommentContent').val(commentContent);
+    $('#editCommentModal').modal('show');
+}
+
+// Lưu bình luận đã chỉnh sửa
+function saveEditedComment() {
+    const commentId = $('#editCommentId').val();
+    const artworkId = $('#editArtworkId').val();
+    const editedContent = $('#editCommentContent').val();
+    
+    if (!editedContent.trim()) {
+        alert('Nội dung bình luận không được để trống');
+        return;
+    }
+    
+    $.ajax({
+        url: '/Artwork/EditComment',
+        type: 'POST',
+        data: {
+            commentId: commentId,
+            artworkId: artworkId,
+            editedContent: editedContent
+        },
+        headers: {
+            'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+        },
+        success: function(response) {
+            if (response.success) {
+                // Cập nhật nội dung bình luận trên UI
+                $(`#comment-${commentId} .comment-text`).text(response.editedContent);
+                
+                // Nếu comment chưa có trạng thái "đã chỉnh sửa", thêm vào
+                if (!$(`#comment-${commentId} .edited-marker`).length) {
+                    $(`#comment-${commentId} .commenter-name`).append('<span class="edited-marker">(đã chỉnh sửa)</span>');
+                }
+                
+                // Đóng modal
+                $('#editCommentModal').modal('hide');
+                
+                // Hiển thị thông báo
+                const toastHTML = `
+                    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+                        <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                            <div class="toast-header">
+                                <strong class="me-auto">Thông báo</strong>
+                                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                            </div>
+                            <div class="toast-body">
+                                ${response.message}
+                            </div>
+                        </div>
+                    </div>`;
+                
+                $('body').append(toastHTML);
+                $('.toast').toast('show');
+            } else {
+                alert(response.message);
+            }
+        },
+        error: function() {
+            alert('Có lỗi xảy ra khi sửa bình luận');
+        }
+    });
+}
+
 // Sự kiện khi trang được tải xong
 $(document).ready(function() {
     // Xử lý rating stars
