@@ -23,7 +23,7 @@
 }
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-<link rel="stylesheet" href="~/css/display.css?v=3">
+<link rel="stylesheet" href="~/css/display.css?v=4">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
 
@@ -174,7 +174,7 @@
                 @if (User.Identity.IsAuthenticated)
                 {
                     <div class="comment-form-container mb-4">
-                        <form id="commentForm" asp-action="AddComment" asp-controller="Artwork" method="post">
+                        <form id="commentForm" asp-action="AddComment" asp-controller="Artwork" method="post" enctype="multipart/form-data">
                             <input type="hidden" name="MaTranh" value="@Model.MaTranh" />
                             
                             <div class="rating-selection mb-3">
@@ -192,6 +192,31 @@
                             <div class="form-group mb-3">
                                 <textarea class="form-control" id="commentContent" name="NoiDung" rows="3" 
                                           placeholder="Nhập bình luận của bạn về tác phẩm này"></textarea>
+                            </div>
+                            
+                            <div class="comment-attachments mt-2 mb-3">
+                                <div class="attachment-buttons">
+                                    <label for="imageInput" class="btn-attachment">
+                                        <i class="fas fa-image"></i> Ảnh
+                                    </label>
+                                    <button type="button" class="btn-attachment" id="openStickerSelector">
+                                        <i class="fas fa-smile"></i> Sticker
+                                    </button>
+                                </div>
+                                <div id="imagePreviewContainer" class="d-none mt-2">
+                                    <img id="imagePreview" class="img-fluid rounded" style="max-height: 100px;" />
+                                    <button type="button" class="btn-remove-attachment" id="removeImage">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                <div id="stickerPreviewContainer" class="d-none mt-2">
+                                    <img id="stickerPreview" class="img-fluid" style="max-height: 80px;" />
+                                    <button type="button" class="btn-remove-attachment" id="removeSticker">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                <input type="hidden" name="Sticker" id="stickerInput" />
+                                <input type="file" id="imageInput" name="CommentImage" class="d-none" accept="image/*" />
                             </div>
                             
                             <button type="submit" class="btn btn-primary">
@@ -237,6 +262,18 @@
                                 </div>
                                 <div class="comment-content">
                                     @comment.NoiDung
+                                    @if (!string.IsNullOrEmpty(comment.Sticker))
+                                    {
+                                        <div class="sticker-container">
+                                            <img src="@Url.Content(comment.Sticker)" alt="Sticker" class="comment-sticker" />
+                                        </div>
+                                    }
+                                    @if (!string.IsNullOrEmpty(comment.DuongDanAnh))
+                                    {
+                                        <div class="comment-image-container mt-2">
+                                            <img src="@Url.Content(comment.DuongDanAnh)" alt="Uploaded image" class="comment-image" />
+                                        </div>
+                                    }
                                 </div>
                                 <div class="comment-actions mt-2">
                                     @if (User.Identity.IsAuthenticated)
@@ -249,7 +286,7 @@
                                 
                                 <!-- Form phản hồi (ẩn ban đầu) -->
                                 <div class="reply-form-container mt-2" id="replyForm-@comment.MaBinhLuan" style="display:none;">
-                                    <form class="reply-form" asp-action="AddReply" asp-controller="Artwork" method="post">
+                                    <form class="reply-form" asp-action="AddReply" asp-controller="Artwork" method="post" enctype="multipart/form-data">
                                         <input type="hidden" name="MaBinhLuan" value="@comment.MaBinhLuan" />
                                         <input type="hidden" name="MaTranh" value="@Model.MaTranh" />
                                         <div class="d-flex">
@@ -258,6 +295,28 @@
                                             </div>
                                             <div class="reply-input-container">
                                                 <textarea class="form-control reply-input" name="NoiDung" placeholder="Viết phản hồi..." rows="1"></textarea>
+                                                <div class="reply-attachment-options mt-1">
+                                                    <button type="button" class="btn-reply-attachment" onclick="openReplyImageSelector(@comment.MaBinhLuan)">
+                                                        <i class="fas fa-image"></i>
+                                                    </button>
+                                                    <button type="button" class="btn-reply-attachment" onclick="openReplyStickerSelector(@comment.MaBinhLuan)">
+                                                        <i class="fas fa-smile"></i>
+                                                    </button>
+                                                    <div id="replyImagePreview-@comment.MaBinhLuan" class="reply-preview d-none">
+                                                        <img class="img-fluid rounded preview-img" />
+                                                        <button type="button" class="btn-remove-preview" onclick="removeReplyImage(@comment.MaBinhLuan)">
+                                                            <i class="fas fa-times"></i>
+                                                        </button>
+                                                    </div>
+                                                    <div id="replyStickerPreview-@comment.MaBinhLuan" class="reply-preview d-none">
+                                                        <img class="img-fluid preview-sticker" />
+                                                        <button type="button" class="btn-remove-preview" onclick="removeReplySticker(@comment.MaBinhLuan)">
+                                                            <i class="fas fa-times"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <input type="hidden" name="Sticker" class="stickerInputReply" id="stickerInputReply-@comment.MaBinhLuan" />
+                                                <input type="file" class="d-none imageInputReply" id="imageInputReply-@comment.MaBinhLuan" name="ReplyImage" accept="image/*" />
                                                 <div class="reply-actions mt-2">
                                                     <button type="button" class="btn-cancel-reply" onclick="hideReplyForm(@comment.MaBinhLuan)">Hủy</button>
                                                     <button type="submit" class="btn-submit-reply">Gửi</button>
@@ -280,6 +339,18 @@
                                                         <div class="reply-bubble">
                                                             <h6 class="reply-username">@reply.MaNguoiDungNavigation.TenNguoiDung</h6>
                                                             <p class="reply-text mb-0">@reply.NoiDung</p>
+                                                            @if (!string.IsNullOrEmpty(reply.Sticker))
+                                                            {
+                                                                <div class="sticker-container">
+                                                                    <img src="@Url.Content(reply.Sticker)" alt="Sticker" class="reply-sticker" />
+                                                                </div>
+                                                            }
+                                                            @if (!string.IsNullOrEmpty(reply.DuongDanAnh))
+                                                            {
+                                                                <div class="reply-image-container mt-1">
+                                                                    <img src="@Url.Content(reply.DuongDanAnh)" alt="Uploaded image" class="reply-image" />
+                                                                </div>
+                                                            }
                                                         </div>
                                                         <div class="reply-meta">
                                                             <span class="reply-time">@reply.NgayPhanHoi?.ToString("dd/MM/yyyy HH:mm")</span>
@@ -358,6 +429,7 @@
         <span class="close" onclick="closeArtworkModal()">&times;</span>
         <img class="artwork-modal-content" id="modalImage">
     </div>
+</div>
 </div>
 
 @section Scripts {
@@ -519,6 +591,146 @@
                 const textarea = replyForm.querySelector('textarea');
                 if (textarea) textarea.value = '';
             }
+        }
+
+        // Load stickers
+        function loadStickers() {
+            $.ajax({
+                url: '/Artwork/GetStickers',
+                type: 'GET',
+                success: function(data) {
+                    if (data.vanthuong && data.vanthuong.length > 0) {
+                        let vanthuongHtml = '';
+                        data.vanthuong.forEach(function(sticker) {
+                            vanthuongHtml += `<div class="sticker-item">
+                                <img src="${sticker}" data-path="${sticker}" class="sticker-img" onclick="selectSticker(this)">
+                            </div>`;
+                        });
+                        $('#vanthuong .sticker-grid').html(vanthuongHtml);
+                    }
+                    
+                    if (data.daisuhuynh && data.daisuhuynh.length > 0) {
+                        let daisuhuynhHtml = '';
+                        data.daisuhuynh.forEach(function(sticker) {
+                            daisuhuynhHtml += `<div class="sticker-item">
+                                <img src="${sticker}" data-path="${sticker}" class="sticker-img" onclick="selectSticker(this)">
+                            </div>`;
+                        });
+                        $('#daisuhuynh .sticker-grid').html(daisuhuynhHtml);
+                    }
+                },
+                error: function() {
+                    console.error('Không thể tải stickers');
+                }
+            });
+        }
+        
+        // Gọi hàm load stickers khi trang đã tải xong
+        loadStickers();
+        
+        // Xử lý nút chọn ảnh
+        $('#openImageSelector').click(function() {
+            $('#imageInput').click();
+        });
+        
+        // Xử lý nút chọn sticker
+        $('#openStickerSelector').click(function() {
+            $('#stickerModal').modal('show');
+        });
+        
+        // Xử lý nút chọn ảnh
+        $('#imageInput').change(function() {
+            const file = this.files[0];
+            console.log('Đã chọn file:', file);
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    $('#imagePreview').attr('src', e.target.result);
+                    $('#imagePreviewContainer').removeClass('d-none');
+                    $('#stickerPreviewContainer').addClass('d-none');
+                    $('#stickerInput').val('');
+                    console.log('Đã hiển thị ảnh preview');
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+        
+        // Xóa ảnh đã chọn
+        $('#removeImage').click(function() {
+            $('#imageInput').val('');
+            $('#imagePreviewContainer').addClass('d-none');
+        });
+        
+        // Xóa sticker đã chọn
+        $('#removeSticker').click(function() {
+            $('#stickerInput').val('');
+            $('#stickerPreviewContainer').addClass('d-none');
+        });
+        
+        // Hàm chọn sticker
+        function selectSticker(element) {
+            const stickerPath = $(element).data('path');
+            $('#stickerInput').val(stickerPath);
+            $('#stickerPreview').attr('src', stickerPath);
+            $('#stickerPreviewContainer').removeClass('d-none');
+            $('#imagePreviewContainer').addClass('d-none');
+            $('#imageInput').val('');
+            $('#stickerModal').modal('hide');
+        }
+        
+        // Hàm mở selector ảnh cho phản hồi
+        function openReplyImageSelector(commentId) {
+            $(`#imageInputReply-${commentId}`).click();
+        }
+        
+        // Hàm mở selector sticker cho phản hồi
+        function openReplyStickerSelector(commentId) {
+            activeReplyId = commentId;
+            $('#stickerModal').modal('show');
+        }
+        
+        // Biến để lưu ID phản hồi đang active
+        let activeReplyId = null;
+        
+        // Thêm xử lý chọn sticker cho phản hồi
+        $('.sticker-img').click(function() {
+            if (activeReplyId) {
+                const stickerPath = $(this).data('path');
+                $(`#stickerInputReply-${activeReplyId}`).val(stickerPath);
+                $(`#replyStickerPreview-${activeReplyId} .preview-sticker`).attr('src', stickerPath);
+                $(`#replyStickerPreview-${activeReplyId}`).removeClass('d-none');
+                $(`#replyImagePreview-${activeReplyId}`).addClass('d-none');
+                $(`#imageInputReply-${activeReplyId}`).val('');
+                $('#stickerModal').modal('hide');
+            }
+        });
+        
+        // Xử lý chọn ảnh cho phản hồi
+        $('.imageInputReply').change(function() {
+            const commentId = $(this).attr('id').split('-')[1];
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    $(`#replyImagePreview-${commentId} .preview-img`).attr('src', e.target.result);
+                    $(`#replyImagePreview-${commentId}`).removeClass('d-none');
+                    $(`#replyStickerPreview-${commentId}`).addClass('d-none');
+                    $(`#stickerInputReply-${commentId}`).val('');
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+        
+        // Xóa ảnh phản hồi
+        function removeReplyImage(commentId) {
+            $(`#imageInputReply-${commentId}`).val('');
+            $(`#replyImagePreview-${commentId}`).addClass('d-none');
+        }
+        
+        // Xóa sticker phản hồi
+        function removeReplySticker(commentId) {
+            $(`#stickerInputReply-${commentId}`).val('');
+            $(`#replyStickerPreview-${commentId}`).addClass('d-none');
         }
     </script>
 }

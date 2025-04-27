@@ -5,6 +5,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
+using System.IO;
 
 namespace ArtGallery.Controllers
 {
@@ -289,14 +290,35 @@ namespace ArtGallery.Controllers
             }
         }
 
+        [HttpGet]
+        public IActionResult GetStickers()
+        {
+            var basePath = "/images/stickers/";
+            var vanthuongPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "stickers", "vanthuong");
+            var daisuhuynhPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "stickers", "daisuhuynh");
+            
+            var vanthuongFiles = Directory.Exists(vanthuongPath) 
+                ? Directory.GetFiles(vanthuongPath, "*.png").Select(f => basePath + "vanthuong/" + Path.GetFileName(f)).ToList() 
+                : new List<string>();
+            
+            var daisuhuynhFiles = Directory.Exists(daisuhuynhPath) 
+                ? Directory.GetFiles(daisuhuynhPath, "*.png").Select(f => basePath + "daisuhuynh/" + Path.GetFileName(f)).ToList() 
+                : new List<string>();
+            
+            return Json(new { vanthuong = vanthuongFiles, daisuhuynh = daisuhuynhFiles });
+        }
+
         [HttpPost]
         [Authorize]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AddComment(BinhLuan model, int Rating)
+        public async Task<IActionResult> AddComment(BinhLuan model, int Rating, IFormFile CommentImage, string Sticker)
         {
-            if (model == null || string.IsNullOrEmpty(model.NoiDung))
+            // Thêm log để kiểm tra
+            _logger.LogInformation($"AddComment: Ảnh đã upload: {CommentImage?.FileName}, Kích thước: {CommentImage?.Length}");
+            
+            if (model == null || (string.IsNullOrEmpty(model.NoiDung) && CommentImage == null && string.IsNullOrEmpty(Sticker)))
             {
-                TempData["ErrorMessage"] = "Nội dung bình luận không được để trống";
+                TempData["ErrorMessage"] = "Vui lòng nhập nội dung, chọn ảnh hoặc sticker";
                 return RedirectToAction("Display", new { id = model.MaTranh });
             }
             
@@ -308,10 +330,30 @@ namespace ArtGallery.Controllers
                 {
                     MaTranh = model.MaTranh,
                     MaNguoiDung = currentUserId,
-                    NoiDung = model.NoiDung,
+                    NoiDung = model.NoiDung ?? "",
                     NgayBinhLuan = DateTime.Now,
-                    Rating = Rating // Thêm trường Rating vào bảng BinhLuan
+                    Rating = Rating,
+                    Sticker = Sticker
                 };
+                
+                // Xử lý upload ảnh nếu có
+                if (CommentImage != null && CommentImage.Length > 0)
+                {
+                    var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "comments");
+                    if (!Directory.Exists(uploadsFolder))
+                        Directory.CreateDirectory(uploadsFolder);
+                        
+                    var uniqueFileName = Guid.NewGuid().ToString() + "_" + CommentImage.FileName;
+                    var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+                    
+                    using (var fileStream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await CommentImage.CopyToAsync(fileStream);
+                    }
+                    
+                    comment.DuongDanAnh = "/images/comments/" + uniqueFileName;
+                    _logger.LogInformation($"Đã lưu ảnh tại: {comment.DuongDanAnh}");
+                }
                 
                 _context.BinhLuans.Add(comment);
                 await _context.SaveChangesAsync();
@@ -330,11 +372,11 @@ namespace ArtGallery.Controllers
         [HttpPost]
         [Authorize]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AddReply(int MaBinhLuan, int MaTranh, string NoiDung)
+        public async Task<IActionResult> AddReply(int MaBinhLuan, int MaTranh, string NoiDung, IFormFile ReplyImage, string Sticker)
         {
-            if (string.IsNullOrEmpty(NoiDung))
+            if (string.IsNullOrEmpty(NoiDung) && ReplyImage == null && string.IsNullOrEmpty(Sticker))
             {
-                TempData["ErrorMessage"] = "Nội dung phản hồi không được để trống";
+                TempData["ErrorMessage"] = "Vui lòng nhập nội dung, chọn ảnh hoặc sticker";
                 return RedirectToAction("Display", new { id = MaTranh });
             }
             
@@ -346,9 +388,28 @@ namespace ArtGallery.Controllers
                 {
                     MaBinhLuan = MaBinhLuan,
                     MaNguoiDung = currentUserId,
-                    NoiDung = NoiDung,
-                    NgayPhanHoi = DateTime.Now
+                    NoiDung = NoiDung ?? "",
+                    NgayPhanHoi = DateTime.Now,
+                    Sticker = Sticker
                 };
+                
+                // Xử lý upload ảnh nếu có
+                if (ReplyImage != null && ReplyImage.Length > 0)
+                {
+                    var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "comments");
+                    if (!Directory.Exists(uploadsFolder))
+                        Directory.CreateDirectory(uploadsFolder);
+                        
+                    var uniqueFileName = Guid.NewGuid().ToString() + "_" + ReplyImage.FileName;
+                    var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+                    
+                    using (var fileStream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await ReplyImage.CopyToAsync(fileStream);
+                    }
+                    
+                    reply.DuongDanAnh = "/images/comments/" + uniqueFileName;
+                }
                 
                 _context.PhanHoiBinhLuans.Add(reply);
                 await _context.SaveChangesAsync();

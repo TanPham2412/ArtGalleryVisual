@@ -31,6 +31,10 @@ namespace ArtGallery.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MaBinhLuan"));
 
+                    b.Property<string>("DuongDanAnh")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("duong_dan_anh");
+
                     b.Property<string>("MaNguoiDung")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)")
@@ -56,6 +60,10 @@ namespace ArtGallery.Migrations
                         .HasColumnType("int")
                         .HasDefaultValue(0)
                         .HasColumnName("rating");
+
+                    b.Property<string>("Sticker")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("sticker");
 
                     b.HasKey("MaBinhLuan")
                         .HasName("PK__binh_lua__300DD2D8D7F67231");
@@ -404,6 +412,10 @@ namespace ArtGallery.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MaPhanHoi"));
 
+                    b.Property<string>("DuongDanAnh")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("duong_dan_anh");
+
                     b.Property<int>("MaBinhLuan")
                         .HasColumnType("int")
                         .HasColumnName("ma_binh_luan");
@@ -423,6 +435,10 @@ namespace ArtGallery.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("noi_dung");
+
+                    b.Property<string>("Sticker")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("sticker");
 
                     b.HasKey("MaPhanHoi")
                         .HasName("PK__phan_hoi_binh_luan__ID");

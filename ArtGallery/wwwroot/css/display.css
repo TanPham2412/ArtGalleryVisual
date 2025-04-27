@@ -781,3 +781,199 @@ body.no-scroll {
     font-size: 11px;
     color: #888;
 }
+
+/* Sticker và ảnh trong bình luận */
+.comment-attachments {
+    display: flex;
+    flex-direction: column;
+}
+
+.attachment-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-attachment {
+    background: #333;
+    border: none;
+    color: #888;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.btn-attachment:hover {
+    background: #444;
+    color: #00a8ff;
+}
+
+.btn-remove-attachment {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.7);
+    border: none;
+    color: #fff;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+#imagePreviewContainer, #stickerPreviewContainer {
+    position: relative;
+    display: inline-block;
+}
+
+/* Sticker modal */
+.sticker-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    padding: 10px;
+}
+
+.sticker-item {
+    cursor: pointer;
+    transition: transform 0.2s;
+    text-align: center;
+}
+
+.sticker-item:hover {
+    transform: scale(1.1);
+}
+
+.sticker-img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 4px;
+}
+
+/* Sticker và ảnh trong nội dung bình luận */
+.sticker-container {
+    margin-top: 10px;
+}
+
+.comment-sticker {
+    max-width: 100px;
+    max-height: 100px;
+}
+
+.comment-image-container {
+    margin-top: 10px;
+}
+
+.comment-image {
+    max-width: 200px;
+    max-height: 150px;
+    border-radius: 8px;
+    object-fit: contain;
+}
+
+/* Sticker và ảnh trong phản hồi */
+.btn-reply-attachment {
+    background: transparent;
+    border: none;
+    color: #777;
+    font-size: 14px;
+    padding: 2px 5px;
+    cursor: pointer;
+}
+
+.btn-reply-attachment:hover {
+    color: #00a8ff;
+}
+
+.reply-preview {
+    position: relative;
+    display: inline-block;
+    margin-top: 5px;
+}
+
+.preview-img, .preview-sticker {
+    max-height: 60px;
+    border-radius: 4px;
+}
+
+.btn-remove-preview {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: rgba(0, 0, 0, 0.7);
+    border: none;
+    color: #fff;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    cursor: pointer;
+}
+
+.reply-attachment-options {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.reply-sticker {
+    max-width: 70px;
+    max-height: 70px;
+}
+
+.reply-image-container {
+    margin-top: 5px;
+}
+
+.reply-image {
+    max-width: 150px;
+    max-height: 100px;
+    border-radius: 6px;
+    object-fit: contain;
+}
+
+/* Tab sticker styles */
+.nav-tabs .nav-link {
+    color: #e0e0e0;
+    border-color: #333 #333 transparent;
+    background-color: #1a1a1a;
+}
+
+.nav-tabs .nav-link.active {
+    color: #00a8ff;
+    background-color: #222;
+    border-color: #444 #444 #222;
+}
+
+.nav-tabs .nav-link:hover {
+    border-color: #444 #444 transparent;
+}
+
+.tab-content {
+    background-color: #222;
+    border: 1px solid #444;
+    border-top: none;
+    border-radius: 0 0 4px 4px;
+}
+
+/* Modal sticker */
+#stickerModal .modal-content {
+    background-color: #1a1a1a;
+    color: #e0e0e0;
+}
+
+#stickerModal .modal-header {
+    border-bottom-color: #333;
+}
+
+/* Thêm container cho ảnh và sticker */
+.comment-image-container, .reply-image-container, .sticker-container {
+    display: inline-block;
+}

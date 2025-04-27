@@ -355,7 +355,9 @@ namespace ArtGallery.Migrations
                     ma_nguoi_dung = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     noi_dung = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ngay_binh_luan = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "(getdate())"),
-                    rating = table.Column<int>(type: "int", nullable: false, defaultValue: 0)
+                    rating = table.Column<int>(type: "int", nullable: false, defaultValue: 0),
+                    duong_dan_anh = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    sticker = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -383,9 +385,11 @@ namespace ArtGallery.Migrations
                     ma_tranh = table.Column<int>(type: "int", nullable: false),
                     so_luong = table.Column<int>(type: "int", nullable: false),
                     so_tien = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    TrangThai = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PhuongThucThanhToan = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ngay_mua = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "(getdate())")
+                    trang_thai = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    phuong_thuc_thanh_toan = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    ngay_mua = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "(getdate())"),
+                    is_hidden_by_buyer = table.Column<bool>(type: "bit", nullable: true, defaultValue: false),
+                    is_hidden_by_seller = table.Column<bool>(type: "bit", nullable: true, defaultValue: false)
                 },
                 constraints: table =>
                 {
@@ -535,7 +539,9 @@ namespace ArtGallery.Migrations
                     ma_binh_luan = table.Column<int>(type: "int", nullable: false),
                     ma_nguoi_dung = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     noi_dung = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ngay_phan_hoi = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "(getdate())")
+                    ngay_phan_hoi = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "(getdate())"),
+                    duong_dan_anh = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    sticker = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
