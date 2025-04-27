@@ -271,7 +271,8 @@
                                     @if (!string.IsNullOrEmpty(comment.DuongDanAnh))
                                     {
                                         <div class="comment-image-container mt-2">
-                                            <img src="@Url.Content(comment.DuongDanAnh)" alt="Uploaded image" class="comment-image" />
+                                            <img src="@Url.Content(comment.DuongDanAnh)" alt="Uploaded image" class="comment-image zoomable-image" 
+                                                 onclick="openImageModal('@Url.Content(comment.DuongDanAnh)')" />
                                         </div>
                                     }
                                 </div>
@@ -348,7 +349,8 @@
                                                             @if (!string.IsNullOrEmpty(reply.DuongDanAnh))
                                                             {
                                                                 <div class="reply-image-container mt-1">
-                                                                    <img src="@Url.Content(reply.DuongDanAnh)" alt="Uploaded image" class="reply-image" />
+                                                                    <img src="@Url.Content(reply.DuongDanAnh)" alt="Uploaded image" class="reply-image zoomable-image" 
+                                                                         onclick="openImageModal('@Url.Content(reply.DuongDanAnh)')" />
                                                                 </div>
                                                             }
                                                         </div>
@@ -428,6 +430,14 @@
     <div class="modal-content artwork-modal">
         <span class="close" onclick="closeArtworkModal()">&times;</span>
         <img class="artwork-modal-content" id="modalImage">
+    </div>
+</div>
+
+<!-- Thêm modal cho ảnh bình luận (có thể sử dụng lại modal hiện có) -->
+<div id="commentImageModal" class="modal">
+    <div class="modal-content artwork-modal">
+        <span class="close" onclick="closeImageModal()">&times;</span>
+        <img class="artwork-modal-content" id="modalCommentImage">
     </div>
 </div>
 </div>
@@ -732,6 +742,37 @@
             $(`#stickerInputReply-${commentId}`).val('');
             $(`#replyStickerPreview-${commentId}`).addClass('d-none');
         }
+
+        // Thêm JavaScript để xử lý việc zoom ảnh bình luận
+        function openImageModal(imageSrc) {
+            const modal = document.getElementById('commentImageModal');
+            const modalImg = document.getElementById('modalCommentImage');
+            
+            modalImg.src = imageSrc;
+            modal.style.display = 'block';
+            document.body.classList.add('modal-open');
+        }
+        
+        function closeImageModal() {
+            document.getElementById('commentImageModal').style.display = 'none';
+            document.body.classList.remove('modal-open');
+        }
+
+        // Đóng modal khi click bên ngoài ảnh
+        $(document).ready(function() {
+            $('#commentImageModal').on('click', function(event) {
+                if (event.target === this) {
+                    closeImageModal();
+                }
+            });
+            
+            // Sử dụng phím Esc để đóng modal
+            $(document).keydown(function(event) {
+                if (event.keyCode === 27) { // Phím Esc
+                    closeImageModal();
+                }
+            });
+        });
     </script>
 }
 

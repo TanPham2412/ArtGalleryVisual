@@ -977,3 +977,39 @@ body.no-scroll {
 .comment-image-container, .reply-image-container, .sticker-container {
     display: inline-block;
 }
+
+/* Thêm style cho ảnh có thể zoom */
+.zoomable-image {
+    cursor: pointer;
+    transition: transform 0.3s;
+}
+
+.zoomable-image:hover {
+    transform: scale(1.03);
+    box-shadow: 0 0 10px rgba(0, 168, 255, 0.3);
+}
+
+/* Style cho modal ảnh bình luận */
+#commentImageModal {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    padding: 0;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: rgba(0, 0, 0, 0.95);
+}
+
+/* Điều chỉnh kích thước ảnh trong modal */
+#modalCommentImage {
+    max-width: 90% !important;
+    max-height: 90vh !important;
+    object-fit: contain;
+    display: block;
+    margin: 0 auto;
+    border: none;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+}
