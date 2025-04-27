@@ -682,19 +682,27 @@ body.no-scroll {
     flex: 1;
 }
 
-.reply-input {
-    background-color: #2a2a2a;
-    border: 1px solid #444;
-    border-radius: 18px;
-    color: #e0e0e0 !important;
-    font-size: 14px;
-    padding: 8px 15px;
+.reply-input,
+textarea[placeholder="Viết phản hồi..."],
+input[placeholder="Viết phản hồi..."] {
+    color: #e0e0e0 !important; /* Màu trắng xám sáng */
+    background-color: #1e1e1e !important; /* Màu nền tối */
+    border: 1px solid #007bff !important; /* Giữ viền xanh */
 }
 
-.reply-input:focus {
-    background-color: #333;
-    color: #fff !important;
-    border-color: #00a8ff;
+/* Đảm bảo placeholder cũng có màu phù hợp */
+.reply-input::placeholder,
+textarea[placeholder="Viết phản hồi..."]::placeholder,
+input[placeholder="Viết phản hồi..."]::placeholder {
+    color: #909090 !important; /* Màu xám nhạt hơn cho placeholder */
+}
+
+/* Tăng độ tương phản khi focus */
+.reply-input:focus,
+textarea[placeholder="Viết phản hồi..."]:focus,
+input[placeholder="Viết phản hồi..."]:focus {
+    color: #ffffff !important; /* Màu trắng sáng hơn khi focus */
+    background-color: #252525 !important; /* Nền tối hơn một chút khi focus */
 }
 
 .reply-actions {
@@ -1300,4 +1308,41 @@ html {
 .comment-form-container .btn-primary:hover {
     background-color: #007bff;
     color: white !important;
+}
+
+/* Sửa lại style cho nút Ảnh với độ ưu tiên cao hơn */
+label.btn-attachment, 
+.comment-form-container label.btn-attachment,
+#commentForm label.btn-attachment {
+    background-color: transparent !important;
+    border: 1px solid rgba(255, 255, 255, 0.7) !important;
+    color: #fff !important;
+    padding: 6px 12px !important;
+    border-radius: 4px !important;
+    margin-right: 10px !important;
+    transition: all 0.3s ease !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+}
+
+/* Tăng độ ưu tiên cho hover effect */
+label.btn-attachment:hover,
+.comment-form-container label.btn-attachment:hover,
+#commentForm label.btn-attachment:hover {
+    background-color: #007bff !important;
+    border-color: #007bff !important;
+    color: white !important;
+    cursor: pointer !important;
+}
+
+/* Đảm bảo không có style nào khác ghi đè */
+.attachment-buttons label.btn-attachment {
+    background-color: transparent !important;
+    cursor: pointer !important;
+}
+
+.attachment-buttons label.btn-attachment:hover {
+    background-color: #007bff !important;
 }

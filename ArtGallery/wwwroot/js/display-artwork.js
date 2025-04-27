@@ -269,7 +269,7 @@ function confirmDelete(artworkId) {
     }
 }
 
-// Thêm hàm xử lý xóa bình luận
+// Sửa lại hàm xử lý xóa bình luận
 function deleteComment(commentId, artworkId) {
     if (confirm('Bạn có chắc chắn muốn xóa bình luận này?')) {
         $.ajax({
@@ -284,30 +284,37 @@ function deleteComment(commentId, artworkId) {
             },
             success: function(response) {
                 if (response.success) {
-                    // Hiển thị thông báo thành công
-                    Swal.fire({
-                        title: 'Thành công!',
-                        text: response.message,
-                        icon: 'success'
-                    }).then(() => {
-                        // Tải lại trang để cập nhật danh sách bình luận
-                        location.reload();
+                    // Hiển thị thông báo nhỏ thay vì SweetAlert
+                    const toastHTML = `
+                        <div class="toast-container position-fixed bottom-0 end-0 p-3">
+                            <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                                <div class="toast-header">
+                                    <strong class="me-auto">Thông báo</strong>
+                                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                                </div>
+                                <div class="toast-body">
+                                    ${response.message}
+                                </div>
+                            </div>
+                        </div>`;
+                    
+                    $('body').append(toastHTML);
+                    $('.toast').toast('show');
+                    
+                    // Xóa bình luận khỏi DOM với hiệu ứng mờ dần thay vì load lại trang
+                    $(`#comment-${commentId}`).fadeOut(300, function() {
+                        $(this).remove();
+                        
+                        // Cập nhật số lượng bình luận trong tiêu đề
+                        const commentCount = $('.comment-item').length;
+                        $('.comments-list h4').text(`Tất cả bình luận (${commentCount})`);
                     });
                 } else {
-                    // Hiển thị thông báo lỗi
-                    Swal.fire({
-                        title: 'Lỗi!',
-                        text: response.message,
-                        icon: 'error'
-                    });
+                    alert(response.message);
                 }
             },
             error: function() {
-                Swal.fire({
-                    title: 'Lỗi!',
-                    text: 'Có lỗi xảy ra khi xóa bình luận',
-                    icon: 'error'
-                });
+                alert('Có lỗi xảy ra khi xóa bình luận');
             }
         });
     }
