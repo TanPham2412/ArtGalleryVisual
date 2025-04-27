@@ -592,8 +592,9 @@ body.no-scroll {
 }
 
 .comment-content {
-    color: #e0e0e0;
-    line-height: 1.5;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
 /* Thông báo khi chưa có bình luận */
@@ -752,11 +753,9 @@ body.no-scroll {
 }
 
 .reply-bubble {
-    background-color: #2a2a2a;
-    padding: 8px 12px;
-    border-radius: 12px;
-    display: inline-block;
-    max-width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
 .reply-username {
@@ -856,7 +855,8 @@ body.no-scroll {
 
 /* Sticker và ảnh trong nội dung bình luận */
 .sticker-container {
-    margin-top: 10px;
+    display: block;
+    margin-top: 8px;
 }
 
 .comment-sticker {
@@ -865,7 +865,8 @@ body.no-scroll {
 }
 
 .comment-image-container {
-    margin-top: 10px;
+    display: block;
+    margin-top: 8px;
 }
 
 .comment-image {
@@ -929,7 +930,8 @@ body.no-scroll {
 }
 
 .reply-image-container {
-    margin-top: 5px;
+    display: block;
+    margin-top: 8px;
 }
 
 .reply-image {
@@ -961,6 +963,23 @@ body.no-scroll {
     border: 1px solid #444;
     border-top: none;
     border-radius: 0 0 4px 4px;
+    max-height: 400px;
+    overflow: auto !important;
+    scrollbar-width: none; /* Firefox */
+}
+
+.tab-content::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Edge */
+}
+
+.tab-pane {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+    overflow: auto;
+}
+
+.tab-pane::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Edge */
 }
 
 /* Modal sticker */
@@ -1012,4 +1031,9 @@ body.no-scroll {
     margin: 0 auto;
     border: none;
     box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+}
+
+/* Ẩn thanh lăn nhưng vẫn cho phép cuộn */
+.modal-body {
+    overflow: auto !important;
 }

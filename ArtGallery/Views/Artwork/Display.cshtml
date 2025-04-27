@@ -199,7 +199,7 @@
                                     <label for="imageInput" class="btn-attachment">
                                         <i class="fas fa-image"></i> Ảnh
                                     </label>
-                                    <button type="button" class="btn-attachment" id="openStickerSelector">
+                                    <button type="button" class="btn btn-primary" id="openStickerSelector" data-bs-toggle="modal" data-bs-target="#stickerModal">
                                         <i class="fas fa-smile"></i> Sticker
                                     </button>
                                 </div>
@@ -440,10 +440,46 @@
         <img class="artwork-modal-content" id="modalCommentImage">
     </div>
 </div>
+
+<!-- Kiểm tra modal sticker có đúng cấu trúc -->
+<div class="modal fade" id="stickerModal" tabindex="-1" aria-labelledby="stickerModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="stickerModalLabel">Chọn sticker</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <ul class="nav nav-tabs" id="stickerTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="vanthuong-tab" data-bs-toggle="tab" data-bs-target="#vanthuong" type="button" role="tab">Vân Thường</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="daisuhuynh-tab" data-bs-toggle="tab" data-bs-target="#daisuhuynh" type="button" role="tab">Đại Sư Huynh</button>
+                    </li>
+                </ul>
+                <div class="tab-content p-2" id="stickerTabContent">
+                    <div class="tab-pane fade show active" id="vanthuong" role="tabpanel">
+                        <div class="sticker-grid" id="vanthuong-stickers">
+                            <!-- Stickers sẽ được load bằng JavaScript -->
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="daisuhuynh" role="tabpanel">
+                        <div class="sticker-grid" id="daisuhuynh-stickers">
+                            <!-- Stickers sẽ được load bằng JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 </div>
 
 @section Scripts {
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Đảm bảo đã include Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
     <script>
         function toggleLike(button, artworkId) {
             $.ajax({
@@ -603,12 +639,52 @@
             }
         }
 
-        // Load stickers
+        // Gọi trực tiếp hàm load stickers khi trang tải xong
+        loadStickers();
+        
+        // Xử lý nút sticker
+        $('#openStickerSelector').click(function() {
+            console.log('Sticker button clicked');
+            // Kiểm tra modal đã được tạo chưa
+            if ($('#stickerModal').length) {
+                $('#stickerModal').modal('show');
+            } else {
+                console.error('Sticker modal not found');
+            }
+        });
+        
+        // Hàm load stickers từ server
         function loadStickers() {
+            console.log('Loading stickers...');
+            // Cập nhật tên thư mục trong biến path (nếu cần)
+            const vanthuongPath = '/images/stickers/vanthuong/';
+            const daisuhuynhPath = '/images/stickers/daisuhuynh/';
+            
+            // Tạo 12 stickers mẫu cho mỗi thư mục
+            let vanthuongHtml = '';
+            for (let i = 1; i <= 12; i++) {
+                vanthuongHtml += `<div class="sticker-item">
+                    <img src="${vanthuongPath}sticker${i}.png" data-path="${vanthuongPath}sticker${i}.png" 
+                         class="sticker-img" onclick="selectSticker(this)">
+                </div>`;
+            }
+            $('#vanthuong-stickers').html(vanthuongHtml);
+            
+            let daisuhuynhHtml = '';
+            for (let i = 1; i <= 12; i++) {
+                daisuhuynhHtml += `<div class="sticker-item">
+                    <img src="${daisuhuynhPath}sticker${i}.png" data-path="${daisuhuynhPath}sticker${i}.png" 
+                         class="sticker-img" onclick="selectSticker(this)">
+                </div>`;
+            }
+            $('#daisuhuynh-stickers').html(daisuhuynhHtml);
+            
+            // Gọi API nếu hard-coded không hoạt động
             $.ajax({
                 url: '/Artwork/GetStickers',
                 type: 'GET',
                 success: function(data) {
+                    console.log('Stickers loaded:', data);
                     if (data.vanthuong && data.vanthuong.length > 0) {
                         let vanthuongHtml = '';
                         data.vanthuong.forEach(function(sticker) {
@@ -616,7 +692,7 @@
                                 <img src="${sticker}" data-path="${sticker}" class="sticker-img" onclick="selectSticker(this)">
                             </div>`;
                         });
-                        $('#vanthuong .sticker-grid').html(vanthuongHtml);
+                        $('#vanthuong-stickers').html(vanthuongHtml);
                     }
                     
                     if (data.daisuhuynh && data.daisuhuynh.length > 0) {
@@ -626,59 +702,18 @@
                                 <img src="${sticker}" data-path="${sticker}" class="sticker-img" onclick="selectSticker(this)">
                             </div>`;
                         });
-                        $('#daisuhuynh .sticker-grid').html(daisuhuynhHtml);
+                        $('#daisuhuynh-stickers').html(daisuhuynhHtml);
                     }
                 },
-                error: function() {
-                    console.error('Không thể tải stickers');
+                error: function(err) {
+                    console.error('Error loading stickers:', err);
                 }
             });
         }
         
-        // Gọi hàm load stickers khi trang đã tải xong
-        loadStickers();
-        
-        // Xử lý nút chọn ảnh
-        $('#openImageSelector').click(function() {
-            $('#imageInput').click();
-        });
-        
-        // Xử lý nút chọn sticker
-        $('#openStickerSelector').click(function() {
-            $('#stickerModal').modal('show');
-        });
-        
-        // Xử lý nút chọn ảnh
-        $('#imageInput').change(function() {
-            const file = this.files[0];
-            console.log('Đã chọn file:', file);
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    $('#imagePreview').attr('src', e.target.result);
-                    $('#imagePreviewContainer').removeClass('d-none');
-                    $('#stickerPreviewContainer').addClass('d-none');
-                    $('#stickerInput').val('');
-                    console.log('Đã hiển thị ảnh preview');
-                }
-                reader.readAsDataURL(file);
-            }
-        });
-        
-        // Xóa ảnh đã chọn
-        $('#removeImage').click(function() {
-            $('#imageInput').val('');
-            $('#imagePreviewContainer').addClass('d-none');
-        });
-        
-        // Xóa sticker đã chọn
-        $('#removeSticker').click(function() {
-            $('#stickerInput').val('');
-            $('#stickerPreviewContainer').addClass('d-none');
-        });
-        
-        // Hàm chọn sticker
+        // Hàm chọn sticker (đặt ở global scope để có thể gọi từ onclick)
         function selectSticker(element) {
+            console.log('Sticker selected:', $(element).data('path'));
             const stickerPath = $(element).data('path');
             $('#stickerInput').val(stickerPath);
             $('#stickerPreview').attr('src', stickerPath);
@@ -686,61 +721,6 @@
             $('#imagePreviewContainer').addClass('d-none');
             $('#imageInput').val('');
             $('#stickerModal').modal('hide');
-        }
-        
-        // Hàm mở selector ảnh cho phản hồi
-        function openReplyImageSelector(commentId) {
-            $(`#imageInputReply-${commentId}`).click();
-        }
-        
-        // Hàm mở selector sticker cho phản hồi
-        function openReplyStickerSelector(commentId) {
-            activeReplyId = commentId;
-            $('#stickerModal').modal('show');
-        }
-        
-        // Biến để lưu ID phản hồi đang active
-        let activeReplyId = null;
-        
-        // Thêm xử lý chọn sticker cho phản hồi
-        $('.sticker-img').click(function() {
-            if (activeReplyId) {
-                const stickerPath = $(this).data('path');
-                $(`#stickerInputReply-${activeReplyId}`).val(stickerPath);
-                $(`#replyStickerPreview-${activeReplyId} .preview-sticker`).attr('src', stickerPath);
-                $(`#replyStickerPreview-${activeReplyId}`).removeClass('d-none');
-                $(`#replyImagePreview-${activeReplyId}`).addClass('d-none');
-                $(`#imageInputReply-${activeReplyId}`).val('');
-                $('#stickerModal').modal('hide');
-            }
-        });
-        
-        // Xử lý chọn ảnh cho phản hồi
-        $('.imageInputReply').change(function() {
-            const commentId = $(this).attr('id').split('-')[1];
-            const file = this.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    $(`#replyImagePreview-${commentId} .preview-img`).attr('src', e.target.result);
-                    $(`#replyImagePreview-${commentId}`).removeClass('d-none');
-                    $(`#replyStickerPreview-${commentId}`).addClass('d-none');
-                    $(`#stickerInputReply-${commentId}`).val('');
-                }
-                reader.readAsDataURL(file);
-            }
-        });
-        
-        // Xóa ảnh phản hồi
-        function removeReplyImage(commentId) {
-            $(`#imageInputReply-${commentId}`).val('');
-            $(`#replyImagePreview-${commentId}`).addClass('d-none');
-        }
-        
-        // Xóa sticker phản hồi
-        function removeReplySticker(commentId) {
-            $(`#stickerInputReply-${commentId}`).val('');
-            $(`#replyStickerPreview-${commentId}`).addClass('d-none');
         }
 
         // Thêm JavaScript để xử lý việc zoom ảnh bình luận

@@ -293,19 +293,36 @@ namespace ArtGallery.Controllers
         [HttpGet]
         public IActionResult GetStickers()
         {
-            var basePath = "/images/stickers/";
-            var vanthuongPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "stickers", "vanthuong");
-            var daisuhuynhPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "stickers", "daisuhuynh");
-            
-            var vanthuongFiles = Directory.Exists(vanthuongPath) 
-                ? Directory.GetFiles(vanthuongPath, "*.png").Select(f => basePath + "vanthuong/" + Path.GetFileName(f)).ToList() 
-                : new List<string>();
-            
-            var daisuhuynhFiles = Directory.Exists(daisuhuynhPath) 
-                ? Directory.GetFiles(daisuhuynhPath, "*.png").Select(f => basePath + "daisuhuynh/" + Path.GetFileName(f)).ToList() 
-                : new List<string>();
-            
-            return Json(new { vanthuong = vanthuongFiles, daisuhuynh = daisuhuynhFiles });
+            try {
+                var basePath = "/images/stickers/";
+                var vanthuongPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "stickers", "vanthuong");
+                var daisuhuynhPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "stickers", "daisuhuynh");
+                
+                var vanthuongFiles = new List<string>();
+                var daisuhuynhFiles = new List<string>();
+                
+                if (Directory.Exists(vanthuongPath)) {
+                    vanthuongFiles = Directory.GetFiles(vanthuongPath, "*.png")
+                        .Select(f => basePath + "vanthuong/" + Path.GetFileName(f))
+                        .ToList();
+                }
+                
+                if (Directory.Exists(daisuhuynhPath)) {
+                    daisuhuynhFiles = Directory.GetFiles(daisuhuynhPath, "*.png")
+                        .Select(f => basePath + "daisuhuynh/" + Path.GetFileName(f))
+                        .ToList();
+                }
+                
+                return Json(new { 
+                    success = true, 
+                    vanthuong = vanthuongFiles, 
+                    daisuhuynh = daisuhuynhFiles 
+                });
+            }
+            catch (Exception ex) {
+                _logger.LogError(ex, "Lỗi khi lấy danh sách stickers");
+                return Json(new { success = false, message = "Không thể tải stickers" });
+            }
         }
 
         [HttpPost]
