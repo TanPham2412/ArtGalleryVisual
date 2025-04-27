@@ -357,7 +357,8 @@ namespace ArtGallery.Migrations
                     ngay_binh_luan = table.Column<DateTime>(type: "datetime", nullable: true, defaultValueSql: "(getdate())"),
                     rating = table.Column<int>(type: "int", nullable: false, defaultValue: 0),
                     duong_dan_anh = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    sticker = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    sticker = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IsHidden = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {

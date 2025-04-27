@@ -21,6 +21,8 @@ public partial class BinhLuan
     
     public string? Sticker { get; set; }
 
+    public bool IsHidden { get; set; } = false;
+
     public virtual NguoiDung MaNguoiDungNavigation { get; set; } = null!;
 
     public virtual Tranh MaTranhNavigation { get; set; } = null!;

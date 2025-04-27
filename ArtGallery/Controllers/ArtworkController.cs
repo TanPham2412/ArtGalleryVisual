@@ -441,5 +441,85 @@ namespace ArtGallery.Controllers
                 return RedirectToAction("Display", new { id = MaTranh });
             }
         }
+
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteComment(int commentId, int artworkId)
+        {
+            try
+            {
+                var comment = await _context.BinhLuans.FindAsync(commentId);
+                if (comment == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy bình luận này" });
+                }
+                
+                var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var isAdmin = User.IsInRole("Admin");
+                
+                // Chỉ admin hoặc người viết bình luận mới có quyền xóa
+                if (isAdmin || comment.MaNguoiDung == currentUserId)
+                {
+                    // Trước khi xóa bình luận, xóa tất cả các phản hồi liên quan
+                    var replies = await _context.PhanHoiBinhLuans
+                        .Where(r => r.MaBinhLuan == commentId)
+                        .ToListAsync();
+                        
+                    _context.PhanHoiBinhLuans.RemoveRange(replies);
+                    _context.BinhLuans.Remove(comment);
+                    await _context.SaveChangesAsync();
+                    
+                    return Json(new { success = true, message = "Đã xóa bình luận thành công" });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Bạn không có quyền xóa bình luận này" });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi xóa bình luận");
+                return Json(new { success = false, message = "Có lỗi xảy ra khi xóa bình luận" });
+            }
+        }
+
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ToggleHideComment(int commentId, int artworkId)
+        {
+            try
+            {
+                var comment = await _context.BinhLuans.FindAsync(commentId);
+                if (comment == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy bình luận này" });
+                }
+                
+                var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var isAdmin = User.IsInRole("Admin");
+                
+                // Chỉ admin hoặc người viết bình luận mới có quyền ẩn/hiện
+                if (isAdmin || comment.MaNguoiDung == currentUserId)
+                {
+                    // Thêm cột IsHidden vào model BinhLuan nếu chưa có
+                    comment.IsHidden = !comment.IsHidden;
+                    await _context.SaveChangesAsync();
+                    
+                    string message = comment.IsHidden ? "Đã ẩn bình luận" : "Đã hiện bình luận";
+                    return Json(new { success = true, message = message, isHidden = comment.IsHidden });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Bạn không có quyền ẩn/hiện bình luận này" });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi ẩn/hiện bình luận");
+                return Json(new { success = false, message = "Có lỗi xảy ra khi ẩn/hiện bình luận" });
+            }
+        }
     }
 }

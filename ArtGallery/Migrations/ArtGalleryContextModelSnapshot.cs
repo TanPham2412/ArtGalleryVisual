@@ -35,6 +35,9 @@ namespace ArtGallery.Migrations
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("duong_dan_anh");
 
+                    b.Property<bool>("IsHidden")
+                        .HasColumnType("bit");
+
                     b.Property<string>("MaNguoiDung")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)")

@@ -1037,3 +1037,59 @@ body.no-scroll {
 .modal-body {
     overflow: auto !important;
 }
+
+/* Style cho bình luận bị ẩn */
+.comment-hidden {
+    opacity: 0.75;
+}
+
+.hidden-comment-notice {
+    background-color: #333;
+    padding: 8px 12px;
+    border-radius: 6px;
+    color: #888;
+    font-style: italic;
+    text-align: center;
+}
+
+/* Style cho các nút quản lý bình luận */
+.comment-admin-actions {
+    display: inline-flex;
+    gap: 8px;
+    margin-left: 10px;
+}
+
+.btn-toggle-hide, .btn-delete-comment {
+    background: transparent;
+    border: none;
+    color: #888;
+    font-size: 13px;
+    padding: 3px 8px;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.btn-toggle-hide:hover {
+    color: #00a8ff;
+}
+
+.btn-delete-comment:hover {
+    color: #ff4545;
+}
+
+/* Style cho toast */
+.toast {
+    background-color: #1e1e1e;
+    color: #e0e0e0;
+    border: 1px solid #333;
+}
+
+.toast-header {
+    background-color: #222;
+    color: #e0e0e0;
+    border-bottom: 1px solid #333;
+}
+
+.toast-body {
+    background-color: #1e1e1e;
+}
