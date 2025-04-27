@@ -175,11 +175,28 @@ function loadStickers() {
 function selectSticker(element) {
     console.log('Sticker selected:', $(element).data('path'));
     const stickerPath = $(element).data('path');
-    $('#stickerInput').val(stickerPath);
-    $('#stickerPreview').attr('src', stickerPath);
-    $('#stickerPreviewContainer').removeClass('d-none');
-    $('#imagePreviewContainer').addClass('d-none');
-    $('#imageInput').val('');
+    
+    // Kiểm tra xem đang chọn sticker cho bình luận mới hay phản hồi
+    if (window.currentStickerTarget && window.currentStickerTarget.type === 'reply') {
+        const commentId = window.currentStickerTarget.commentId;
+        
+        // Cập nhật giá trị sticker cho phản hồi
+        $(`#stickerInputReply-${commentId}`).val(stickerPath);
+        $(`#replyStickerPreview-${commentId} .preview-sticker`).attr('src', stickerPath);
+        $(`#replyStickerPreview-${commentId}`).removeClass('d-none');
+        $(`#replyImagePreview-${commentId}`).addClass('d-none');
+        
+        // Reset target sau khi đã chọn
+        window.currentStickerTarget = null;
+    } else {
+        // Xử lý cho bình luận mới (code cũ)
+        $('#stickerInput').val(stickerPath);
+        $('#stickerPreview').attr('src', stickerPath);
+        $('#stickerPreviewContainer').removeClass('d-none');
+        $('#imagePreviewContainer').addClass('d-none');
+        $('#imageInput').val('');
+    }
+    
     $('#stickerModal').modal('hide');
 }
 
@@ -384,6 +401,148 @@ function saveEditedComment() {
     });
 }
 
+// Hiển thị modal sửa phản hồi
+function showEditReplyModal(replyId, commentId, replyContent) {
+    $('#editReplyId').val(replyId);
+    $('#editReplyCommentId').val(commentId);
+    $('#editReplyContent').val(replyContent);
+    $('#editReplyModal').modal('show');
+}
+
+// Lưu phản hồi đã chỉnh sửa
+function saveEditedReply() {
+    const replyId = $('#editReplyId').val();
+    const commentId = $('#editReplyCommentId').val();
+    const artworkId = $('#editReplyArtworkId').val();
+    const editedContent = $('#editReplyContent').val();
+    
+    if (!editedContent.trim()) {
+        alert('Nội dung phản hồi không được để trống');
+        return;
+    }
+    
+    $.ajax({
+        url: '/Artwork/EditReply',
+        type: 'POST',
+        data: {
+            replyId: replyId,
+            commentId: commentId,
+            artworkId: artworkId,
+            editedContent: editedContent
+        },
+        headers: {
+            'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+        },
+        success: function(response) {
+            if (response.success) {
+                // Cập nhật nội dung phản hồi trên UI
+                $(`#reply-${replyId} .reply-text`).text(response.editedContent);
+                
+                // Nếu phản hồi chưa có trạng thái "đã chỉnh sửa", thêm vào
+                if (!$(`#reply-${replyId} .edited-marker`).length) {
+                    $(`#reply-${replyId} .reply-username`).append('<span class="edited-marker">(đã chỉnh sửa)</span>');
+                }
+                
+                // Đóng modal
+                $('#editReplyModal').modal('hide');
+                
+                // Hiển thị thông báo
+                const toastHTML = `
+                    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+                        <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                            <div class="toast-header">
+                                <strong class="me-auto">Thông báo</strong>
+                                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                            </div>
+                            <div class="toast-body">
+                                ${response.message}
+                            </div>
+                        </div>
+                    </div>`;
+                
+                $('body').append(toastHTML);
+                $('.toast').toast('show');
+            } else {
+                alert(response.message);
+            }
+        },
+        error: function() {
+            alert('Có lỗi xảy ra khi sửa phản hồi');
+        }
+    });
+}
+
+// Xóa phản hồi
+function deleteReply(replyId, artworkId) {
+    if (confirm('Bạn có chắc chắn muốn xóa phản hồi này?')) {
+        $.ajax({
+            url: '/Artwork/DeleteReply',
+            type: 'POST',
+            data: {
+                replyId: replyId,
+                artworkId: artworkId
+            },
+            headers: {
+                'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+            },
+            success: function(response) {
+                if (response.success) {
+                    // Xóa phản hồi khỏi UI
+                    $(`#reply-${replyId}`).fadeOut(300, function() {
+                        $(this).remove();
+                    });
+                    
+                    // Hiển thị thông báo
+                    const toastHTML = `
+                        <div class="toast-container position-fixed bottom-0 end-0 p-3">
+                            <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                                <div class="toast-header">
+                                    <strong class="me-auto">Thông báo</strong>
+                                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                                </div>
+                                <div class="toast-body">
+                                    ${response.message}
+                                </div>
+                            </div>
+                        </div>`;
+                    
+                    $('body').append(toastHTML);
+                    $('.toast').toast('show');
+                } else {
+                    alert(response.message);
+                }
+            },
+            error: function() {
+                alert('Có lỗi xảy ra khi xóa phản hồi');
+            }
+        });
+    }
+}
+
+// Thêm vào phần có sẵn để hỗ trợ sticker và ảnh trong phản hồi
+function openReplyImageSelector(commentId) {
+    $(`#imageInputReply-${commentId}`).click();
+}
+
+function openReplyStickerSelector(commentId) {
+    // Lưu thông tin rằng đang chọn sticker cho phản hồi, không phải bình luận mới
+    window.currentStickerTarget = {
+        type: 'reply',
+        commentId: commentId
+    };
+    $('#stickerModal').modal('show');
+}
+
+function removeReplyImage(commentId) {
+    $(`#imageInputReply-${commentId}`).val('');
+    $(`#replyImagePreview-${commentId}`).addClass('d-none');
+}
+
+function removeReplySticker(commentId) {
+    $(`#stickerInputReply-${commentId}`).val('');
+    $(`#replyStickerPreview-${commentId}`).addClass('d-none');
+}
+
 // Sự kiện khi trang được tải xong
 $(document).ready(function() {
     // Xử lý rating stars
@@ -457,13 +616,10 @@ $(document).ready(function() {
 
     // Xử lý nút sticker
     $('#openStickerSelector').click(function() {
-        console.log('Sticker button clicked');
-        // Kiểm tra modal đã được tạo chưa
-        if ($('#stickerModal').length) {
-            $('#stickerModal').modal('show');
-        } else {
-            console.error('Sticker modal not found');
-        }
+        // Xóa target trước đó (nếu có)
+        window.currentStickerTarget = null;
+        console.log('Opening sticker modal for new comment');
+        $('#stickerModal').modal('show');
     });
 
     // Xử lý nút chọn ảnh
@@ -497,4 +653,21 @@ $(document).ready(function() {
 
     // Load stickers khi trang tải xong
     loadStickers();
+
+    // Xử lý ảnh cho phản hồi
+    $('.imageInputReply').change(function() {
+        const file = this.files[0];
+        const commentId = this.id.split('-')[1];
+        
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                $(`#replyImagePreview-${commentId} .preview-img`).attr('src', e.target.result);
+                $(`#replyImagePreview-${commentId}`).removeClass('d-none');
+                $(`#replyStickerPreview-${commentId}`).addClass('d-none');
+                $(`#stickerInputReply-${commentId}`).val('');
+            }
+            reader.readAsDataURL(file);
+        }
+    });
 });

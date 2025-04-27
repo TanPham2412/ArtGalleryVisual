@@ -572,5 +572,89 @@ namespace ArtGallery.Controllers
                 return Json(new { success = false, message = "Có lỗi xảy ra khi sửa bình luận" });
             }
         }
+
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditReply(int replyId, int commentId, int artworkId, string editedContent)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(editedContent))
+                {
+                    return Json(new { success = false, message = "Nội dung phản hồi không được để trống" });
+                }
+                
+                var reply = await _context.PhanHoiBinhLuans.FindAsync(replyId);
+                if (reply == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy phản hồi này" });
+                }
+                
+                var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var isAdmin = User.IsInRole("Admin");
+                
+                // Chỉ admin hoặc người viết phản hồi mới có quyền sửa
+                if (isAdmin || reply.MaNguoiDung == currentUserId)
+                {
+                    // Cập nhật nội dung phản hồi
+                    reply.NoiDung = editedContent;
+                    reply.DaChinhSua = true; // Đánh dấu đã chỉnh sửa
+                    await _context.SaveChangesAsync();
+                    
+                    return Json(new { 
+                        success = true, 
+                        message = "Đã cập nhật phản hồi thành công",
+                        replyId = replyId,
+                        editedContent = editedContent
+                    });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Bạn không có quyền sửa phản hồi này" });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi sửa phản hồi");
+                return Json(new { success = false, message = "Có lỗi xảy ra khi sửa phản hồi" });
+            }
+        }
+
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteReply(int replyId, int artworkId)
+        {
+            try
+            {
+                var reply = await _context.PhanHoiBinhLuans.FindAsync(replyId);
+                if (reply == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy phản hồi này" });
+                }
+                
+                var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var isAdmin = User.IsInRole("Admin");
+                
+                // Chỉ admin hoặc người viết phản hồi mới có quyền xóa
+                if (isAdmin || reply.MaNguoiDung == currentUserId)
+                {
+                    _context.PhanHoiBinhLuans.Remove(reply);
+                    await _context.SaveChangesAsync();
+                    
+                    return Json(new { success = true, message = "Đã xóa phản hồi thành công" });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Bạn không có quyền xóa phản hồi này" });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi xóa phản hồi");
+                return Json(new { success = false, message = "Có lỗi xảy ra khi xóa phản hồi" });
+            }
+        }
     }
 }

@@ -363,7 +363,7 @@
                                     <div class="replies-container mt-2">
                                         @foreach (var reply in ViewBag.Replies[comment.MaBinhLuan])
                                         {
-                                            <div class="reply-item">
+                                            <div class="reply-item" id="reply-@reply.MaPhanHoi">
                                                 <div class="d-flex align-items-start">
                                                     <img src="@reply.MaNguoiDungNavigation.GetAvatarPath()" alt="@reply.MaNguoiDungNavigation.TenNguoiDung" class="reply-avatar" />
                                                     <div class="reply-content">
@@ -383,8 +383,27 @@
                                                                     </div>
                                                                 }
                                                             </div>
-                                                            <h6 class="reply-username">@reply.MaNguoiDungNavigation.TenNguoiDung</h6>
+                                                            <h6 class="reply-username">
+                                                                @reply.MaNguoiDungNavigation.TenNguoiDung
+                                                                @if (reply.DaChinhSua)
+                                                                {
+                                                                    <span class="edited-marker">(đã chỉnh sửa)</span>
+                                                                }
+                                                            </h6>
                                                             <p class="reply-text mb-0">@reply.NoiDung</p>
+                                                            
+                                                            <!-- Nút sửa và xóa phản hồi -->
+                                                            @if (User.Identity.IsAuthenticated && (User.IsInRole("Admin") || reply.MaNguoiDung == currentUserId))
+                                                            {
+                                                                <div class="reply-admin-actions mt-1">
+                                                                    <button class="btn-edit-reply" onclick="showEditReplyModal(@reply.MaPhanHoi, @comment.MaBinhLuan, '@reply.NoiDung')">
+                                                                        <i class="fas fa-edit me-1"></i>Sửa
+                                                                    </button>
+                                                                    <button class="btn-delete-reply" onclick="deleteReply(@reply.MaPhanHoi, @Model.MaTranh)">
+                                                                        <i class="fas fa-trash-alt me-1"></i>Xóa
+                                                                    </button>
+                                                                </div>
+                                                            }
                                                         </div>
                                                         <div class="reply-meta">
                                                             <span class="reply-time">@reply.NgayPhanHoi?.ToString("dd/MM/yyyy HH:mm")</span>
@@ -523,6 +542,28 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
                 <button type="button" class="btn btn-primary" onclick="saveEditedComment()">Lưu thay đổi</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Thêm modal chỉnh sửa phản hồi vào cuối file -->
+<div class="modal fade" id="editReplyModal" tabindex="-1" aria-labelledby="editReplyModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editReplyModalLabel">Chỉnh sửa phản hồi</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <textarea id="editReplyContent" class="form-control" rows="3"></textarea>
+                <input type="hidden" id="editReplyId" value="" />
+                <input type="hidden" id="editReplyCommentId" value="" />
+                <input type="hidden" id="editReplyArtworkId" value="@Model.MaTranh" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary" onclick="saveEditedReply()">Lưu thay đổi</button>
             </div>
         </div>
     </div>

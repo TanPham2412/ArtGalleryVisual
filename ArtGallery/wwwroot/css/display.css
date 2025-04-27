@@ -1131,3 +1131,41 @@ body.no-scroll {
     color: #fff;
     box-shadow: 0 0 0 0.25rem rgba(0, 168, 255, 0.25);
 }
+
+/* Style cho nút sửa và xóa phản hồi */
+.reply-admin-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-edit-reply, .btn-delete-reply {
+    background: transparent;
+    border: none;
+    color: #888;
+    font-size: 12px;
+    padding: 2px 6px;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.btn-edit-reply:hover {
+    color: #00a8ff;
+}
+
+.btn-delete-reply:hover {
+    color: #ff4545;
+}
+
+/* Style cho modal chỉnh sửa phản hồi */
+#editReplyContent {
+    background-color: #333;
+    border: 1px solid #444;
+    color: #e0e0e0;
+}
+
+#editReplyContent:focus {
+    background-color: #3a3a3a;
+    border-color: #00a8ff;
+    color: #fff;
+    box-shadow: 0 0 0 0.25rem rgba(0, 168, 255, 0.25);
+}
