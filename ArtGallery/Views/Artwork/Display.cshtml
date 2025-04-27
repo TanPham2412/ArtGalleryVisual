@@ -536,7 +536,36 @@
             </div>
             <div class="modal-body">
                 <textarea id="editCommentContent" class="form-control" rows="4"></textarea>
+                
+                <!-- Thêm phần sticker và ảnh -->
+                <div class="comment-attachments mt-3">
+                    <div class="attachment-buttons">
+                        <label for="editImageInput" class="btn-attachment">
+                            <i class="fas fa-image"></i> Ảnh
+                        </label>
+                        <button type="button" class="btn btn-primary" id="openEditStickerSelector">
+                            <i class="fas fa-smile"></i> Sticker
+                        </button>
+                    </div>
+                    <div id="editImagePreviewContainer" class="d-none mt-2">
+                        <img id="editImagePreview" class="img-fluid rounded" style="max-height: 100px;" />
+                        <button type="button" class="btn-remove-attachment" id="removeEditImage">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div id="editStickerPreviewContainer" class="d-none mt-2">
+                        <img id="editStickerPreview" class="img-fluid" style="max-height: 80px;" />
+                        <button type="button" class="btn-remove-attachment" id="removeEditSticker">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <input type="hidden" id="editStickerInput" />
+                    <input type="file" id="editImageInput" class="d-none" accept="image/*" />
+                </div>
+                
                 <input type="hidden" id="editCommentId" value="" />
+                <input type="hidden" id="editCommentOriginalImage" value="" />
+                <input type="hidden" id="editCommentOriginalSticker" value="" />
                 <input type="hidden" id="editArtworkId" value="@Model.MaTranh" />
             </div>
             <div class="modal-footer">

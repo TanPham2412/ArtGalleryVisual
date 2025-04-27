@@ -176,28 +176,53 @@ function selectSticker(element) {
     console.log('Sticker selected:', $(element).data('path'));
     const stickerPath = $(element).data('path');
     
-    // Kiểm tra xem đang chọn sticker cho bình luận mới hay phản hồi
-    if (window.currentStickerTarget && window.currentStickerTarget.type === 'reply') {
-        const commentId = window.currentStickerTarget.commentId;
-        
-        // Cập nhật giá trị sticker cho phản hồi
-        $(`#stickerInputReply-${commentId}`).val(stickerPath);
-        $(`#replyStickerPreview-${commentId} .preview-sticker`).attr('src', stickerPath);
-        $(`#replyStickerPreview-${commentId}`).removeClass('d-none');
-        $(`#replyImagePreview-${commentId}`).addClass('d-none');
+    // Đóng modal sticker trước
+    $('#stickerModal').modal('hide');
+    
+    // Kiểm tra target hiện tại
+    if (window.currentStickerTarget) {
+        if (window.currentStickerTarget.type === 'reply') {
+            const commentId = window.currentStickerTarget.commentId;
+            
+            // Xử lý cho phản hồi
+            $(`#stickerInputReply-${commentId}`).val(stickerPath);
+            $(`#replyStickerPreview-${commentId} .preview-sticker`).attr('src', stickerPath);
+            $(`#replyStickerPreview-${commentId}`).removeClass('d-none');
+            $(`#replyImagePreview-${commentId}`).addClass('d-none');
+        } 
+        else if (window.currentStickerTarget.type === 'editComment') {
+            // Xử lý cho sửa bình luận
+            setTimeout(function() {
+                // Mở lại modal sửa bình luận
+                $('#editCommentModal').modal('show');
+                
+                // Khôi phục nội dung trước đó
+                if (window.editCommentState) {
+                    $('#editCommentId').val(window.editCommentState.commentId);
+                    $('#editCommentContent').val(window.editCommentState.content);
+                    $('#editCommentOriginalImage').val(window.editCommentState.originalImage);
+                    $('#editCommentOriginalSticker').val(window.editCommentState.originalSticker);
+                }
+                
+                // Cập nhật sticker mới nhưng không ảnh hưởng đến ảnh
+                $('#editStickerInput').val(stickerPath);
+                $('#editStickerPreview').attr('src', stickerPath);
+                $('#editStickerPreviewContainer').removeClass('d-none');
+            }, 500);
+        }
         
         // Reset target sau khi đã chọn
         window.currentStickerTarget = null;
     } else {
-        // Xử lý cho bình luận mới (code cũ)
+        // Xử lý cho bình luận mới
         $('#stickerInput').val(stickerPath);
         $('#stickerPreview').attr('src', stickerPath);
         $('#stickerPreviewContainer').removeClass('d-none');
+        
+        // Trong trường hợp bình luận mới, vẫn giữ lại hành vi ẩn ảnh
         $('#imagePreviewContainer').addClass('d-none');
         $('#imageInput').val('');
     }
-    
-    $('#stickerModal').modal('hide');
 }
 
 // Hàm xử lý xóa tranh
@@ -333,64 +358,111 @@ function toggleHideComment(commentId, artworkId) {
     });
 }
 
-// Hiển thị modal sửa bình luận
+// Hiển thị modal sửa bình luận với sticker và ảnh
 function showEditCommentModal(commentId, commentContent) {
+    const comment = $(`#comment-${commentId}`);
     $('#editCommentId').val(commentId);
     $('#editCommentContent').val(commentContent);
+    
+    // Lấy thông tin sticker hiện tại nếu có
+    const sticker = comment.find('.comment-sticker').attr('src');
+    if (sticker) {
+        $('#editStickerInput').val(sticker);
+        $('#editStickerPreview').attr('src', sticker);
+        $('#editStickerPreviewContainer').removeClass('d-none');
+        $('#editCommentOriginalSticker').val(sticker);
+    } else {
+        $('#editStickerPreviewContainer').addClass('d-none');
+        $('#editStickerInput').val('');
+        $('#editCommentOriginalSticker').val('');
+    }
+    
+    // Lấy thông tin ảnh hiện tại nếu có
+    const image = comment.find('.comment-image').attr('src');
+    if (image) {
+        $('#editImagePreview').attr('src', image);
+        $('#editImagePreviewContainer').removeClass('d-none');
+        $('#editCommentOriginalImage').val(image);
+    } else {
+        $('#editImagePreviewContainer').addClass('d-none');
+        $('#editCommentOriginalImage').val('');
+    }
+    
+    // Hiển thị modal
     $('#editCommentModal').modal('show');
 }
 
-// Lưu bình luận đã chỉnh sửa
+// Lưu bình luận đã chỉnh sửa bao gồm sticker và ảnh
 function saveEditedComment() {
     const commentId = $('#editCommentId').val();
     const artworkId = $('#editArtworkId').val();
     const editedContent = $('#editCommentContent').val();
+    const stickerPath = $('#editStickerInput').val();
     
-    if (!editedContent.trim()) {
-        alert('Nội dung bình luận không được để trống');
+    if (!editedContent.trim() && !stickerPath && !hasEditImageSelected()) {
+        alert('Vui lòng nhập nội dung, chọn ảnh hoặc sticker');
         return;
     }
+    
+    // Tạo FormData để gửi cả dữ liệu và file
+    const formData = new FormData();
+    formData.append('commentId', commentId);
+    formData.append('artworkId', artworkId);
+    formData.append('editedContent', editedContent);
+    formData.append('sticker', stickerPath);
+    
+    // Thêm ảnh nếu có
+    const imageInput = document.getElementById('editImageInput');
+    if (imageInput.files.length > 0) {
+        formData.append('commentImage', imageInput.files[0]);
+    }
+    
+    // Thêm thông tin có cần giữ lại ảnh cũ không
+    formData.append('keepOriginalImage', !hasEditImageSelected() && $('#editCommentOriginalImage').val() ? 'true' : 'false');
     
     $.ajax({
         url: '/Artwork/EditComment',
         type: 'POST',
-        data: {
-            commentId: commentId,
-            artworkId: artworkId,
-            editedContent: editedContent
-        },
+        data: formData,
+        processData: false,
+        contentType: false,
         headers: {
             'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
         },
         success: function(response) {
             if (response.success) {
-                // Cập nhật nội dung bình luận trên UI
+                // Cập nhật giao diện
+                location.reload(); // Cách đơn giản nhất là tải lại trang
+                
+                // Hoặc cập nhật từng thành phần trên UI (phức tạp hơn)
+                /*
                 $(`#comment-${commentId} .comment-text`).text(response.editedContent);
                 
-                // Nếu comment chưa có trạng thái "đã chỉnh sửa", thêm vào
-                if (!$(`#comment-${commentId} .edited-marker`).length) {
-                    $(`#comment-${commentId} .commenter-name`).append('<span class="edited-marker">(đã chỉnh sửa)</span>');
+                // Cập nhật sticker nếu có
+                if (response.sticker) {
+                    if ($(`#comment-${commentId} .sticker-container`).length == 0) {
+                        $(`#comment-${commentId} .comment-media-container`).prepend('<div class="sticker-container"><img class="comment-sticker"></div>');
+                    }
+                    $(`#comment-${commentId} .comment-sticker`).attr('src', response.sticker);
+                    $(`#comment-${commentId} .sticker-container`).removeClass('d-none');
+                } else {
+                    $(`#comment-${commentId} .sticker-container`).addClass('d-none');
                 }
+                
+                // Cập nhật ảnh nếu có
+                if (response.imagePath) {
+                    if ($(`#comment-${commentId} .comment-image-container`).length == 0) {
+                        $(`#comment-${commentId} .comment-media-container`).append('<div class="comment-image-container"><img class="comment-image zoomable-image"></div>');
+                    }
+                    $(`#comment-${commentId} .comment-image`).attr('src', response.imagePath);
+                    $(`#comment-${commentId} .comment-image-container`).removeClass('d-none');
+                } else {
+                    $(`#comment-${commentId} .comment-image-container`).addClass('d-none');
+                }
+                */
                 
                 // Đóng modal
                 $('#editCommentModal').modal('hide');
-                
-                // Hiển thị thông báo
-                const toastHTML = `
-                    <div class="toast-container position-fixed bottom-0 end-0 p-3">
-                        <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-                            <div class="toast-header">
-                                <strong class="me-auto">Thông báo</strong>
-                                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-                            </div>
-                            <div class="toast-body">
-                                ${response.message}
-                            </div>
-                        </div>
-                    </div>`;
-                
-                $('body').append(toastHTML);
-                $('.toast').toast('show');
             } else {
                 alert(response.message);
             }
@@ -399,6 +471,11 @@ function saveEditedComment() {
             alert('Có lỗi xảy ra khi sửa bình luận');
         }
     });
+}
+
+// Kiểm tra xem có đang chọn ảnh mới không
+function hasEditImageSelected() {
+    return $('#editImageInput').get(0).files.length > 0;
 }
 
 // Hiển thị modal sửa phản hồi
@@ -543,7 +620,7 @@ function removeReplySticker(commentId) {
     $(`#replyStickerPreview-${commentId}`).addClass('d-none');
 }
 
-// Sự kiện khi trang được tải xong
+// Thêm các event handlers vào document.ready
 $(document).ready(function() {
     // Xử lý rating stars
     $('.rating-stars i').on('click', function() {
@@ -668,6 +745,69 @@ $(document).ready(function() {
                 $(`#stickerInputReply-${commentId}`).val('');
             }
             reader.readAsDataURL(file);
+        }
+    });
+
+    // Xử lý nút sticker trong modal sửa bình luận
+    $('#openEditStickerSelector').click(function() {
+        // Lưu trạng thái hiện tại của modal sửa bình luận
+        var commentModal = $('#editCommentModal');
+        
+        // Lưu nội dung và ID bình luận trước khi đóng modal
+        window.editCommentState = {
+            commentId: $('#editCommentId').val(),
+            content: $('#editCommentContent').val(),
+            originalImage: $('#editCommentOriginalImage').val(),
+            originalSticker: $('#editCommentOriginalSticker').val()
+        };
+        
+        // Đánh dấu trạng thái đang chọn sticker cho modal sửa
+        window.currentStickerTarget = {
+            type: 'editComment'
+        };
+        
+        // Ẩn modal sửa bình luận (không đóng hẳn)
+        commentModal.modal('hide');
+        
+        // Hiển thị modal sticker
+        $('#stickerModal').modal('show');
+    });
+    
+    // Xử lý nút chọn ảnh trong modal sửa bình luận
+    $('#editImageInput').change(function() {
+        const file = this.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                $('#editImagePreview').attr('src', e.target.result);
+                $('#editImagePreviewContainer').removeClass('d-none');
+                
+                console.log('Đã hiển thị ảnh preview khi sửa');
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+    
+    // Xóa ảnh đã chọn trong modal sửa
+    $('#removeEditImage').click(function() {
+        $('#editImageInput').val('');
+        $('#editImagePreviewContainer').addClass('d-none');
+        $('#editCommentOriginalImage').val(''); // Đánh dấu xóa ảnh gốc
+    });
+    
+    // Xóa sticker đã chọn trong modal sửa
+    $('#removeEditSticker').click(function() {
+        $('#editStickerInput').val('');
+        $('#editStickerPreviewContainer').addClass('d-none');
+    });
+
+    // Xử lý sự kiện đóng modal sticker
+    $('#stickerModal').on('hidden.bs.modal', function () {
+        // Nếu đang sửa bình luận, mở lại modal sửa bình luận
+        if (window.currentStickerTarget && window.currentStickerTarget.type === 'editComment' && window.editCommentState) {
+            setTimeout(function() {
+                $('#editCommentModal').modal('show');
+            }, 500);
         }
     });
 });

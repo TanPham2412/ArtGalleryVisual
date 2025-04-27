@@ -525,13 +525,14 @@ namespace ArtGallery.Controllers
         [HttpPost]
         [Authorize]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditComment(int commentId, int artworkId, string editedContent)
+        public async Task<IActionResult> EditComment(int commentId, int artworkId, string editedContent, 
+            IFormFile commentImage, string sticker, bool keepOriginalImage = false)
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(editedContent))
+                if (string.IsNullOrWhiteSpace(editedContent) && commentImage == null && string.IsNullOrEmpty(sticker))
                 {
-                    return Json(new { success = false, message = "Nội dung bình luận không được để trống" });
+                    return Json(new { success = false, message = "Vui lòng nhập nội dung, chọn ảnh hoặc sticker" });
                 }
                 
                 var comment = await _context.BinhLuans.FindAsync(commentId);
@@ -546,19 +547,52 @@ namespace ArtGallery.Controllers
                 // Chỉ admin hoặc người viết bình luận mới có quyền sửa
                 if (isAdmin || comment.MaNguoiDung == currentUserId)
                 {
-                    // Lưu nội dung cũ trước khi cập nhật
-                    var originalContent = comment.NoiDung;
-                    
                     // Cập nhật nội dung bình luận
                     comment.NoiDung = editedContent;
                     comment.DaChinhSua = true; // Đánh dấu đã chỉnh sửa
+                    
+                    // Cập nhật sticker nếu có
+                    comment.Sticker = sticker;
+                    
+                    // Xử lý upload ảnh mới nếu có
+                    if (commentImage != null && commentImage.Length > 0)
+                    {
+                        // Xóa ảnh cũ nếu có
+                        if (!string.IsNullOrEmpty(comment.DuongDanAnh))
+                        {
+                            // Có thể thêm code xóa file ảnh cũ ở đây
+                        }
+                        
+                        var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "comments");
+                        if (!Directory.Exists(uploadsFolder))
+                            Directory.CreateDirectory(uploadsFolder);
+                            
+                        var uniqueFileName = Guid.NewGuid().ToString() + "_" + commentImage.FileName;
+                        var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+                        
+                        using (var fileStream = new FileStream(filePath, FileMode.Create))
+                        {
+                            await commentImage.CopyToAsync(fileStream);
+                        }
+                        
+                        comment.DuongDanAnh = "/images/comments/" + uniqueFileName;
+                        _logger.LogInformation($"Đã lưu ảnh mới tại: {comment.DuongDanAnh}");
+                    }
+                    else if (!keepOriginalImage)
+                    {
+                        // Xóa ảnh nếu người dùng đã xóa và không upload ảnh mới
+                        comment.DuongDanAnh = null;
+                    }
+                    
                     await _context.SaveChangesAsync();
                     
                     return Json(new { 
                         success = true, 
                         message = "Đã cập nhật bình luận thành công",
                         commentId = commentId,
-                        editedContent = editedContent
+                        editedContent = editedContent,
+                        sticker = comment.Sticker,
+                        imagePath = comment.DuongDanAnh
                     });
                 }
                 else
