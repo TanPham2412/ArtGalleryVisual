@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ArtGallery.Migrations
 {
     [DbContext(typeof(ArtGalleryContext))]
-    [Migration("20250420120626_InitialCreate")]
+    [Migration("20250427103959_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -33,6 +33,13 @@ namespace ArtGallery.Migrations
                         .HasColumnName("ma_binh_luan");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MaBinhLuan"));
+
+                    b.Property<string>("DuongDanAnh")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("duong_dan_anh");
+
+                    b.Property<bool>("IsHidden")
+                        .HasColumnType("bit");
 
                     b.Property<string>("MaNguoiDung")
                         .IsRequired()
@@ -59,6 +66,10 @@ namespace ArtGallery.Migrations
                         .HasColumnType("int")
                         .HasDefaultValue(0)
                         .HasColumnName("rating");
+
+                    b.Property<string>("Sticker")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("sticker");
 
                     b.HasKey("MaBinhLuan")
                         .HasName("PK__binh_lua__300DD2D8D7F67231");
@@ -103,6 +114,18 @@ namespace ArtGallery.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MaGiaoDich"));
 
+                    b.Property<bool?>("IsHiddenByBuyer")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false)
+                        .HasColumnName("is_hidden_by_buyer");
+
+                    b.Property<bool?>("IsHiddenBySeller")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false)
+                        .HasColumnName("is_hidden_by_seller");
+
                     b.Property<string>("MaNguoiMua")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)")
@@ -120,7 +143,9 @@ namespace ArtGallery.Migrations
 
                     b.Property<string>("PhuongThucThanhToan")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("phuong_thuc_thanh_toan");
 
                     b.Property<int>("SoLuong")
                         .HasColumnType("int")
@@ -132,7 +157,9 @@ namespace ArtGallery.Migrations
 
                     b.Property<string>("TrangThai")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("trang_thai");
 
                     b.HasKey("MaGiaoDich")
                         .HasName("PK__giao_dic__FB80ED3254B2912A");
@@ -391,6 +418,10 @@ namespace ArtGallery.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MaPhanHoi"));
 
+                    b.Property<string>("DuongDanAnh")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("duong_dan_anh");
+
                     b.Property<int>("MaBinhLuan")
                         .HasColumnType("int")
                         .HasColumnName("ma_binh_luan");
@@ -410,6 +441,10 @@ namespace ArtGallery.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("noi_dung");
+
+                    b.Property<string>("Sticker")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("sticker");
 
                     b.HasKey("MaPhanHoi")
                         .HasName("PK__phan_hoi_binh_luan__ID");

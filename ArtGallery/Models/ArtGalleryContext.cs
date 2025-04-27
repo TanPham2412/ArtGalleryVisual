@@ -75,6 +75,11 @@ public partial class ArtGalleryContext : IdentityDbContext<NguoiDung, IdentityRo
                 .HasColumnName("ngay_binh_luan");
             entity.Property(e => e.NoiDung).HasColumnName("noi_dung");
             entity.Property(e => e.Rating).HasColumnName("rating").HasDefaultValue(0);
+            entity.Property(e => e.DuongDanAnh).HasColumnName("duong_dan_anh");
+            entity.Property(e => e.Sticker).HasColumnName("sticker");
+            entity.Property(e => e.DaChinhSua)
+                .HasColumnName("da_chinh_sua")
+                .HasDefaultValue(false);
 
             entity.HasOne(d => d.MaNguoiDungNavigation).WithMany(p => p.BinhLuans)
                 .HasForeignKey(d => d.MaNguoiDung)
@@ -433,7 +438,12 @@ public partial class ArtGalleryContext : IdentityDbContext<NguoiDung, IdentityRo
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")
                 .HasColumnName("ngay_phan_hoi");
-            
+            entity.Property(e => e.DuongDanAnh).HasColumnName("duong_dan_anh");
+            entity.Property(e => e.Sticker).HasColumnName("sticker");
+            entity.Property(e => e.DaChinhSua)
+        .HasColumnName("da_chinh_sua")
+        .HasDefaultValue(false);
+
             entity.HasOne(d => d.MaBinhLuanNavigation)
                 .WithMany()
                 .HasForeignKey(d => d.MaBinhLuan)

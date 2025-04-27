@@ -16,6 +16,14 @@ public partial class BinhLuan
     public DateTime? NgayBinhLuan { get; set; }
     
     public int Rating { get; set; } = 0;
+    
+    public string? DuongDanAnh { get; set; }
+    
+    public string? Sticker { get; set; }
+
+    public bool IsHidden { get; set; } = false;
+
+    public bool DaChinhSua { get; set; } = false;
 
     public virtual NguoiDung MaNguoiDungNavigation { get; set; } = null!;
 

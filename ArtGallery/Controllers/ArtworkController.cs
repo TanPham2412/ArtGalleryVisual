@@ -5,6 +5,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
+using System.IO;
 
 namespace ArtGallery.Controllers
 {
@@ -289,15 +290,53 @@ namespace ArtGallery.Controllers
             }
         }
 
+        [HttpGet]
+        public IActionResult GetStickers()
+        {
+            try {
+                var basePath = "/images/stickers/";
+                var vanthuongPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "stickers", "vanthuong");
+                var daisuhuynhPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "stickers", "daisuhuynh");
+                
+                var vanthuongFiles = new List<string>();
+                var daisuhuynhFiles = new List<string>();
+                
+                if (Directory.Exists(vanthuongPath)) {
+                    vanthuongFiles = Directory.GetFiles(vanthuongPath, "*.png")
+                        .Select(f => basePath + "vanthuong/" + Path.GetFileName(f))
+                        .ToList();
+                }
+                
+                if (Directory.Exists(daisuhuynhPath)) {
+                    daisuhuynhFiles = Directory.GetFiles(daisuhuynhPath, "*.png")
+                        .Select(f => basePath + "daisuhuynh/" + Path.GetFileName(f))
+                        .ToList();
+                }
+                
+                return Json(new { 
+                    success = true, 
+                    vanthuong = vanthuongFiles, 
+                    daisuhuynh = daisuhuynhFiles 
+                });
+            }
+            catch (Exception ex) {
+                _logger.LogError(ex, "Lỗi khi lấy danh sách stickers");
+                return Json(new { success = false, message = "Không thể tải stickers" });
+            }
+        }
+
         [HttpPost]
         [Authorize]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AddComment(BinhLuan model, int Rating)
+        public async Task<IActionResult> AddComment(BinhLuan model, int Rating, IFormFile CommentImage, string Sticker)
         {
-            if (model == null || string.IsNullOrEmpty(model.NoiDung))
+            // Thêm log để kiểm tra
+            _logger.LogInformation($"AddComment: Ảnh đã upload: {CommentImage?.FileName}, Kích thước: {CommentImage?.Length}");
+            
+            if (model == null || (string.IsNullOrEmpty(model.NoiDung) && CommentImage == null && string.IsNullOrEmpty(Sticker)))
             {
-                TempData["ErrorMessage"] = "Nội dung bình luận không được để trống";
-                return RedirectToAction("Display", new { id = model.MaTranh });
+                TempData["ErrorMessage"] = "Vui lòng nhập nội dung, chọn ảnh hoặc sticker";
+                return RedirectToAction("Display", new { id = model.MaTranh, scrollToComments = true });
             }
             
             try
@@ -308,33 +347,53 @@ namespace ArtGallery.Controllers
                 {
                     MaTranh = model.MaTranh,
                     MaNguoiDung = currentUserId,
-                    NoiDung = model.NoiDung,
+                    NoiDung = model.NoiDung ?? "",
                     NgayBinhLuan = DateTime.Now,
-                    Rating = Rating // Thêm trường Rating vào bảng BinhLuan
+                    Rating = Rating,
+                    Sticker = Sticker
                 };
+                
+                // Xử lý upload ảnh nếu có
+                if (CommentImage != null && CommentImage.Length > 0)
+                {
+                    var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "comments");
+                    if (!Directory.Exists(uploadsFolder))
+                        Directory.CreateDirectory(uploadsFolder);
+                        
+                    var uniqueFileName = Guid.NewGuid().ToString() + "_" + CommentImage.FileName;
+                    var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+                    
+                    using (var fileStream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await CommentImage.CopyToAsync(fileStream);
+                    }
+                    
+                    comment.DuongDanAnh = "/images/comments/" + uniqueFileName;
+                    _logger.LogInformation($"Đã lưu ảnh tại: {comment.DuongDanAnh}");
+                }
                 
                 _context.BinhLuans.Add(comment);
                 await _context.SaveChangesAsync();
                 
                 TempData["SuccessMessage"] = "Bình luận của bạn đã được gửi thành công!";
-                return RedirectToAction("Display", new { id = model.MaTranh });
+                return RedirectToAction("Display", new { id = model.MaTranh, scrollToComments = true });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Lỗi khi thêm bình luận");
                 TempData["ErrorMessage"] = "Có lỗi xảy ra khi gửi bình luận";
-                return RedirectToAction("Display", new { id = model.MaTranh });
+                return RedirectToAction("Display", new { id = model.MaTranh, scrollToComments = true });
             }
         }
 
         [HttpPost]
         [Authorize]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AddReply(int MaBinhLuan, int MaTranh, string NoiDung)
+        public async Task<IActionResult> AddReply(int MaBinhLuan, int MaTranh, string NoiDung, IFormFile ReplyImage, string Sticker)
         {
-            if (string.IsNullOrEmpty(NoiDung))
+            if (string.IsNullOrEmpty(NoiDung) && ReplyImage == null && string.IsNullOrEmpty(Sticker))
             {
-                TempData["ErrorMessage"] = "Nội dung phản hồi không được để trống";
+                TempData["ErrorMessage"] = "Vui lòng nhập nội dung, chọn ảnh hoặc sticker";
                 return RedirectToAction("Display", new { id = MaTranh });
             }
             
@@ -346,9 +405,28 @@ namespace ArtGallery.Controllers
                 {
                     MaBinhLuan = MaBinhLuan,
                     MaNguoiDung = currentUserId,
-                    NoiDung = NoiDung,
-                    NgayPhanHoi = DateTime.Now
+                    NoiDung = NoiDung ?? "",
+                    NgayPhanHoi = DateTime.Now,
+                    Sticker = Sticker
                 };
+                
+                // Xử lý upload ảnh nếu có
+                if (ReplyImage != null && ReplyImage.Length > 0)
+                {
+                    var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "comments");
+                    if (!Directory.Exists(uploadsFolder))
+                        Directory.CreateDirectory(uploadsFolder);
+                        
+                    var uniqueFileName = Guid.NewGuid().ToString() + "_" + ReplyImage.FileName;
+                    var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+                    
+                    using (var fileStream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await ReplyImage.CopyToAsync(fileStream);
+                    }
+                    
+                    reply.DuongDanAnh = "/images/comments/" + uniqueFileName;
+                }
                 
                 _context.PhanHoiBinhLuans.Add(reply);
                 await _context.SaveChangesAsync();
@@ -361,6 +439,255 @@ namespace ArtGallery.Controllers
                 _logger.LogError(ex, "Lỗi khi thêm phản hồi bình luận");
                 TempData["ErrorMessage"] = "Có lỗi xảy ra khi gửi phản hồi";
                 return RedirectToAction("Display", new { id = MaTranh });
+            }
+        }
+
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteComment(int commentId, int artworkId)
+        {
+            try
+            {
+                var comment = await _context.BinhLuans.FindAsync(commentId);
+                if (comment == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy bình luận này" });
+                }
+                
+                var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var isAdmin = User.IsInRole("Admin");
+                
+                // Chỉ admin hoặc người viết bình luận mới có quyền xóa
+                if (isAdmin || comment.MaNguoiDung == currentUserId)
+                {
+                    // Trước khi xóa bình luận, xóa tất cả các phản hồi liên quan
+                    var replies = await _context.PhanHoiBinhLuans
+                        .Where(r => r.MaBinhLuan == commentId)
+                        .ToListAsync();
+                        
+                    _context.PhanHoiBinhLuans.RemoveRange(replies);
+                    _context.BinhLuans.Remove(comment);
+                    await _context.SaveChangesAsync();
+                    
+                    return Json(new { success = true, message = "Đã xóa bình luận thành công" });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Bạn không có quyền xóa bình luận này" });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi xóa bình luận");
+                return Json(new { success = false, message = "Có lỗi xảy ra khi xóa bình luận" });
+            }
+        }
+
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ToggleHideComment(int commentId, int artworkId)
+        {
+            try
+            {
+                var comment = await _context.BinhLuans.FindAsync(commentId);
+                if (comment == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy bình luận này" });
+                }
+                
+                var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var isAdmin = User.IsInRole("Admin");
+                
+                // Chỉ admin hoặc người viết bình luận mới có quyền ẩn/hiện
+                if (isAdmin || comment.MaNguoiDung == currentUserId)
+                {
+                    // Thêm cột IsHidden vào model BinhLuan nếu chưa có
+                    comment.IsHidden = !comment.IsHidden;
+                    await _context.SaveChangesAsync();
+                    
+                    string message = comment.IsHidden ? "Đã ẩn bình luận" : "Đã hiện bình luận";
+                    return Json(new { success = true, message = message, isHidden = comment.IsHidden });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Bạn không có quyền ẩn/hiện bình luận này" });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi ẩn/hiện bình luận");
+                return Json(new { success = false, message = "Có lỗi xảy ra khi ẩn/hiện bình luận" });
+            }
+        }
+
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditComment(int commentId, int artworkId, string editedContent, 
+            IFormFile commentImage, string sticker, bool keepOriginalImage = false)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(editedContent) && commentImage == null && string.IsNullOrEmpty(sticker))
+                {
+                    return Json(new { success = false, message = "Vui lòng nhập nội dung, chọn ảnh hoặc sticker" });
+                }
+                
+                var comment = await _context.BinhLuans.FindAsync(commentId);
+                if (comment == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy bình luận này" });
+                }
+                
+                var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var isAdmin = User.IsInRole("Admin");
+                
+                // Chỉ admin hoặc người viết bình luận mới có quyền sửa
+                if (isAdmin || comment.MaNguoiDung == currentUserId)
+                {
+                    // Cập nhật nội dung bình luận
+                    comment.NoiDung = editedContent;
+                    comment.DaChinhSua = true; // Đánh dấu đã chỉnh sửa
+                    
+                    // Cập nhật sticker nếu có
+                    comment.Sticker = sticker;
+                    
+                    // Xử lý upload ảnh mới nếu có
+                    if (commentImage != null && commentImage.Length > 0)
+                    {
+                        // Xóa ảnh cũ nếu có
+                        if (!string.IsNullOrEmpty(comment.DuongDanAnh))
+                        {
+                            // Có thể thêm code xóa file ảnh cũ ở đây
+                        }
+                        
+                        var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "comments");
+                        if (!Directory.Exists(uploadsFolder))
+                            Directory.CreateDirectory(uploadsFolder);
+                            
+                        var uniqueFileName = Guid.NewGuid().ToString() + "_" + commentImage.FileName;
+                        var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+                        
+                        using (var fileStream = new FileStream(filePath, FileMode.Create))
+                        {
+                            await commentImage.CopyToAsync(fileStream);
+                        }
+                        
+                        comment.DuongDanAnh = "/images/comments/" + uniqueFileName;
+                        _logger.LogInformation($"Đã lưu ảnh mới tại: {comment.DuongDanAnh}");
+                    }
+                    else if (!keepOriginalImage)
+                    {
+                        // Xóa ảnh nếu người dùng đã xóa và không upload ảnh mới
+                        comment.DuongDanAnh = null;
+                    }
+                    
+                    await _context.SaveChangesAsync();
+                    
+                    return Json(new { 
+                        success = true, 
+                        message = "Đã cập nhật bình luận thành công",
+                        commentId = commentId,
+                        editedContent = editedContent,
+                        sticker = comment.Sticker,
+                        imagePath = comment.DuongDanAnh
+                    });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Bạn không có quyền sửa bình luận này" });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi sửa bình luận");
+                return Json(new { success = false, message = "Có lỗi xảy ra khi sửa bình luận" });
+            }
+        }
+
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditReply(int replyId, int commentId, int artworkId, string editedContent)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(editedContent))
+                {
+                    return Json(new { success = false, message = "Nội dung phản hồi không được để trống" });
+                }
+                
+                var reply = await _context.PhanHoiBinhLuans.FindAsync(replyId);
+                if (reply == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy phản hồi này" });
+                }
+                
+                var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var isAdmin = User.IsInRole("Admin");
+                
+                // Chỉ admin hoặc người viết phản hồi mới có quyền sửa
+                if (isAdmin || reply.MaNguoiDung == currentUserId)
+                {
+                    // Cập nhật nội dung phản hồi
+                    reply.NoiDung = editedContent;
+                    reply.DaChinhSua = true; // Đánh dấu đã chỉnh sửa
+                    await _context.SaveChangesAsync();
+                    
+                    return Json(new { 
+                        success = true, 
+                        message = "Đã cập nhật phản hồi thành công",
+                        replyId = replyId,
+                        editedContent = editedContent
+                    });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Bạn không có quyền sửa phản hồi này" });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi sửa phản hồi");
+                return Json(new { success = false, message = "Có lỗi xảy ra khi sửa phản hồi" });
+            }
+        }
+
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteReply(int replyId, int artworkId)
+        {
+            try
+            {
+                var reply = await _context.PhanHoiBinhLuans.FindAsync(replyId);
+                if (reply == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy phản hồi này" });
+                }
+                
+                var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var isAdmin = User.IsInRole("Admin");
+                
+                // Chỉ admin hoặc người viết phản hồi mới có quyền xóa
+                if (isAdmin || reply.MaNguoiDung == currentUserId)
+                {
+                    _context.PhanHoiBinhLuans.Remove(reply);
+                    await _context.SaveChangesAsync();
+                    
+                    return Json(new { success = true, message = "Đã xóa phản hồi thành công" });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Bạn không có quyền xóa phản hồi này" });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi xóa phản hồi");
+                return Json(new { success = false, message = "Có lỗi xảy ra khi xóa phản hồi" });
             }
         }
     }

@@ -592,8 +592,9 @@ body.no-scroll {
 }
 
 .comment-content {
-    color: #e0e0e0;
-    line-height: 1.5;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
 /* Thông báo khi chưa có bình luận */
@@ -681,19 +682,27 @@ body.no-scroll {
     flex: 1;
 }
 
-.reply-input {
-    background-color: #2a2a2a;
-    border: 1px solid #444;
-    border-radius: 18px;
-    color: #e0e0e0 !important;
-    font-size: 14px;
-    padding: 8px 15px;
+.reply-input,
+textarea[placeholder="Viết phản hồi..."],
+input[placeholder="Viết phản hồi..."] {
+    color: #e0e0e0 !important; /* Màu trắng xám sáng */
+    background-color: #1e1e1e !important; /* Màu nền tối */
+    border: 1px solid #007bff !important; /* Giữ viền xanh */
 }
 
-.reply-input:focus {
-    background-color: #333;
-    color: #fff !important;
-    border-color: #00a8ff;
+/* Đảm bảo placeholder cũng có màu phù hợp */
+.reply-input::placeholder,
+textarea[placeholder="Viết phản hồi..."]::placeholder,
+input[placeholder="Viết phản hồi..."]::placeholder {
+    color: #909090 !important; /* Màu xám nhạt hơn cho placeholder */
+}
+
+/* Tăng độ tương phản khi focus */
+.reply-input:focus,
+textarea[placeholder="Viết phản hồi..."]:focus,
+input[placeholder="Viết phản hồi..."]:focus {
+    color: #ffffff !important; /* Màu trắng sáng hơn khi focus */
+    background-color: #252525 !important; /* Nền tối hơn một chút khi focus */
 }
 
 .reply-actions {
@@ -752,11 +761,9 @@ body.no-scroll {
 }
 
 .reply-bubble {
-    background-color: #2a2a2a;
-    padding: 8px 12px;
-    border-radius: 12px;
-    display: inline-block;
-    max-width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
 .reply-username {
@@ -780,4 +787,562 @@ body.no-scroll {
 .reply-time {
     font-size: 11px;
     color: #888;
+}
+
+/* Sticker và ảnh trong bình luận */
+.comment-attachments {
+    display: flex;
+    flex-direction: column;
+}
+
+.attachment-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+/* Thống nhất giao diện cho nút sticker trong mọi trường hợp */
+button#openStickerSelector,
+button[id^="Sticker"], 
+.modal-body button, 
+button.btn-outline-light,
+label.btn-attachment {
+    background-color: transparent !important;
+    border: 1px solid rgba(255, 255, 255, 0.7) !important;
+    color: #fff !important;
+    padding: 6px 12px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    border-radius: 4px !important;
+    margin-right: 10px !important;
+    transition: all 0.3s ease !important;
+}
+
+/* Ghi đè style cho các nút trong modal chỉnh sửa */
+#editCommentModal button, 
+#editReplyModal button {
+    border-radius: 4px !important;
+}
+
+/* Sửa cụ thể nút sticker trong form chỉnh sửa bình luận */
+button.sticker-btn, 
+button[id*="Sticker"],
+button.btn-outline-light,
+.modal-body .btn-outline-light {
+    border-radius: 4px !important;
+    padding: 6px 12px !important;
+    text-align: center !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/* Đảm bảo icon nằm giữa nút */
+button i, label i {
+    margin-right: 4px;
+}
+
+/* Đặc biệt sửa cho nút sticker trong phần comment chính */
+.attachment-buttons .btn {
+    border-radius: 4px !important;
+    background-color: transparent !important;
+    border: 1px solid rgba(255, 255, 255, 0.7) !important;
+}
+
+/* Thống nhất hover cho tất cả nút */
+button#openStickerSelector:hover,
+button[id^="Sticker"]:hover, 
+.modal-body button:hover,
+button.btn-outline-light:hover,
+label.btn-attachment:hover,
+.attachment-buttons .btn:hover {
+    background-color: #007bff !important;
+    border-color: #007bff !important;
+    color: white !important;
+}
+
+/* Sửa nút trong form bình luận gốc */
+#commentForm button, 
+#commentForm label.btn-attachment {
+    background-color: transparent !important;
+    border: 1px solid rgba(255, 255, 255, 0.7) !important;
+    border-radius: 4px !important;
+    padding: 6px 12px !important;
+}
+
+/* Thêm style cho nút Sticker */
+.modal-body button[id*="Sticker"] {
+    width: auto !important;
+    height: auto !important;
+    border-radius: 4px !important;
+    padding: 6px 12px !important;
+}
+
+/* Màu nút trong modal footer */
+.modal-footer .btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.modal-footer .btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #0056b3;
+}
+
+#imagePreviewContainer, #stickerPreviewContainer {
+    position: relative;
+    display: inline-block;
+}
+
+/* Sticker modal */
+.sticker-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    padding: 10px;
+}
+
+.sticker-item {
+    cursor: pointer;
+    transition: transform 0.2s;
+    text-align: center;
+}
+
+.sticker-item:hover {
+    transform: scale(1.1);
+}
+
+.sticker-img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 4px;
+}
+
+/* Sticker và ảnh trong nội dung bình luận */
+.sticker-container {
+    display: block;
+    margin-top: 8px;
+}
+
+.comment-sticker {
+    max-width: 100px;
+    max-height: 100px;
+}
+
+.comment-image-container {
+    display: block;
+    margin-top: 8px;
+}
+
+.comment-image {
+    max-width: 200px;
+    max-height: 150px;
+    border-radius: 8px;
+    object-fit: contain;
+}
+
+/* Sticker và ảnh trong phản hồi */
+.btn-reply-attachment {
+    background: transparent;
+    border: none;
+    color: #777;
+    font-size: 14px;
+    padding: 2px 5px;
+    cursor: pointer;
+}
+
+.btn-reply-attachment:hover {
+    color: #00a8ff;
+}
+
+.reply-preview {
+    position: relative;
+    display: inline-block;
+    margin-top: 5px;
+}
+
+.preview-img, .preview-sticker {
+    max-height: 60px;
+    border-radius: 4px;
+}
+
+.btn-remove-preview {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: rgba(0, 0, 0, 0.7);
+    border: none;
+    color: #fff;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    cursor: pointer;
+}
+
+.reply-attachment-options {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.reply-sticker {
+    max-width: 70px;
+    max-height: 70px;
+}
+
+.reply-image-container {
+    display: block;
+    margin-top: 8px;
+}
+
+.reply-image {
+    max-width: 150px;
+    max-height: 100px;
+    border-radius: 6px;
+    object-fit: contain;
+}
+
+/* Tab sticker styles */
+.nav-tabs .nav-link {
+    color: #e0e0e0;
+    border-color: #333 #333 transparent;
+    background-color: #1a1a1a;
+}
+
+.nav-tabs .nav-link.active {
+    color: #00a8ff;
+    background-color: #222;
+    border-color: #444 #444 #222;
+}
+
+.nav-tabs .nav-link:hover {
+    border-color: #444 #444 transparent;
+}
+
+.tab-content {
+    background-color: #222;
+    border: 1px solid #444;
+    border-top: none;
+    border-radius: 0 0 4px 4px;
+    max-height: 400px;
+    overflow: auto !important;
+    scrollbar-width: none; /* Firefox */
+}
+
+.tab-content::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Edge */
+}
+
+.tab-pane {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+    overflow: auto;
+}
+
+.tab-pane::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Edge */
+}
+
+/* Modal sticker */
+#stickerModal .modal-content {
+    background-color: #1a1a1a;
+    color: #e0e0e0;
+}
+
+#stickerModal .modal-header {
+    border-bottom-color: #333;
+}
+
+/* Thêm container cho ảnh và sticker */
+.comment-image-container, .reply-image-container, .sticker-container {
+    display: inline-block;
+}
+
+/* Thêm style cho ảnh có thể zoom */
+.zoomable-image {
+    cursor: pointer;
+    transition: transform 0.3s;
+}
+
+.zoomable-image:hover {
+    transform: scale(1.03);
+    box-shadow: 0 0 10px rgba(0, 168, 255, 0.3);
+}
+
+/* Style cho modal ảnh bình luận */
+#commentImageModal {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    padding: 0;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: rgba(0, 0, 0, 0.95);
+}
+
+/* Điều chỉnh kích thước ảnh trong modal */
+#modalCommentImage {
+    max-width: 90% !important;
+    max-height: 90vh !important;
+    object-fit: contain;
+    display: block;
+    margin: 0 auto;
+    border: none;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+}
+
+/* Ẩn thanh lăn nhưng vẫn cho phép cuộn */
+.modal-body {
+    overflow: auto !important;
+}
+
+/* Style cho bình luận bị ẩn */
+.comment-hidden {
+    opacity: 0.75;
+}
+
+.hidden-comment-notice {
+    background-color: #333;
+    padding: 8px 12px;
+    border-radius: 6px;
+    color: #888;
+    font-style: italic;
+    text-align: center;
+}
+
+/* Style cho các nút quản lý bình luận */
+.comment-admin-actions {
+    display: inline-flex;
+    gap: 8px;
+    margin-left: 10px;
+}
+
+.btn-toggle-hide, .btn-delete-comment {
+    background: transparent;
+    border: none;
+    color: #888;
+    font-size: 13px;
+    padding: 3px 8px;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.btn-toggle-hide:hover {
+    color: #00a8ff;
+}
+
+.btn-delete-comment:hover {
+    color: #ff4545;
+}
+
+/* Style cho toast */
+.toast {
+    background-color: #1e1e1e;
+    color: #e0e0e0;
+    border: 1px solid #333;
+}
+
+.toast-header {
+    background-color: #222;
+    color: #e0e0e0;
+    border-bottom: 1px solid #333;
+}
+
+.toast-body {
+    background-color: #1e1e1e;
+}
+
+/* Style cho trạng thái đã chỉnh sửa */
+.edited-marker {
+    font-size: 12px;
+    color: #888;
+    font-weight: normal;
+    font-style: italic;
+    margin-left: 5px;
+}
+
+/* Style cho nút chỉnh sửa bình luận */
+.btn-edit-comment {
+    background: transparent;
+    border: none;
+    color: #888;
+    font-size: 13px;
+    padding: 3px 8px;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.btn-edit-comment:hover {
+    color: #00a8ff;
+}
+
+/* Style cho modal chỉnh sửa */
+#editCommentContent {
+    background-color: #333;
+    border: 1px solid #444;
+    color: #e0e0e0;
+}
+
+#editCommentContent:focus {
+    background-color: #3a3a3a;
+    border-color: #00a8ff;
+    color: #fff;
+    box-shadow: 0 0 0 0.25rem rgba(0, 168, 255, 0.25);
+}
+
+/* Style cho nút sửa và xóa phản hồi */
+.reply-admin-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-edit-reply, .btn-delete-reply {
+    background: transparent;
+    border: none;
+    color: #888;
+    font-size: 12px;
+    padding: 2px 6px;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.btn-edit-reply:hover {
+    color: #00a8ff;
+}
+
+.btn-delete-reply:hover {
+    color: #ff4545;
+}
+
+/* Cải thiện giao diện nút sửa bình luận */
+.btn-edit-comment,
+.btn-edit-reply,
+.btn-toggle-hide,
+.btn-delete-comment,
+.btn-delete-reply {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+    margin-right: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.btn-edit-comment:hover,
+.btn-edit-reply:hover {
+    color: #007bff !important;
+    background-color: rgba(0, 123, 255, 0.1);
+}
+
+.btn-toggle-hide:hover {
+    color: #ffc107 !important;
+    background-color: rgba(255, 193, 7, 0.1);
+}
+
+.btn-delete-comment:hover,
+.btn-delete-reply:hover {
+    color: #dc3545 !important;
+    background-color: rgba(220, 53, 69, 0.1);
+}
+
+/* Cải thiện giao diện cho modal chỉnh sửa */
+#editCommentModal .modal-content,
+#editReplyModal .modal-content {
+    background-color: #1a1a1a !important;
+    border: 1px solid #333;
+}
+
+#editCommentModal .modal-header,
+#editReplyModal .modal-header {
+    border-bottom: 1px solid #333;
+}
+
+#editCommentModal .modal-footer,
+#editReplyModal .modal-footer {
+    border-top: 1px solid #333;
+}
+
+/* Đồng bộ nút trong modal với phong cách chính */
+#openEditImage, 
+#openEditReplyImage,
+#openEditStickerSelector, 
+#openEditReplySticker {
+    background-color: transparent !important;
+    border: 1px solid rgba(255, 255, 255, 0.7) !important;
+    color: #fff !important;
+    border-radius: 4px;
+    padding: 6px 12px;
+    transition: all 0.3s ease;
+}
+
+#openEditImage:hover, 
+#openEditReplyImage:hover,
+#openEditStickerSelector:hover, 
+#openEditReplySticker:hover {
+    background-color: #007bff !important;
+    border-color: #007bff !important;
+}
+
+/* Thêm CSS để giữ scroll position */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Sửa màu chữ nút gửi bình luận thành xanh lam */
+.comment-form-container .btn-primary {
+    background-color: #121212;
+    border-color: #007bff;
+    color: #007bff !important;
+    transition: all 0.3s ease;
+}
+
+.comment-form-container .btn-primary:hover {
+    background-color: #007bff;
+    color: white !important;
+}
+
+/* Sửa lại style cho nút Ảnh với độ ưu tiên cao hơn */
+label.btn-attachment, 
+.comment-form-container label.btn-attachment,
+#commentForm label.btn-attachment {
+    background-color: transparent !important;
+    border: 1px solid rgba(255, 255, 255, 0.7) !important;
+    color: #fff !important;
+    padding: 6px 12px !important;
+    border-radius: 4px !important;
+    margin-right: 10px !important;
+    transition: all 0.3s ease !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+}
+
+/* Tăng độ ưu tiên cho hover effect */
+label.btn-attachment:hover,
+.comment-form-container label.btn-attachment:hover,
+#commentForm label.btn-attachment:hover {
+    background-color: #007bff !important;
+    border-color: #007bff !important;
+    color: white !important;
+    cursor: pointer !important;
+}
+
+/* Đảm bảo không có style nào khác ghi đè */
+.attachment-buttons label.btn-attachment {
+    background-color: transparent !important;
+    cursor: pointer !important;
+}
+
+.attachment-buttons label.btn-attachment:hover {
+    background-color: #007bff !important;
 }

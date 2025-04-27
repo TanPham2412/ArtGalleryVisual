@@ -13,6 +13,12 @@ public partial class PhanHoiBinhLuan
     public string NoiDung { get; set; } = null!;
 
     public DateTime? NgayPhanHoi { get; set; }
+    
+    public string? DuongDanAnh { get; set; }
+    
+    public string? Sticker { get; set; }
+    
+    public bool DaChinhSua { get; set; } = false;
 
     public virtual NguoiDung MaNguoiDungNavigation { get; set; } = null!;
 

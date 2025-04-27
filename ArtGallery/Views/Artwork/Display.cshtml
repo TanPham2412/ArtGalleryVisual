@@ -23,7 +23,7 @@
 }
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-<link rel="stylesheet" href="~/css/display.css?v=3">
+<link rel="stylesheet" href="~/css/display.css?v=5">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
 
@@ -174,7 +174,7 @@
                 @if (User.Identity.IsAuthenticated)
                 {
                     <div class="comment-form-container mb-4">
-                        <form id="commentForm" asp-action="AddComment" asp-controller="Artwork" method="post">
+                        <form id="commentForm" asp-action="AddComment" asp-controller="Artwork" method="post" enctype="multipart/form-data">
                             <input type="hidden" name="MaTranh" value="@Model.MaTranh" />
                             
                             <div class="rating-selection mb-3">
@@ -192,6 +192,31 @@
                             <div class="form-group mb-3">
                                 <textarea class="form-control" id="commentContent" name="NoiDung" rows="3" 
                                           placeholder="Nhập bình luận của bạn về tác phẩm này"></textarea>
+                            </div>
+                            
+                            <div class="comment-attachments mt-2 mb-3">
+                                <div class="attachment-buttons">
+                                    <label for="imageInput" class="btn-attachment">
+                                        <i class="fas fa-image"></i> Ảnh
+                                    </label>
+                                    <button type="button" class="btn btn-primary" id="openStickerSelector" data-bs-toggle="modal" data-bs-target="#stickerModal">
+                                        <i class="fas fa-smile"></i> Sticker
+                                    </button>
+                                </div>
+                                <div id="imagePreviewContainer" class="d-none mt-2">
+                                    <img id="imagePreview" class="img-fluid rounded" style="max-height: 100px;" />
+                                    <button type="button" class="btn-remove-attachment" id="removeImage">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                <div id="stickerPreviewContainer" class="d-none mt-2">
+                                    <img id="stickerPreview" class="img-fluid" style="max-height: 80px;" />
+                                    <button type="button" class="btn-remove-attachment" id="removeSticker">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                <input type="hidden" name="Sticker" id="stickerInput" />
+                                <input type="file" id="imageInput" name="CommentImage" class="d-none" accept="image/*" />
                             </div>
                             
                             <button type="submit" class="btn btn-primary">
@@ -216,12 +241,18 @@
                     {
                         @foreach (var comment in ViewBag.Comments)
                         {
-                            <div class="comment-item">
+                            <div id="comment-@comment.MaBinhLuan" class="comment-item @(comment.IsHidden ? "comment-hidden" : "")">
                                 <div class="comment-header">
                                     <div class="d-flex align-items-center">
                                         <img src="@comment.MaNguoiDungNavigation.GetAvatarPath()" alt="@comment.MaNguoiDungNavigation.TenNguoiDung" class="commenter-avatar" />
                                         <div class="commenter-info">
-                                            <h5 class="commenter-name">@comment.MaNguoiDungNavigation.TenNguoiDung</h5>
+                                            <h5 class="commenter-name">
+                                                @comment.MaNguoiDungNavigation.TenNguoiDung
+                                                @if (comment.DaChinhSua)
+                                                {
+                                                    <span class="edited-marker">(đã chỉnh sửa)</span>
+                                                }
+                                            </h5>
                                             <div class="comment-date">@comment.NgayBinhLuan?.ToString("dd/MM/yyyy HH:mm")</div>
                                         </div>
                                     </div>
@@ -236,7 +267,28 @@
                                     </div>
                                 </div>
                                 <div class="comment-content">
-                                    @comment.NoiDung
+                                    @if(comment.IsHidden)
+                                    {
+                                        <div class="hidden-comment-notice">
+                                            <i class="fas fa-eye-slash"></i> Bình luận này đã bị ẩn
+                                        </div>
+                                    }
+                                    <div class="comment-media-container @(comment.IsHidden ? "d-none" : "")">
+                                        @if (!string.IsNullOrEmpty(comment.Sticker))
+                                        {
+                                            <div class="sticker-container">
+                                                <img src="@Url.Content(comment.Sticker)" alt="Sticker" class="comment-sticker" />
+                                            </div>
+                                        }
+                                        @if (!string.IsNullOrEmpty(comment.DuongDanAnh))
+                                        {
+                                            <div class="comment-image-container">
+                                                <img src="@Url.Content(comment.DuongDanAnh)" alt="Uploaded image" class="comment-image zoomable-image"
+                                                     onclick="openImageModal('@Url.Content(comment.DuongDanAnh)')" />
+                                            </div>
+                                        }
+                                    </div>
+                                    <div class="comment-text @(comment.IsHidden ? "d-none" : "")">@comment.NoiDung</div>
                                 </div>
                                 <div class="comment-actions mt-2">
                                     @if (User.Identity.IsAuthenticated)
@@ -244,12 +296,28 @@
                                         <button class="btn-reply" onclick="toggleReplyForm(@comment.MaBinhLuan)">
                                             <i class="fas fa-reply me-1"></i>Phản hồi
                                         </button>
+
+                                        @if (User.IsInRole("Admin") || comment.MaNguoiDung == currentUserId)
+                                        {
+                                            <div class="comment-admin-actions">
+                                                <button class="btn-edit-comment" onclick="showEditCommentModal(@comment.MaBinhLuan, '@comment.NoiDung')">
+                                                    <i class="fas fa-edit me-1"></i>Sửa
+                                                </button>
+                                                <button class="btn-toggle-hide" onclick="toggleHideComment(@comment.MaBinhLuan, @Model.MaTranh)">
+                                                    <i class="fas @(comment.IsHidden ? "fa-eye" : "fa-eye-slash") me-1"></i>
+                                                    @(comment.IsHidden ? "Hiện" : "Ẩn")
+                                                </button>
+                                                <button class="btn-delete-comment" onclick="deleteComment(@comment.MaBinhLuan, @Model.MaTranh)">
+                                                    <i class="fas fa-trash-alt me-1"></i>Xóa
+                                                </button>
+                                            </div>
+                                        }
                                     }
                                 </div>
                                 
                                 <!-- Form phản hồi (ẩn ban đầu) -->
                                 <div class="reply-form-container mt-2" id="replyForm-@comment.MaBinhLuan" style="display:none;">
-                                    <form class="reply-form" asp-action="AddReply" asp-controller="Artwork" method="post">
+                                    <form class="reply-form" asp-action="AddReply" asp-controller="Artwork" method="post" enctype="multipart/form-data">
                                         <input type="hidden" name="MaBinhLuan" value="@comment.MaBinhLuan" />
                                         <input type="hidden" name="MaTranh" value="@Model.MaTranh" />
                                         <div class="d-flex">
@@ -258,6 +326,28 @@
                                             </div>
                                             <div class="reply-input-container">
                                                 <textarea class="form-control reply-input" name="NoiDung" placeholder="Viết phản hồi..." rows="1"></textarea>
+                                                <div class="reply-attachment-options mt-1">
+                                                    <button type="button" class="btn-reply-attachment" onclick="openReplyImageSelector(@comment.MaBinhLuan)">
+                                                        <i class="fas fa-image"></i>
+                                                    </button>
+                                                    <button type="button" class="btn-reply-attachment" onclick="openReplyStickerSelector(@comment.MaBinhLuan)">
+                                                        <i class="fas fa-smile"></i>
+                                                    </button>
+                                                    <div id="replyImagePreview-@comment.MaBinhLuan" class="reply-preview d-none">
+                                                        <img class="img-fluid rounded preview-img" />
+                                                        <button type="button" class="btn-remove-preview" onclick="removeReplyImage(@comment.MaBinhLuan)">
+                                                            <i class="fas fa-times"></i>
+                                                        </button>
+                                                    </div>
+                                                    <div id="replyStickerPreview-@comment.MaBinhLuan" class="reply-preview d-none">
+                                                        <img class="img-fluid preview-sticker" />
+                                                        <button type="button" class="btn-remove-preview" onclick="removeReplySticker(@comment.MaBinhLuan)">
+                                                            <i class="fas fa-times"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <input type="hidden" name="Sticker" class="stickerInputReply" id="stickerInputReply-@comment.MaBinhLuan" />
+                                                <input type="file" class="d-none imageInputReply" id="imageInputReply-@comment.MaBinhLuan" name="ReplyImage" accept="image/*" />
                                                 <div class="reply-actions mt-2">
                                                     <button type="button" class="btn-cancel-reply" onclick="hideReplyForm(@comment.MaBinhLuan)">Hủy</button>
                                                     <button type="submit" class="btn-submit-reply">Gửi</button>
@@ -273,13 +363,47 @@
                                     <div class="replies-container mt-2">
                                         @foreach (var reply in ViewBag.Replies[comment.MaBinhLuan])
                                         {
-                                            <div class="reply-item">
+                                            <div class="reply-item" id="reply-@reply.MaPhanHoi">
                                                 <div class="d-flex align-items-start">
                                                     <img src="@reply.MaNguoiDungNavigation.GetAvatarPath()" alt="@reply.MaNguoiDungNavigation.TenNguoiDung" class="reply-avatar" />
                                                     <div class="reply-content">
                                                         <div class="reply-bubble">
-                                                            <h6 class="reply-username">@reply.MaNguoiDungNavigation.TenNguoiDung</h6>
+                                                            <div class="reply-media-container">
+                                                                @if (!string.IsNullOrEmpty(reply.Sticker))
+                                                                {
+                                                                    <div class="sticker-container">
+                                                                        <img src="@Url.Content(reply.Sticker)" alt="Sticker" class="reply-sticker" />
+                                                                    </div>
+                                                                }
+                                                                @if (!string.IsNullOrEmpty(reply.DuongDanAnh))
+                                                                {
+                                                                    <div class="reply-image-container">
+                                                                        <img src="@Url.Content(reply.DuongDanAnh)" alt="Uploaded image" class="reply-image zoomable-image"
+                                                                             onclick="openImageModal('@Url.Content(reply.DuongDanAnh)')" />
+                                                                    </div>
+                                                                }
+                                                            </div>
+                                                            <h6 class="reply-username">
+                                                                @reply.MaNguoiDungNavigation.TenNguoiDung
+                                                                @if (reply.DaChinhSua)
+                                                                {
+                                                                    <span class="edited-marker">(đã chỉnh sửa)</span>
+                                                                }
+                                                            </h6>
                                                             <p class="reply-text mb-0">@reply.NoiDung</p>
+                                                            
+                                                            <!-- Nút sửa và xóa phản hồi -->
+                                                            @if (User.Identity.IsAuthenticated && (User.IsInRole("Admin") || reply.MaNguoiDung == currentUserId))
+                                                            {
+                                                                <div class="reply-admin-actions mt-1">
+                                                                    <button class="btn-edit-reply" onclick="showEditReplyModal(@reply.MaPhanHoi, @comment.MaBinhLuan, '@reply.NoiDung')">
+                                                                        <i class="fas fa-edit me-1"></i>Sửa
+                                                                    </button>
+                                                                    <button class="btn-delete-reply" onclick="deleteReply(@reply.MaPhanHoi, @Model.MaTranh)">
+                                                                        <i class="fas fa-trash-alt me-1"></i>Xóa
+                                                                    </button>
+                                                                </div>
+                                                            }
                                                         </div>
                                                         <div class="reply-meta">
                                                             <span class="reply-time">@reply.NgayPhanHoi?.ToString("dd/MM/yyyy HH:mm")</span>
@@ -360,167 +484,163 @@
     </div>
 </div>
 
+<!-- Thêm modal cho ảnh bình luận (có thể sử dụng lại modal hiện có) -->
+<div id="commentImageModal" class="modal">
+    <div class="modal-content artwork-modal">
+        <span class="close" onclick="closeImageModal()">&times;</span>
+        <img class="artwork-modal-content" id="modalCommentImage">
+    </div>
+</div>
+
+<!-- Kiểm tra modal sticker có đúng cấu trúc -->
+<div class="modal fade" id="stickerModal" tabindex="-1" aria-labelledby="stickerModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="stickerModalLabel">Chọn sticker</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <ul class="nav nav-tabs" id="stickerTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="vanthuong-tab" data-bs-toggle="tab" data-bs-target="#vanthuong" type="button" role="tab">Vân Thường</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="daisuhuynh-tab" data-bs-toggle="tab" data-bs-target="#daisuhuynh" type="button" role="tab">Đại Sư Huynh</button>
+                    </li>
+                </ul>
+                <div class="tab-content p-2" id="stickerTabContent">
+                    <div class="tab-pane fade show active" id="vanthuong" role="tabpanel">
+                        <div class="sticker-grid" id="vanthuong-stickers">
+                            <!-- Stickers sẽ được load bằng JavaScript -->
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="daisuhuynh" role="tabpanel">
+                        <div class="sticker-grid" id="daisuhuynh-stickers">
+                            <!-- Stickers sẽ được load bằng JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Thêm modal chỉnh sửa bình luận vào cuối file -->
+<div class="modal fade" id="editCommentModal" tabindex="-1" aria-labelledby="editCommentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark text-white">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editCommentModalLabel">Chỉnh sửa bình luận</h5>
+                <button type="button" class="btn-close text-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editCommentForm" enctype="multipart/form-data">
+                    <input type="hidden" id="editCommentId" value="" />
+                    <input type="hidden" id="editCommentOriginalImage" value="" />
+                    <input type="hidden" id="editCommentOriginalSticker" value="" />
+                    <input type="hidden" id="editArtworkId" value="@Model.MaTranh" />
+                    
+                    <div class="mb-3">
+                        <textarea id="editCommentContent" class="form-control bg-dark text-white" rows="3"></textarea>
+                    </div>
+                    
+                    <div class="d-flex mb-2">
+                        <button type="button" id="openEditImage" class="btn btn-outline-light me-2">
+                            <i class="fas fa-image"></i> Ảnh
+                        </button>
+                        <button type="button" id="openEditStickerSelector" class="btn btn-outline-light">
+                            <i class="far fa-smile"></i> Sticker
+                        </button>
+                    </div>
+                    
+                    <input type="file" id="editImageInput" class="d-none" accept="image/*" />
+                    <input type="hidden" id="editStickerInput" />
+                    
+                    <div id="editImagePreviewContainer" class="d-none mb-3">
+                        <img id="editImagePreview" class="img-thumbnail" style="max-width: 100px; max-height: 100px;" />
+                        <button type="button" id="removeEditImage" class="btn-remove-attachment">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    
+                    <div id="editStickerPreviewContainer" class="d-none mb-3">
+                        <img id="editStickerPreview" class="img-thumbnail" style="max-width: 100px; max-height: 100px;" />
+                        <button type="button" id="removeEditSticker" class="btn-remove-attachment">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary" id="saveEditComment">Lưu thay đổi</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Thêm modal chỉnh sửa phản hồi vào cuối file -->
+<div class="modal fade" id="editReplyModal" tabindex="-1" aria-labelledby="editReplyModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark text-white">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editReplyModalLabel">Chỉnh sửa phản hồi</h5>
+                <button type="button" class="btn-close text-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editReplyForm" enctype="multipart/form-data">
+                    <input type="hidden" id="editReplyId" name="replyId" />
+                    <input type="hidden" id="editReplyOriginalImage" name="originalImage" />
+                    <input type="hidden" id="editReplyOriginalSticker" name="originalSticker" />
+                    
+                    <div class="mb-3">
+                        <textarea id="editReplyContent" class="form-control bg-dark text-white" rows="3"></textarea>
+                    </div>
+                    
+                    <div class="d-flex mb-2">
+                        <button type="button" id="openEditReplyImage" class="btn btn-outline-light me-2">
+                            <i class="fas fa-image"></i> Ảnh
+                        </button>
+                        <button type="button" id="openEditReplySticker" class="btn btn-outline-light">
+                            <i class="far fa-smile"></i> Sticker
+                        </button>
+                    </div>
+                    
+                    <input type="file" id="editReplyImageInput" name="image" class="d-none" accept="image/*" />
+                    <input type="hidden" id="editReplyStickerInput" name="sticker" />
+                    
+                    <div id="editReplyImagePreviewContainer" class="d-none mb-3">
+                        <img id="editReplyImagePreview" class="img-thumbnail" style="max-width: 100px; max-height: 100px;" />
+                        <button type="button" id="removeEditReplyImage" class="btn-remove-attachment">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    
+                    <div id="editReplyStickerPreviewContainer" class="d-none mb-3">
+                        <img id="editReplyStickerPreview" class="img-thumbnail" style="max-width: 100px; max-height: 100px;" />
+                        <button type="button" id="removeEditReplySticker" class="btn-remove-attachment">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary" id="saveEditReply">Lưu thay đổi</button>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
 @section Scripts {
+    <!-- Đảm bảo đã include các thư viện cần thiết -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-        function toggleLike(button, artworkId) {
-            $.ajax({
-                url: '/Artwork/ToggleLike',
-                type: 'POST',
-                data: { artworkId: artworkId },
-                headers: {
-                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
-                },
-                success: function(response) {
-                    if (response.success) {
-                        const icon = button.querySelector('i');
-                        if (response.liked) {
-                            // Đã thích
-                            icon.classList.remove('far');
-                            icon.classList.add('fas');
-                            button.classList.add('active');
-                        } else {
-                            // Đã hủy thích
-                            icon.classList.remove('fas');
-                            icon.classList.add('far');
-                            button.classList.remove('active');
-                        }
-                    } else {
-                        alert(response.message);
-                    }
-                },
-                error: function() {
-                    alert('Có lỗi xảy ra khi thực hiện thao tác');
-                }
-            });
-        }
-        
-        function toggleFollow(event, userId) {
-            event.preventDefault();
-            var button = event.currentTarget;
-            
-            $.ajax({
-                url: '/User/ToggleFollow',
-                type: 'POST',
-                data: { followedUserId: userId },
-                headers: {
-                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
-                },
-                success: function(response) {
-                    if (response.success) {
-                        if (response.isFollowing) {
-                            button.classList.add('following');
-                        } else {
-                            button.classList.remove('following');
-                        }
-                    } else {
-                        alert(response.message);
-                    }
-                },
-                error: function() {
-                    alert('Có lỗi xảy ra khi thực hiện thao tác theo dõi');
-                }
-            });
-        }
-
-        // Thêm code mới cho lightbox
-        function openArtworkModal() {
-            const modal = document.getElementById('artworkModal');
-            if (modal) {
-                modal.style.display = 'block';
-                document.body.classList.add('modal-open');
-            } else {
-                console.error('Modal element not found');
-            }
-        }
-
-        function closeArtworkModal() {
-            document.getElementById('artworkModal').style.display = 'none';
-            document.body.classList.remove('modal-open');
-        }
-
-        // Khi trang đã tải xong
-        document.addEventListener('DOMContentLoaded', function() {
-            // Thêm sự kiện click cho ảnh
-            const artworkImage = document.querySelector('.art-image img');
-            if (artworkImage) {
-                artworkImage.addEventListener('click', function() {
-                    // Thiết lập src cho ảnh trong modal
-                    document.getElementById('modalImage').src = this.src;
-                    // Mở modal
-                    openArtworkModal();
-                });
-            }
-
-            // Đóng modal khi click bên ngoài ảnh
-            const modal = document.getElementById('artworkModal');
-            if (modal) {
-                modal.addEventListener('click', function(event) {
-                    if (event.target === modal) {
-                        closeArtworkModal();
-                    }
-                });
-            }
-        });
-
-        // Thêm code xử lý rating stars
-        $(document).ready(function() {
-            // Xử lý rating stars
-            $('.rating-stars i').on('click', function() {
-                const rating = $(this).data('rating');
-                $('#selectedRating').val(rating);
-                
-                // Reset tất cả các sao về trạng thái chưa chọn
-                $('.rating-stars i').removeClass('fas').addClass('far');
-                
-                // Thêm class active cho các sao được chọn
-                $('.rating-stars i').each(function() {
-                    if ($(this).data('rating') <= rating) {
-                        $(this).removeClass('far').addClass('fas');
-                    }
-                });
-            });
-            
-            // Hiệu ứng hover
-            $('.rating-stars i').on('mouseenter', function() {
-                const hoverRating = $(this).data('rating');
-                
-                // Tô màu các sao khi hover
-                $('.rating-stars i').each(function() {
-                    if ($(this).data('rating') <= hoverRating) {
-                        $(this).addClass('hover');
-                    } else {
-                        $(this).removeClass('hover');
-                    }
-                });
-            }).on('mouseleave', function() {
-                // Xóa hover khi di chuột ra khỏi
-                $('.rating-stars i').removeClass('hover');
-            });
-        });
-
-                function toggleReplyForm(commentId) {
-            const replyForm = document.getElementById(`replyForm-${commentId}`);
-            if (replyForm) {
-                replyForm.style.display = 'block';
-                // Focus vào ô input
-                setTimeout(() => {
-                    const textarea = replyForm.querySelector('textarea');
-                    if (textarea) textarea.focus();
-                }, 100);
-            }
-        }
-
-        function hideReplyForm(commentId) {
-            const replyForm = document.getElementById(`replyForm-${commentId}`);
-            if (replyForm) {
-                replyForm.style.display = 'none';
-                // Clear nội dung
-                const textarea = replyForm.querySelector('textarea');
-                if (textarea) textarea.value = '';
-            }
-        }
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Tham chiếu đến file display-artwork.js -->
+    <script src="~/js/display-artwork.js"></script>
 }
 
 <input type="hidden" name="__RequestVerificationToken" value="@token" />
