@@ -118,10 +118,80 @@ function hideReplyForm(commentId) {
 function loadStickers() {
     console.log('Loading stickers...');
     // Cập nhật tên thư mục trong biến path (nếu cần)
-    const vanthuongPath = '/images/stickers/vanthuong/';
     const daisuhuynhPath = '/images/stickers/daisuhuynh/';
+    const nhisuhuynhPath = '/images/stickers/nhisuhuynh/';
+    const tamsuhuynhPath = '/images/stickers/tamsuhuynh/';
+    const tusuhuynhPath = '/images/stickers/tusuhuynh/';
+    const longtuongPath = '/images/stickers/longtuong/';
+    const ngutieumaiPath = '/images/stickers/longtuong/';
+    const thuyhanhPath = '/images/stickers/thuyhanh/';
+    const vanthuongPath = '/images/stickers/vanthuong/';
+    
     
     // Tạo 12 stickers mẫu cho mỗi thư mục
+    let daisuhuynhHtml = '';
+    for (let i = 1; i <= 12; i++) {
+        daisuhuynhHtml += `<div class="sticker-item">
+            <img src="${daisuhuynhPath}sticker${i}.png" data-path="${daisuhuynhPath}sticker${i}.png" 
+                 class="sticker-img" onclick="selectSticker(this)">
+        </div>`;
+    }
+    $('#daisuhuynh-stickers').html(daisuhuynhHtml);
+
+    let nhisuhuynhHtml = '';
+    for (let i = 1; i <= 12; i++) {
+        nhisuhuynhHtml += `<div class="sticker-item">
+            <img src="${nhisuhuynhPath}sticker${i}.png" data-path="${nhisuhuynhPath}sticker${i}.png" 
+                 class="sticker-img" onclick="selectSticker(this)">
+        </div>`;
+    }
+    $('#nhisuhuynh-stickers').html(nhisuhuynhHtml);
+
+    let tamsuhuynhHtml = '';
+    for (let i = 1; i <= 12; i++) {
+        tamsuhuynhHtml += `<div class="sticker-item">
+            <img src="${tamsuhuynhPath}sticker${i}.png" data-path="${tamsuhuynhPath}sticker${i}.png" 
+                 class="sticker-img" onclick="selectSticker(this)">
+        </div>`;
+    }
+    $('#tamsuhuynh-stickers').html(tamsuhuynhHtml);
+
+    let tusuhuynhHtml = '';
+    for (let i = 1; i <= 12; i++) {
+        tusuhuynhHtml += `<div class="sticker-item">
+            <img src="${tusuhuynhPath}sticker${i}.png" data-path="${tusuhuynhPath}sticker${i}.png" 
+                 class="sticker-img" onclick="selectSticker(this)">
+        </div>`;
+    }
+    $('#tusuhuynh-stickers').html(tusuhuynhHtml);
+
+    let longtuongHtml = '';
+    for (let i = 1; i <= 12; i++) {
+        longtuongHtml += `<div class="sticker-item">
+            <img src="${longtuongPath}sticker${i}.png" data-path="${longtuongPath}sticker${i}.png" 
+                 class="sticker-img" onclick="selectSticker(this)">
+        </div>`;
+    }
+    $('#longtuong-stickers').html(longtuongHtml);
+
+    let ngutieumaiHtml = '';
+    for (let i = 1; i <= 12; i++) {
+        ngutieumaiHtml += `<div class="sticker-item">
+            <img src="${ngutieumaiPath}sticker${i}.png" data-path="${ngutieumaiPath}sticker${i}.png" 
+                 class="sticker-img" onclick="selectSticker(this)">
+        </div>`;
+    }
+    $('#ngutieumai-stickers').html(ngutieumaiHtml);
+
+    let thuyhanhHtml = '';
+    for (let i = 1; i <= 12; i++) {
+        thuyhanhHtml += `<div class="sticker-item">
+            <img src="${thuyhanhPath}sticker${i}.png" data-path="${thuyhanhPath}sticker${i}.png" 
+                 class="sticker-img" onclick="selectSticker(this)">
+        </div>`;
+    }
+    $('#thuyhanh-stickers').html(thuyhanhHtml);
+
     let vanthuongHtml = '';
     for (let i = 1; i <= 12; i++) {
         vanthuongHtml += `<div class="sticker-item">
@@ -131,21 +201,83 @@ function loadStickers() {
     }
     $('#vanthuong-stickers').html(vanthuongHtml);
     
-    let daisuhuynhHtml = '';
-    for (let i = 1; i <= 12; i++) {
-        daisuhuynhHtml += `<div class="sticker-item">
-            <img src="${daisuhuynhPath}sticker${i}.png" data-path="${daisuhuynhPath}sticker${i}.png" 
-                 class="sticker-img" onclick="selectSticker(this)">
-        </div>`;
-    }
-    $('#daisuhuynh-stickers').html(daisuhuynhHtml);
-    
     // Gọi API nếu hard-coded không hoạt động
     $.ajax({
         url: '/Artwork/GetStickers',
         type: 'GET',
         success: function(data) {
             console.log('Stickers loaded:', data);
+
+            if (data.daisuhuynh && data.daisuhuynh.length > 0) {
+                let daisuhuynhHtml = '';
+                data.daisuhuynh.forEach(function (sticker) {
+                    daisuhuynhHtml += `<div class="sticker-item">
+                        <img src="${sticker}" data-path="${sticker}" class="sticker-img" onclick="selectSticker(this)">
+                    </div>`;
+                });
+                $('#daisuhuynh-stickers').html(daisuhuynhHtml);
+            }
+
+            if (data.nhisuhuynh && data.nhisuhuynh.length > 0) {
+                let nhisuhuynhHtml = '';
+                data.nhisuhuynh.forEach(function (sticker) {
+                    nhisuhuynhHtml += `<div class="sticker-item">
+                        <img src="${sticker}" data-path="${sticker}" class="sticker-img" onclick="selectSticker(this)">
+                    </div>`;
+                });
+                $('#nhisuhuynh-stickers').html(nhisuhuynhHtml);
+            }
+
+            if (data.tamsuhuynh && data.tamsuhuynh.length > 0) {
+                let tamsuhuynhHtml = '';
+                data.tamsuhuynh.forEach(function (sticker) {
+                    tamsuhuynhHtml += `<div class="sticker-item">
+                        <img src="${sticker}" data-path="${sticker}" class="sticker-img" onclick="selectSticker(this)">
+                    </div>`;
+                });
+                $('#tamsuhuynh-stickers').html(tamsuhuynhHtml);
+            }
+
+            if (data.tusuhuynh && data.tusuhuynh.length > 0) {
+                let tusuhuynhHtml = '';
+                data.tusuhuynh.forEach(function (sticker) {
+                    tusuhuynhHtml += `<div class="sticker-item">
+                        <img src="${sticker}" data-path="${sticker}" class="sticker-img" onclick="selectSticker(this)">
+                    </div>`;
+                });
+                $('#tusuhuynh-stickers').html(tusuhuynhHtml);
+            }
+
+            if (data.longtuong && data.longtuong.length > 0) {
+                let longtuongHtml = '';
+                data.longtuong.forEach(function (sticker) {
+                    longtuongHtml += `<div class="sticker-item">
+                        <img src="${sticker}" data-path="${sticker}" class="sticker-img" onclick="selectSticker(this)">
+                    </div>`;
+                });
+                $('#longtuong-stickers').html(longtuongHtml);
+            }
+
+            if (data.ngutieumai && data.ngutieumai.length > 0) {
+                let ngutieumaiHtml = '';
+                data.ngutieumai.forEach(function (sticker) {
+                    ngutieumaiHtml += `<div class="sticker-item">
+                        <img src="${sticker}" data-path="${sticker}" class="sticker-img" onclick="selectSticker(this)">
+                    </div>`;
+                });
+                $('#ngutieumai-stickers').html(ngutieumaiHtml);
+            }
+
+            if (data.thuyhanh && data.thuyhanh.length > 0) {
+                let thuyhanhHtml = '';
+                data.thuyhanh.forEach(function (sticker) {
+                    thuyhanhHtml += `<div class="sticker-item">
+                        <img src="${sticker}" data-path="${sticker}" class="sticker-img" onclick="selectSticker(this)">
+                    </div>`;
+                });
+                $('#thuyhanh-stickers').html(thuyhanhHtml);
+            }
+
             if (data.vanthuong && data.vanthuong.length > 0) {
                 let vanthuongHtml = '';
                 data.vanthuong.forEach(function(sticker) {
@@ -155,16 +287,7 @@ function loadStickers() {
                 });
                 $('#vanthuong-stickers').html(vanthuongHtml);
             }
-            
-            if (data.daisuhuynh && data.daisuhuynh.length > 0) {
-                let daisuhuynhHtml = '';
-                data.daisuhuynh.forEach(function(sticker) {
-                    daisuhuynhHtml += `<div class="sticker-item">
-                        <img src="${sticker}" data-path="${sticker}" class="sticker-img" onclick="selectSticker(this)">
-                    </div>`;
-                });
-                $('#daisuhuynh-stickers').html(daisuhuynhHtml);
-            }
+           
         },
         error: function(err) {
             console.error('Error loading stickers:', err);

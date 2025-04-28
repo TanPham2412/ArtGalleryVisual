@@ -295,28 +295,91 @@ namespace ArtGallery.Controllers
         {
             try {
                 var basePath = "/images/stickers/";
-                var vanthuongPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "stickers", "vanthuong");
+                
                 var daisuhuynhPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "stickers", "daisuhuynh");
-                
-                var vanthuongFiles = new List<string>();
+                var nhisuhuynhPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "stickers", "nhisuhuynh");
+                var tamsuhuynhPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "stickers", "tamsuhuynh");
+                var tusuhuynhPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "stickers", "tusuhuynh");
+                var longtuongPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "stickers", "longtuong");
+                var ngutieumaiPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "stickers", "ngutieumai");
+                var thuyhanhPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "stickers", "thuyhanh");
+                var vanthuongPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "stickers", "vanthuong");
+
                 var daisuhuynhFiles = new List<string>();
+                var nhisuhuynhFiles = new List<string>();
+                var tamsuhuynhFiles = new List<string>();
+                var tusuhuynhFiles = new List<string>();
+                var longtuongFiles = new List<string>();
+                var ngutieumaiFiles = new List<string>();
+                var thuyhanhFiles = new List<string>();
+                var vanthuongFiles = new List<string>();
                 
-                if (Directory.Exists(vanthuongPath)) {
-                    vanthuongFiles = Directory.GetFiles(vanthuongPath, "*.png")
-                        .Select(f => basePath + "vanthuong/" + Path.GetFileName(f))
-                        .ToList();
-                }
                 
                 if (Directory.Exists(daisuhuynhPath)) {
                     daisuhuynhFiles = Directory.GetFiles(daisuhuynhPath, "*.png")
                         .Select(f => basePath + "daisuhuynh/" + Path.GetFileName(f))
                         .ToList();
                 }
-                
+
+                if (Directory.Exists(nhisuhuynhPath))
+                {
+                    nhisuhuynhFiles = Directory.GetFiles(nhisuhuynhPath, "*.png")
+                        .Select(f => basePath + "nhisuhuynh/" + Path.GetFileName(f))
+                        .ToList();
+                }
+
+                if (Directory.Exists(tamsuhuynhPath))
+                {
+                    tamsuhuynhFiles = Directory.GetFiles(tamsuhuynhPath, "*.png")
+                        .Select(f => basePath + "tamsuhuynh/" + Path.GetFileName(f))
+                        .ToList();
+                }
+
+                if (Directory.Exists(tusuhuynhPath))
+                {
+                    tusuhuynhFiles = Directory.GetFiles(tusuhuynhPath, "*.png")
+                        .Select(f => basePath + "tusuhuynh/" + Path.GetFileName(f))
+                        .ToList();
+                }
+
+                if (Directory.Exists(longtuongPath))
+                {
+                    longtuongFiles = Directory.GetFiles(longtuongPath, "*.png")
+                        .Select(f => basePath + "longtuong/" + Path.GetFileName(f))
+                        .ToList();
+                }
+
+                if (Directory.Exists(ngutieumaiPath))
+                {
+                    ngutieumaiFiles = Directory.GetFiles(ngutieumaiPath, "*.png")
+                        .Select(f => basePath + "ngutieumai/" + Path.GetFileName(f))
+                        .ToList();
+                }
+
+                if (Directory.Exists(thuyhanhPath))
+                {
+                    thuyhanhFiles = Directory.GetFiles(thuyhanhPath, "*.png")
+                        .Select(f => basePath + "thuyhanh/" + Path.GetFileName(f))
+                        .ToList();
+                }
+
+                if (Directory.Exists(vanthuongPath))
+                {
+                    vanthuongFiles = Directory.GetFiles(vanthuongPath, "*.png")
+                        .Select(f => basePath + "vanthuong/" + Path.GetFileName(f))
+                        .ToList();
+                }
+
                 return Json(new { 
-                    success = true, 
-                    vanthuong = vanthuongFiles, 
-                    daisuhuynh = daisuhuynhFiles 
+                    success = true,
+                    daisuhuynh = daisuhuynhFiles,
+                    nhisuhuynh = nhisuhuynhFiles,
+                    tamsuhuynh = tamsuhuynhFiles,
+                    tusuhuynh = tusuhuynhFiles,
+                    longtuong = longtuongFiles,
+                    ngutieumai = ngutieumaiFiles,
+                    thuyhanh = thuyhanhFiles,
+                    vanthuong = vanthuongFiles        
                 });
             }
             catch (Exception ex) {
