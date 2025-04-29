@@ -9,13 +9,13 @@
     // Lấy người dùng hiện tại
     var currentUser = await _userManager.GetUserAsync(User);
     var currentUserId = currentUser?.Id;
-    
+
     // Kiểm tra quyền sở hữu
     var isOwner = currentUserId != null && Model.MaNguoiDung == currentUserId;
-    
-    // Kiểm tra quyền admin 
+
+    // Kiểm tra quyền admin
     var isAdmin = User.IsInRole("Admin");
-    
+
     // Có thể sửa/xóa nếu là admin hoặc chủ sở hữu
     var canEditOrDelete = isOwner || isAdmin;
 
@@ -86,7 +86,7 @@
                         @if (User.Identity.IsAuthenticated && currentUserId != Model.MaNguoiDung)
                         {
                             var isFollowing = await _context.TheoDois.AnyAsync(t => t.MaNguoiTheoDoi == currentUserId && t.MaNguoiDuocTheoDoi == Model.MaNguoiDung);
-                            <button class="follow-btn @(isFollowing ? "following" : "")" 
+                            <button class="follow-btn @(isFollowing ? "following" : "")"
                                     onclick="toggleFollow(event, '@Model.MaNguoiDung')">
                                 <span class="follow-text">Theo dõi</span>
                                 <span class="following-text">Đang theo dõi</span>
@@ -125,11 +125,11 @@
                             <i class="fas fa-info-circle me-2"></i>Đây là tác phẩm của bạn
                         </div>
                     }
-                    
+
                     @{
                         var isLiked = await _context.LuotThiches.AnyAsync(lt => lt.MaTranh == Model.MaTranh && lt.MaNguoiDung == currentUserId);
                     }
-                    <button class="btn btn-outline-primary btn-lg w-100 @(isLiked ? "active" : "")" 
+                    <button class="btn btn-outline-primary btn-lg w-100 @(isLiked ? "active" : "")"
                             onclick="toggleLike(this, @Model.MaTranh)">
                         <i class="@(isLiked ? "fas" : "far") fa-heart me-2"></i>Yêu thích
                     </button>
@@ -152,7 +152,7 @@
                                 </div>
                             }
                         </div>
-                        <a href="@Url.Action("Gallery", "User", new { id = Model.MaNguoiDung })" 
+                        <a href="@Url.Action("Gallery", "User", new { id = Model.MaNguoiDung })"
                            class="view-all-link mt-3 d-block text-center">
                             Xem tất cả tác phẩm của @Model.MaNguoiDungNavigation.TenNguoiDung
                         </a>
@@ -169,14 +169,14 @@
         <div class="col-12">
             <div class="comments-section">
                 <h3 class="section-title mb-4">Đánh giá & Bình luận</h3>
-                
+
                 <!-- Form đánh giá và bình luận -->
                 @if (User.Identity.IsAuthenticated)
                 {
                     <div class="comment-form-container mb-4">
                         <form id="commentForm" asp-action="AddComment" asp-controller="Artwork" method="post" enctype="multipart/form-data">
                             <input type="hidden" name="MaTranh" value="@Model.MaTranh" />
-                            
+
                             <div class="rating-selection mb-3">
                                 <label class="form-label">Đánh giá của bạn:</label>
                                 <div class="rating-stars">
@@ -188,12 +188,12 @@
                                 </div>
                                 <input type="hidden" name="Rating" id="selectedRating" value="0" />
                             </div>
-                            
+
                             <div class="form-group mb-3">
-                                <textarea class="form-control" id="commentContent" name="NoiDung" rows="3" 
+                                <textarea class="form-control" id="commentContent" name="NoiDung" rows="3"
                                           placeholder="Nhập bình luận của bạn về tác phẩm này"></textarea>
                             </div>
-                            
+
                             <div class="comment-attachments mt-2 mb-3">
                                 <div class="attachment-buttons">
                                     <label for="imageInput" class="btn-attachment">
@@ -218,7 +218,7 @@
                                 <input type="hidden" name="Sticker" id="stickerInput" />
                                 <input type="file" id="imageInput" name="CommentImage" class="d-none" accept="image/*" />
                             </div>
-                            
+
                             <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-paper-plane me-2"></i>Gửi bình luận
                             </button>
@@ -232,11 +232,11 @@
                         Vui lòng <a href="@Url.Action("Login", "Account")" class="alert-link">đăng nhập</a> để đánh giá và bình luận
                     </div>
                 }
-                
+
                 <!-- Danh sách bình luận -->
                 <div class="comments-list">
                     <h4 class="mb-3">Tất cả bình luận (@ViewBag.Comments?.Count)</h4>
-                    
+
                     @if (ViewBag.Comments != null && ViewBag.Comments.Count > 0)
                     {
                         @foreach (var comment in ViewBag.Comments)
@@ -267,7 +267,7 @@
                                     </div>
                                 </div>
                                 <div class="comment-content">
-                                    @if(comment.IsHidden)
+                                    @if (comment.IsHidden)
                                     {
                                         <div class="hidden-comment-notice">
                                             <i class="fas fa-eye-slash"></i> Bình luận này đã bị ẩn
@@ -314,7 +314,7 @@
                                         }
                                     }
                                 </div>
-                                
+
                                 <!-- Form phản hồi (ẩn ban đầu) -->
                                 <div class="reply-form-container mt-2" id="replyForm-@comment.MaBinhLuan" style="display:none;">
                                     <form class="reply-form" asp-action="AddReply" asp-controller="Artwork" method="post" enctype="multipart/form-data">
@@ -356,7 +356,7 @@
                                         </div>
                                     </form>
                                 </div>
-                                
+
                                 <!-- Hiển thị phản hồi cho bình luận -->
                                 @if (ViewBag.Replies != null && ViewBag.Replies.ContainsKey(comment.MaBinhLuan))
                                 {
@@ -391,7 +391,7 @@
                                                                 }
                                                             </h6>
                                                             <p class="reply-text mb-0">@reply.NoiDung</p>
-                                                            
+
                                                             <!-- Nút sửa và xóa phản hồi -->
                                                             @if (User.Identity.IsAuthenticated && (User.IsInRole("Admin") || reply.MaNguoiDung == currentUserId))
                                                             {
@@ -572,11 +572,11 @@
                     <input type="hidden" id="editCommentOriginalImage" value="" />
                     <input type="hidden" id="editCommentOriginalSticker" value="" />
                     <input type="hidden" id="editArtworkId" value="@Model.MaTranh" />
-                    
+
                     <div class="mb-3">
                         <textarea id="editCommentContent" class="form-control bg-dark text-white" rows="3"></textarea>
                     </div>
-                    
+
                     <div class="d-flex mb-2">
                         <button type="button" id="openEditImage" class="btn btn-outline-light me-2">
                             <i class="fas fa-image"></i> Ảnh
@@ -585,17 +585,17 @@
                             <i class="far fa-smile"></i> Sticker
                         </button>
                     </div>
-                    
+
                     <input type="file" id="editImageInput" class="d-none" accept="image/*" />
                     <input type="hidden" id="editStickerInput" />
-                    
+
                     <div id="editImagePreviewContainer" class="d-none mb-3">
                         <img id="editImagePreview" class="img-thumbnail" style="max-width: 100px; max-height: 100px;" />
                         <button type="button" id="removeEditImage" class="btn-remove-attachment">
                             <i class="fas fa-times"></i>
                         </button>
                     </div>
-                    
+
                     <div id="editStickerPreviewContainer" class="d-none mb-3">
                         <img id="editStickerPreview" class="img-thumbnail" style="max-width: 100px; max-height: 100px;" />
                         <button type="button" id="removeEditSticker" class="btn-remove-attachment">
@@ -625,11 +625,11 @@
                     <input type="hidden" id="editReplyId" name="replyId" />
                     <input type="hidden" id="editReplyOriginalImage" name="originalImage" />
                     <input type="hidden" id="editReplyOriginalSticker" name="originalSticker" />
-                    
+
                     <div class="mb-3">
                         <textarea id="editReplyContent" class="form-control bg-dark text-white" rows="3"></textarea>
                     </div>
-                    
+
                     <div class="d-flex mb-2">
                         <button type="button" id="openEditReplyImage" class="btn btn-outline-light me-2">
                             <i class="fas fa-image"></i> Ảnh
@@ -638,17 +638,17 @@
                             <i class="far fa-smile"></i> Sticker
                         </button>
                     </div>
-                    
+
                     <input type="file" id="editReplyImageInput" name="image" class="d-none" accept="image/*" />
                     <input type="hidden" id="editReplyStickerInput" name="sticker" />
-                    
+
                     <div id="editReplyImagePreviewContainer" class="d-none mb-3">
                         <img id="editReplyImagePreview" class="img-thumbnail" style="max-width: 100px; max-height: 100px;" />
                         <button type="button" id="removeEditReplyImage" class="btn-remove-attachment">
                             <i class="fas fa-times"></i>
                         </button>
                     </div>
-                    
+
                     <div id="editReplyStickerPreviewContainer" class="d-none mb-3">
                         <img id="editReplyStickerPreview" class="img-thumbnail" style="max-width: 100px; max-height: 100px;" />
                         <button type="button" id="removeEditReplySticker" class="btn-remove-attachment">
@@ -670,7 +670,7 @@
     <!-- Đảm bảo đã include các thư viện cần thiết -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
+
     <!-- Tham chiếu đến file display-artwork.js -->
     <script src="~/js/display-artwork.js"></script>
 }

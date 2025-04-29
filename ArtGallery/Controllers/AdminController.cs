@@ -32,7 +32,7 @@ namespace ArtGallery.Controllers
         public async Task<IActionResult> Index()
         {
             var users = await _context.NguoiDungs.ToListAsync();
-            return View(users);
+            return View("AdminHomePage");
         }
 
         [HttpGet]
@@ -198,6 +198,178 @@ namespace ArtGallery.Controllers
                 _logger.LogError(ex, "Error rejecting artist application");
                 TempData["ErrorMessage"] = "Đã xảy ra lỗi khi từ chối đăng ký: " + ex.Message;
                 return RedirectToAction("Index", "Home");
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetDashboardStats()
+        {
+            try
+            {
+                // Đếm tổng số người dùng
+                var totalUsers = await _context.NguoiDungs.CountAsync();
+                
+                // Đếm tổng số nghệ sĩ
+                var totalArtists = await _userManager.GetUsersInRoleAsync("Artists");
+                
+                // Đếm tổng số tác phẩm
+                var totalArtworks = await _context.Tranhs.CountAsync();
+                
+                // Đếm tổng số đơn hàng
+                var totalOrders = await _context.GiaoDiches.CountAsync();
+                
+                // Lấy danh sách đơn đăng ký nghệ sĩ mới nhất
+                var recentArtistApplications = await _context.NguoiDungs
+                    .Where(n => n.DangKyNgheSi)
+                    .OrderByDescending(n => n.NgayDangKy)
+                    .Take(5)
+                    .Select(n => new
+                    {
+                        userId = n.Id,
+                        artistName = n.TenNguoiDung,
+                        applicationDate = n.NgayDangKy
+                    })
+                    .ToListAsync();
+                
+                // Lấy danh sách tác phẩm mới nhất
+                var recentArtworks = await _context.Tranhs
+                    .OrderByDescending(t => t.NgayDang)
+                    .Take(5)
+                    .Select(t => new
+                    {
+                        id = t.MaTranh,
+                        title = t.TieuDe,
+                        thumbnailUrl = t.DuongDanAnh,
+                        artistName = t.MaNguoiDungNavigation.TenNguoiDung,
+                        createdDate = t.NgayDang
+                    })
+                    .ToListAsync();
+                
+                return Json(new
+                {
+                    totalUsers,
+                    totalArtists = totalArtists.Count,
+                    totalArtworks,
+                    totalOrders,
+                    recentArtistApplications,
+                    recentArtworks
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting dashboard stats");
+                return StatusCode(500, new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetUsers()
+        {
+            try
+            {
+                var users = await _context.NguoiDungs
+                    .Select(u => new
+                    {
+                        id = u.Id,
+                        userName = u.TenNguoiDung,
+                        email = u.Email,
+                        avatarPath = u.GetAvatarPath(),
+                        isAdmin = _context.UserRoles.Any(ur => ur.UserId == u.Id && _context.Roles.Any(r => r.Id == ur.RoleId && r.Name == "Admin")),
+                        isArtist = _context.UserRoles.Any(ur => ur.UserId == u.Id && _context.Roles.Any(r => r.Id == ur.RoleId && r.Name == "Artists")),
+                        isActive = !u.LockoutEnabled || (u.LockoutEnd == null || u.LockoutEnd <= DateTimeOffset.Now)
+                    })
+                    .ToListAsync();
+                
+                return Json(users);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting users");
+                return StatusCode(500, new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetArtistApplications()
+        {
+            try
+            {
+                var applications = await _context.NguoiDungs
+                    .Where(n => n.DangKyNgheSi)
+                    .OrderByDescending(n => n.NgayDangKy)
+                    .Select(n => new
+                    {
+                        userId = n.Id,
+                        artistName = n.TenNguoiDung,
+                        email = n.Email,
+                        avatarPath = n.GetAvatarPath(),
+                        applicationDate = n.NgayDangKy
+                    })
+                    .ToListAsync();
+                
+                return Json(applications);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting artist applications");
+                return StatusCode(500, new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetArtworks()
+        {
+            try
+            {
+                var artworks = await _context.Tranhs
+                    .OrderByDescending(t => t.NgayDang)
+                    .Select(t => new
+                    {
+                        id = t.MaTranh,
+                        title = t.TieuDe,
+                        thumbnailUrl = t.DuongDanAnh,
+                        artistName = t.MaNguoiDungNavigation.TenNguoiDung,
+                        category = t.MaTheLoais.FirstOrDefault() != null ? t.MaTheLoais.FirstOrDefault().TenTheLoai : "Chưa phân loại",
+                        price = t.Gia,
+                        createdDate = t.NgayDang,
+                        isActive = t.TrangThai != "Đã ẩn" // Hoặc sử dụng trạng thái phù hợp từ t.TrangThai
+                    })
+                    .ToListAsync();
+
+                return Json(artworks);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting artworks");
+                return StatusCode(500, new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetOrders()
+        {
+            try
+            {
+                var orders = await _context.GiaoDiches
+                    .OrderByDescending(g => g.NgayMua)
+                    .Select(g => new
+                    {
+                        orderId = g.MaGiaoDich,
+                        customerName = g.MaNguoiMuaNavigation.TenNguoiDung,
+                        artworkTitle = g.MaTranhNavigation.TieuDe,
+                        artworkThumbnail = g.MaTranhNavigation.DuongDanAnh,
+                        totalAmount = g.SoTien,
+                        orderDate = g.NgayMua,
+                        status = g.TrangThai
+                    })
+                    .ToListAsync();
+                
+                return Json(orders);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting orders");
+                return StatusCode(500, new { success = false, message = ex.Message });
             }
         }
     }
