@@ -1,9 +1,9 @@
 @{
-    ViewData["Title"] = "Trang quản trị";
+    ViewData["Title"] = "Quản trị PiaoYue";
     Layout = "_Layout";
 }
 
-<link rel="stylesheet" href="~/css/admin-homepage.css?v=1">
+<link rel="stylesheet" href="~/css/admin-homepage.css?v=3">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
 <div class="admin-container">
@@ -51,7 +51,7 @@
     <div class="admin-content">
         <!-- Dashboard Section -->
         <div class="admin-section active" id="dashboard">
-            <h2>Tổng quan</h2>
+            <h2>Tổng quan hệ thống</h2>
 
             <div class="dashboard-stats">
                 <div class="stat-card">
@@ -369,5 +369,36 @@
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="~/js/admin-homepage.js?v=1"></script>
+    <script src="~/js/admin-homepage.js?v=2"></script>
+    
+    <script>
+        // Update Chart.js defaults for dark theme
+        Chart.defaults.color = '#e0e0e0';
+        Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.1)';
+        
+        // Apply dark theme to all table elements
+        document.addEventListener('DOMContentLoaded', function() {
+            // Force background color for all table cells
+            const allTableCells = document.querySelectorAll('table td, table th');
+            allTableCells.forEach(cell => {
+                cell.style.backgroundColor = 'var(--dark-color)';
+                cell.style.color = 'var(--text-color)';
+            });
+            
+            // Make sure new content added via AJAX also gets dark styling
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.addedNodes.length) {
+                        const cells = document.querySelectorAll('table td, table th');
+                        cells.forEach(cell => {
+                            cell.style.backgroundColor = 'var(--dark-color)';
+                            cell.style.color = 'var(--text-color)';
+                        });
+                    }
+                });
+            });
+            
+            observer.observe(document.body, { childList: true, subtree: true });
+        });
+    </script>
 }
