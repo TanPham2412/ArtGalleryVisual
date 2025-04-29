@@ -127,6 +127,17 @@ namespace ArtGallery.Areas.Identity.Pages.Account
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("Đăng nhập thành công.");
+                    
+                    // Lấy user hiện tại
+                    var user = await _userManager.FindByNameAsync(Input.Email) ?? 
+                              await _userManager.FindByEmailAsync(Input.Email);
+                        
+                    // Kiểm tra nếu user thuộc role Admin
+                    if (user != null && await _userManager.IsInRoleAsync(user, "Admin"))
+                    {
+                        return RedirectToAction("Index", "Admin");
+                    }
+                    
                     return LocalRedirect(returnUrl);
                 }
                 if (result.RequiresTwoFactor)
