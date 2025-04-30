@@ -21,6 +21,8 @@ namespace ArtGallery.Models
         public DateTime ThoiGian { get; set; } = DateTime.Now;
 
         public bool DaDoc { get; set; } = false;
+        public string? DuongDanAnh { get; set; }
+        public string? Sticker { get; set; }
 
         [ForeignKey("MaNguoiGui")]
         public virtual NguoiDung NguoiGui { get; set; }

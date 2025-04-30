@@ -192,7 +192,9 @@ namespace ArtGallery.Controllers
                     maNguoiNhan = m.MaNguoiNhan,
                     noiDung = m.NoiDung,
                     thoiGian = m.ThoiGian,
-                    daDoc = m.DaDoc
+                    daDoc = m.DaDoc,
+                    duongDanAnh = m.DuongDanAnh,
+                    sticker = m.Sticker
                 })
                 .ToListAsync();
 
@@ -432,6 +434,57 @@ namespace ArtGallery.Controllers
                 success = true, 
                 markedCount = unreadMessages.Count 
             });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SendMessageWithMedia(string receiverId, string message, IFormFile? messageImage, string? sticker)
+        {
+            // Sửa điều kiện kiểm tra tin nhắn - cho phép gửi khi chỉ có ảnh không có text
+            if (string.IsNullOrWhiteSpace(message) && messageImage == null && string.IsNullOrWhiteSpace(sticker))
+            {
+                return BadRequest("Tin nhắn không được để trống");
+            }
+
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            string imagePath = null;
+
+            // Xử lý upload ảnh nếu có
+            if (messageImage != null && messageImage.Length > 0)
+            {
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "messages");
+
+                // Tạo thư mục nếu chưa tồn tại
+                if (!Directory.Exists(uploadsFolder))
+                    Directory.CreateDirectory(uploadsFolder);
+
+                // Tạo tên file duy nhất
+                var uniqueFileName = $"{Guid.NewGuid()}_{Path.GetFileName(messageImage.FileName)}";
+                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await messageImage.CopyToAsync(stream);
+                }
+
+                imagePath = $"/images/messages/{uniqueFileName}";
+            }
+
+            var tinNhan = new TinNhan
+            {
+                MaNguoiGui = currentUserId,
+                MaNguoiNhan = receiverId,
+                NoiDung = message ?? "", // Đảm bảo NoiDung không null
+                ThoiGian = DateTime.Now,
+                DaDoc = false,
+                DuongDanAnh = imagePath,
+                Sticker = sticker
+            };
+
+            _context.TinNhans.Add(tinNhan);
+            await _context.SaveChangesAsync();
+
+            return Json(new { success = true, message = tinNhan });
         }
     }
 }

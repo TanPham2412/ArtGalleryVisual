@@ -95,9 +95,103 @@ $(document).ready(function() {
             }
         }
     }
+
+    // Xử lý click vào nút chọn ảnh
+    // $(document).on('click', '#openImageSelector', function () {
+    //     console.log('Nút chọn ảnh được nhấn');
+    //     document.getElementById('messageImageInput').click();
+    // });
+
+    // Xử lý khi chọn ảnh
+    // $(document).on('change', '#messageImageInput', function () {
+    //     const file = this.files[0];
+    //     if (file) {
+    //         const reader = new FileReader();
+    //         reader.onload = function (e) {
+    //             $('#imagePreview').attr('src', e.target.result);
+    //             $('#imagePreviewContainer').removeClass('d-none');
+    //             $('#stickerPreviewContainer').addClass('d-none');
+    //             $('#messageStickerPath').val('');
+    //         }
+    //         reader.readAsDataURL(file);
+    //     }
+    // });
+
+    // Xử lý click vào nút chọn sticker
+    $(document).on('click', '#openStickerSelector', function() {
+        console.log('Nút chọn sticker được nhấn');
+        
+        // Tải stickers nếu chưa tải
+        if (!window.stickersLoaded) {
+            loadStickers();
+            window.stickersLoaded = true;
+        }
+        
+        // Hiển thị modal
+        $('#stickerModal').modal('show');
+    });
     
     // Gọi hàm kiểm tra URL khi trang đã tải xong
     checkURLForConversation();
+
+    // Tải stickers khi trang đã sẵn sàng
+    loadStickers();
+    
+    // Đăng ký sự kiện cho modal sticker
+    $('#stickerModal').on('shown.bs.modal', function () {
+        // Đảm bảo stickers đã được tải khi modal hiển thị
+        if ($('#vanthuong-stickers').children().length === 0) {
+            loadStickers();
+        }
+    });
+    
+    // Đảm bảo tab hoạt động đúng
+    $('#stickerTabs button').on('click', function (e) {
+        e.preventDefault();
+        $(this).tab('show');
+    });
+
+    // Tải stickers khi trang đã sẵn sàng
+    loadStickers();
+    
+    // Xử lý chuyển tab sticker
+    $(document).on('click', '.sticker-tab-btn', function() {
+        // Loại bỏ trạng thái active của tất cả các tab
+        $('.sticker-tab-btn').removeClass('active');
+        
+        // Thêm trạng thái active cho tab được chọn
+        $(this).addClass('active');
+        
+        // Ẩn tất cả các danh mục sticker
+        $('.sticker-category').hide();
+        
+        // Hiển thị danh mục sticker tương ứng với tab
+        const category = $(this).data('category');
+        $(`#${category}-stickers`).show();
+    });
+    
+    // Thêm code xử lý sticker được chọn
+    $(document).on('click', '.sticker-img', function() {
+        // Xóa class selected từ tất cả sticker
+        $('.sticker-item').removeClass('selected');
+        
+        // Thêm class selected cho sticker đang được chọn
+        $(this).closest('.sticker-item').addClass('selected');
+        
+        // Lấy đường dẫn sticker
+        const stickerPath = $(this).data('path') || $(this).attr('src');
+        
+        // Đóng modal sau một khoảng thời gian ngắn để người dùng thấy sticker được chọn
+        setTimeout(function() {
+            $('#stickerModal').modal('hide');
+            
+            // Cập nhật preview và input
+            $('#stickerPreview').attr('src', stickerPath);
+            $('#stickerPreviewContainer').removeClass('d-none');
+            $('#imagePreviewContainer').addClass('d-none');
+            $('#messageStickerPath').val(stickerPath);
+        }, 200);
+    });
 });
 
 // Load danh sách cuộc trò chuyện
@@ -229,7 +323,7 @@ function renderConversation(user, messages) {
     // Thêm các tin nhắn
     if (messages && messages.length > 0) {
         let lastDate = '';
-        
+
         for (const message of messages) {
             // Kiểm tra nếu ngày thay đổi, hiển thị phân cách ngày
             const messageDate = new Date(message.thoiGian).toLocaleDateString('vi-VN');
@@ -240,15 +334,15 @@ function renderConversation(user, messages) {
                 chatMessages.appendChild(dateSeparator);
                 lastDate = messageDate;
             }
-            
+
             // Xác định tin nhắn của mình hay của người khác
             const isMyMessage = message.maNguoiGui === currentUserId;
-            
+
             // Tạo tin nhắn từ template
             const messageTemplate = document.getElementById('messageTemplate');
             const messageClone = document.importNode(messageTemplate.content, true);
             const messageItem = messageClone.querySelector('.chat-message-item');
-            
+
             if (isMyMessage) {
                 messageItem.classList.add('my-message');
                 // Xóa avatar nếu là tin nhắn của mình
@@ -260,11 +354,39 @@ function renderConversation(user, messages) {
                 const avatar = messageClone.querySelector('.message-avatar img');
                 avatar.src = user.avatar;
             }
-            
+
             // Cập nhật nội dung tin nhắn
-            messageClone.querySelector('.message-text').textContent = message.noiDung;
+            const messageBubble = messageClone.querySelector('.message-bubble');
+            const messageText = messageClone.querySelector('.message-text');
+
+            // Thêm sticker nếu có
+            if (message.sticker) {
+                const stickerElem = document.createElement('div');
+                stickerElem.className = 'message-sticker';
+                const img = document.createElement('img');
+                img.src = message.sticker;
+                img.alt = "Sticker";
+                stickerElem.appendChild(img);
+                messageBubble.appendChild(stickerElem);
+            }
+
+            // Thêm ảnh nếu có
+            if (message.duongDanAnh) {
+                const imageContainer = document.createElement('div');
+                imageContainer.className = 'message-image-container';
+                const img = document.createElement('img');
+                img.src = message.duongDanAnh;
+                img.alt = "Ảnh";
+                img.className = 'message-image';
+                imageContainer.appendChild(img);
+                messageBubble.appendChild(imageContainer);
+            }
+
+            // Thêm text nếu có
+            messageText.textContent = message.noiDung;
+
             messageClone.querySelector('.message-time').textContent = formatTime(message.thoiGian);
-            
+
             chatMessages.appendChild(messageClone);
         }
     } else {
@@ -311,28 +433,50 @@ function setupSendMessage(receiverId) {
     });
 }
 
-// Hàm gửi tin nhắn
+// Sửa hàm sendMessage để xử lý gửi ảnh đúng cách
 function sendMessage(receiverId) {
     const input = $('#messageInput');
     const message = input.val().trim();
-    
-    if (message.length === 0) return;
-    
-    // Xóa nội dung input
+    const stickerPath = $('#messageStickerPath').val();
+    const imageFile = $('#messageImageInput')[0].files[0];
+
+    // Kiểm tra có nội dung tin nhắn hoặc file ảnh hoặc sticker không
+    if (message.length === 0 && !stickerPath && !imageFile) return;
+
+    // Xóa nội dung input và preview
     input.val('');
     
     // Lấy token antiforgery
     const token = $('input[name="__RequestVerificationToken"]').val();
-    
+
+    // Tạo FormData để gửi file
+    const formData = new FormData();
+    formData.append('receiverId', receiverId);
+    formData.append('message', message);
+    formData.append('__RequestVerificationToken', token);
+
+    if (stickerPath) {
+        formData.append('sticker', stickerPath);
+    }
+
+    if (imageFile) {
+        formData.append('messageImage', imageFile);
+        // Đặt lại input file và preview ảnh
+        $('#messageImageInput').val('');
+        $('#imagePreviewContainer').addClass('d-none');
+    } else {
+        // Nếu không có file thì vẫn cần xóa preview
+        $('#messageStickerPath').val('');
+        $('#stickerPreviewContainer').addClass('d-none');
+    }
+
     // Gửi tin nhắn đến server
     $.ajax({
-        url: '/Messages/SendMessage',
+        url: '/Messages/SendMessageWithMedia',
         type: 'POST',
-        data: {
-            receiverId: receiverId,
-            message: message,
-            __RequestVerificationToken: token
-        },
+        data: formData,
+        processData: false,
+        contentType: false,
         success: function(data) {
             if (data.success) {
                 // Thêm tin nhắn vào danh sách tin nhắn
@@ -341,29 +485,42 @@ function sendMessage(receiverId) {
                 loadConversations();
             }
         },
-        error: function() {
+        error: function(xhr) {
+            console.error("Lỗi gửi tin nhắn:", xhr.responseText);
             alert('Gửi tin nhắn thất bại');
         }
     });
 }
 
-// Sửa hàm appendMyMessage để sử dụng template
+// Sửa lại hàm hiển thị tin nhắn của mình
 function appendMyMessage(message) {
-    const messageTemplate = document.getElementById('messageTemplate');
-    const messageClone = document.importNode(messageTemplate.content, true);
-    const messageItem = messageClone.querySelector('.chat-message-item');
+    let html = `
+    <div class="chat-message-item my-message">
+        <div class="message-content">
+            <div class="message-bubble">`;
     
-    messageItem.classList.add('my-message');
-    // Xóa avatar vì là tin nhắn của mình
-    const avatar = messageClone.querySelector('.message-avatar');
-    messageItem.removeChild(avatar);
+    // Thêm sticker nếu có
+    if (message.sticker) {
+        html += `<div class="message-sticker"><img src="${message.sticker}" alt="Sticker"></div>`;
+    }
+
+    // Thêm ảnh nếu có
+    if (message.duongDanAnh) {
+        html += `<div class="message-image-container"><img src="${message.duongDanAnh}" alt="Ảnh" class="message-image"></div>`;
+    }
+
+    // Thêm text nếu có
+    if (message.noiDung) {
+        html += `<div class="message-text">${message.noiDung}</div>`;
+    }
     
-    // Cập nhật nội dung tin nhắn
-    messageClone.querySelector('.message-text').textContent = message.noiDung;
-    messageClone.querySelector('.message-time').textContent = formatTime(message.thoiGian);
+    html += `</div>
+            <div class="message-time">${formatTime(message.thoiGian)}</div>
+        </div>
+    </div>`;
     
     // Thêm vào danh sách tin nhắn
-    document.getElementById('chatMessages').appendChild(messageClone);
+    $('#chatMessages').append(html);
     
     // Cuộn xuống tin nhắn cuối cùng
     const chatMessages = document.getElementById('chatMessages');
@@ -544,3 +701,147 @@ $(function() {
         $('#recipientInput').focus();
     });
 });
+
+// Hàm xóa ảnh đã chọn
+function removeMessageImage() {
+    $('#imagePreviewContainer').addClass('d-none');
+    $('#messageImageInput').val('');
+}
+
+// Hàm xóa sticker đã chọn
+function removeMessageSticker() {
+    $('#stickerPreviewContainer').addClass('d-none');
+    $('#messageStickerPath').val('');
+}
+
+// Thay thế hàm loadStickers
+function loadStickers() {
+    console.log('Loading stickers...');
+    
+    // Xác định đường dẫn cho các tập sticker
+    const daisuhuynhPath = '/images/stickers/daisuhuynh/';
+    const nhisuhuynhPath = '/images/stickers/nhisuhuynh/';
+    const tamsuhuynhPath = '/images/stickers/tamsuhuynh/';
+    const tusuhuynhPath = '/images/stickers/tusuhuynh/';
+    const longtuongPath = '/images/stickers/longtuong/';
+    const ngutieumaiPath = '/images/stickers/ngutieumai/';
+    const thuyhanhPath = '/images/stickers/thuyhanh/';
+    const vanthuongPath = '/images/stickers/vanthuong/';
+
+    // Gọi API để lấy danh sách stickers từ controller
+    $.ajax({
+        url: '/Artwork/GetStickers',
+        type: 'GET',
+        success: function(data) {
+            if (data.success) {
+                // Xóa nội dung cũ
+                $('.sticker-grid').empty();
+                
+                // Hiển thị stickers cho từng tab
+                renderStickerSet('daisuhuynh-stickers', data.daisuhuynh);
+                renderStickerSet('nhisuhuynh-stickers', data.nhisuhuynh);
+                renderStickerSet('tamsuhuynh-stickers', data.tamsuhuynh);
+                renderStickerSet('tusuhuynh-stickers', data.tusuhuynh);
+                renderStickerSet('longtuong-stickers', data.longtuong);
+                renderStickerSet('ngutieumai-stickers', data.ngutieumai);
+                renderStickerSet('thuyhanh-stickers', data.thuyhanh);
+                renderStickerSet('vanthuong-stickers', data.vanthuong);
+            } else {
+                console.error('Không thể tải stickers:', data.message);
+                loadDefaultStickers();
+            }
+        },
+        error: function(err) {
+            console.error('Lỗi khi tải stickers:', err);
+            loadDefaultStickers();
+        }
+    });
+}
+
+// Thay thế hàm renderStickerSet
+function renderStickerSet(containerId, stickers) {
+    if (!stickers || stickers.length === 0) return;
+    
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    
+    let html = '';
+    stickers.forEach(function(stickerPath) {
+        html += `
+            <div class="sticker-item">
+                <img src="${stickerPath}" alt="Sticker" class="sticker-img" 
+                    data-path="${stickerPath}" onclick="selectMessageSticker(this)">
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+}
+
+// Thay thế hàm loadDefaultStickers
+function loadDefaultStickers() {
+    // Xác định đường dẫn cho các tập sticker
+    const daisuhuynhPath = '/images/stickers/daisuhuynh/';
+    const nhisuhuynhPath = '/images/stickers/nhisuhuynh/';
+    const tamsuhuynhPath = '/images/stickers/tamsuhuynh/';
+    const tusuhuynhPath = '/images/stickers/tusuhuynh/';
+    const longtuongPath = '/images/stickers/longtuong/';
+    const ngutieumaiPath = '/images/stickers/ngutieumai/';
+    const thuyhanhPath = '/images/stickers/thuyhanh/';
+    const vanthuongPath = '/images/stickers/vanthuong/';
+    
+    const collections = [
+        { id: 'daisuhuynh-stickers', path: daisuhuynhPath },
+        { id: 'nhisuhuynh-stickers', path: nhisuhuynhPath },
+        { id: 'tamsuhuynh-stickers', path: tamsuhuynhPath },
+        { id: 'tusuhuynh-stickers', path: tusuhuynhPath },
+        { id: 'longtuong-stickers', path: longtuongPath },
+        { id: 'ngutieumai-stickers', path: ngutieumaiPath },
+        { id: 'thuyhanh-stickers', path: thuyhanhPath },
+        { id: 'vanthuong-stickers', path: vanthuongPath }
+    ];
+    
+    collections.forEach(collection => {
+        const container = document.getElementById(collection.id);
+        if (!container) return;
+        
+        let html = '';
+        for (let i = 1; i <= 12; i++) {
+            const stickerPath = `${collection.path}sticker${i}.png`;
+            html += `
+                <div class="sticker-item">
+                    <img src="${stickerPath}" alt="Sticker" class="sticker-img" 
+                        data-path="${stickerPath}" onclick="selectMessageSticker(this)">
+                </div>
+            `;
+        }
+        
+        container.innerHTML = html;
+    });
+}
+
+// Sửa lại hàm selectMessageSticker
+function selectMessageSticker(element) {
+    // Không xử lý sticker ngay lập tức, để người dùng thấy hiệu ứng được chọn
+    const stickerItem = $(element).closest('.sticker-item');
+    
+    // Xóa class selected từ tất cả sticker
+    $('.sticker-item').removeClass('selected');
+    
+    // Thêm class selected cho sticker đang được chọn
+    stickerItem.addClass('selected');
+    
+    // Lấy đường dẫn sticker
+    const stickerPath = $(element).data('path') || $(element).attr('src');
+    
+    // Đóng modal sau một khoảng thời gian ngắn
+    setTimeout(function() {
+        $('#stickerModal').modal('hide');
+        
+        // Cập nhật preview và input
+        $('#stickerPreview').attr('src', stickerPath);
+        $('#stickerPreviewContainer').removeClass('d-none');
+        $('#imagePreviewContainer').addClass('d-none');
+        $('#messageStickerPath').val(stickerPath);
+    }, 200);
+}
