@@ -474,6 +474,11 @@ public partial class ArtGalleryContext : IdentityDbContext<NguoiDung, IdentityRo
             entity.Property(e => e.DaDoc)
                 .HasDefaultValue(false)
                 .HasColumnName("da_doc");
+            // Thêm 2 trường mới
+            entity.Property(e => e.DuongDanAnh)
+                .HasColumnName("duong_dan_anh");
+            entity.Property(e => e.Sticker)
+                .HasColumnName("sticker");
 
             entity.HasOne(d => d.NguoiGui)
                 .WithMany()
