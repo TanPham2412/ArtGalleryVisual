@@ -5,7 +5,7 @@
 
 @Html.AntiForgeryToken()
 
-<link href="~/css/message.css" rel="stylesheet" />
+<link href="~/css/message.css?v=3" rel="stylesheet" />
 
 <div class="message-container">
     <div class="message-sidebar">
@@ -95,39 +95,48 @@
 
 <!-- Template cho phần nhập tin nhắn -->
 <template id="chatInputTemplate">
-    <div class="chat-input">
-        <div class="input-actions">
-            <button type="button" class="btn-icon" id="openImageSelector">
-                <i class="far fa-image"></i>
-            </button>
-            <button type="button" class="btn-icon" id="openStickerSelector">
-                <i class="far fa-smile"></i>
-            </button>
-        </div>
-        <div class="message-preview">
-            <div id="imagePreviewContainer" class="d-none">
+    <div class="chat-container">
+        <!-- Khu vực hiển thị tin nhắn -->
+        <div class="chat-messages" id="chatMessages"></div>
+        
+        <!-- Khu vực hiển thị ảnh preview - đặt phía trên khung nhập tin nhắn -->
+        <div class="media-preview-area">
+            <div id="imagePreviewContainer" class="d-none media-preview-item">
                 <img id="imagePreview" src="" alt="Preview" class="preview-img">
                 <button type="button" class="btn-remove-preview" onclick="removeMessageImage()">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-            <div id="stickerPreviewContainer" class="d-none">
+            
+            <div id="stickerPreviewContainer" class="d-none media-preview-item">
                 <img id="stickerPreview" src="" alt="Sticker" class="preview-sticker">
                 <button type="button" class="btn-remove-preview" onclick="removeMessageSticker()">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
         </div>
-        <div class="message-input-wrapper">
-            <input type="text" id="messageInput" placeholder="Aa" autocomplete="off">
-            <input type="hidden" id="messageImagePath">
-            <input type="hidden" id="messageStickerPath">
+        
+        <!-- Khung nhập tin nhắn - đặt phía dưới các phần trên -->
+        <div class="chat-input">
+            <div class="input-actions">
+                <button type="button" class="btn-icon" id="openImageSelector">
+                    <i class="far fa-image"></i>
+                </button>
+                <button type="button" class="btn-icon" id="openStickerSelector">
+                    <i class="far fa-smile"></i>
+                </button>
+            </div>
+            <div class="message-input-wrapper">
+                <input type="text" id="messageInput" placeholder="Aa" autocomplete="off">
+                <input type="hidden" id="messageImagePath">
+                <input type="hidden" id="messageStickerPath">
+            </div>
+            <button type="button" class="send-btn" id="sendMessageBtn">
+                <i class="fas fa-paper-plane"></i>
+            </button>
         </div>
-        <button type="button" class="send-btn" id="sendMessageBtn">
-            <i class="fas fa-paper-plane"></i>
-        </button>
     </div>
-</template> 
+</template>
 
 <!-- Thêm modal cho sticker -->
 <div class="modal fade" id="stickerModal" tabindex="-1" aria-labelledby="stickerModalLabel" aria-hidden="true">
@@ -466,6 +475,12 @@
                     // Ẩn sticker nếu có
                     $('#stickerPreviewContainer').addClass('d-none');
                     $('#messageStickerPath').val('');
+                    
+                    // Đảm bảo cuộn xuống để xem ảnh preview
+                    const chatMessages = document.getElementById('chatMessages');
+                    if (chatMessages) {
+                        chatMessages.scrollTop = chatMessages.scrollHeight;
+                    }
                 };
                 
                 // Bắt lỗi nếu có
@@ -486,5 +501,216 @@
         $('#messageImageInput').val('');
         $('#imagePreviewContainer').addClass('d-none');
         $('#imagePreview').attr('src', '');
+    }
+    
+    // Hàm xóa sticker đã chọn
+    function removeMessageSticker() {
+        console.log('Xóa sticker đã chọn');
+        $('#stickerPreviewContainer').addClass('d-none');
+        $('#messageStickerPath').val('');
+        $('#stickerPreview').attr('src', '');
+    }
+</script>
+
+<script>
+    // Cập nhật lại hàm renderConversation
+    function renderConversation(user, messages) {
+        // Xác định ID người dùng hiện tại
+        let currentUserId = '';
+        $.ajax({
+            url: '/Messages/GetCurrentUserId',
+            type: 'GET',
+            async: false,
+            success: function(data) {
+                currentUserId = data.userId;
+            }
+        });
+        
+        // Tạo container cho nội dung chat và xóa class mặc định
+        let html = `
+            <div class="chat-header">
+                <div class="chat-user-info">
+                    <div class="chat-avatar">
+                        <img src="${user.avatar}" alt="" onerror="this.src='/images/authors/default/default-image.png'">
+                        <span class="status-indicator ${user.isOnline ? 'online' : ''}"></span>
+                    </div>
+                    <div class="chat-user">
+                        <div class="chat-username">${user.userName}</div>
+                    </div>
+                </div>
+                <div class="chat-actions">
+                    <button type="button" class="btn-icon">
+                        <i class="fas fa-info-circle"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="chat-container">
+                <div class="chat-messages" id="chatMessages">`;
+        
+        // Thêm các tin nhắn
+        if (messages && messages.length > 0) {
+            let lastDate = '';
+
+            for (const message of messages) {
+                // Kiểm tra nếu ngày thay đổi, hiển thị phân cách ngày
+                const messageDate = new Date(message.thoiGian).toLocaleDateString('vi-VN');
+                if (messageDate !== lastDate) {
+                    html += `<div class="message-date-separator"><span>${messageDate}</span></div>`;
+                    lastDate = messageDate;
+                }
+
+                // Xác định tin nhắn của mình hay của người khác
+                const isMyMessage = message.maNguoiGui === currentUserId;
+                const messageClass = isMyMessage ? 'my-message' : 'other-message';
+
+                // Tạo HTML cho tin nhắn
+                if (isMyMessage) {
+                    html += `
+                        <div class="chat-message-item my-message">
+                            <div class="message-content">
+                                <div class="message-bubble">`;
+                    
+                    // Thêm sticker nếu có
+                    if (message.sticker) {
+                        html += `<div class="message-sticker"><img src="${message.sticker}" alt="Sticker"></div>`;
+                    }
+
+                    // Thêm ảnh nếu có
+                    if (message.duongDanAnh) {
+                        html += `<div class="message-image-container"><img src="${message.duongDanAnh}" alt="Ảnh" class="message-image"></div>`;
+                    }
+
+                    // Thêm text nếu có
+                    html += `<div class="message-text">${message.noiDung}</div>`;
+                    html += `</div><div class="message-time">${formatTime(message.thoiGian)}</div>
+                            </div>
+                        </div>`;
+                } else {
+                    html += `
+                        <div class="chat-message-item other-message">
+                            <div class="message-avatar">
+                                <img src="${user.avatar}" alt="" onerror="this.src='/images/authors/default/default-image.png'">
+                            </div>
+                            <div class="message-content">
+                                <div class="message-bubble">`;
+                    
+                    // Thêm sticker nếu có
+                    if (message.sticker) {
+                        html += `<div class="message-sticker"><img src="${message.sticker}" alt="Sticker"></div>`;
+                    }
+
+                    // Thêm ảnh nếu có
+                    if (message.duongDanAnh) {
+                        html += `<div class="message-image-container"><img src="${message.duongDanAnh}" alt="Ảnh" class="message-image"></div>`;
+                    }
+
+                    // Thêm text nếu có
+                    html += `<div class="message-text">${message.noiDung}</div>`;
+                    html += `</div><div class="message-time">${formatTime(message.thoiGian)}</div>
+                            </div>
+                        </div>`;
+                }
+            }
+        } else {
+            // Không có tin nhắn, hiển thị trạng thái trống
+            html += `
+                <div class="empty-conversation">
+                    <div class="empty-icon">
+                        <i class="far fa-paper-plane"></i>
+                    </div>
+                    <div class="empty-text">Hãy bắt đầu cuộc trò chuyện</div>
+                </div>`;
+        }
+        
+        html += `</div>`;
+        
+        // Thêm khu vực preview ảnh và sticker
+        html += `
+            <div class="media-preview-area">
+                <div id="imagePreviewContainer" class="d-none media-preview-item">
+                    <img id="imagePreview" src="" alt="Preview" class="preview-img">
+                    <button type="button" class="btn-remove-preview" onclick="removeMessageImage()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <div id="stickerPreviewContainer" class="d-none media-preview-item">
+                    <img id="stickerPreview" src="" alt="Sticker" class="preview-sticker">
+                    <button type="button" class="btn-remove-preview" onclick="removeMessageSticker()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>`;
+        
+        // Thêm phần nhập tin nhắn
+        html += `
+            <div class="chat-input">
+                <div class="input-actions">
+                    <button type="button" class="btn-icon" id="openImageSelector">
+                        <i class="far fa-image"></i>
+                    </button>
+                    <button type="button" class="btn-icon" id="openStickerSelector">
+                        <i class="far fa-smile"></i>
+                    </button>
+                </div>
+                <div class="message-input-wrapper">
+                    <input type="text" id="messageInput" placeholder="Aa" autocomplete="off">
+                    <input type="hidden" id="messageImagePath">
+                    <input type="hidden" id="messageStickerPath">
+                </div>
+                <button type="button" class="send-btn" id="sendMessageBtn" data-receiver-id="${user.userId}">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>`;
+        
+        // Cập nhật UI
+        $('#messageContent').html(html);
+        
+        // Cuộn xuống tin nhắn cuối cùng
+        const chatMessagesElement = document.getElementById('chatMessages');
+        if (chatMessagesElement) {
+            chatMessagesElement.scrollTop = chatMessagesElement.scrollHeight;
+        }
+        
+        // Thêm sự kiện gửi tin nhắn
+        setupSendMessage(user.userId);
+    }
+
+    // Hàm cập nhật để thêm mới tin nhắn của mình
+    function appendMyMessage(message) {
+        let html = `
+        <div class="chat-message-item my-message">
+            <div class="message-content">
+                <div class="message-bubble">`;
+        
+        // Thêm sticker nếu có
+        if (message.sticker) {
+            html += `<div class="message-sticker"><img src="${message.sticker}" alt="Sticker"></div>`;
+        }
+
+        // Thêm ảnh nếu có
+        if (message.duongDanAnh) {
+            html += `<div class="message-image-container"><img src="${message.duongDanAnh}" alt="Ảnh" class="message-image"></div>`;
+        }
+
+        // Thêm text nếu có
+        if (message.noiDung) {
+            html += `<div class="message-text">${message.noiDung}</div>`;
+        }
+        
+        html += `</div>
+                <div class="message-time">${formatTime(message.thoiGian)}</div>
+            </div>
+        </div>`;
+        
+        // Thêm vào danh sách tin nhắn
+        $('#chatMessages').append(html);
+        
+        // Cuộn xuống tin nhắn cuối cùng
+        const chatMessages = document.getElementById('chatMessages');
+        if (chatMessages) {
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
     }
 </script> 
