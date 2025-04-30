@@ -192,7 +192,9 @@ namespace ArtGallery.Controllers
                     maNguoiNhan = m.MaNguoiNhan,
                     noiDung = m.NoiDung,
                     thoiGian = m.ThoiGian,
-                    daDoc = m.DaDoc
+                    daDoc = m.DaDoc,
+                    duongDanAnh = m.DuongDanAnh,
+                    sticker = m.Sticker
                 })
                 .ToListAsync();
 
@@ -438,6 +440,7 @@ namespace ArtGallery.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> SendMessageWithMedia(string receiverId, string message, IFormFile? messageImage, string? sticker)
         {
+            // Sửa điều kiện kiểm tra tin nhắn - cho phép gửi khi chỉ có ảnh không có text
             if (string.IsNullOrWhiteSpace(message) && messageImage == null && string.IsNullOrWhiteSpace(sticker))
             {
                 return BadRequest("Tin nhắn không được để trống");
@@ -456,7 +459,7 @@ namespace ArtGallery.Controllers
                     Directory.CreateDirectory(uploadsFolder);
 
                 // Tạo tên file duy nhất
-                var uniqueFileName = $"{Guid.NewGuid()}_{messageImage.FileName}";
+                var uniqueFileName = $"{Guid.NewGuid()}_{Path.GetFileName(messageImage.FileName)}";
                 var filePath = Path.Combine(uploadsFolder, uniqueFileName);
 
                 using (var stream = new FileStream(filePath, FileMode.Create))
@@ -471,7 +474,7 @@ namespace ArtGallery.Controllers
             {
                 MaNguoiGui = currentUserId,
                 MaNguoiNhan = receiverId,
-                NoiDung = message,
+                NoiDung = message ?? "", // Đảm bảo NoiDung không null
                 ThoiGian = DateTime.Now,
                 DaDoc = false,
                 DuongDanAnh = imagePath,

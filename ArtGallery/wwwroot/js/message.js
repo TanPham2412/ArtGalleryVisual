@@ -372,28 +372,50 @@ function setupSendMessage(receiverId) {
     });
 }
 
-// Hàm gửi tin nhắn
+// Sửa hàm sendMessage để xử lý gửi ảnh đúng cách
 function sendMessage(receiverId) {
     const input = $('#messageInput');
     const message = input.val().trim();
-    
-    if (message.length === 0) return;
-    
-    // Xóa nội dung input
+    const stickerPath = $('#messageStickerPath').val();
+    const imageFile = $('#messageImageInput')[0].files[0];
+
+    // Kiểm tra có nội dung tin nhắn hoặc file ảnh hoặc sticker không
+    if (message.length === 0 && !stickerPath && !imageFile) return;
+
+    // Xóa nội dung input và preview
     input.val('');
     
     // Lấy token antiforgery
     const token = $('input[name="__RequestVerificationToken"]').val();
-    
+
+    // Tạo FormData để gửi file
+    const formData = new FormData();
+    formData.append('receiverId', receiverId);
+    formData.append('message', message);
+    formData.append('__RequestVerificationToken', token);
+
+    if (stickerPath) {
+        formData.append('sticker', stickerPath);
+    }
+
+    if (imageFile) {
+        formData.append('messageImage', imageFile);
+        // Đặt lại input file và preview ảnh
+        $('#messageImageInput').val('');
+        $('#imagePreviewContainer').addClass('d-none');
+    } else {
+        // Nếu không có file thì vẫn cần xóa preview
+        $('#messageStickerPath').val('');
+        $('#stickerPreviewContainer').addClass('d-none');
+    }
+
     // Gửi tin nhắn đến server
     $.ajax({
-        url: '/Messages/SendMessage',
+        url: '/Messages/SendMessageWithMedia',
         type: 'POST',
-        data: {
-            receiverId: receiverId,
-            message: message,
-            __RequestVerificationToken: token
-        },
+        data: formData,
+        processData: false,
+        contentType: false,
         success: function(data) {
             if (data.success) {
                 // Thêm tin nhắn vào danh sách tin nhắn
@@ -402,29 +424,42 @@ function sendMessage(receiverId) {
                 loadConversations();
             }
         },
-        error: function() {
+        error: function(xhr) {
+            console.error("Lỗi gửi tin nhắn:", xhr.responseText);
             alert('Gửi tin nhắn thất bại');
         }
     });
 }
 
-// Sửa hàm appendMyMessage để sử dụng template
+// Sửa lại hàm hiển thị tin nhắn của mình
 function appendMyMessage(message) {
-    const messageTemplate = document.getElementById('messageTemplate');
-    const messageClone = document.importNode(messageTemplate.content, true);
-    const messageItem = messageClone.querySelector('.chat-message-item');
+    let html = `
+    <div class="chat-message-item my-message">
+        <div class="message-content">
+            <div class="message-bubble">`;
     
-    messageItem.classList.add('my-message');
-    // Xóa avatar vì là tin nhắn của mình
-    const avatar = messageClone.querySelector('.message-avatar');
-    messageItem.removeChild(avatar);
+    // Thêm sticker nếu có
+    if (message.sticker) {
+        html += `<div class="message-sticker"><img src="${message.sticker}" alt="Sticker"></div>`;
+    }
+
+    // Thêm ảnh nếu có
+    if (message.duongDanAnh) {
+        html += `<div class="message-image-container"><img src="${message.duongDanAnh}" alt="Ảnh" class="message-image"></div>`;
+    }
+
+    // Thêm text nếu có
+    if (message.noiDung) {
+        html += `<div class="message-text">${message.noiDung}</div>`;
+    }
     
-    // Cập nhật nội dung tin nhắn
-    messageClone.querySelector('.message-text').textContent = message.noiDung;
-    messageClone.querySelector('.message-time').textContent = formatTime(message.thoiGian);
+    html += `</div>
+            <div class="message-time">${formatTime(message.thoiGian)}</div>
+        </div>
+    </div>`;
     
     // Thêm vào danh sách tin nhắn
-    document.getElementById('chatMessages').appendChild(messageClone);
+    $('#chatMessages').append(html);
     
     // Cuộn xuống tin nhắn cuối cùng
     const chatMessages = document.getElementById('chatMessages');
@@ -687,111 +722,4 @@ function selectMessageSticker(element) {
     $('#stickerPreviewContainer').removeClass('d-none');
     $('#imagePreviewContainer').addClass('d-none');
     $('#messageStickerPath').val(stickerPath);
-}
-
-// Thay đổi hàm sendMessage để hỗ trợ gửi ảnh và sticker
-function sendMessage(receiverId) {
-    const input = $('#messageInput');
-    const message = input.val().trim();
-    const stickerPath = $('#messageStickerPath').val();
-    const imageFile = $('#messageImageInput')[0].files[0];
-
-    if (message.length === 0 && !stickerPath && !imageFile) return;
-
-    // Xóa nội dung input và preview
-    input.val('');
-    $('#messageStickerPath').val('');
-    $('#stickerPreviewContainer').addClass('d-none');
-    $('#imagePreviewContainer').addClass('d-none');
-
-    // Lấy token antiforgery
-    const token = $('input[name="__RequestVerificationToken"]').val();
-
-    // Tạo FormData để gửi file
-    const formData = new FormData();
-    formData.append('receiverId', receiverId);
-    formData.append('message', message);
-    formData.append('__RequestVerificationToken', token);
-
-    if (stickerPath) {
-        formData.append('sticker', stickerPath);
-    }
-
-    if (imageFile) {
-        formData.append('messageImage', imageFile);
-    }
-
-    // Gửi tin nhắn đến server
-    $.ajax({
-        url: '/Messages/SendMessageWithMedia',
-        type: 'POST',
-        data: formData,
-        processData: false,
-        contentType: false,
-        success: function (data) {
-            if (data.success) {
-                // Thêm tin nhắn vào danh sách tin nhắn
-                appendMyMessage(data.message);
-                // Cập nhật danh sách cuộc trò chuyện
-                loadConversations();
-            }
-        },
-        error: function () {
-            alert('Gửi tin nhắn thất bại');
-        }
-    });
-}
-
-// Cập nhật hàm appendMyMessage và renderConversation để hiển thị ảnh và sticker
-function appendMyMessage(message) {
-    const messageTemplate = document.getElementById('messageTemplate');
-    const messageClone = document.importNode(messageTemplate.content, true);
-    const messageItem = messageClone.querySelector('.chat-message-item');
-
-    messageItem.classList.add('my-message');
-    // Xóa avatar vì là tin nhắn của mình
-    const avatar = messageClone.querySelector('.message-avatar');
-    messageItem.removeChild(avatar);
-
-    // Cập nhật nội dung tin nhắn
-    const messageContent = messageClone.querySelector('.message-content');
-    const messageBubble = messageClone.querySelector('.message-bubble');
-    const messageText = messageClone.querySelector('.message-text');
-
-    // Thêm sticker nếu có
-    if (message.sticker) {
-        const stickerElem = document.createElement('div');
-        stickerElem.className = 'message-sticker';
-        const img = document.createElement('img');
-        img.src = message.sticker;
-        img.alt = "Sticker";
-        stickerElem.appendChild(img);
-        messageBubble.appendChild(stickerElem);
-    }
-
-    // Thêm ảnh nếu có
-    if (message.duongDanAnh) {
-        const imageContainer = document.createElement('div');
-        imageContainer.className = 'message-image-container';
-        const img = document.createElement('img');
-        img.src = message.duongDanAnh;
-        img.alt = "Ảnh";
-        img.className = 'message-image';
-        imageContainer.appendChild(img);
-        messageBubble.appendChild(imageContainer);
-    }
-
-    // Thêm text nếu có
-    messageText.textContent = message.noiDung;
-
-    messageClone.querySelector('.message-time').textContent = formatTime(message.thoiGian);
-
-    // Thêm vào danh sách tin nhắn
-    document.getElementById('chatMessages').appendChild(messageClone);
-
-    // Cuộn xuống tin nhắn cuối cùng
-    const chatMessages = document.getElementById('chatMessages');
-    if (chatMessages) {
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-    }
 }
