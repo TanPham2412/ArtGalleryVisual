@@ -617,6 +617,10 @@ namespace ArtGallery.Migrations
                         .HasDefaultValue(false)
                         .HasColumnName("da_doc");
 
+                    b.Property<string>("DuongDanAnh")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("duong_dan_anh");
+
                     b.Property<string>("MaNguoiGui")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)")
@@ -631,6 +635,10 @@ namespace ArtGallery.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("noi_dung");
+
+                    b.Property<string>("Sticker")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("sticker");
 
                     b.Property<DateTime>("ThoiGian")
                         .ValueGeneratedOnAdd()

@@ -433,5 +433,55 @@ namespace ArtGallery.Controllers
                 markedCount = unreadMessages.Count 
             });
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SendMessageWithMedia(string receiverId, string message, IFormFile? messageImage, string? sticker)
+        {
+            if (string.IsNullOrWhiteSpace(message) && messageImage == null && string.IsNullOrWhiteSpace(sticker))
+            {
+                return BadRequest("Tin nhắn không được để trống");
+            }
+
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            string imagePath = null;
+
+            // Xử lý upload ảnh nếu có
+            if (messageImage != null && messageImage.Length > 0)
+            {
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "messages");
+
+                // Tạo thư mục nếu chưa tồn tại
+                if (!Directory.Exists(uploadsFolder))
+                    Directory.CreateDirectory(uploadsFolder);
+
+                // Tạo tên file duy nhất
+                var uniqueFileName = $"{Guid.NewGuid()}_{messageImage.FileName}";
+                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await messageImage.CopyToAsync(stream);
+                }
+
+                imagePath = $"/images/messages/{uniqueFileName}";
+            }
+
+            var tinNhan = new TinNhan
+            {
+                MaNguoiGui = currentUserId,
+                MaNguoiNhan = receiverId,
+                NoiDung = message,
+                ThoiGian = DateTime.Now,
+                DaDoc = false,
+                DuongDanAnh = imagePath,
+                Sticker = sticker
+            };
+
+            _context.TinNhans.Add(tinNhan);
+            await _context.SaveChangesAsync();
+
+            return Json(new { success = true, message = tinNhan });
+        }
     }
 }
