@@ -919,3 +919,260 @@ footer,
     width: calc(100% - 45px);
     overflow: hidden;
 }
+
+/* Thêm CSS cho sticker selector */
+.sticker-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 10px;
+}
+
+.sticker-item {
+    width: 100%;
+    height: 0;
+    padding-bottom: 100%;
+    position: relative;
+    background-color: transparent;
+    border-radius: 0;
+    overflow: hidden;
+    margin: 0;
+    border: none;
+    cursor: pointer;
+}
+
+.sticker-img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    object-fit: contain;
+    transition: transform 0.2s ease;
+}
+
+.sticker-item:hover .sticker-img {
+    transform: scale(1.1);
+}
+
+.sticker-item:hover,
+.sticker-item.selected {
+    background-color: transparent;
+}
+
+.sticker-item:active,
+.sticker-item:focus {
+    background-color: transparent;
+}
+
+/* Xóa khung xám khi được chọn */
+.sticker-item.selected {
+    background-color: transparent;
+}
+
+/* Xóa viền khi được chọn, thay bằng hiệu ứng phóng to */
+.sticker-item.selected::after {
+    display: none;
+}
+
+.sticker-item.selected .sticker-img {
+    transform: scale(1.15);
+}
+
+/* Thêm CSS cho sticker được chọn */
+.sticker-item.selected .sticker-img {
+    transform: scale(0.9);
+    transition: transform 0.2s;
+}
+
+/* Sửa lại preview sticker khi được chọn */
+.preview-sticker {
+    max-width: 100%;
+    max-height: 120px;
+    display: block;
+    margin: 0;
+}
+
+/* Sửa background-color cho sticker đã chọn, chỉ thêm viền nhẹ */
+.sticker-item.selected::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    right: 2px;
+    bottom: 2px;
+    border: 2px solid #0084ff;
+    border-radius: 4px;
+    pointer-events: none;
+}
+
+.tab-content {
+    max-height: 350px;
+    overflow-y: auto;
+}
+
+#stickerTabContent .tab-pane {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+/* Thêm CSS cho sticker modal */
+#stickerModal .modal-content {
+    background-color: #1a1a1a;
+    color: #e0e0e0;
+    border-radius: 8px;
+    border: 1px solid #333;
+}
+
+#stickerModal .modal-header {
+    padding: 10px 15px;
+    border-bottom: none;
+    background-color: #1a1a1a;
+}
+
+#stickerModal .modal-title {
+    font-weight: bold;
+    font-size: 18px;
+}
+
+#stickerModal .modal-body {
+    padding: 0;
+}
+
+/* Làm lại tabs giống hệt ảnh */
+.sticker-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 6px;
+    background-color: #1a1a1a;
+}
+
+.sticker-tab-btn {
+    flex: 0 0 auto;
+    padding: 8px 12px;
+    background-color: #1a1a1a;
+    border: 1px solid #444;
+    border-radius: 6px;
+    color: #fff;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    margin: 0;
+}
+
+.sticker-tab-btn:hover {
+    background-color: #333;
+}
+
+.sticker-tab-btn.active {
+    background-color: #0084ff;
+    border-color: #0084ff;
+    color: #fff;
+}
+
+/* Khu vực nội dung sticker */
+.sticker-content-area {
+    max-height: 400px;
+    overflow-y: auto;
+    padding: 0;
+    background: #1a1a1a;
+    border-top: 1px solid #333;
+}
+
+/* Grid cho stickers giống hệt ảnh */
+.sticker-category {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    padding: 0;
+    width: 100%;
+    background-color: #1a1a1a;
+}
+
+.sticker-item {
+    width: 100%;
+    height: 0;
+    padding-bottom: 100%;
+    position: relative;
+    background-color: transparent;
+    border-radius: 0;
+    overflow: hidden;
+    margin: 0;
+    border: none;
+}
+
+.sticker-item:hover,
+.sticker-item.selected {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.sticker-img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    object-fit: contain;
+}
+
+/* Thêm CSS cho sticker được chọn */
+.sticker-item.selected {
+    background-color: rgba(100, 100, 100, 0.2);
+}
+
+/* Sửa hiệu ứng hover và active */
+.sticker-item:active,
+.sticker-item:focus {
+    background-color: rgba(100, 100, 100, 0.2);
+}
+
+/* Kích thước modal giống hệt ảnh */
+#stickerModal .modal-dialog {
+    max-width: 400px;
+    margin: 1.75rem auto;
+}
+
+/* X button trong top-right */
+#stickerModal .btn-close {
+    color: #e0e0e0;
+    filter: invert(1);
+    font-size: 1.5rem;
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    z-index: 100;
+}
+
+/* Scrollbar tùy chỉnh */
+.sticker-content-area::-webkit-scrollbar {
+    width: 0;
+    display: none;
+}
+
+.sticker-content-area {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* Xóa hoàn toàn hiệu ứng hover màu xám cho sticker */
+.sticker-category .sticker-item:hover,
+.sticker-category .sticker-item.selected,
+.sticker-category .sticker-item:active,
+.sticker-category .sticker-item:focus {
+    background-color: transparent !important;
+}
+
+/* Tăng cường hiệu ứng phóng to khi hover */
+.sticker-category .sticker-item:hover .sticker-img {
+    transform: scale(1.15);
+    cursor: pointer;
+}
+
+/* Hiệu ứng khi được chọn */
+.sticker-category .sticker-item.selected .sticker-img {
+    transform: scale(1.2);
+}

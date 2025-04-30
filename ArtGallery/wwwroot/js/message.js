@@ -118,19 +118,80 @@ $(document).ready(function() {
     // });
 
     // Xử lý click vào nút chọn sticker
-    $(document).on('click', '#openStickerSelector', function () {
+    $(document).on('click', '#openStickerSelector', function() {
         console.log('Nút chọn sticker được nhấn');
+        
         // Tải stickers nếu chưa tải
         if (!window.stickersLoaded) {
             loadStickers();
             window.stickersLoaded = true;
         }
-        // Hiển thị modal sticker - Sửa cách gọi modal
+        
+        // Hiển thị modal
         $('#stickerModal').modal('show');
     });
     
     // Gọi hàm kiểm tra URL khi trang đã tải xong
     checkURLForConversation();
+
+    // Tải stickers khi trang đã sẵn sàng
+    loadStickers();
+    
+    // Đăng ký sự kiện cho modal sticker
+    $('#stickerModal').on('shown.bs.modal', function () {
+        // Đảm bảo stickers đã được tải khi modal hiển thị
+        if ($('#vanthuong-stickers').children().length === 0) {
+            loadStickers();
+        }
+    });
+    
+    // Đảm bảo tab hoạt động đúng
+    $('#stickerTabs button').on('click', function (e) {
+        e.preventDefault();
+        $(this).tab('show');
+    });
+
+    // Tải stickers khi trang đã sẵn sàng
+    loadStickers();
+    
+    // Xử lý chuyển tab sticker
+    $(document).on('click', '.sticker-tab-btn', function() {
+        // Loại bỏ trạng thái active của tất cả các tab
+        $('.sticker-tab-btn').removeClass('active');
+        
+        // Thêm trạng thái active cho tab được chọn
+        $(this).addClass('active');
+        
+        // Ẩn tất cả các danh mục sticker
+        $('.sticker-category').hide();
+        
+        // Hiển thị danh mục sticker tương ứng với tab
+        const category = $(this).data('category');
+        $(`#${category}-stickers`).show();
+    });
+    
+    // Thêm code xử lý sticker được chọn
+    $(document).on('click', '.sticker-img', function() {
+        // Xóa class selected từ tất cả sticker
+        $('.sticker-item').removeClass('selected');
+        
+        // Thêm class selected cho sticker đang được chọn
+        $(this).closest('.sticker-item').addClass('selected');
+        
+        // Lấy đường dẫn sticker
+        const stickerPath = $(this).data('path') || $(this).attr('src');
+        
+        // Đóng modal sau một khoảng thời gian ngắn để người dùng thấy sticker được chọn
+        setTimeout(function() {
+            $('#stickerModal').modal('hide');
+            
+            // Cập nhật preview và input
+            $('#stickerPreview').attr('src', stickerPath);
+            $('#stickerPreviewContainer').removeClass('d-none');
+            $('#imagePreviewContainer').addClass('d-none');
+            $('#messageStickerPath').val(stickerPath);
+        }, 200);
+    });
 });
 
 // Load danh sách cuộc trò chuyện
@@ -653,73 +714,134 @@ function removeMessageSticker() {
     $('#messageStickerPath').val('');
 }
 
-// Thêm hàm loadStickers tương tự như trong display-artwork.js
+// Thay thế hàm loadStickers
 function loadStickers() {
     console.log('Loading stickers...');
-    // Cập nhật tên thư mục trong biến path
+    
+    // Xác định đường dẫn cho các tập sticker
     const daisuhuynhPath = '/images/stickers/daisuhuynh/';
     const nhisuhuynhPath = '/images/stickers/nhisuhuynh/';
     const tamsuhuynhPath = '/images/stickers/tamsuhuynh/';
     const tusuhuynhPath = '/images/stickers/tusuhuynh/';
+    const longtuongPath = '/images/stickers/longtuong/';
+    const ngutieumaiPath = '/images/stickers/ngutieumai/';
+    const thuyhanhPath = '/images/stickers/thuyhanh/';
+    const vanthuongPath = '/images/stickers/vanthuong/';
 
-    // Tạo 12 stickers mẫu cho mỗi thư mục
-    let daisuhuynhHtml = '';
-    for (let i = 1; i <= 12; i++) {
-        daisuhuynhHtml += `<div class="sticker-item">
-            <img src="${daisuhuynhPath}sticker${i}.png" data-path="${daisuhuynhPath}sticker${i}.png" 
-                 class="sticker-img" onclick="selectMessageSticker(this)">
-        </div>`;
-    }
-    $('#daisuhuynh-stickers').html(daisuhuynhHtml);
-
-    let nhisuhuynhHtml = '';
-    for (let i = 1; i <= 12; i++) {
-        nhisuhuynhHtml += `<div class="sticker-item">
-            <img src="${nhisuhuynhPath}sticker${i}.png" data-path="${nhisuhuynhPath}sticker${i}.png" 
-                 class="sticker-img" onclick="selectMessageSticker(this)">
-        </div>`;
-    }
-    $('#nhisuhuynh-stickers').html(nhisuhuynhHtml);
-
-    let tamsuhuynhHtml = '';
-    for (let i = 1; i <= 12; i++) {
-        tamsuhuynhHtml += `<div class="sticker-item">
-            <img src="${tamsuhuynhPath}sticker${i}.png" data-path="${tamsuhuynhPath}sticker${i}.png" 
-                 class="sticker-img" onclick="selectMessageSticker(this)">
-        </div>`;
-    }
-    $('#tamsuhuynh-stickers').html(tamsuhuynhHtml);
-
-    let tusuhuynhHtml = '';
-    for (let i = 1; i <= 12; i++) {
-        tusuhuynhHtml += `<div class="sticker-item">
-            <img src="${tusuhuynhPath}sticker${i}.png" data-path="${tusuhuynhPath}sticker${i}.png" 
-                 class="sticker-img" onclick="selectMessageSticker(this)">
-        </div>`;
-    }
-    $('#tusuhuynh-stickers').html(tusuhuynhHtml);
-
-    // Gọi API nếu cần
+    // Gọi API để lấy danh sách stickers từ controller
     $.ajax({
         url: '/Artwork/GetStickers',
         type: 'GET',
-        success: function (data) {
-            console.log('Stickers loaded:', data);
-            // Cập nhật UI nếu có dữ liệu từ API
+        success: function(data) {
+            if (data.success) {
+                // Xóa nội dung cũ
+                $('.sticker-grid').empty();
+                
+                // Hiển thị stickers cho từng tab
+                renderStickerSet('daisuhuynh-stickers', data.daisuhuynh);
+                renderStickerSet('nhisuhuynh-stickers', data.nhisuhuynh);
+                renderStickerSet('tamsuhuynh-stickers', data.tamsuhuynh);
+                renderStickerSet('tusuhuynh-stickers', data.tusuhuynh);
+                renderStickerSet('longtuong-stickers', data.longtuong);
+                renderStickerSet('ngutieumai-stickers', data.ngutieumai);
+                renderStickerSet('thuyhanh-stickers', data.thuyhanh);
+                renderStickerSet('vanthuong-stickers', data.vanthuong);
+            } else {
+                console.error('Không thể tải stickers:', data.message);
+                loadDefaultStickers();
+            }
         },
-        error: function (err) {
-            console.error('Error loading stickers:', err);
+        error: function(err) {
+            console.error('Lỗi khi tải stickers:', err);
+            loadDefaultStickers();
         }
     });
 }
 
-// Hàm chọn sticker
-function selectMessageSticker(element) {
-    const stickerPath = $(element).data('path');
-    $('#stickerModal').modal('hide');
+// Thay thế hàm renderStickerSet
+function renderStickerSet(containerId, stickers) {
+    if (!stickers || stickers.length === 0) return;
+    
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    
+    let html = '';
+    stickers.forEach(function(stickerPath) {
+        html += `
+            <div class="sticker-item">
+                <img src="${stickerPath}" alt="Sticker" class="sticker-img" 
+                    data-path="${stickerPath}" onclick="selectMessageSticker(this)">
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+}
 
-    $('#stickerPreview').attr('src', stickerPath);
-    $('#stickerPreviewContainer').removeClass('d-none');
-    $('#imagePreviewContainer').addClass('d-none');
-    $('#messageStickerPath').val(stickerPath);
+// Thay thế hàm loadDefaultStickers
+function loadDefaultStickers() {
+    // Xác định đường dẫn cho các tập sticker
+    const daisuhuynhPath = '/images/stickers/daisuhuynh/';
+    const nhisuhuynhPath = '/images/stickers/nhisuhuynh/';
+    const tamsuhuynhPath = '/images/stickers/tamsuhuynh/';
+    const tusuhuynhPath = '/images/stickers/tusuhuynh/';
+    const longtuongPath = '/images/stickers/longtuong/';
+    const ngutieumaiPath = '/images/stickers/ngutieumai/';
+    const thuyhanhPath = '/images/stickers/thuyhanh/';
+    const vanthuongPath = '/images/stickers/vanthuong/';
+    
+    const collections = [
+        { id: 'daisuhuynh-stickers', path: daisuhuynhPath },
+        { id: 'nhisuhuynh-stickers', path: nhisuhuynhPath },
+        { id: 'tamsuhuynh-stickers', path: tamsuhuynhPath },
+        { id: 'tusuhuynh-stickers', path: tusuhuynhPath },
+        { id: 'longtuong-stickers', path: longtuongPath },
+        { id: 'ngutieumai-stickers', path: ngutieumaiPath },
+        { id: 'thuyhanh-stickers', path: thuyhanhPath },
+        { id: 'vanthuong-stickers', path: vanthuongPath }
+    ];
+    
+    collections.forEach(collection => {
+        const container = document.getElementById(collection.id);
+        if (!container) return;
+        
+        let html = '';
+        for (let i = 1; i <= 12; i++) {
+            const stickerPath = `${collection.path}sticker${i}.png`;
+            html += `
+                <div class="sticker-item">
+                    <img src="${stickerPath}" alt="Sticker" class="sticker-img" 
+                        data-path="${stickerPath}" onclick="selectMessageSticker(this)">
+                </div>
+            `;
+        }
+        
+        container.innerHTML = html;
+    });
+}
+
+// Sửa lại hàm selectMessageSticker
+function selectMessageSticker(element) {
+    // Không xử lý sticker ngay lập tức, để người dùng thấy hiệu ứng được chọn
+    const stickerItem = $(element).closest('.sticker-item');
+    
+    // Xóa class selected từ tất cả sticker
+    $('.sticker-item').removeClass('selected');
+    
+    // Thêm class selected cho sticker đang được chọn
+    stickerItem.addClass('selected');
+    
+    // Lấy đường dẫn sticker
+    const stickerPath = $(element).data('path') || $(element).attr('src');
+    
+    // Đóng modal sau một khoảng thời gian ngắn
+    setTimeout(function() {
+        $('#stickerModal').modal('hide');
+        
+        // Cập nhật preview và input
+        $('#stickerPreview').attr('src', stickerPath);
+        $('#stickerPreviewContainer').removeClass('d-none');
+        $('#imagePreviewContainer').addClass('d-none');
+        $('#messageStickerPath').val(stickerPath);
+    }, 200);
 }
