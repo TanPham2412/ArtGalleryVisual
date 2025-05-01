@@ -1,13 +1,10 @@
 # 🎵 PiaoYue ArtGallery
-
 PiaoYue ArtGallery là nền tảng thương mại và trưng bày tác phẩm nghệ thuật mã nguồn mở.
 
 ## 📝 Giới thiệu
-
 PiaoYue ArtGallery được phát triển nhằm cung cấp một nền tảng cho các nghệ sĩ trưng bày và bán tác phẩm nghệ thuật của họ. Người dùng có thể duyệt, tìm kiếm, theo dõi nghệ sĩ yêu thích và mua các tác phẩm nghệ thuật.
 
 ## ✨ Tính năng chính
-
 - **Quản lý tài khoản**: Đăng ký, đăng nhập, phân quyền người dùng
 - **Trưng bày tác phẩm**: Nghệ sĩ có thể đăng tải và quản lý tác phẩm của mình
 - **Tìm kiếm và lọc**: Tìm kiếm theo tên, thể loại, nghệ sĩ
@@ -17,7 +14,6 @@ PiaoYue ArtGallery được phát triển nhằm cung cấp một nền tảng c
 - **Mua bán**: Hệ thống giỏ hàng và thanh toán
 
 ## 🛠️ Công nghệ sử dụng
-
 - **Backend**: ASP.NET Core MVC
 - **Frontend**: HTML, CSS, JavaScript, jQuery
 - **Database**: SQL Server
@@ -25,7 +21,6 @@ PiaoYue ArtGallery được phát triển nhằm cung cấp một nền tảng c
 - **Authentication**: ASP.NET Core Identity
 
 ## 🚀 Clone Project
-
 Để lấy mã nguồn về máy tính của bạn, chạy lệnh sau trong terminal:
 
 ```bash
@@ -33,7 +28,6 @@ git clone https://github.com/TanPham2412/ArtGalleryVisual.git
 ```
 
 ## 🔧 Cài đặt và chạy
-
 1. **Yêu cầu hệ thống**:
    - .NET 7.0 SDK hoặc cao hơn
    - SQL Server
@@ -55,7 +49,6 @@ git clone https://github.com/TanPham2412/ArtGalleryVisual.git
 5. **Truy cập ứng dụng**: Mở trình duyệt và truy cập `http://localhost:5000`
 
 ## 📁 Cấu trúc dự án
-
 - `/Areas`: Chứa các khu vực phân tách trong ứng dụng MVC
 - `/Controllers`: Chứa các controller xử lý request
 - `/Data`: Chứa database context và migration
@@ -70,9 +63,7 @@ git clone https://github.com/TanPham2412/ArtGalleryVisual.git
 - `/wwwroot`: Tài nguyên tĩnh (CSS, JS, hình ảnh)
 
 ## 👨‍💻 Đóng góp
-
 Chúng tôi rất hoan nghênh đóng góp từ cộng đồng. Nếu bạn muốn đóng góp:
-
 1. Fork repository
 2. Tạo branch mới (`git checkout -b feature/amazing-feature`)
 3. Commit thay đổi (`git commit -m 'Add some amazing feature'`)
@@ -80,7 +71,6 @@ Chúng tôi rất hoan nghênh đóng góp từ cộng đồng. Nếu bạn mu�
 5. Mở Pull Request
 
 ## 📊 RepoBeats Analytics
-
 <p align="center">
     <img src="https://repobeats.axiom.co/api/embed/d2fd449cf12eb010947325731445c985db76b96f.svg" alt="RepoBeats analytics" />
 </p>
