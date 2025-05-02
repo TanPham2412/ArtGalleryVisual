@@ -22,7 +22,6 @@ PiaoYue ArtGallery được phát triển nhằm cung cấp một nền tảng c
 
 ## 🚀 Clone Project
 Để lấy mã nguồn về máy tính của bạn, chạy lệnh sau trong terminal:
-
 ```bash
 git clone https://github.com/TanPham2412/ArtGalleryVisual.git
 ```
@@ -31,21 +30,17 @@ git clone https://github.com/TanPham2412/ArtGalleryVisual.git
 1. **Yêu cầu hệ thống**:
    - .NET 7.0 SDK hoặc cao hơn
    - SQL Server
-
 2. **Cấu hình database**:
    - Mở file `appsettings.json`
    - Cập nhật chuỗi kết nối database
-
 3. **Khởi tạo database**:
    ```bash
    dotnet ef database update
    ```
-
 4. **Chạy ứng dụng**:
    ```bash
    dotnet run
    ```
-
 5. **Truy cập ứng dụng**: Mở trình duyệt và truy cập `http://localhost:5000`
 
 ## 📁 Cấu trúc dự án
