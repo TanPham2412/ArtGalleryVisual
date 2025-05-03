@@ -416,49 +416,46 @@
             });
             // Xử lý thanh toán VNPAY
             $("#btnConfirmVNPAY").click(function() {
+                // Không gọi ajax mà chỉ chuẩn bị form để submit
                 var maTranh = @Model.MaTranh;
                 var soLuong = parseInt($("#quantity").val());
                 var tongTien = soLuong * price;
 
-                // Gửi Ajax request để lưu đơn hàng với phương thức COD
-                $.ajax({
-                    url: '/Order/PlaceOrder',
-                    type: 'POST',
-                    data: {
-                        maTranh: maTranh,
-                        soLuong: soLuong,
-                        tongTien: tongTien,
-                        trangThai: "Đã đặt hàng",
-                        phuongThucThanhToan: "thanh toán bằng VNPAY",
-                        orderId: isInCart ? orderId : null
-                    },
-                    success: function(response) {
-                        if (response.success) {
-                            // Thông báo thành công rồi chuyển hướng
-                            Swal.fire({
-                                title: 'Đặt hàng thành công!',
-                                text: 'Đơn hàng của bạn đã được xác nhận.',
-                                icon: 'success',
-                                confirmButtonText: 'Xem chi tiết'
-                            }).then(() => {
-                                window.location.href = '/Order/History';
-                            });
-                        } else {
-                            Swal.fire({
-                                title: 'Lỗi!',
-                                text: response.message || 'Có lỗi xảy ra khi đặt hàng.',
-                                icon: 'error'
-                            });
-                        }
-                    },
-                    error: function() {
-                        Swal.fire({
-                            title: 'Lỗi!',
-                            text: 'Có lỗi xảy ra, vui lòng thử lại sau.',
-                            icon: 'error'
-                        });
+                // Cập nhật giá trị vào form
+                $('#vnpayAmount').val(tongTien);
+                
+                // Thêm thông tin cần thiết vào form để xử lý sau khi thanh toán
+                if (!$('#artwork-id').length) {
+                    $('<input>').attr({
+                        type: 'hidden',
+                        id: 'artwork-id',
+                        name: 'MaTranh',
+                        value: maTranh
+                    }).appendTo('#vnpayForm');
+                }
+                
+                if (!$('#quantity-input').length) {
+                    $('<input>').attr({
+                        type: 'hidden',
+                        id: 'quantity-input',
+                        name: 'SoLuong',
+                        value: soLuong
+                    }).appendTo('#vnpayForm');
+                }
+                
+                if (isInCart && orderId) {
+                    if (!$('#order-id-input').length) {
+                        $('<input>').attr({
+                            type: 'hidden',
+                            id: 'order-id-input',
+                            name: 'OrderId',
+                            value: orderId
+                        }).appendTo('#vnpayForm');
                     }
-                });
+                }
+                
+                // Submit form để chuyển đến cổng thanh toán VNPay
+                // KHÔNG gọi PlaceOrder, để callback từ VNPay lưu đơn hàng
             });
             // Xử lý thanh toán COD
             $("#btnConfirmCOD").click(function() {
