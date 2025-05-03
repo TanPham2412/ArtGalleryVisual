@@ -439,10 +439,10 @@ function sendMessage(receiverId) {
     const message = input.val().trim();
     const stickerPath = $('#messageStickerPath').val();
     const imageFile = $('#messageImageInput')[0].files[0];
-
+    
     // Kiểm tra có nội dung tin nhắn hoặc file ảnh hoặc sticker không
     if (message.length === 0 && !stickerPath && !imageFile) return;
-
+    
     // Xóa nội dung input và preview
     input.val('');
     
@@ -469,7 +469,7 @@ function sendMessage(receiverId) {
         $('#messageStickerPath').val('');
         $('#stickerPreviewContainer').addClass('d-none');
     }
-
+    
     // Gửi tin nhắn đến server
     $.ajax({
         url: '/Messages/SendMessageWithMedia',
