@@ -1,0 +1,35 @@
+@{
+    ViewData["Title"] = "Thanh toán thất bại";
+}
+
+<link rel="stylesheet" href="~/css/vnpay.css" />
+
+<div class="container mt-5 pt-5">
+    <div class="payment-error-container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card payment-error-card">
+                    <div class="card-body text-center">
+                        <div class="error-icon mb-4">
+                            <i class="fas fa-times-circle fa-5x text-danger"></i>
+                        </div>
+                        <h2 class="mb-4">Thanh toán không thành công</h2>
+                        <p class="lead mb-4">Rất tiếc, giao dịch của bạn đã bị hủy hoặc đã xảy ra lỗi trong quá trình thanh toán.</p>
+                        <div class="error-details mb-4">
+                            <p>Giao dịch của bạn chưa được hoàn tất và bạn chưa bị trừ tiền.</p>
+                            <p>Vui lòng kiểm tra lại thông tin thanh toán hoặc chọn phương thức thanh toán khác.</p>
+                        </div>
+                        <div class="action-buttons">
+                            <a href="javascript:history.back()" class="btn btn-outline-secondary me-3">
+                                <i class="fas fa-arrow-left me-2"></i>Quay lại
+                            </a>
+                            <a href="/" class="btn btn-primary">
+                                <i class="fas fa-home me-2"></i>Về trang chủ
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> 
