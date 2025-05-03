@@ -157,8 +157,8 @@
                                 <!-- Hidden user ID -->
                                 <input type="hidden" name="UserId" value="@User.FindFirst("UserId")?.Value" />
 
-                                <button type="submit" class="btn btn-primary mt-3">
-                                    <i class="fas fa-credit-card me-2"></i>Thanh toán qua VNPay
+                                <button id="btnConfirmVNPAY" class="btn btn-primary btn-lg mt-3">
+                                    <i class="fas fa-check me-2"></i>Xác nhận đặt hàng VNPAY
                                 </button>
                             </form>
 
@@ -414,7 +414,52 @@
                 // Lưu đơn hàng với trạng thái "Đã đặt hàng" thay vì "Chờ xác nhận"
                 saveOrder("Đã đặt hàng", "chuyển khoản");
             });
-            
+            // Xử lý thanh toán VNPAY
+            $("#btnConfirmVNPAY").click(function() {
+                var maTranh = @Model.MaTranh;
+                var soLuong = parseInt($("#quantity").val());
+                var tongTien = soLuong * price;
+
+                // Gửi Ajax request để lưu đơn hàng với phương thức COD
+                $.ajax({
+                    url: '/Order/PlaceOrder',
+                    type: 'POST',
+                    data: {
+                        maTranh: maTranh,
+                        soLuong: soLuong,
+                        tongTien: tongTien,
+                        trangThai: "Đã đặt hàng",
+                        phuongThucThanhToan: "thanh toán bằng VNPAY",
+                        orderId: isInCart ? orderId : null
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            // Thông báo thành công rồi chuyển hướng
+                            Swal.fire({
+                                title: 'Đặt hàng thành công!',
+                                text: 'Đơn hàng của bạn đã được xác nhận.',
+                                icon: 'success',
+                                confirmButtonText: 'Xem chi tiết'
+                            }).then(() => {
+                                window.location.href = '/Order/History';
+                            });
+                        } else {
+                            Swal.fire({
+                                title: 'Lỗi!',
+                                text: response.message || 'Có lỗi xảy ra khi đặt hàng.',
+                                icon: 'error'
+                            });
+                        }
+                    },
+                    error: function() {
+                        Swal.fire({
+                            title: 'Lỗi!',
+                            text: 'Có lỗi xảy ra, vui lòng thử lại sau.',
+                            icon: 'error'
+                        });
+                    }
+                });
+            });
             // Xử lý thanh toán COD
             $("#btnConfirmCOD").click(function() {
                 var maTranh = @Model.MaTranh;
