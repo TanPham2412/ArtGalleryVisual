@@ -610,5 +610,37 @@ namespace ArtGallery.Controllers
                 return Json(new { success = false, message = "Lỗi: " + ex.Message });
             }
         }
+        [HttpPost]
+        public IActionResult OrderCOD(string DiaChi, string PhoneNumber, string UserId)
+        {
+            var user = _context.NguoiDungs.FirstOrDefault(u => u.Id == UserId);
+            if (user != null)
+            {
+                user.DiaChi = DiaChi;
+                user.PhoneNumber = PhoneNumber;
+                _context.SaveChanges();
+            }
+
+            // Truyền thông tin qua TempData để dùng sau khi redirect
+            TempData["DiaChi"] = DiaChi;
+            TempData["PhoneNumber"] = PhoneNumber;
+            TempData["SuccessMessage"] = "Đơn hàng của bạn đã được xác nhận!";
+
+            return RedirectToAction("OrderCOD"); // Gọi GET /Order/OrderCOD
+        }
+        [HttpGet]
+        public IActionResult OrderCOD()
+        {
+            var diaChi = TempData["DiaChi"]?.ToString();
+            var phone = TempData["PhoneNumber"]?.ToString();
+            var message = TempData["SuccessMessage"]?.ToString();
+
+            ViewBag.DiaChi = diaChi;
+            ViewBag.PhoneNumber = phone;
+            ViewBag.Message = message;
+
+            return View(); // sẽ render ra Views/Order/OrderCOD.cshtml
+        }
+
     }
 }

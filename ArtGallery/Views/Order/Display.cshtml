@@ -143,6 +143,20 @@
                                 <input type="hidden" name="OrderType" value="Tranh">
                                 <input type="hidden" name="amount" id="vnpayAmount" value="@artwork.Gia" />
                                 <input type="hidden" name="OrderDescription" value="VNPAY">
+
+                                <!-- Thêm input cho địa chỉ và số điện thoại -->
+                                <div class="mb-3 text-start px-4">
+                                    <label for="vnpayAddress" class="form-label">Địa chỉ nhận hàng</label>
+                                    <input type="text" class="form-control" id="vnpayAddress" name="DiaChi" placeholder="Nhập địa chỉ nhận hàng" required>
+                                </div>
+                                <div class="mb-3 text-start px-4">
+                                    <label for="vnpayPhone" class="form-label">Số điện thoại</label>
+                                    <input type="tel" class="form-control" id="vnpayPhone" name="PhoneNumber" placeholder="Nhập số điện thoại" required>
+                                </div>
+
+                                <!-- Hidden user ID -->
+                                <input type="hidden" name="UserId" value="@User.FindFirst("UserId")?.Value" />
+
                                 <button type="submit" class="btn btn-primary mt-3">
                                     <i class="fas fa-credit-card me-2"></i>Thanh toán qua VNPay
                                 </button>
@@ -152,19 +166,43 @@
                         </div>
                     </div>
 
+
                     <!-- Tab thanh toán khi nhận hàng -->
                     <div class="tab-pane fade" id="cod-content" role="tabpanel">
-                        <div class="text-center">
-                            <div class="py-3">
-                                <i class="fas fa-truck fa-4x text-primary mb-3"></i>
-                                <h5>Thanh toán khi nhận hàng</h5>
-                                <p>Bạn sẽ thanh toán số tiền <strong class="text-danger" id="codAmountText">@artwork.Gia.ToString("N0") VND</strong> khi nhận được hàng</p>
+                        <form method="post" action="@Url.Action("OrderCOD", "Order")">
+                            <div class="text-center">
+                                <div class="py-3">
+                                    <i class="fas fa-truck fa-4x text-primary mb-3"></i>
+                                    <h5>Thanh toán khi nhận hàng</h5>
+                                    <p>
+                                        Bạn sẽ thanh toán số tiền
+                                        <strong class="text-danger" id="codAmountText">@artwork.Gia.ToString("N0") VND</strong>
+                                        khi nhận được hàng
+                                    </p>
+                                </div>
+
+                                <!-- Input cho địa chỉ và số điện thoại -->
+                                <div class="mb-3 text-start px-4">
+                                    <label for="shippingAddress" class="form-label">Địa chỉ nhận hàng</label>
+                                    <input type="text" class="form-control" id="shippingAddress" name="DiaChi" placeholder="Nhập địa chỉ nhận hàng" required>
+                                </div>
+                                <div class="mb-3 text-start px-4">
+                                    <label for="phoneNumber" class="form-label">Số điện thoại</label>
+                                    <input type="tel" class="form-control" id="phoneNumber" name="PhoneNumber" placeholder="Nhập số điện thoại" required>
+                                </div>
+
+                                <!-- Hidden user ID -->
+                                <input type="hidden" name="UserId" value="@User.FindFirst("UserId")?.Value" />
+
+                                <!-- Submit button -->
+                                <button type="submit" class="btn btn-primary btn-lg mt-3">
+                                    <i class="fas fa-check me-2"></i>Xác nhận đặt hàng
+                                </button>
                             </div>
-                            <button id="btnConfirmCOD" class="btn btn-primary btn-lg mt-3">
-                                <i class="fas fa-check me-2"></i>Xác nhận đặt hàng
-                            </button>
-                        </div>
+                        </form>
                     </div>
+
+
                 </div>
             </div>
         </div>

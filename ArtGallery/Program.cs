@@ -101,6 +101,10 @@ builder.Services.ConfigureApplicationCookie(options =>
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 //VNPAY
 builder.Services.AddScoped<IVnPayService, VnPayService>();
+// Register the email sender service
+builder.Services.AddTransient<IEmailSender, EmailSender>();
+builder.Services.AddTransient<EmailService>(); // Đăng ký EmailService
+
 var app = builder.Build();
 
 // Seed Roles và Admin user
