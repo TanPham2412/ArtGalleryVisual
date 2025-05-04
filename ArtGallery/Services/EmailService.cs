@@ -1,47 +1,38 @@
 ﻿using MailKit.Net.Smtp;
 using MimeKit;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 
 public class EmailService
 {
-    private readonly string senderEmail;
-    private readonly string senderName;
-    private readonly string appPassword;
+    private readonly EmailSettings _emailSettings;
 
-    // Tiêm các giá trị cấu hình qua constructor
-    public EmailService(IOptions<EmailSettings> emailSettings)
+    public EmailService(IOptions<EmailSettings> options)
     {
-        senderEmail = emailSettings.Value.SenderEmail;
-        senderName = emailSettings.Value.SenderName;
-        appPassword = emailSettings.Value.AppPassword;
+        _emailSettings = options.Value;
     }
 
-    public async Task SendOrderConfirmationEmail(string toEmail, string toName, string subject, string body)
+    public async Task SendOrderConfirmationEmail(string toEmail, string userName, string orderInfo)
     {
-        try
-        {
-            var email = new MimeMessage();
-            email.From.Add(new MailboxAddress(senderName, senderEmail));
-            email.To.Add(new MailboxAddress(toName, toEmail));
-            email.Subject = subject;
+        var email = new MimeMessage();
+        email.From.Add(new MailboxAddress(_emailSettings.DisplayName, _emailSettings.FromEmail));
+        email.To.Add(MailboxAddress.Parse(toEmail));
+        email.Subject = "Xác nhận đơn hàng - ArtGallery";
 
-            email.Body = new TextPart("html")
-            {
-                Text = body
-            };
-
-            // Kết nối tới máy chủ SMTP của Gmail
-            using var smtp = new SmtpClient();
-            await smtp.ConnectAsync("smtp.gmail.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
-            await smtp.AuthenticateAsync(senderEmail, appPassword);
-            await smtp.SendAsync(email);
-            await smtp.DisconnectAsync(true);
-        }
-        catch (Exception ex)
+        email.Body = new TextPart(MimeKit.Text.TextFormat.Html)
         {
-            // Xử lý ngoại lệ, có thể log hoặc báo lỗi
-            throw new Exception("Có lỗi khi gửi email: " + ex.Message);
-        }
+            Text = $@"
+                <h3>Chào {userName},</h3>
+                <p>Bạn đã đặt hàng thành công tại <strong>ArtGallery</strong>.</p>
+                <p>Thông tin đơn hàng:</p>
+                {orderInfo}
+                <p>Cảm ơn bạn đã mua sắm!</p>"
+        };
+
+        using var smtp = new SmtpClient();
+        await smtp.ConnectAsync(_emailSettings.Host, _emailSettings.Port, MailKit.Security.SecureSocketOptions.StartTls);
+        await smtp.AuthenticateAsync(_emailSettings.FromEmail, _emailSettings.AppPassword);
+        await smtp.SendAsync(email);
+        await smtp.DisconnectAsync(true);
     }
+
 }

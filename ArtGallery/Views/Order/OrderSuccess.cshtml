@@ -1,71 +1,13 @@
 @model ArtGallery.Models.VNPAY.PaymentResponseModel
 
-@{
-    var isSuccess = Model?.VnPayResponseCode == "00";
-    var statusText = isSuccess ? "Thanh toán thành công!" : "Thanh toán thất bại!";
-    var statusClass = isSuccess ? "text-success" : "text-danger";
-    var iconUrl = isSuccess
-        ? "https://cdn-icons-png.flaticon.com/512/845/845646.png"
-        : "https://cdn-icons-png.flaticon.com/512/463/463612.png";
-}
+<div class="container py-5 text-center">
+    <i class="fas fa-check-circle fa-4x text-success mb-4"></i>
+    <h2>Đơn hàng của bạn đã được xác nhận!</h2>
+    <p><strong>Mã đơn hàng:</strong> @Model.OrderId</p>
+    <p><strong>Phương thức thanh toán:</strong> @Model.PaymentMethod</p>
+    <p><strong>Mô tả:</strong> @Model.OrderDescription</p>
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-
-<style>
-    .payment-card {
-        max-width: 600px;
-        margin: 40px auto;
-        border-radius: 20px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        background: #fff;
-        padding: 30px;
-    }
-
-        .payment-card h2 {
-            font-weight: bold;
-        }
-
-    .payment-icon {
-        width: 80px;
-        height: 80px;
-    }
-
-    .back-btn {
-        border-radius: 50px;
-        padding: 10px 30px;
-    }
-</style>
-
-<div class="container">
-    @if (Model == null)
-    {
-        <div class="payment-card text-center">
-            <img src="https://cdn-icons-png.flaticon.com/512/463/463612.png" alt="Error" class="payment-icon mb-3" />
-            <h2 class="text-danger">Không tìm thấy thông tin thanh toán</h2>
-            <a href="/" class="btn btn-outline-secondary mt-4 back-btn">🔙 Quay lại trang chủ</a>
-        </div>
-    }
-    else
-    {
-        <div class="payment-card text-center">
-            <img src="@iconUrl" alt="Status Icon" class="payment-icon mb-3" />
-            <h2 class="@statusClass">@statusText</h2>
-            <p class="text-muted">@DateTime.Now.ToString("dd/MM/yyyy HH:mm")</p>
-
-            <hr />
-
-            <div class="text-start mt-4">
-                <p><strong>Mã đơn hàng:</strong> @Model.OrderId</p>
-                <p><strong>Mã giao dịch VNPAY:</strong> @Model.TransactionId</p>
-                <p><strong>Phương thức thanh toán:</strong> @Model.PaymentMethod</p>
-                <p><strong>Mô tả đơn hàng:</strong> @Model.OrderDescription</p>
-                <p>
-                    <strong>Trạng thái giao dịch:</strong>
-                    <span class="@statusClass fw-bold">@statusText</span>
-                </p>
-            </div>
-
-            <a href="/" class="btn btn-primary mt-4 back-btn">🏠 Quay lại trang chủ</a>
-        </div>
-    }
+    <a href="/" class="btn btn-primary mt-4">
+        <i class="fas fa-home me-2"></i>Về trang chủ
+    </a>
 </div>

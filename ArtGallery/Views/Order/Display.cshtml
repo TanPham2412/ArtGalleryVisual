@@ -136,25 +136,34 @@
                 <!-- Nội dung tab -->
                 <div class="tab-content pt-3" id="paymentTabContent">
                     <!-- Tab VNPay -->
+                    @{
+                        var userEmail = User.Identity?.Name; // hoặc lấy từ claim nếu cần
+                    }
                     <div class="tab-pane fade show active" id="transfer-content" role="tabpanel">
                         <div class="text-center">
-                            <p>Thanh toán số tiền: <strong class="text-danger" id="qrAmountText">@artwork.Gia.ToString("N0") VND</strong></p>
+                            <p>
+                                Thanh toán số tiền:
+                                <strong class="text-danger" id="qrAmountText">@artwork.Gia.ToString("N0") VND</strong>
+                            </p>
                             <form method="post" action="@Url.Action("CreatePaymentUrlVnpay", "Payment")" id="vnpayForm">
-                                <input type="hidden" name="OrderType" value="Tranh">
+                                <input type="hidden" name="OrderType" value="Tranh" />
                                 <input type="hidden" name="amount" id="vnpayAmount" value="@artwork.Gia" />
-                                <input type="hidden" name="OrderDescription" value="VNPAY">
 
-                                <!-- Thêm input cho địa chỉ và số điện thoại -->
+                                <!-- Gửi email kèm trong OrderDescription -->
+                                <input type="hidden" name="OrderDescription" value="@User.FindFirst("Email")?.Value | Thanh toán VNPAY">
+
+
+                                <!-- Nhập địa chỉ và số điện thoại -->
                                 <div class="mb-3 text-start px-4">
                                     <label for="vnpayAddress" class="form-label">Địa chỉ nhận hàng</label>
-                                    <input type="text" class="form-control" id="vnpayAddress" name="DiaChi" placeholder="Nhập địa chỉ nhận hàng" required>
+                                    <input type="text" class="form-control" id="vnpayAddress" name="DiaChi" placeholder="Nhập địa chỉ nhận hàng" required />
                                 </div>
                                 <div class="mb-3 text-start px-4">
                                     <label for="vnpayPhone" class="form-label">Số điện thoại</label>
-                                    <input type="tel" class="form-control" id="vnpayPhone" name="PhoneNumber" placeholder="Nhập số điện thoại" required>
+                                    <input type="tel" class="form-control" id="vnpayPhone" name="PhoneNumber" placeholder="Nhập số điện thoại" required />
                                 </div>
 
-                                <!-- Hidden user ID -->
+                                <!-- Hidden user ID (tùy bạn có cần dùng lại hay không) -->
                                 <input type="hidden" name="UserId" value="@User.FindFirst("UserId")?.Value" />
 
                                 <button id="btnConfirmVNPAY" class="btn btn-primary btn-lg mt-3">
@@ -167,9 +176,11 @@
                     </div>
 
 
+
                     <!-- Tab thanh toán khi nhận hàng -->
                     <div class="tab-pane fade" id="cod-content" role="tabpanel">
                         <form method="post" action="@Url.Action("OrderCOD", "Order")">
+                            @Html.AntiForgeryToken() <!-- Thêm token chống CSRF -->
                             <div class="text-center">
                                 <div class="py-3">
                                     <i class="fas fa-truck fa-4x text-primary mb-3"></i>
@@ -201,6 +212,8 @@
                             </div>
                         </form>
                     </div>
+
+
 
 
                 </div>

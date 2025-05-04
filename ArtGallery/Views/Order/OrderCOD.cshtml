@@ -1,13 +1,22 @@
 ﻿@{
     ViewBag.Title = "Xác nhận đơn hàng";
-    Layout = "~/Views/Shared/_Layout.cshtml"; // thay đổi nếu bạn dùng layout khác
 }
 
 <div class="container py-5 text-center">
-    <i class="fas fa-check-circle fa-4x text-success mb-4"></i>
-    <h2>@ViewBag.Message</h2>
-    <p><strong>Địa chỉ giao hàng:</strong> @ViewBag.DiaChi</p>
-    <p><strong>Số điện thoại:</strong> @ViewBag.PhoneNumber</p>
+    @if (!string.IsNullOrEmpty(ViewBag.Message))
+    {
+        <div class="alert alert-success">@ViewBag.Message</div>
+    }
+    else if (!string.IsNullOrEmpty(ViewBag.ErrorMessage))
+    {
+        <div class="alert alert-danger">@ViewBag.ErrorMessage</div>
+    }
+
+    @if (ViewBag.DiaChi != null)
+    {
+        <p><strong>Địa chỉ giao hàng:</strong> @ViewBag.DiaChi</p>
+        <p><strong>Số điện thoại:</strong> @ViewBag.PhoneNumber</p>
+    }
 
     <a href="/" class="btn btn-primary mt-4">
         <i class="fas fa-home me-2"></i>Về trang chủ

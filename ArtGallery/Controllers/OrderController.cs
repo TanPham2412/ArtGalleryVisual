@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using ArtGallery.Models.VNPAY;
+using System.Text.RegularExpressions;
 
 namespace ArtGallery.Controllers
 {
@@ -17,19 +18,27 @@ namespace ArtGallery.Controllers
         private readonly UserManager<NguoiDung> _userManager;
         private readonly ArtGalleryContext _context;
         private readonly INotificationRepository _notificationRepository;
+        private readonly EmailService _emailService;
+        private string ExtractEmailFromOrderInfo(string orderInfo)
+        {
+            var match = Regex.Match(orderInfo, @"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}");
+            return match.Success ? match.Value : string.Empty;
+        }
 
         public OrderController(
             IOrderRepository orderRepository, 
             ILogger<OrderController> logger, 
             UserManager<NguoiDung> userManager, 
             ArtGalleryContext context,
-            INotificationRepository notificationRepository)
+            INotificationRepository notificationRepository,
+            EmailService emailService)
         {
             _orderRepository = orderRepository;
             _logger = logger;
             _userManager = userManager;
             _context = context;
             _notificationRepository = notificationRepository;
+            _emailService = emailService;
         }
 
         public async Task<IActionResult> Display(int id, int? orderId = null)
@@ -215,35 +224,63 @@ namespace ArtGallery.Controllers
 
         // Action hiển thị trang đặt hàng thành công
         [HttpGet]
-        public IActionResult OrderSuccess()
+        public async Task<IActionResult> OrderSuccess()
         {
-            // Kiểm tra các tham số từ VNPay
             var vnp_TxnRef = Request.Query["vnp_TxnRef"];
             var vnp_TransactionNo = Request.Query["vnp_TransactionNo"];
             var vnp_OrderInfo = Request.Query["vnp_OrderInfo"];
             var vnp_ResponseCode = Request.Query["vnp_ResponseCode"];
 
-            // Nếu không có tham số VNPay, có thể là thanh toán COD
-            if (string.IsNullOrEmpty(vnp_TxnRef) ||
-                string.IsNullOrEmpty(vnp_TransactionNo) ||
-                string.IsNullOrEmpty(vnp_OrderInfo) ||
-                string.IsNullOrEmpty(vnp_ResponseCode))
+            // Nếu là thanh toán qua VNPay
+            if (!string.IsNullOrEmpty(vnp_TxnRef) &&
+                !string.IsNullOrEmpty(vnp_TransactionNo) &&
+                !string.IsNullOrEmpty(vnp_OrderInfo) &&
+                !string.IsNullOrEmpty(vnp_ResponseCode))
             {
-                // Hiển thị view OrderSuccess mà không có model
-                return View();
+                var paymentResponse = new PaymentResponseModel
+                {
+                    OrderId = vnp_TxnRef,
+                    TransactionId = vnp_TransactionNo,
+                    OrderDescription = vnp_OrderInfo,
+                    VnPayResponseCode = vnp_ResponseCode,
+                    PaymentMethod = "VNPAY"
+                };
+
+                // Lấy email từ nội dung đơn hàng
+                string email = ExtractEmailFromOrderInfo(vnp_OrderInfo);
+
+                if (!string.IsNullOrEmpty(email))
+                {
+                    var user = await _context.NguoiDungs.FirstOrDefaultAsync(u => u.Email == email);
+                    if (user != null)
+                    {
+                        string info = $@"
+                        <p>Đơn hàng đã được thanh toán qua <strong>VNPAY</strong>.</p>
+                        <p><strong>Mã giao dịch:</strong> {vnp_TxnRef}</p>
+                        <p><strong>Nội dung đơn hàng:</strong> {vnp_OrderInfo}</p>";
+
+                        try
+                        {
+                            await _emailService.SendOrderConfirmationEmail(user.Email, user.TenNguoiDung, info);
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine("Lỗi gửi email: " + ex.Message);
+                        }
+                    }
+                }
+
+                return View(paymentResponse);
             }
 
-            var paymentResponse = new PaymentResponseModel
-            {
-                OrderId = vnp_TxnRef,
-                TransactionId = vnp_TransactionNo,
-                OrderDescription = vnp_OrderInfo,
-                VnPayResponseCode = vnp_ResponseCode,
-                PaymentMethod = "VNPAY"
-            };
+            // Trường hợp COD (TempData)
+            ViewBag.DiaChi = TempData["DiaChi"];
+            ViewBag.PhoneNumber = TempData["PhoneNumber"];
+            ViewBag.Message = TempData["SuccessMessage"];
 
-            return View(paymentResponse);
+            return View(); // View không có model
         }
+
 
         // Thêm action PaymentError nếu cần
         [HttpGet]
@@ -610,36 +647,63 @@ namespace ArtGallery.Controllers
                 return Json(new { success = false, message = "Lỗi: " + ex.Message });
             }
         }
+
         [HttpPost]
-        public IActionResult OrderCOD(string DiaChi, string PhoneNumber, string UserId)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> OrderCOD(string DiaChi, string PhoneNumber)
         {
-            var user = _context.NguoiDungs.FirstOrDefault(u => u.Id == UserId);
+            var email = User.FindFirstValue(ClaimTypes.Email);
+            if (string.IsNullOrEmpty(email))
+            {
+                TempData["ErrorMessage"] = "Không xác định được người dùng.";
+                return RedirectToAction("OrderCOD");
+            }
+
+            var user = _context.NguoiDungs.FirstOrDefault(u => u.Email == email);
             if (user != null)
             {
                 user.DiaChi = DiaChi;
                 user.PhoneNumber = PhoneNumber;
                 _context.SaveChanges();
+
+                string orderInfo = $@"
+            <p>Đơn hàng thanh toán khi nhận (COD):</p>
+            <p><strong>Họ tên:</strong> {user.TenNguoiDung}</p>
+            <p><strong>Email:</strong> {user.Email}</p>
+            <p><strong>Địa chỉ:</strong> {DiaChi}</p>
+            <p><strong>Số điện thoại:</strong> {PhoneNumber}</p>
+        ";
+
+                try
+                {
+                    await _emailService.SendOrderConfirmationEmail(user.Email, user.TenNguoiDung, orderInfo);
+                    TempData["SuccessMessage"] = "Đơn hàng của bạn đã được xác nhận! Email đã được gửi.";
+                }
+                catch (Exception ex)
+                {
+                    TempData["SuccessMessage"] = "Đơn hàng xác nhận thành công nhưng gửi email thất bại.";
+                    Console.WriteLine("Email error: " + ex.Message);
+                }
+
+                TempData["DiaChi"] = DiaChi;
+                TempData["PhoneNumber"] = PhoneNumber;
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Không tìm thấy người dùng.";
             }
 
-            // Truyền thông tin qua TempData để dùng sau khi redirect
-            TempData["DiaChi"] = DiaChi;
-            TempData["PhoneNumber"] = PhoneNumber;
-            TempData["SuccessMessage"] = "Đơn hàng của bạn đã được xác nhận!";
-
-            return RedirectToAction("OrderCOD"); // Gọi GET /Order/OrderCOD
+            return RedirectToAction("OrderCOD");
         }
+
         [HttpGet]
         public IActionResult OrderCOD()
         {
-            var diaChi = TempData["DiaChi"]?.ToString();
-            var phone = TempData["PhoneNumber"]?.ToString();
-            var message = TempData["SuccessMessage"]?.ToString();
-
-            ViewBag.DiaChi = diaChi;
-            ViewBag.PhoneNumber = phone;
-            ViewBag.Message = message;
-
-            return View(); // sẽ render ra Views/Order/OrderCOD.cshtml
+            ViewBag.DiaChi = TempData["DiaChi"];
+            ViewBag.PhoneNumber = TempData["PhoneNumber"];
+            ViewBag.Message = TempData["SuccessMessage"];
+            ViewBag.ErrorMessage = TempData["ErrorMessage"];
+            return View(); // OrderCOD.cshtml
         }
 
     }
