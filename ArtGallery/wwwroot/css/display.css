@@ -1346,3 +1346,18 @@ label.btn-attachment:hover,
 .attachment-buttons label.btn-attachment:hover {
     background-color: #007bff !important;
 }
+
+/* Style cho nút hết hàng */
+.btn-outline-danger {
+    border-color: #dc3545;
+    color: #dc3545;
+    background-color: transparent;
+    transition: all 0.3s;
+}
+
+.btn-outline-danger:hover, .btn-outline-danger:disabled {
+    background-color: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+    border-color: #dc3545;
+    cursor: not-allowed;
+}
