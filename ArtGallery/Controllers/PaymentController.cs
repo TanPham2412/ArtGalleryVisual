@@ -33,7 +33,7 @@ namespace ArtGallery.Controllers
             };
             
             if (OrderId.HasValue)
-            {
+        {
                 formData.Add("OrderId", OrderId.Value.ToString());
             }
             
@@ -55,7 +55,7 @@ namespace ArtGallery.Controllers
             // Tạo model thay vì truyền nhiều tham số
             var paymentModel = new PaymentInformationModel
             {
-                Amount = (int)(amount * 100), // Chuyển đổi sang số nguyên, nhân 100 để giữ chính xác
+                Amount = (int)(amount), // Chuyển đổi sang số nguyên, nhân 100 để giữ chính xác
                 OrderDescription = orderInfo,
                 OrderType = OrderType
             };
