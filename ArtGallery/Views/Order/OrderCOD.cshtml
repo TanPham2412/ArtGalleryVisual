@@ -1,24 +1,49 @@
-﻿@{
-    ViewBag.Title = "Xác nhận đơn hàng";
+﻿    ViewBag.Title = "Xác nhận đơn hàng";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="container py-5 text-center">
-    @if (!string.IsNullOrEmpty(ViewBag.Message))
-    {
-        <div class="alert alert-success">@ViewBag.Message</div>
-    }
-    else if (!string.IsNullOrEmpty(ViewBag.ErrorMessage))
-    {
-        <div class="alert alert-danger">@ViewBag.ErrorMessage</div>
-    }
+<link rel="stylesheet" href="~/css/vnpay.css" />
 
-    @if (ViewBag.DiaChi != null)
-    {
-        <p><strong>Địa chỉ giao hàng:</strong> @ViewBag.DiaChi</p>
-        <p><strong>Số điện thoại:</strong> @ViewBag.PhoneNumber</p>
-    }
+<div class="container mt-5 pt-5">
+    <div class="payment-error-container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="payment-error-card text-center">
+                    <div class="error-icon mb-4">
+                        <i class="fas fa-check-circle fa-5x text-success"></i>
+                    </div>
+                    <h2 class="mb-4">@ViewBag.Message</h2>
+                    <p class="lead mb-4">Cảm ơn bạn đã đặt hàng tại PiaoYue Art Gallery</p>
 
-    <a href="/" class="btn btn-primary mt-4">
-        <i class="fas fa-home me-2"></i>Về trang chủ
-    </a>
+                    <div class="error-details text-start">
+                        <div class="row mb-2">
+                            <div class="col-md-4"><strong>Địa chỉ giao hàng:</strong></div>
+                            <div class="col-md-8">@ViewBag.DiaChi</div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-md-4"><strong>Số điện thoại:</strong></div>
+                            <div class="col-md-8">@ViewBag.PhoneNumber</div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-md-4"><strong>Phương thức thanh toán:</strong></div>
+                            <div class="col-md-8">Thanh toán khi nhận hàng (COD)</div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-md-4"><strong>Thời gian đặt:</strong></div>
+                            <div class="col-md-8">@DateTime.Now.ToString("dd/MM/yyyy HH:mm")</div>
+                        </div>
+                    </div>
+
+                    <div class="action-buttons">
+                        <a href="/Order/History" class="btn btn-outline-secondary me-3">
+                            <i class="fas fa-history me-2"></i>Xem lịch sử đơn hàng
+                        </a>
+                        <a href="/" class="btn btn-primary">
+                            <i class="fas fa-home me-2"></i>Về trang chủ
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

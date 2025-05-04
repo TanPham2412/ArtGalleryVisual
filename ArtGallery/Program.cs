@@ -106,6 +106,14 @@ builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("Emai
 builder.Services.AddTransient<EmailService>();
 
 
+// Thêm vào phần cấu hình dịch vụ
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
+
 var app = builder.Build();
 
 // Seed Roles và Admin user
@@ -158,5 +166,8 @@ using (var scope = app.Services.CreateScope())
         logger.LogError(ex, "Lỗi khi khởi tạo dữ liệu.");
     }
 }
+
+// Đảm bảo thêm dòng này vào phần cấu hình middleware
+app.UseSession();
 
 app.Run();

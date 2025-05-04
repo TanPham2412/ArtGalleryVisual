@@ -231,9 +231,12 @@
                                                         <button type="button" class="btn btn-success btn-sm btn-xacnhan" data-id="@item.MaGiaoDich">
                                                             <i class="fas fa-check me-1"></i>Xác nhận
                                                         </button>
-                                                        <button type="button" class="btn btn-danger btn-sm btn-huy" data-id="@item.MaGiaoDich">
-                                                            <i class="fas fa-times me-1"></i>Hủy
-                                                        </button>
+                                                        @if (item.PhuongThucThanhToan != "VNPAY") 
+                                                        {
+                                                            <button type="button" class="btn btn-danger btn-sm btn-huy" data-id="@item.MaGiaoDich">
+                                                                <i class="fas fa-times me-1"></i>Hủy
+                                                            </button>
+                                                        }
                                                     </div>
                                                 }
                                                 else
@@ -566,6 +569,22 @@
         
         // Xử lý khi chọn hủy đơn hàng
         $("#cancelOrder").on("click", function() {
+            // Lấy phương thức thanh toán từ hàng đang được chọn
+            var paymentMethod = $(".table tr.selected").find("td:eq(6) .badge").text().trim();
+            var isVnpay = paymentMethod.includes("Chuyển khoản");
+            
+            if (isVnpay) {
+                // Nếu là đơn thanh toán bằng chuyển khoản, hiển thị thông báo không thể hủy
+                Swal.fire({
+                    title: 'Không thể hủy!',
+                    text: 'Đơn hàng đã được thanh toán bằng chuyển khoản, không thể hủy. Vui lòng liên hệ với người bán để được hỗ trợ.',
+                    icon: 'warning',
+                    confirmButtonColor: '#3085d6',
+                    confirmButtonText: 'Đã hiểu'
+                });
+                return;
+            }
+            
             if (selectedOrderStatus === "Đã đặt hàng") {
                 // Nếu đơn hàng ở trạng thái "Đã đặt hàng" thì có thể hủy
                 Swal.fire({

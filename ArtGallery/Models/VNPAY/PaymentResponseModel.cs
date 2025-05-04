@@ -10,6 +10,7 @@
         public bool Success { get; set; }
         public string Token { get; set; }
         public string VnPayResponseCode { get; set; }
-
+        public string BankCode { get; set; }
+        public string CardType { get; set; }
     }
 }
