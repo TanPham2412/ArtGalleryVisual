@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using ArtGallery.Models.VNPAY;
+using System.Text.RegularExpressions;
 
 namespace ArtGallery.Controllers
 {
@@ -17,19 +18,27 @@ namespace ArtGallery.Controllers
         private readonly UserManager<NguoiDung> _userManager;
         private readonly ArtGalleryContext _context;
         private readonly INotificationRepository _notificationRepository;
+        private readonly EmailService _emailService;
+        private string ExtractEmailFromOrderInfo(string orderInfo)
+        {
+            var match = Regex.Match(orderInfo, @"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}");
+            return match.Success ? match.Value : string.Empty;
+        }
 
         public OrderController(
             IOrderRepository orderRepository, 
             ILogger<OrderController> logger, 
             UserManager<NguoiDung> userManager, 
             ArtGalleryContext context,
-            INotificationRepository notificationRepository)
+            INotificationRepository notificationRepository,
+            EmailService emailService)
         {
             _orderRepository = orderRepository;
             _logger = logger;
             _userManager = userManager;
             _context = context;
             _notificationRepository = notificationRepository;
+            _emailService = emailService;
         }
 
         public async Task<IActionResult> Display(int id, int? orderId = null)
@@ -227,7 +236,7 @@ namespace ArtGallery.Controllers
                 var vnp_TransactionNo = Request.Query["vnp_TransactionNo"].ToString();
                 var vnp_BankCode = Request.Query["vnp_BankCode"].ToString();
                 var vnp_CardType = Request.Query["vnp_CardType"].ToString();
-                
+
                 // Kiểm tra mã phản hồi từ VNPay (00 là thành công)
                 if (vnp_ResponseCode == "00")
                 {
@@ -235,17 +244,17 @@ namespace ArtGallery.Controllers
                     var artworkId = 0;
                     var quantity = 0;
                     var orderId = 0;
-                    
+
                     // Xử lý chuỗi vnp_OrderInfo (VNPAY+orderId+artworkId+quantity)
                     var parts = vnp_OrderInfo.Split('+');
-                    
+
                     if (parts.Length >= 4)
                     {
                         int.TryParse(parts[1], out orderId);
                         int.TryParse(parts[2], out artworkId);
                         int.TryParse(parts[3], out quantity);
                     }
-                    
+
                     // Nếu không trích xuất được từ chuỗi, thử lấy từ session
                     if (artworkId <= 0 || quantity <= 0)
                     {
@@ -258,22 +267,22 @@ namespace ArtGallery.Controllers
                             int.TryParse(formData.GetValueOrDefault("OrderId"), out orderId);
                         }
                     }
-                    
+
                     // Lấy giá trị userID và artwork
                     if (artworkId > 0 && quantity > 0)
                     {
                         var userId = _userManager.GetUserId(User);
-                        
+
                         var artwork = _context.Tranhs
                             .Include(t => t.MaNguoiDungNavigation)
                             .FirstOrDefault(t => t.MaTranh == artworkId);
-                        
+
                         if (artwork != null)
                         {
                             decimal amount = decimal.Parse(vnp_Amount) / 100; // VNPay trả về số tiền * 100
-                            
+
                             GiaoDich giaoDich;
-                            
+
                             if (orderId > 0)
                             {
                                 // Cập nhật đơn hàng đã tồn tại
@@ -285,7 +294,7 @@ namespace ArtGallery.Controllers
                                     giaoDich.SoLuong = quantity;
                                     giaoDich.SoTien = amount;
                                     giaoDich.NgayMua = DateTime.Now;
-                                    
+
                                     _context.GiaoDiches.Update(giaoDich);
                                 }
                                 else
@@ -301,7 +310,7 @@ namespace ArtGallery.Controllers
                                         TrangThai = "Đã đặt hàng",
                                         PhuongThucThanhToan = "VNPAY"
                                     };
-                                    
+
                                     _context.GiaoDiches.Add(giaoDich);
                                 }
                             }
@@ -318,19 +327,19 @@ namespace ArtGallery.Controllers
                                     TrangThai = "Đã đặt hàng",
                                     PhuongThucThanhToan = "VNPAY"
                                 };
-                                
+
                                 _context.GiaoDiches.Add(giaoDich);
                             }
-                            
+
                             // Cập nhật số lượng tranh còn lại
                             artwork.SoLuongTon -= quantity;
                             _context.Tranhs.Update(artwork);
-                            
+
                             // Lưu thay đổi vào database
                             _context.SaveChanges();
                         }
                     }
-                    
+
                     // Tạo model cho view
                     var paymentResponse = new PaymentResponseModel
                     {
@@ -355,13 +364,14 @@ namespace ArtGallery.Controllers
             {
                 _logger.LogError($"Error in OrderSuccess: {ex.Message}");
                 // Tạo PaymentResponseModel để hiển thị thông tin lỗi
-                return View(new PaymentResponseModel 
-                { 
+                return View(new PaymentResponseModel
+                {
                     VnPayResponseCode = "99",
                     OrderDescription = "Lỗi xử lý giao dịch"
                 });
             }
         }
+
 
         // Thêm action PaymentError nếu cần
         [HttpGet]
@@ -728,36 +738,63 @@ namespace ArtGallery.Controllers
                 return Json(new { success = false, message = "Lỗi: " + ex.Message });
             }
         }
+
         [HttpPost]
-        public IActionResult OrderCOD(string DiaChi, string PhoneNumber, string UserId)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> OrderCOD(string DiaChi, string PhoneNumber)
         {
-            var user = _context.NguoiDungs.FirstOrDefault(u => u.Id == UserId);
+            var email = User.FindFirstValue(ClaimTypes.Email);
+            if (string.IsNullOrEmpty(email))
+            {
+                TempData["ErrorMessage"] = "Không xác định được người dùng.";
+                return RedirectToAction("OrderCOD");
+            }
+
+            var user = _context.NguoiDungs.FirstOrDefault(u => u.Email == email);
             if (user != null)
             {
                 user.DiaChi = DiaChi;
                 user.PhoneNumber = PhoneNumber;
                 _context.SaveChanges();
+
+                string orderInfo = $@"
+            <p>Đơn hàng thanh toán khi nhận (COD):</p>
+            <p><strong>Họ tên:</strong> {user.TenNguoiDung}</p>
+            <p><strong>Email:</strong> {user.Email}</p>
+            <p><strong>Địa chỉ:</strong> {DiaChi}</p>
+            <p><strong>Số điện thoại:</strong> {PhoneNumber}</p>
+        ";
+
+                try
+                {
+                    await _emailService.SendOrderConfirmationEmail(user.Email, user.TenNguoiDung, orderInfo);
+                    TempData["SuccessMessage"] = "Đơn hàng của bạn đã được xác nhận! Email đã được gửi.";
+                }
+                catch (Exception ex)
+                {
+                    TempData["SuccessMessage"] = "Đơn hàng xác nhận thành công nhưng gửi email thất bại.";
+                    Console.WriteLine("Email error: " + ex.Message);
+                }
+
+                TempData["DiaChi"] = DiaChi;
+                TempData["PhoneNumber"] = PhoneNumber;
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Không tìm thấy người dùng.";
             }
 
-            // Truyền thông tin qua TempData để dùng sau khi redirect
-            TempData["DiaChi"] = DiaChi;
-            TempData["PhoneNumber"] = PhoneNumber;
-            TempData["SuccessMessage"] = "Đơn hàng của bạn đã được xác nhận!";
-
-            return RedirectToAction("OrderCOD"); // Gọi GET /Order/OrderCOD
+            return RedirectToAction("OrderCOD");
         }
+
         [HttpGet]
         public IActionResult OrderCOD()
         {
-            var diaChi = TempData["DiaChi"]?.ToString();
-            var phone = TempData["PhoneNumber"]?.ToString();
-            var message = TempData["SuccessMessage"]?.ToString();
-
-            ViewBag.DiaChi = diaChi;
-            ViewBag.PhoneNumber = phone;
-            ViewBag.Message = message;
-
-            return View(); // sẽ render ra Views/Order/OrderCOD.cshtml
+            ViewBag.DiaChi = TempData["DiaChi"];
+            ViewBag.PhoneNumber = TempData["PhoneNumber"];
+            ViewBag.Message = TempData["SuccessMessage"];
+            ViewBag.ErrorMessage = TempData["ErrorMessage"];
+            return View(); // OrderCOD.cshtml
         }
 
     }

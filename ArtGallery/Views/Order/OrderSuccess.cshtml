@@ -1,5 +1,17 @@
 @model ArtGallery.Models.VNPAY.PaymentResponseModel
 
+<<<<<<< HEAD
+<div class="container py-5 text-center">
+    <i class="fas fa-check-circle fa-4x text-success mb-4"></i>
+    <h2>Đơn hàng của bạn đã được xác nhận!</h2>
+    <p><strong>Mã đơn hàng:</strong> @Model.OrderId</p>
+    <p><strong>Phương thức thanh toán:</strong> @Model.PaymentMethod</p>
+    <p><strong>Mô tả:</strong> @Model.OrderDescription</p>
+
+    <a href="/" class="btn btn-primary mt-4">
+        <i class="fas fa-home me-2"></i>Về trang chủ
+    </a>
+=======
 @{
     ViewData["Title"] = "Kết quả thanh toán";
     var isSuccess = Model?.VnPayResponseCode == "00";
@@ -80,4 +92,5 @@
             </div>
         </div>
     </div>
+>>>>>>> 46f65b7af2025fd797269455ba4590e0a660d5c1
 </div>

@@ -102,8 +102,9 @@ builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 //VNPAY
 builder.Services.AddScoped<IVnPayService, VnPayService>();
 // Register the email sender service
-builder.Services.AddTransient<IEmailSender, EmailSender>();
-builder.Services.AddTransient<EmailService>(); // Đăng ký EmailService
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
+builder.Services.AddTransient<EmailService>();
+
 
 // Thêm vào phần cấu hình dịch vụ
 builder.Services.AddSession(options =>
