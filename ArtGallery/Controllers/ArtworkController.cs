@@ -159,16 +159,114 @@ namespace ArtGallery.Controllers
             var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var isAdmin = User.IsInRole("Admin");
             
-            // In thông tin để gỡ lỗi
             _logger.LogInformation($"Delete request: ArtworkID={id}, UserID={currentUserId}, IsAdmin={isAdmin}");
             
-            var result = await _artworkRepository.DeleteArtwork(id, currentUserId);
-
-            return Json(new { 
-                success = result.success, 
-                message = result.message,
-                redirectUrl = result.redirectUrl 
-            });
+            try 
+            {
+                // Kiểm tra quyền sở hữu
+                var artwork = await _context.Tranhs
+                    .Include(t => t.BinhLuans)
+                    .Include(t => t.GiaoDiches)
+                    .Include(t => t.LuotThiches)
+                    .Include(t => t.LuuTranhs)
+                    .Include(t => t.NoiBats)
+                    .Include(t => t.MaTags)
+                    .Include(t => t.MaTheLoais)
+                    .FirstOrDefaultAsync(t => t.MaTranh == id);
+                    
+                if (artwork == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy tác phẩm" });
+                }
+                
+                if (artwork.MaNguoiDung != currentUserId && !isAdmin)
+                {
+                    return Json(new { success = false, message = "Bạn không có quyền xóa tác phẩm này" });
+                }
+                
+                // Lấy tất cả mã bình luận để xóa phản hồi
+                var commentIds = artwork.BinhLuans.Select(b => b.MaBinhLuan).ToList();
+                
+                // 1. Xóa phản hồi bình luận
+                var replies = await _context.PhanHoiBinhLuans
+                    .Where(r => commentIds.Contains(r.MaBinhLuan))
+                    .ToListAsync();
+                _context.PhanHoiBinhLuans.RemoveRange(replies);
+                
+                // 2. Xóa bình luận
+                _context.BinhLuans.RemoveRange(artwork.BinhLuans);
+                
+                // 3. Xóa lượt thích
+                _context.LuotThiches.RemoveRange(artwork.LuotThiches);
+                
+                // 4. Xóa lưu tranh
+                _context.LuuTranhs.RemoveRange(artwork.LuuTranhs);
+                
+                // 5. Xóa nổi bật
+                _context.NoiBats.RemoveRange(artwork.NoiBats);
+                
+                // 6. Xóa liên kết với thẻ tag (không xóa tag)
+                artwork.MaTags.Clear();
+                
+                // 7. Xóa liên kết với thể loại (không xóa thể loại)
+                artwork.MaTheLoais.Clear();
+                
+                // 8. Kiểm tra giao dịch (nếu có giao dịch hoàn thành, không xóa tranh)
+                var completedTransactions = artwork.GiaoDiches
+                    .Where(g => g.TrangThai == "Đã hoàn thành" || g.TrangThai == "Đang giao hàng")
+                    .ToList();
+                    
+                if (completedTransactions.Any())
+                {
+                    return Json(new { 
+                        success = false, 
+                        message = "Không thể xóa tác phẩm đã bán. Hãy cập nhật trạng thái để ẩn thay vì xóa." 
+                    });
+                }
+                
+                // 9. Xóa giao dịch chưa hoàn thành
+                var pendingTransactions = artwork.GiaoDiches
+                    .Where(g => g.TrangThai != "Đã hoàn thành" && g.TrangThai != "Đang giao hàng")
+                    .ToList();
+                _context.GiaoDiches.RemoveRange(pendingTransactions);
+                
+                // 10. Xóa file ảnh gốc trên server (nếu cần)
+                if (!string.IsNullOrEmpty(artwork.DuongDanAnh))
+                {
+                    var imagePath = Path.Combine(
+                        Directory.GetCurrentDirectory(), 
+                        "wwwroot", 
+                        artwork.DuongDanAnh.TrimStart('/')
+                    );
+                    
+                    if (System.IO.File.Exists(imagePath))
+                    {
+                        try {
+                            System.IO.File.Delete(imagePath);
+                        } catch (Exception ex) {
+                            _logger.LogWarning($"Không thể xóa file ảnh: {ex.Message}");
+                        }
+                    }
+                }
+                
+                // 11. Cuối cùng xóa tác phẩm
+                _context.Tranhs.Remove(artwork);
+                await _context.SaveChangesAsync();
+                
+                return Json(new { 
+                    success = true, 
+                    message = "Xóa tác phẩm thành công",
+                    redirectUrl = "/Artwork/Products" 
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi xóa tác phẩm");
+                return Json(new { 
+                    success = false, 
+                    message = "Có lỗi xảy ra khi xóa tác phẩm" 
+                });
+            }
         }
 
         [Authorize(Roles = "Admin")]

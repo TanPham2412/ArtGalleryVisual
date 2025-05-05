@@ -149,10 +149,13 @@
                         }
                     }
                     
-                    <div class="add-featured" onclick="showFeaturedArtworksModal()">
-                        <i class="fas fa-plus"></i>
-                        <span>Thêm</span>
-                    </div>
+                    @if (ViewBag.IsOwnProfile)
+                    {
+                        <div class="add-featured" onclick="showFeaturedArtworksModal()">
+                            <i class="fas fa-plus"></i>
+                            <span>Thêm</span>
+                        </div>
+                    }
                 </div>
             </div>
 

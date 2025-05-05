@@ -337,21 +337,21 @@ namespace ArtGallery.Controllers
                                 );
                             }
                         }
-                    }
+            }
 
-                    var paymentResponse = new PaymentResponseModel
-                    {
-                        OrderId = vnp_TxnRef,
-                        TransactionId = vnp_TransactionNo,
-                        OrderDescription = vnp_OrderInfo,
-                        VnPayResponseCode = vnp_ResponseCode,
+            var paymentResponse = new PaymentResponseModel
+            {
+                OrderId = vnp_TxnRef,
+                TransactionId = vnp_TransactionNo,
+                OrderDescription = vnp_OrderInfo,
+                VnPayResponseCode = vnp_ResponseCode,
                         PaymentMethod = "VNPAY",
                         BankCode = vnp_BankCode,
                         CardType = vnp_CardType
-                    };
+            };
 
-                    return View(paymentResponse);
-                }
+            return View(paymentResponse);
+        }
                 else
                 {
                     // Gửi email báo thanh toán thất bại
@@ -819,8 +819,8 @@ namespace ArtGallery.Controllers
                     Console.WriteLine("Email error: " + ex.Message);
                 }
 
-                TempData["DiaChi"] = DiaChi;
-                TempData["PhoneNumber"] = PhoneNumber;
+            TempData["DiaChi"] = DiaChi;
+            TempData["PhoneNumber"] = PhoneNumber;
             }
             else
             {

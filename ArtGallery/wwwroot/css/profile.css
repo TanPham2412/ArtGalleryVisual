@@ -687,8 +687,8 @@ body {
     transition: opacity 0.6s ease, transform 0.6s ease;
 }
 
-.add-featured:hover {
-    border-color: #00a8ff;
+    .add-featured:hover {
+        border-color: #00a8ff;
     color: #ffffff;
     transform: translateY(-10px);
     background-color: rgba(0, 168, 255, 0.2);
@@ -822,7 +822,7 @@ body {
     100% {
         width: 60px;
     }
-}
+    }
 
 /* Gallery Grid */
 .gallery-grid {
