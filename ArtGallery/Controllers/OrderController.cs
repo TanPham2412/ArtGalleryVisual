@@ -224,11 +224,10 @@ namespace ArtGallery.Controllers
 
         // Action hiển thị trang đặt hàng thành công
         [HttpGet]
-        public IActionResult OrderSuccess()
+        public async Task<IActionResult> OrderSuccess()
         {
             try
             {
-                // Kiểm tra các tham số từ VNPay
                 var vnp_ResponseCode = Request.Query["vnp_ResponseCode"].ToString();
                 var vnp_TxnRef = Request.Query["vnp_TxnRef"].ToString();
                 var vnp_Amount = Request.Query["vnp_Amount"].ToString();
@@ -237,17 +236,12 @@ namespace ArtGallery.Controllers
                 var vnp_BankCode = Request.Query["vnp_BankCode"].ToString();
                 var vnp_CardType = Request.Query["vnp_CardType"].ToString();
 
-                // Kiểm tra mã phản hồi từ VNPay (00 là thành công)
+                // Nếu thanh toán thành công (00 là thành công)
                 if (vnp_ResponseCode == "00")
                 {
-                    // Lấy thông tin từ các tham số
-                    var artworkId = 0;
-                    var quantity = 0;
-                    var orderId = 0;
+                    int artworkId = 0, quantity = 0, orderId = 0;
 
-                    // Xử lý chuỗi vnp_OrderInfo (VNPAY+orderId+artworkId+quantity)
                     var parts = vnp_OrderInfo.Split('+');
-
                     if (parts.Length >= 4)
                     {
                         int.TryParse(parts[1], out orderId);
@@ -255,7 +249,6 @@ namespace ArtGallery.Controllers
                         int.TryParse(parts[3], out quantity);
                     }
 
-                    // Nếu không trích xuất được từ chuỗi, thử lấy từ session
                     if (artworkId <= 0 || quantity <= 0)
                     {
                         var form = HttpContext.Session.GetString("VNPayFormData");
@@ -268,25 +261,19 @@ namespace ArtGallery.Controllers
                         }
                     }
 
-                    // Lấy giá trị userID và artwork
                     if (artworkId > 0 && quantity > 0)
                     {
                         var userId = _userManager.GetUserId(User);
-
-                        var artwork = _context.Tranhs
-                            .Include(t => t.MaNguoiDungNavigation)
-                            .FirstOrDefault(t => t.MaTranh == artworkId);
+                        var artwork = await _context.Tranhs.Include(t => t.MaNguoiDungNavigation).FirstOrDefaultAsync(t => t.MaTranh == artworkId);
 
                         if (artwork != null)
                         {
-                            decimal amount = decimal.Parse(vnp_Amount) / 100; // VNPay trả về số tiền * 100
+                            decimal amount = decimal.Parse(vnp_Amount) / 100;
 
                             GiaoDich giaoDich;
-
                             if (orderId > 0)
                             {
-                                // Cập nhật đơn hàng đã tồn tại
-                                giaoDich = _context.GiaoDiches.Find(orderId);
+                                giaoDich = await _context.GiaoDiches.FindAsync(orderId);
                                 if (giaoDich != null && giaoDich.MaNguoiMua == userId)
                                 {
                                     giaoDich.TrangThai = "Đã đặt hàng";
@@ -299,7 +286,6 @@ namespace ArtGallery.Controllers
                                 }
                                 else
                                 {
-                                    // Tạo mới nếu không tìm thấy đơn hàng cũ
                                     giaoDich = new GiaoDich
                                     {
                                         MaNguoiMua = userId,
@@ -310,13 +296,11 @@ namespace ArtGallery.Controllers
                                         TrangThai = "Đã đặt hàng",
                                         PhuongThucThanhToan = "VNPAY"
                                     };
-
                                     _context.GiaoDiches.Add(giaoDich);
                                 }
                             }
                             else
                             {
-                                // Tạo giao dịch mới
                                 giaoDich = new GiaoDich
                                 {
                                     MaNguoiMua = userId,
@@ -327,20 +311,34 @@ namespace ArtGallery.Controllers
                                     TrangThai = "Đã đặt hàng",
                                     PhuongThucThanhToan = "VNPAY"
                                 };
-
                                 _context.GiaoDiches.Add(giaoDich);
                             }
 
-                            // Cập nhật số lượng tranh còn lại
                             artwork.SoLuongTon -= quantity;
                             _context.Tranhs.Update(artwork);
 
-                            // Lưu thay đổi vào database
-                            _context.SaveChanges();
+                            await _context.SaveChangesAsync();
+
+                            // Gửi email xác nhận
+                            var user = await _userManager.FindByIdAsync(userId);
+                            if (user != null)
+                            {
+                                string orderInfo = $@"
+                            <p>Mã giao dịch: {vnp_TxnRef}</p>
+                            <p>Sản phẩm: {artwork.TieuDe}</p>
+                            <p>Số lượng: {quantity}</p>
+                            <p>Thành tiền: {amount:N0} VND</p>
+                            <p>Phương thức thanh toán: VNPAY</p>";
+
+                                await _emailService.SendOrderConfirmationEmail(
+                                    user.Email,
+                                    user.TenNguoiDung,
+                                    orderInfo
+                                );
+                            }
                         }
                     }
 
-                    // Tạo model cho view
                     var paymentResponse = new PaymentResponseModel
                     {
                         OrderId = vnp_TxnRef,
@@ -356,14 +354,28 @@ namespace ArtGallery.Controllers
                 }
                 else
                 {
-                    // Thanh toán thất bại, chuyển đến trang lỗi
+                    // Gửi email báo thanh toán thất bại
+                    var user = await _userManager.GetUserAsync(User);
+                    if (user != null)
+                    {
+                        string failInfo = $@"
+                    <p>Mã đơn hàng: {vnp_TxnRef}</p>
+                    <p>Thông tin: {vnp_OrderInfo}</p>
+                    <p>Trạng thái: <strong>Thất bại</strong></p>";
+
+                        await _emailService.SendOrderConfirmationEmail(
+                            user.Email,
+                            user.TenNguoiDung,
+                            failInfo
+                        );
+                    }
+
                     return RedirectToAction("PaymentError");
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError($"Error in OrderSuccess: {ex.Message}");
-                // Tạo PaymentResponseModel để hiển thị thông tin lỗi
                 return View(new PaymentResponseModel
                 {
                     VnPayResponseCode = "99",
@@ -371,6 +383,7 @@ namespace ArtGallery.Controllers
                 });
             }
         }
+
 
 
         // Thêm action PaymentError nếu cần
