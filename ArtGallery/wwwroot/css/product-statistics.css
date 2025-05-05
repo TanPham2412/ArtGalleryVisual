@@ -1,0 +1,97 @@
+/* Styles for Product Statistics page */
+.statistics-header {
+    color: #fff;
+}
+
+.summary-cards .card {
+    transition: all 0.3s ease;
+    border-width: 1px;
+}
+
+.summary-cards .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+}
+
+.statistics-table {
+    margin-bottom: 0;
+}
+
+.statistics-table th {
+    background-color: #1a1a1a;
+    color: #fff;
+}
+
+.statistics-table .sortable {
+    cursor: pointer;
+    position: relative;
+}
+
+.statistics-table .sortable:after {
+    content: "\f0dc";
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+    margin-left: 5px;
+    color: #666;
+}
+
+.statistics-table .sortable.asc:after {
+    content: "\f0de";
+    color: #007bff;
+}
+
+.statistics-table .sortable.desc:after {
+    content: "\f0dd";
+    color: #007bff;
+}
+
+.artwork-thumbnail {
+    max-width: 60px;
+    max-height: 60px;
+    border-radius: 4px;
+    border: 1px solid #333;
+    object-fit: cover;
+}
+
+.search-filter {
+    width: 300px;
+}
+
+#artworkTable td {
+    vertical-align: middle;
+}
+
+.btn-group .btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+}
+
+/* Dark theme styles */
+.table-dark {
+    background-color: #121212;
+    color: #f0f0f0;
+}
+
+.table-dark thead th {
+    border-color: #333;
+}
+
+.table-dark tbody tr:hover {
+    background-color: #2c2c2c;
+}
+
+.pagination-container .page-link {
+    background-color: #1a1a1a;
+    border-color: #333;
+    color: #fff;
+}
+
+.pagination-container .page-item.active .page-link {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.pagination-container .page-link:hover {
+    background-color: #333;
+    border-color: #444;
+} 

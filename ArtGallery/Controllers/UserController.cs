@@ -294,5 +294,72 @@ namespace ArtGallery.Controllers
                 return Json(new { success = false, message = "Có lỗi xảy ra khi thực hiện thao tác" });
             }
         }
+
+        [Authorize]
+        public async Task<IActionResult> ProductStatistics(string id = null)
+        {
+            try
+            {
+                // Xác định ID người dùng cần xem
+                if (string.IsNullOrEmpty(id))
+                {
+                    var currentUser = await _userManager.GetUserAsync(User);
+                    if (currentUser != null)
+                    {
+                        id = currentUser.Id;
+                    }
+                    else
+                    {
+                        return RedirectToAction("Login", "Account");
+                    }
+                }
+
+                // Kiểm tra quyền truy cập (chỉ admin hoặc chủ sở hữu)
+                var loggedInUser = await _userManager.GetUserAsync(User);
+                var isAdmin = await _userManager.IsInRoleAsync(loggedInUser, "Admin");
+                var isOwner = loggedInUser?.Id == id;
+
+                if (!isAdmin && !isOwner)
+                {
+                    return Forbid();
+                }
+
+                // Lấy thông tin người dùng và danh sách tranh
+                var user = await _context.NguoiDungs
+                    .Include(u => u.DoanhThu)
+                    .Include(u => u.Tranhs)
+                    .FirstOrDefaultAsync(u => u.Id == id);
+
+                if (user == null)
+                {
+                    return NotFound("Không tìm thấy người dùng");
+                }
+                
+                // Lấy thông tin giao dịch của các tranh
+                var artworkIds = user.Tranhs.Select(t => t.MaTranh).ToList();
+                var transactions = await _context.GiaoDiches
+                    .Where(g => artworkIds.Contains(g.MaTranh) && g.TrangThai == "Đã giao hàng")
+                    .ToListAsync();
+                    
+                // Tính toán thống kê chi tiết cho từng tranh
+                var artworkStatistics = user.Tranhs.Select(tranh => new ArtworkStatisticsViewModel
+                {
+                    Artwork = tranh,
+                    TotalSales = transactions.Where(t => t.MaTranh == tranh.MaTranh)
+                                  .Sum(t => t.SoTien)
+                }).ToList();
+
+                ViewBag.User = user;
+                ViewBag.TotalRevenue = user.DoanhThu?.TongDoanhThu ?? 0;
+                ViewBag.TotalSoldArtworks = user.DoanhThu?.SoTranhBanDuoc ?? 0;
+
+                return View(artworkStatistics);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi hiển thị thống kê sản phẩm của người dùng {UserId}", id);
+                return RedirectToAction("Error", "Home");
+            }
+        }
     }
 }
