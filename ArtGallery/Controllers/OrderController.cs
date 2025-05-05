@@ -576,6 +576,11 @@ namespace ArtGallery.Controllers
                         doanhThu.SoTranhBanDuoc += order.SoLuong;
                         _context.DoanhThus.Update(doanhThu);
                     }
+                    
+                    // THÊM ĐOẠN NÀY: Cập nhật số lượng đã bán trong bảng Tranh
+                    var artwork = order.MaTranhNavigation;
+                    artwork.DaBan += order.SoLuong;
+                    _context.Tranhs.Update(artwork);
                 }
                 _context.GiaoDiches.Update(order);
                 await _context.SaveChangesAsync();
