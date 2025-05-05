@@ -552,6 +552,31 @@ namespace ArtGallery.Controllers
 
                 // Cập nhật trạng thái
                 order.TrangThai = status;
+                if (status == "Đã hoàn thành")
+                {
+                    // Cập nhật doanh thu cho người bán
+                    var sellerId = order.MaTranhNavigation.MaNguoiDung;
+                    var doanhThu = await _context.DoanhThus.FirstOrDefaultAsync(d => d.MaNguoiDung == sellerId);
+
+                    if (doanhThu == null)
+                    {
+                        // Tạo mới nếu chưa có
+                        doanhThu = new DoanhThu
+                        {
+                            MaNguoiDung = sellerId,
+                            TongDoanhThu = order.SoTien,
+                            SoTranhBanDuoc = order.SoLuong
+                        };
+                        _context.DoanhThus.Add(doanhThu);
+                    }
+                    else
+                    {
+                        // Cập nhật nếu đã có
+                        doanhThu.TongDoanhThu += order.SoTien;
+                        doanhThu.SoTranhBanDuoc += order.SoLuong;
+                        _context.DoanhThus.Update(doanhThu);
+                    }
+                }
                 _context.GiaoDiches.Update(order);
                 await _context.SaveChangesAsync();
 

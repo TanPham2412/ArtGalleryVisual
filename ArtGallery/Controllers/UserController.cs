@@ -338,9 +338,9 @@ namespace ArtGallery.Controllers
                 // Lấy thông tin giao dịch của các tranh
                 var artworkIds = user.Tranhs.Select(t => t.MaTranh).ToList();
                 var transactions = await _context.GiaoDiches
-                    .Where(g => artworkIds.Contains(g.MaTranh) && g.TrangThai == "Đã giao hàng")
+                    .Where(g => artworkIds.Contains(g.MaTranh) && g.TrangThai == "Đã hoàn thành")
                     .ToListAsync();
-                    
+
                 // Tính toán thống kê chi tiết cho từng tranh
                 var artworkStatistics = user.Tranhs.Select(tranh => new ArtworkStatisticsViewModel
                 {
