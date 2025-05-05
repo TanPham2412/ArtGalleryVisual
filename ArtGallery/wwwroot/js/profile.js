@@ -185,6 +185,17 @@ document.addEventListener('DOMContentLoaded', function () {
     
     // Cập nhật label ô input cho dropdown địa điểm
     initializeSelects();
+
+    // Thêm sự kiện cho nút Thêm trong phần nổi bật
+    const addFeaturedBtn = document.querySelector('.add-featured');
+    if (addFeaturedBtn) {
+        addFeaturedBtn.addEventListener('click', function() {
+            openAddFeaturedModal();
+        });
+    }
+    
+    // Debug để xem liệu sự kiện click có hoạt động không
+    console.log('Added event listener to featured button:', addFeaturedBtn);
 });
 
 function initializeSelects() {
@@ -503,4 +514,193 @@ document.addEventListener('DOMContentLoaded', function() {
             openConversationWithUser(userId);
         });
     }
+});
+
+// Mở modal thêm tác phẩm nổi bật
+window.openAddFeaturedModal = function() {
+    console.log('Opening add featured modal');
+    const modal = document.getElementById('addFeaturedModal');
+    if (modal) {
+        modal.style.display = 'block';
+        document.body.classList.add('modal-open');
+        loadUserArtworks();
+    } else {
+        console.error('Modal not found: addFeaturedModal');
+    }
+}
+
+// Định nghĩa rõ hàm closeAddFeaturedModal ở phạm vi toàn cục
+window.closeAddFeaturedModal = function() {
+    const modal = document.getElementById('addFeaturedModal');
+    if (modal) {
+        modal.style.display = 'none';
+        document.body.classList.remove('modal-open');
+    }
+}
+
+// Thêm toggleFeaturedArtwork ở phạm vi toàn cục
+window.toggleFeaturedArtwork = function(artworkId, element) {
+    const isCurrentlyFeatured = element.classList.contains('is-featured');
+    const shouldBeFeatured = !isCurrentlyFeatured;
+    
+    console.log(`Toggling featured status for artwork ${artworkId} to ${shouldBeFeatured}`);
+    
+    fetch('/User/ToggleFeaturedArtwork', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+        },
+        body: JSON.stringify({ 
+            artworkId: artworkId, 
+            isFeatured: shouldBeFeatured 
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            if (shouldBeFeatured) {
+                element.classList.add('is-featured');
+                element.querySelector('.overlay-indicator').innerHTML = '<i class="fas fa-check-circle"></i> Đã thêm';
+                
+                // Thêm vào grid
+                const featuredGrid = document.getElementById('featured-grid');
+                const addButton = featuredGrid.querySelector('.add-featured');
+                
+                const newFeaturedItem = document.createElement('div');
+                newFeaturedItem.className = 'featured-item';
+                newFeaturedItem.dataset.id = artworkId;
+                
+                newFeaturedItem.innerHTML = `
+                    <a href="/Artwork/Display/${artworkId}">
+                        <img src="${data.artwork.duongDanAnh}" alt="${data.artwork.tieuDe}">
+                        <div class="featured-item-title">${data.artwork.tieuDe}</div>
+                    </a>
+                    <button class="remove-featured" onclick="removeFeatured(${artworkId})">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                
+                if (addButton) {
+                    featuredGrid.insertBefore(newFeaturedItem, addButton);
+                } else {
+                    featuredGrid.appendChild(newFeaturedItem);
+                }
+            } else {
+                element.classList.remove('is-featured');
+                element.querySelector('.overlay-indicator').innerHTML = '<i class="fas fa-plus-circle"></i> Thêm';
+                
+                // Xóa khỏi grid
+                const featuredItem = document.querySelector(`.featured-item[data-id="${artworkId}"]`);
+                if (featuredItem) {
+                    featuredItem.remove();
+                }
+            }
+        } else {
+            alert(data.message || 'Có lỗi khi cập nhật tác phẩm nổi bật');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Có lỗi xảy ra khi cập nhật tác phẩm nổi bật');
+    });
+}
+
+window.removeFeatured = function(artworkId) {
+    event.preventDefault();
+    event.stopPropagation();
+    
+    if(confirm('Bạn có chắc muốn xóa tác phẩm này khỏi mục nổi bật?')) {
+        toggleFeaturedArtwork(artworkId, document.querySelector(`.artwork-select-item[data-id="${artworkId}"]`));
+    }
+}
+
+// Tải danh sách tác phẩm của người dùng
+function loadUserArtworks() {
+    const userId = document.querySelector('meta[name="user-id"]')?.content;
+    console.log('Loading artworks for user:', userId);
+    
+    if (!userId) {
+        console.error('Không tìm thấy ID người dùng');
+        alert('Không thể xác định ID người dùng');
+        return;
+    }
+    
+    // Hiển thị loading trong modal
+    const container = document.getElementById('artwork-selection-grid');
+    if (container) {
+        container.innerHTML = '<div class="loading">Đang tải tác phẩm...</div>';
+    }
+    
+    // Gọi API để lấy danh sách tác phẩm
+    fetch('/User/GetUserArtworks?userId=' + userId)
+        .then(response => response.json())
+        .then(data => {
+            console.log('Received data:', data);
+            displayArtworksForSelection(data);
+        })
+        .catch(error => {
+            console.error('Lỗi khi tải danh sách tác phẩm:', error);
+            if (container) {
+                container.innerHTML = '<div class="error">Có lỗi xảy ra khi tải tác phẩm. Vui lòng thử lại sau.</div>';
+            }
+        });
+}
+
+// Hiển thị danh sách tác phẩm để chọn
+function displayArtworksForSelection(artworks) {
+    const container = document.getElementById('artwork-selection-grid');
+    
+    if (!container) return;
+    
+    container.innerHTML = '';
+    
+    if (!artworks || artworks.length === 0) {
+        container.innerHTML = '<div class="no-artworks">Bạn chưa có tác phẩm nào</div>';
+        return;
+    }
+    
+    artworks.forEach(artwork => {
+        const isFeatured = artwork.isFeatured;
+        
+        const artworkElement = document.createElement('div');
+        artworkElement.className = `artwork-select-item ${isFeatured ? 'is-featured' : ''}`;
+        artworkElement.dataset.id = artwork.maTranh;
+        
+        artworkElement.innerHTML = `
+            <div class="artwork-image-container">
+                <img src="${artwork.duongDanAnh}" alt="${artwork.tieuDe}">
+                <div class="artwork-select-overlay">
+                    <div class="overlay-indicator">
+                        ${isFeatured ? '<i class="fas fa-check-circle"></i> Đã thêm' : '<i class="fas fa-plus-circle"></i> Thêm'}
+                    </div>
+                </div>
+            </div>
+            <div class="artwork-title">${artwork.tieuDe}</div>
+        `;
+        
+        artworkElement.addEventListener('click', () => toggleFeaturedArtwork(artwork.maTranh, artworkElement));
+        
+        container.appendChild(artworkElement);
+    });
+    
+    // Thêm tính năng tìm kiếm
+    document.getElementById('artworkSearch').addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        document.querySelectorAll('.artwork-select-item').forEach(item => {
+            const title = item.querySelector('.artwork-title').textContent.toLowerCase();
+            item.style.display = title.includes(searchTerm) ? 'block' : 'none';
+        });
+    });
+}
+// Thêm chức năng đóng modal vào nút đóng
+document.addEventListener('DOMContentLoaded', function() {
+    // Đóng modal khi nhấn nút close
+    const closeButtons = document.querySelectorAll('#addFeaturedModal .close');
+    closeButtons.forEach(button => {
+        button.onclick = function() {
+            document.getElementById('addFeaturedModal').style.display = 'none';
+            document.body.classList.remove('modal-open');
+        };
+    });
 });
