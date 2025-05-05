@@ -71,6 +71,15 @@ namespace ArtGallery.Controllers
                                        t.MaNguoiDuocTheoDoi == id);
                 }
 
+                // Lấy danh sách tác phẩm nổi bật
+                var featuredArtworks = await _context.NoiBats
+                    .Where(n => n.MaNguoiDung == id)
+                    .Include(n => n.MaTranhNavigation)
+                    .Select(n => n.MaTranhNavigation)
+                    .ToListAsync();
+
+                ViewBag.FeaturedArtworks = featuredArtworks;
+
                 return View(user);
             }
             catch (Exception ex)
@@ -292,6 +301,200 @@ namespace ArtGallery.Controllers
             {
                 _logger.LogError(ex, "Lỗi khi theo dõi/hủy theo dõi người dùng {UserId}", followedUserId);
                 return Json(new { success = false, message = "Có lỗi xảy ra khi thực hiện thao tác" });
+            }
+        }
+
+        [Authorize]
+        public async Task<IActionResult> ProductStatistics(string id = null)
+        {
+            try
+            {
+                // Xác định ID người dùng cần xem
+                if (string.IsNullOrEmpty(id))
+                {
+                    var currentUser = await _userManager.GetUserAsync(User);
+                    if (currentUser != null)
+                    {
+                        id = currentUser.Id;
+                    }
+                    else
+                    {
+                        return RedirectToAction("Login", "Account");
+                    }
+                }
+
+                // Kiểm tra quyền truy cập (chỉ admin hoặc chủ sở hữu)
+                var loggedInUser = await _userManager.GetUserAsync(User);
+                var isAdmin = await _userManager.IsInRoleAsync(loggedInUser, "Admin");
+                var isOwner = loggedInUser?.Id == id;
+
+                if (!isAdmin && !isOwner)
+                {
+                    return Forbid();
+                }
+
+                // Lấy thông tin người dùng và danh sách tranh
+                var user = await _context.NguoiDungs
+                    .Include(u => u.DoanhThu)
+                    .Include(u => u.Tranhs)
+                    .FirstOrDefaultAsync(u => u.Id == id);
+
+                if (user == null)
+                {
+                    return NotFound("Không tìm thấy người dùng");
+                }
+                
+                // Lấy thông tin giao dịch của các tranh
+                var artworkIds = user.Tranhs.Select(t => t.MaTranh).ToList();
+                var transactions = await _context.GiaoDiches
+                    .Where(g => artworkIds.Contains(g.MaTranh) && g.TrangThai == "Đã hoàn thành")
+                    .ToListAsync();
+
+                // Tính toán thống kê chi tiết cho từng tranh
+                var artworkStatistics = user.Tranhs.Select(tranh => new ArtworkStatisticsViewModel
+                {
+                    Artwork = tranh,
+                    TotalSales = transactions.Where(t => t.MaTranh == tranh.MaTranh)
+                                  .Sum(t => t.SoTien)
+                }).ToList();
+
+                ViewBag.User = user;
+                ViewBag.TotalRevenue = user.DoanhThu?.TongDoanhThu ?? 0;
+                ViewBag.TotalSoldArtworks = user.DoanhThu?.SoTranhBanDuoc ?? 0;
+
+                return View(artworkStatistics);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi hiển thị thống kê sản phẩm của người dùng {UserId}", id);
+                return RedirectToAction("Error", "Home");
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetUserArtworks(string userId)
+        {
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Json(new { success = false, message = "ID người dùng không hợp lệ" });
+            }
+
+            try
+            {
+                var user = await _context.NguoiDungs
+                    .Include(u => u.Tranhs)
+                    .Include(u => u.NoiBats)
+                    .FirstOrDefaultAsync(u => u.Id == userId);
+
+                if (user == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy người dùng" });
+                }
+
+                // Lấy danh sách ID tranh đã thêm vào nổi bật
+                var featuredArtworkIds = user.NoiBats
+                    .Select(nb => nb.MaTranh)
+                    .ToList();
+
+                // Lấy thông tin tranh và đánh dấu những tranh đã được thêm vào nổi bật
+                var artworks = user.Tranhs
+                    .Select(t => new
+                    {
+                        maTranh = t.MaTranh,
+                        tieuDe = t.TieuDe,
+                        duongDanAnh = t.DuongDanAnh,
+                        isFeatured = featuredArtworkIds.Contains(t.MaTranh)
+                    })
+                    .ToList();
+
+                return Json(artworks);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi lấy danh sách tác phẩm của người dùng {UserId}", userId);
+                return Json(new { success = false, message = "Có lỗi xảy ra khi lấy danh sách tác phẩm" });
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize]
+        public async Task<IActionResult> ToggleFeaturedArtwork([FromBody] FeaturedArtworkViewModel model)
+        {
+            try
+            {
+                var currentUser = await _userManager.GetUserAsync(User);
+                if (currentUser == null)
+                {
+                    return Json(new { success = false, message = "Bạn cần đăng nhập để thực hiện thao tác này" });
+                }
+
+                var artwork = await _context.Tranhs
+                    .FirstOrDefaultAsync(t => t.MaTranh == model.ArtworkId);
+
+                if (artwork == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy tác phẩm" });
+                }
+
+                // Chỉ cho phép thêm tác phẩm của chính mình
+                if (artwork.MaNguoiDung != currentUser.Id)
+                {
+                    return Json(new { success = false, message = "Bạn chỉ có thể thêm tác phẩm của chính mình vào danh sách nổi bật" });
+                }
+
+                // Kiểm tra xem tác phẩm đã có trong danh sách nổi bật chưa
+                var existingFeatured = await _context.NoiBats
+                    .FirstOrDefaultAsync(n => n.MaNguoiDung == currentUser.Id && n.MaTranh == model.ArtworkId);
+
+                if (model.IsFeatured)
+                {
+                    // Thêm vào danh sách nổi bật nếu chưa có
+                    if (existingFeatured == null)
+                    {
+                        var newFeatured = new NoiBat
+                        {
+                            MaNguoiDung = currentUser.Id,
+                            MaTranh = model.ArtworkId,
+                     
+                        };
+
+                        await _context.NoiBats.AddAsync(newFeatured);
+                        await _context.SaveChangesAsync();
+                    }
+
+                    return Json(new
+                    {
+                        success = true,
+                        message = "Đã thêm tác phẩm vào danh sách nổi bật",
+                        artwork = new
+                        {
+                            maTranh = artwork.MaTranh,
+                            tieuDe = artwork.TieuDe,
+                            duongDanAnh = artwork.DuongDanAnh
+                        }
+                    });
+                }
+                else
+                {
+                    // Xóa khỏi danh sách nổi bật nếu đã có
+                    if (existingFeatured != null)
+                    {
+                        _context.NoiBats.Remove(existingFeatured);
+                        await _context.SaveChangesAsync();
+                    }
+
+                    return Json(new
+                    {
+                        success = true,
+                        message = "Đã xóa tác phẩm khỏi danh sách nổi bật"
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi cập nhật tác phẩm nổi bật");
+                return Json(new { success = false, message = "Có lỗi xảy ra khi cập nhật tác phẩm nổi bật" });
             }
         }
     }

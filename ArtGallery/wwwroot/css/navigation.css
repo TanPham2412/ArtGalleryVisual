@@ -863,3 +863,22 @@ input[type="file"]::-webkit-file-upload-button:hover {
     color: white;
     font-size: 18px;
 }
+
+/* Ẩn thanh cuộn nhưng vẫn cho phép cuộn nội dung */
+.notification-dropdown,
+.notification-list,
+.message-dropdown-menu,
+.message-list {
+    -ms-overflow-style: none;  /* IE và Edge */
+    scrollbar-width: none;  /* Firefox */
+    overflow-y: auto;
+}
+
+.notification-dropdown::-webkit-scrollbar,
+.notification-list::-webkit-scrollbar,
+.message-dropdown-menu::-webkit-scrollbar,
+.message-list::-webkit-scrollbar {
+    display: none;  /* Chrome, Safari và Opera */
+    width: 0;
+    height: 0;
+}

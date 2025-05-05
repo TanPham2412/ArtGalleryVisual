@@ -337,21 +337,21 @@ namespace ArtGallery.Controllers
                                 );
                             }
                         }
-                    }
+            }
 
-                    var paymentResponse = new PaymentResponseModel
-                    {
-                        OrderId = vnp_TxnRef,
-                        TransactionId = vnp_TransactionNo,
-                        OrderDescription = vnp_OrderInfo,
-                        VnPayResponseCode = vnp_ResponseCode,
+            var paymentResponse = new PaymentResponseModel
+            {
+                OrderId = vnp_TxnRef,
+                TransactionId = vnp_TransactionNo,
+                OrderDescription = vnp_OrderInfo,
+                VnPayResponseCode = vnp_ResponseCode,
                         PaymentMethod = "VNPAY",
                         BankCode = vnp_BankCode,
                         CardType = vnp_CardType
-                    };
+            };
 
-                    return View(paymentResponse);
-                }
+            return View(paymentResponse);
+        }
                 else
                 {
                     // Gửi email báo thanh toán thất bại
@@ -552,6 +552,36 @@ namespace ArtGallery.Controllers
 
                 // Cập nhật trạng thái
                 order.TrangThai = status;
+                if (status == "Đã hoàn thành")
+                {
+                    // Cập nhật doanh thu cho người bán
+                    var sellerId = order.MaTranhNavigation.MaNguoiDung;
+                    var doanhThu = await _context.DoanhThus.FirstOrDefaultAsync(d => d.MaNguoiDung == sellerId);
+
+                    if (doanhThu == null)
+                    {
+                        // Tạo mới nếu chưa có
+                        doanhThu = new DoanhThu
+                        {
+                            MaNguoiDung = sellerId,
+                            TongDoanhThu = order.SoTien,
+                            SoTranhBanDuoc = order.SoLuong
+                        };
+                        _context.DoanhThus.Add(doanhThu);
+                    }
+                    else
+                    {
+                        // Cập nhật nếu đã có
+                        doanhThu.TongDoanhThu += order.SoTien;
+                        doanhThu.SoTranhBanDuoc += order.SoLuong;
+                        _context.DoanhThus.Update(doanhThu);
+                    }
+                    
+                    // THÊM ĐOẠN NÀY: Cập nhật số lượng đã bán trong bảng Tranh
+                    var artwork = order.MaTranhNavigation;
+                    artwork.DaBan += order.SoLuong;
+                    _context.Tranhs.Update(artwork);
+                }
                 _context.GiaoDiches.Update(order);
                 await _context.SaveChangesAsync();
 
@@ -789,8 +819,8 @@ namespace ArtGallery.Controllers
                     Console.WriteLine("Email error: " + ex.Message);
                 }
 
-                TempData["DiaChi"] = DiaChi;
-                TempData["PhoneNumber"] = PhoneNumber;
+            TempData["DiaChi"] = DiaChi;
+            TempData["PhoneNumber"] = PhoneNumber;
             }
             else
             {

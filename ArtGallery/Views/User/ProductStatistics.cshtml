@@ -1,0 +1,106 @@
+@model List<ArtGallery.Models.ArtworkStatisticsViewModel>
+@{
+    ViewData["Title"] = "Thống kê sản phẩm";
+    var user = ViewBag.User as NguoiDung;
+    var totalRevenue = ViewBag.TotalRevenue;
+    var totalSoldArtworks = ViewBag.TotalSoldArtworks;
+}
+
+<link rel="stylesheet" href="~/css/product-statistics.css">
+
+<div class="container mt-5 pt-5">
+    <div class="statistics-header mb-4">
+        <h2>Thống kê sản phẩm của @user.TenNguoiDung</h2>
+        <div class="summary-cards row">
+            <div class="col-md-4">
+                <div class="card bg-dark text-white border-primary shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title text-primary">Tổng doanh thu</h5>
+                        <p class="card-text display-6">@(((decimal)totalRevenue).ToString("N0")) VND</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-dark text-white border-success shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title text-success">Số tác phẩm đã bán</h5>
+                        <p class="card-text display-6">@totalSoldArtworks</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-dark text-white border-info shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title text-info">Tổng số tác phẩm</h5>
+                        <p class="card-text display-6">@Model.Count</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card bg-dark text-white shadow">
+        <div class="card-header bg-dark d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="fas fa-palette me-2"></i>Danh sách tác phẩm</h5>
+            <div class="search-filter">
+                <input type="text" id="searchArtwork" class="form-control form-control-sm" placeholder="Tìm kiếm tác phẩm...">
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-dark table-hover statistics-table" id="artworkTable">
+                    <thead>
+                        <tr>
+                            <th scope="col" class="sortable" data-sort="tieuDe">Tên sản phẩm</th>
+                            <th scope="col" class="text-center">Hình ảnh</th>
+                            <th scope="col" class="text-center sortable" data-sort="gia">Giá (VND)</th>
+                            <th scope="col" class="text-center sortable" data-sort="daBan">Đã bán</th>
+                            <th scope="col" class="text-center sortable" data-sort="soLuongTon">Tồn kho</th>
+                            <th scope="col" class="text-center sortable" data-sort="totalSales">Doanh thu (VND)</th>
+                            <th scope="col" class="text-center sortable" data-sort="ngayDang">Ngày đăng</th>
+                            <th scope="col" class="text-center">Trạng thái</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr data-artwork-id="@item.Artwork.MaTranh">
+                                <td>@item.Artwork.TieuDe</td>
+                                <td class="text-center">
+                                    <img src="@item.Artwork.DuongDanAnh" alt="@item.Artwork.TieuDe" class="artwork-thumbnail">
+                                </td>
+                                <td class="text-center">@item.Artwork.Gia.ToString("N0")</td>
+                                <td class="text-center">@item.Artwork.DaBan</td>
+                                <td class="text-center">@item.Artwork.SoLuongTon</td>
+                                <td class="text-center">@item.TotalSales.ToString("N0")</td>
+                                <td class="text-center">@(item.Artwork.NgayDang?.ToString("dd/MM/yyyy") ?? "-")</td>
+                                <td class="text-center">
+                                    @if (item.Artwork.SoLuongTon > 0)
+                                    {
+                                        <span class="badge bg-success">Còn hàng</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger">Hết hàng</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card-footer bg-dark">
+            <div class="d-flex justify-content-between align-items-center">
+                <div><i class="fas fa-cubes me-2"></i>Tổng số: <span id="totalItems">@Model.Count</span> tác phẩm</div>
+                <div class="pagination-container" id="pagination">
+                    <!-- Phân trang sẽ được tạo bằng JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/product-statistics.js"></script>
+} 

@@ -3,9 +3,13 @@
 @{
     ViewData["Title"] = Model.TenNguoiDung;
     var mediaJson = Json.Serialize(Model.Media.Select(m => new { loaiMedia = m.LoaiMedia, duongDan = m.DuongDan }));
+    var currentUserId = ViewBag.CurrentUserId;
 }
 
-<link rel="stylesheet" href="~/css/profile.css?v=3">
+<meta name="user-id" content="@Model.Id" />
+@Html.AntiForgeryToken()
+
+<link rel="stylesheet" href="~/css/profile.css?v=4">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
 <div class="profile-container">
@@ -125,11 +129,33 @@
                     <h2>Nổi bật</h2>
                     <a href="#" class="see-all">Xem tất cả</a>
                 </div>
-                <div class="featured-grid">
-                    <div class="add-featured">
-                        <i class="fas fa-plus"></i>
-                        <span>Thêm</span>
-                    </div>
+                <div class="featured-grid" id="featured-grid">
+                    @if (ViewBag.FeaturedArtworks != null)
+                    {
+                        @foreach (var artwork in ViewBag.FeaturedArtworks)
+                        {
+                            <div class="featured-item">
+                                <a href="@Url.Action("Display", "Artwork", new { id = artwork.MaTranh })">
+                                    <img src="@artwork.DuongDanAnh" alt="@artwork.TieuDe">
+                                    <div class="featured-item-title">@artwork.TieuDe</div>
+                                </a>
+                                @if (ViewBag.IsOwnProfile)
+                                {
+                                    <button class="remove-featured" onclick="removeFeatured(@artwork.MaTranh)">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                }
+                            </div>
+                        }
+                    }
+                    
+                    @if (ViewBag.IsOwnProfile)
+                    {
+                        <div class="add-featured" onclick="showFeaturedArtworksModal()">
+                            <i class="fas fa-plus"></i>
+                            <span>Thêm</span>
+                        </div>
+                    }
                 </div>
             </div>
 
@@ -448,8 +474,32 @@
     </div>
 </div>
 
+<!-- Thêm Modal chọn tác phẩm nổi bật -->
+<div id="addFeaturedModal" class="modal">
+    <div class="modal-content featured-modal">
+        <div class="modal-header">
+            <h3>Thêm tác phẩm nổi bật</h3>
+            <span class="close" onclick="closeAddFeaturedModal()">&times;</span>
+        </div>
+        <div class="modal-body">
+            <div class="artwork-select-container">
+                <div class="artwork-search">
+                    <input type="text" id="artworkSearch" placeholder="Tìm kiếm tác phẩm..." class="form-control">
+                </div>
+                <div class="artwork-grid" id="artwork-selection-grid">
+                    <!-- Danh sách tác phẩm sẽ được thêm vào đây bằng JavaScript -->
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <p class="hint-text">Nhấn vào tác phẩm để thêm vào danh mục nổi bật</p>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script src="~/js/profile.js"></script>
+    <script src="~/js/featured-artworks.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Đảm bảo navbar hoạt động đúng
@@ -475,23 +525,18 @@
                     openViewAllInfoModal();
                 };
             }
+        });
 
-            // Thêm hàm mở/đóng modal thông tin chi tiết
-            window.openViewAllInfoModal = function() {
-                const modal = document.getElementById('viewAllInfoModal');
-                if (modal) {
-                    modal.style.display = 'block';
-                    document.body.classList.add('modal-open');
-                }
-            };
-            
-            window.closeViewAllInfoModal = function() {
-                const modal = document.getElementById('viewAllInfoModal');
-                if (modal) {
-                    modal.style.display = 'none';
-                    document.body.classList.remove('modal-open');
-                }
-            };
+        // Thêm hiệu ứng lấp lánh vào các phần tử featured-item
+        const featuredItems = document.querySelectorAll('.featured-item');
+        
+        featuredItems.forEach(item => {
+            // Thêm 4 điểm lấp lánh vào mỗi tác phẩm nổi bật
+            for (let i = 0; i < 4; i++) {
+                const sparkle = document.createElement('div');
+                sparkle.className = 'sparkle';
+                item.appendChild(sparkle);
+            }
         });
     </script>
 }  
