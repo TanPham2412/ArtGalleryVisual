@@ -25,7 +25,6 @@ PiaoYue ArtGallery được phát triển nhằm cung cấp một nền tảng c
 ```bash
 git clone https://github.com/TanPham2412/ArtGalleryVisual.git
 ```
-
 ## 🔧 Cài đặt và chạy
 1. **Yêu cầu hệ thống**:
    - .NET 7.0 SDK hoặc cao hơn
