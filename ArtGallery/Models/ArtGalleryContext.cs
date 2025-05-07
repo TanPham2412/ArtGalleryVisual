@@ -53,6 +53,14 @@ public partial class ArtGalleryContext : IdentityDbContext<NguoiDung, IdentityRo
         
         // Đặt tên bảng theo schema của bạn
         modelBuilder.Entity<NguoiDung>().ToTable("nguoi_dung");
+        
+        // Thêm cấu hình cho LockoutReason
+        modelBuilder.Entity<NguoiDung>()
+            .Property(u => u.LockoutReason)
+            .HasColumnName("lockout_reason")
+            .HasMaxLength(500)
+            .IsRequired(false); // Cho phép null
+        
         modelBuilder.Entity<IdentityRole>().ToTable("roles");
         modelBuilder.Entity<IdentityUserRole<string>>().ToTable("user_roles");
         modelBuilder.Entity<IdentityUserClaim<string>>().ToTable("user_claims");

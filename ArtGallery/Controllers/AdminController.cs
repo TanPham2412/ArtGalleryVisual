@@ -372,5 +372,90 @@ namespace ArtGallery.Controllers
                 return StatusCode(500, new { success = false, message = ex.Message });
             }
         }
+
+        [HttpPost]
+        public async Task<IActionResult> LockUser([FromBody] LockUserViewModel model)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(model.UserId))
+                    return BadRequest(new { success = false, message = "ID người dùng không hợp lệ" });
+
+                var user = await _userManager.FindByIdAsync(model.UserId);
+                if (user == null)
+                    return NotFound(new { success = false, message = "Không tìm thấy người dùng" });
+
+                // Tính toán thời gian khóa
+                var lockoutEnd = DateTimeOffset.UtcNow.AddDays(model.Days)
+                                                    .AddHours(model.Hours)
+                                                    .AddMinutes(model.Minutes)
+                                                    .AddSeconds(model.Seconds);
+
+                // Lưu lý do khóa
+                user.LockoutReason = model.Reason;
+                
+                // Kích hoạt khóa tài khoản
+                await _userManager.SetLockoutEnabledAsync(user, true);
+                await _userManager.SetLockoutEndDateAsync(user, lockoutEnd);
+                
+                // Cập nhật thông tin người dùng
+                await _userManager.UpdateAsync(user);
+                
+                // Gửi thông báo cho người dùng
+                await _notificationRepository.CreateSystemNotification(
+                    model.UserId,
+                    "Tài khoản của bạn đã bị khóa",
+                    $"Tài khoản của bạn đã bị khóa đến {lockoutEnd.LocalDateTime:dd/MM/yyyy HH:mm:ss} với lý do: {model.Reason}",
+                    "/User/Profile/" + model.UserId,
+                    "system"
+                );
+                
+                return Ok(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error locking user");
+                return StatusCode(500, new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UnlockUser([FromBody] string userId)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(userId))
+                    return BadRequest(new { success = false, message = "ID người dùng không hợp lệ" });
+
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user == null)
+                    return NotFound(new { success = false, message = "Không tìm thấy người dùng" });
+
+                // Xóa lý do khóa
+                user.LockoutReason = null;
+                
+                // Mở khóa tài khoản
+                await _userManager.SetLockoutEndDateAsync(user, null);
+                
+                // Cập nhật thông tin người dùng
+                await _userManager.UpdateAsync(user);
+                
+                // Gửi thông báo cho người dùng
+                await _notificationRepository.CreateSystemNotification(
+                    userId,
+                    "Tài khoản của bạn đã được mở khóa",
+                    "Tài khoản của bạn đã được mở khóa và có thể sử dụng bình thường.",
+                    "/User/Profile/" + userId,
+                    "system"
+                );
+                
+                return Ok(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error unlocking user");
+                return StatusCode(500, new { success = false, message = ex.Message });
+            }
+        }
     }
 }

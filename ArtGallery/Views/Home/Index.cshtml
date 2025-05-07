@@ -238,3 +238,80 @@
         });
     </script>
 }
+
+@if (TempData["LockoutMessage"] != null)
+{
+    <div class="modal fade" id="lockoutModal" tabindex="-1" aria-labelledby="lockoutModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog">
+            <div class="modal-content" style="background-color: #1e1e1e; border: 1px solid #333; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.3);">
+                <div class="modal-header" style="border-bottom: 1px solid #333; padding: 15px 20px;">
+                    <h5 class="modal-title" id="lockoutModalLabel" style="color: #e0e0e0; font-weight: 600; font-size: 18px;">Tài khoản bị khóa</h5>
+                </div>
+                <div class="modal-body" style="padding: 20px;">
+                    <div style="background-color: #252525; border-radius: 8px; padding: 15px; border-left: 4px solid #ff4444;">
+                        <p style="color: #e0e0e0; margin-bottom: 15px; display: flex; align-items: center;">
+                            <i class="fas fa-exclamation-triangle" style="color: #ff4444; margin-right: 10px; font-size: 20px;"></i>
+                            <span>Tài khoản của bạn đang bị khóa với lý do:</span>
+                        </p>
+                        <p style="color: #ff4444; font-weight: 600; font-size: 16px; margin-bottom: 20px; padding: 10px; background-color: #1a1a1a; border-radius: 6px;">@TempData["LockoutReason"]</p>
+                        
+                        <div style="margin-top: 20px; border-top: 1px solid #333; padding-top: 15px;">
+                            <p style="color: #e0e0e0; font-size: 14px;">Thời gian còn lại:</p>
+                            <div style="background-color: #1a1a1a; padding: 12px; border-radius: 8px; text-align: center; margin-top: 10px;">
+                                <span id="lockout-countdown" style="color: #00a8ff; font-size: 18px; font-weight: 700; letter-spacing: 0.5px;"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid #333; padding: 15px 20px;">
+                    <a href="@Url.Action("LoginRegister", "Home")" class="btn" style="background-color: #00a8ff; color: #fff; border-radius: 30px; padding: 8px 20px; font-weight: 500; transition: all 0.2s;">
+                        <i class="fas fa-sign-out-alt" style="margin-right: 8px;"></i>
+                        Đăng xuất
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Đăng xuất người dùng trước khi hiển thị modal
+            fetch('/Account/Logout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                }
+            }).then(() => {
+                // Hiển thị modal khi trang tải xong
+                var lockoutModal = new bootstrap.Modal(document.getElementById('lockoutModal'));
+                lockoutModal.show();
+            });
+            
+            // Đếm ngược thời gian
+            var endTime = new Date('@TempData["LockoutEndTime"]').getTime();
+            
+            var countdownTimer = setInterval(function() {
+                var now = new Date().getTime();
+                var distance = endTime - now;
+                
+                if (distance <= 0) {
+                    clearInterval(countdownTimer);
+                    document.getElementById('lockout-countdown').innerHTML = "Hết hạn. Vui lòng làm mới trang để đăng nhập lại.";
+                    return;
+                }
+                
+                var days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+                
+                document.getElementById('lockout-countdown').innerHTML = 
+                    (days > 0 ? '<span style="color: #ff4444;">' + days + '</span> ngày ' : '') + 
+                    '<span style="color: #ff4444;">' + hours + '</span> giờ ' +
+                    '<span style="color: #ff4444;">' + minutes + '</span> phút ' +
+                    '<span style="color: #ff4444;">' + seconds + '</span> giây';
+            }, 1000);
+        });
+    </script>
+}

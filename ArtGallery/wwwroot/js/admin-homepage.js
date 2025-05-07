@@ -445,7 +445,7 @@ function addUserButtonsEventListeners() {
     document.querySelectorAll('.btn-view-user').forEach(button => {
         button.addEventListener('click', function () {
             const userId = this.getAttribute('data-id');
-            window.open(`/Admin/UserDetail/${userId}`, '_blank');
+            window.open(`/User/Profile/${userId}`, '_blank');
         });
     });
 
@@ -454,29 +454,67 @@ function addUserButtonsEventListeners() {
         button.addEventListener('click', function () {
             const userId = this.getAttribute('data-id');
             const isActive = this.getAttribute('data-active') === 'true';
-            const action = isActive ? 'vô hiệu hóa' : 'kích hoạt';
 
-            if (confirm(`Bạn có chắc muốn ${action} người dùng này?`)) {
-                fetch('/Admin/ToggleUserStatus', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
-                    },
-                    body: JSON.stringify({ userId: userId, setActive: !isActive })
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert(`Đã ${action} người dùng thành công!`);
-                            fetchUsers(); // Tải lại danh sách
-                        } else {
-                            alert(`Lỗi: ${data.message}`);
-                        }
-                    })
-                    .catch(error => console.error('Error toggling user status:', error));
+            if (isActive) {
+                // Hiển thị modal nhập lý do và thời gian khóa
+                document.getElementById('lock-user-id').value = userId;
+                
+                // Reset form
+                document.getElementById('lock-reason').value = '';
+                document.getElementById('lock-days').value = '0';
+                document.getElementById('lock-hours').value = '0';
+                document.getElementById('lock-minutes').value = '0';
+                document.getElementById('lock-seconds').value = '0';
+                
+                // Hiển thị modal (cách sử dụng Bootstrap 5)
+                const lockModal = document.getElementById('lockUserModal');
+                const bootstrapModal = new bootstrap.Modal(lockModal);
+                bootstrapModal.show();
+                
+                // Đảm bảo các label hiển thị rõ ràng
+                setTimeout(() => {
+                    const labels = lockModal.querySelectorAll('.form-text');
+                    labels.forEach(label => {
+                        label.style.visibility = 'visible';
+                        label.style.color = '#ccc';
+                    });
+                }, 100);
+            } else {
+                // Mở khóa tài khoản
+                if (confirm('Bạn có chắc muốn mở khóa tài khoản người dùng này?')) {
+                    unlockUser(userId);
+                }
             }
         });
+    });
+
+    // Xử lý nút xác nhận khóa trong modal
+    document.getElementById('confirm-lock-user').addEventListener('click', function() {
+        const userId = document.getElementById('lock-user-id').value;
+        const reason = document.getElementById('lock-reason').value;
+        const days = parseInt(document.getElementById('lock-days').value) || 0;
+        const hours = parseInt(document.getElementById('lock-hours').value) || 0;
+        const minutes = parseInt(document.getElementById('lock-minutes').value) || 0;
+        const seconds = parseInt(document.getElementById('lock-seconds').value) || 0;
+        
+        // Kiểm tra nếu không có thời gian khóa
+        if (days === 0 && hours === 0 && minutes === 0 && seconds === 0) {
+            alert('Vui lòng nhập thời gian khóa tài khoản!');
+            return;
+        }
+        
+        // Kiểm tra nếu không có lý do
+        if (!reason.trim()) {
+            alert('Vui lòng nhập lý do khóa tài khoản!');
+            return;
+        }
+        
+        // Gửi yêu cầu khóa tài khoản
+        lockUser(userId, reason, days, hours, minutes, seconds);
+        
+        // Đóng modal
+        const lockModal = new bootstrap.Modal(document.getElementById('lockUserModal'));
+        lockModal.hide();
     });
 
     // Nút xóa người dùng
@@ -506,6 +544,57 @@ function addUserButtonsEventListeners() {
             }
         });
     });
+}
+
+// Hàm khóa tài khoản
+function lockUser(userId, reason, days, hours, minutes, seconds) {
+    fetch('/Admin/LockUser', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+        },
+        body: JSON.stringify({ 
+            userId: userId, 
+            reason: reason,
+            days: days,
+            hours: hours,
+            minutes: minutes,
+            seconds: seconds
+        })
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Đã khóa tài khoản người dùng thành công!');
+                fetchUsers(); // Tải lại danh sách
+            } else {
+                alert(`Lỗi: ${data.message}`);
+            }
+        })
+        .catch(error => console.error('Error locking user:', error));
+}
+
+// Hàm mở khóa tài khoản
+function unlockUser(userId) {
+    fetch('/Admin/UnlockUser', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+        },
+        body: JSON.stringify(userId)
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Đã mở khóa tài khoản người dùng thành công!');
+                fetchUsers(); // Tải lại danh sách
+            } else {
+                alert(`Lỗi: ${data.message}`);
+            }
+        })
+        .catch(error => console.error('Error unlocking user:', error));
 }
 
 // Thêm sự kiện cho các nút trong bảng tác phẩm

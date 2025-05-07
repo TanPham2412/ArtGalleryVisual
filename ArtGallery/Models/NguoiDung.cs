@@ -86,6 +86,8 @@ public partial class NguoiDung : IdentityUser<string>
 
     public virtual ICollection<Tranh> Tranhs { get; set; } = new List<Tranh>();
 
+    public string LockoutReason { get; set; }
+
     public string GetAvatarPath()
     {
         if (string.IsNullOrEmpty(AnhDaiDien))

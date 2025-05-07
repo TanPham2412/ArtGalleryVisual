@@ -1,0 +1,50 @@
+@if (TempData["LockoutMessage"] != null)
+{
+    <div class="modal fade" id="lockoutModal" tabindex="-1" aria-labelledby="lockoutModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="lockoutModalLabel">Tài khoản bị khóa</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Tài khoản của bạn đang bị khóa với lý do: <strong>@TempData["LockoutReason"]</strong></p>
+                    <p>Thời gian còn lại: <span id="lockout-countdown">@TempData["LockoutTime"]</span></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Hiển thị modal khi trang tải xong
+        document.addEventListener('DOMContentLoaded', function() {
+            var lockoutModal = new bootstrap.Modal(document.getElementById('lockoutModal'));
+            lockoutModal.show();
+            
+            // Đếm ngược thời gian
+            var endTime = new Date('@TempData["LockoutEndTime"]').getTime();
+            
+            var countdownTimer = setInterval(function() {
+                var now = new Date().getTime();
+                var distance = endTime - now;
+                
+                if (distance <= 0) {
+                    clearInterval(countdownTimer);
+                    document.getElementById('lockout-countdown').innerHTML = "Hết hạn. Vui lòng làm mới trang để đăng nhập lại.";
+                    return;
+                }
+                
+                var days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+                
+                document.getElementById('lockout-countdown').innerHTML = days + " ngày " + hours + " giờ "
+                    + minutes + " phút " + seconds + " giây";
+            }, 1000);
+        });
+    </script>
+} 
