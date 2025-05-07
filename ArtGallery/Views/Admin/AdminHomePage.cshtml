@@ -152,14 +152,14 @@
         <div class="admin-section" id="users">
             <h2>Quản lý người dùng</h2>
             <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
+                <div class="card-header">
                     <h5>Danh sách người dùng</h5>
-                    <div class="search-box">
+                </div>
+                <div class="card-body">
+                    <div class="search-box mb-3">
                         <input type="text" id="user-search" placeholder="Tìm kiếm người dùng...">
                         <button class="btn btn-sm btn-primary"><i class="fas fa-search"></i></button>
                     </div>
-                </div>
-                <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-hover" id="users-table">
                             <thead>
@@ -215,14 +215,14 @@
         <div class="admin-section" id="artworks">
             <h2>Quản lý tác phẩm</h2>
             <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
+                <div class="card-header">
                     <h5>Danh sách tác phẩm</h5>
-                    <div class="search-box">
+                </div>
+                <div class="card-body">
+                    <div class="search-box mb-3">
                         <input type="text" id="artwork-search" placeholder="Tìm kiếm tác phẩm...">
                         <button class="btn btn-sm btn-primary"><i class="fas fa-search"></i></button>
                     </div>
-                </div>
-                <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-hover" id="artworks-table">
                             <thead>
@@ -250,14 +250,14 @@
         <div class="admin-section" id="orders">
             <h2>Quản lý đơn hàng</h2>
             <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
+                <div class="card-header">
                     <h5>Danh sách đơn hàng</h5>
-                    <div class="search-box">
+                </div>
+                <div class="card-body">
+                    <div class="search-box mb-3">
                         <input type="text" id="order-search" placeholder="Tìm kiếm đơn hàng...">
                         <button class="btn btn-sm btn-primary"><i class="fas fa-search"></i></button>
                     </div>
-                </div>
-                <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-hover" id="orders-table">
                             <thead>
@@ -372,41 +372,41 @@
 <!-- Modal khóa tài khoản -->
 <div class="modal fade" id="lockUserModal" tabindex="-1" aria-labelledby="lockUserModalLabel" aria-hidden="true">
     <div class="modal-dialog">
-        <div class="modal-content" style="background-color: var(--dark-color); color: var(--text-color);">
+        <div class="modal-content" style="background-color: var(--dark-color);">
             <div class="modal-header" style="border-bottom-color: var(--gray-color);">
-                <h5 class="modal-title" id="lockUserModalLabel">Khóa tài khoản người dùng</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: invert(1);"></button>
+                <h5 class="modal-title" id="lockUserModalLabel" style="color: #e0e0e0;">Khóa tài khoản người dùng</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <input type="hidden" id="lock-user-id">
                 <div class="mb-3">
-                    <label for="lock-reason" class="form-label">Lý do khóa tài khoản</label>
-                    <textarea class="form-control" id="lock-reason" rows="3" placeholder="Nhập lý do khóa tài khoản..."></textarea>
+                    <label for="lock-reason" class="form-label" style="color: #e0e0e0;">Lý do khóa tài khoản</label>
+                    <textarea class="form-control" id="lock-reason" rows="3" placeholder="Nhập lý do khóa tài khoản..." style="background-color: #2d2d2d; color: #e0e0e0; border-color: #444;"></textarea>
                 </div>
                 <div class="mb-3">
-                    <label class="form-label">Thời gian khóa</label>
+                    <label class="form-label" style="color: #e0e0e0; margin-bottom: 10px;">Thời gian khóa</label>
                     <div class="row g-2">
                         <div class="col-3">
-                            <input type="number" class="form-control" id="lock-days" placeholder="Ngày" min="0" value="0">
-                            <small class="form-text text-muted">Ngày</small>
+                            <input type="number" class="form-control" id="lock-days" placeholder="Ngày" min="0" value="0" style="background-color: #2d2d2d; color: #e0e0e0; border-color: #444;">
+                            <label class="form-text" style="color: #ccc; margin-top: 5px; font-size: 0.9em;">Ngày</label>
                         </div>
                         <div class="col-3">
-                            <input type="number" class="form-control" id="lock-hours" placeholder="Giờ" min="0" max="23" value="0">
-                            <small class="form-text text-muted">Giờ</small>
+                            <input type="number" class="form-control" id="lock-hours" placeholder="Giờ" min="0" max="23" value="0" style="background-color: #2d2d2d; color: #e0e0e0; border-color: #444;">
+                            <label class="form-text" style="color: #ccc; margin-top: 5px; font-size: 0.9em;">Giờ</label>
                         </div>
                         <div class="col-3">
-                            <input type="number" class="form-control" id="lock-minutes" placeholder="Phút" min="0" max="59" value="0">
-                            <small class="form-text text-muted">Phút</small>
+                            <input type="number" class="form-control" id="lock-minutes" placeholder="Phút" min="0" max="59" value="0" style="background-color: #2d2d2d; color: #e0e0e0; border-color: #444;">
+                            <label class="form-text" style="color: #ccc; margin-top: 5px; font-size: 0.9em;">Phút</label>
                         </div>
                         <div class="col-3">
-                            <input type="number" class="form-control" id="lock-seconds" placeholder="Giây" min="0" max="59" value="0">
-                            <small class="form-text text-muted">Giây</small>
+                            <input type="number" class="form-control" id="lock-seconds" placeholder="Giây" min="0" max="59" value="0" style="background-color: #2d2d2d; color: #e0e0e0; border-color: #444;">
+                            <label class="form-text" style="color: #ccc; margin-top: 5px; font-size: 0.9em;">Giây</label>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="modal-footer" style="border-top-color: var(--gray-color);">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="background-color: #444; color: #e0e0e0; border: none;">Hủy</button>
                 <button type="button" class="btn btn-danger" id="confirm-lock-user">Khóa tài khoản</button>
             </div>
         </div>
@@ -427,7 +427,21 @@
         // Apply dark theme to all table elements
         document.addEventListener('DOMContentLoaded', function() {
             // Khởi tạo modal
-            const lockModal = new bootstrap.Modal(document.getElementById('lockUserModal'));
+            const lockModal = document.getElementById('lockUserModal');
+            const bootstrapLockModal = new bootstrap.Modal(lockModal);
+            
+            // Xử lý hiện/ẩn ô tìm kiếm khi modal hiện/ẩn
+            lockModal.addEventListener('show.bs.modal', function() {
+                document.querySelectorAll('.search-box').forEach(box => {
+                    box.style.visibility = 'hidden'; // Ẩn khi modal hiển thị
+                });
+            });
+            
+            lockModal.addEventListener('hidden.bs.modal', function() {
+                document.querySelectorAll('.search-box').forEach(box => {
+                    box.style.visibility = 'visible'; // Hiện lại khi modal đóng
+                });
+            });
             
             // Force background color for all table cells
             const allTableCells = document.querySelectorAll('table td, table th');

@@ -467,8 +467,18 @@ function addUserButtonsEventListeners() {
                 document.getElementById('lock-seconds').value = '0';
                 
                 // Hiển thị modal (cách sử dụng Bootstrap 5)
-                const lockModal = new bootstrap.Modal(document.getElementById('lockUserModal'));
-                lockModal.show();
+                const lockModal = document.getElementById('lockUserModal');
+                const bootstrapModal = new bootstrap.Modal(lockModal);
+                bootstrapModal.show();
+                
+                // Đảm bảo các label hiển thị rõ ràng
+                setTimeout(() => {
+                    const labels = lockModal.querySelectorAll('.form-text');
+                    labels.forEach(label => {
+                        label.style.visibility = 'visible';
+                        label.style.color = '#ccc';
+                    });
+                }, 100);
             } else {
                 // Mở khóa tài khoản
                 if (confirm('Bạn có chắc muốn mở khóa tài khoản người dùng này?')) {

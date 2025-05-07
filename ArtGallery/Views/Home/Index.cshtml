@@ -243,20 +243,31 @@
 {
     <div class="modal fade" id="lockoutModal" tabindex="-1" aria-labelledby="lockoutModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
         <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="lockoutModalLabel">Tài khoản bị khóa</h5>
+            <div class="modal-content" style="background-color: #1e1e1e; border: 1px solid #333; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.3);">
+                <div class="modal-header" style="border-bottom: 1px solid #333; padding: 15px 20px;">
+                    <h5 class="modal-title" id="lockoutModalLabel" style="color: #e0e0e0; font-weight: 600; font-size: 18px;">Tài khoản bị khóa</h5>
                 </div>
-                <div class="modal-body">
-                    <div class="alert alert-warning">
-                        <p><i class="fas fa-exclamation-triangle"></i> Tài khoản của bạn đang bị khóa với lý do:</p>
-                        <p class="text-danger fw-bold">@TempData["LockoutReason"]</p>
-                        <hr>
-                        <p>Thời gian còn lại: <span id="lockout-countdown" class="badge bg-danger"></span></p>
+                <div class="modal-body" style="padding: 20px;">
+                    <div style="background-color: #252525; border-radius: 8px; padding: 15px; border-left: 4px solid #ff4444;">
+                        <p style="color: #e0e0e0; margin-bottom: 15px; display: flex; align-items: center;">
+                            <i class="fas fa-exclamation-triangle" style="color: #ff4444; margin-right: 10px; font-size: 20px;"></i>
+                            <span>Tài khoản của bạn đang bị khóa với lý do:</span>
+                        </p>
+                        <p style="color: #ff4444; font-weight: 600; font-size: 16px; margin-bottom: 20px; padding: 10px; background-color: #1a1a1a; border-radius: 6px;">@TempData["LockoutReason"]</p>
+                        
+                        <div style="margin-top: 20px; border-top: 1px solid #333; padding-top: 15px;">
+                            <p style="color: #e0e0e0; font-size: 14px;">Thời gian còn lại:</p>
+                            <div style="background-color: #1a1a1a; padding: 12px; border-radius: 8px; text-align: center; margin-top: 10px;">
+                                <span id="lockout-countdown" style="color: #00a8ff; font-size: 18px; font-weight: 700; letter-spacing: 0.5px;"></span>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <a href="@Url.Action("LoginRegister", "Home")" class="btn btn-primary">Đăng xuất</a>
+                <div class="modal-footer" style="border-top: 1px solid #333; padding: 15px 20px;">
+                    <a href="@Url.Action("LoginRegister", "Home")" class="btn" style="background-color: #00a8ff; color: #fff; border-radius: 30px; padding: 8px 20px; font-weight: 500; transition: all 0.2s;">
+                        <i class="fas fa-sign-out-alt" style="margin-right: 8px;"></i>
+                        Đăng xuất
+                    </a>
                 </div>
             </div>
         </div>
@@ -295,8 +306,11 @@
                 var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
                 var seconds = Math.floor((distance % (1000 * 60)) / 1000);
                 
-                document.getElementById('lockout-countdown').innerHTML = days + " ngày " + hours + " giờ "
-                    + minutes + " phút " + seconds + " giây";
+                document.getElementById('lockout-countdown').innerHTML = 
+                    (days > 0 ? '<span style="color: #ff4444;">' + days + '</span> ngày ' : '') + 
+                    '<span style="color: #ff4444;">' + hours + '</span> giờ ' +
+                    '<span style="color: #ff4444;">' + minutes + '</span> phút ' +
+                    '<span style="color: #ff4444;">' + seconds + '</span> giây';
             }, 1000);
         });
     </script>
