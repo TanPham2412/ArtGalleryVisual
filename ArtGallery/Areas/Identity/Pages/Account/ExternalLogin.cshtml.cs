@@ -115,6 +115,31 @@ namespace ArtGallery.Areas.Identity.Pages.Account
                 return RedirectToPage("./Login", new { ReturnUrl = returnUrl });
             }
 
+            // Kiểm tra nếu user tồn tại dựa trên thông tin từ Google
+            var email = info.Principal.FindFirstValue(ClaimTypes.Email);
+            var user = await _userManager.FindByEmailAsync(email);
+
+            // Nếu user tồn tại và bị khóa
+            if (user != null && await _userManager.IsLockedOutAsync(user))
+            {
+                var lockoutEnd = await _userManager.GetLockoutEndDateAsync(user);
+                
+                if (lockoutEnd.HasValue && lockoutEnd.Value > DateTimeOffset.Now)
+                {
+                    // Lưu thông tin khóa để hiển thị
+                    TempData["LockoutMessage"] = "Tài khoản của bạn đang bị khóa";
+                    TempData["LockoutReason"] = user.LockoutReason ?? "Vi phạm quy định của trang web";
+                    TempData["LockoutTime"] = (lockoutEnd.Value - DateTimeOffset.Now).ToString();
+                    TempData["LockoutEndTime"] = lockoutEnd.Value.LocalDateTime.ToString("yyyy-MM-ddTHH:mm:ss");
+                    
+                    // Đăng nhập người dùng dù họ bị khóa
+                    await _signInManager.SignInAsync(user, isPersistent: false);
+                    
+                    // Chuyển hướng đến trang Index
+                    return LocalRedirect(returnUrl);
+                }
+            }
+
             // Sign in the user with this external login provider if the user already has a login.
             var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false, bypassTwoFactor: true);
             if (result.Succeeded)
@@ -124,6 +149,28 @@ namespace ArtGallery.Areas.Identity.Pages.Account
             }
             if (result.IsLockedOut)
             {
+                // Đoạn này cần sửa đổi để phù hợp với yêu cầu mới
+                var userByEmail = await _userManager.FindByEmailAsync(email);
+                if (userByEmail != null)
+                {
+                    var lockoutEnd = await _userManager.GetLockoutEndDateAsync(userByEmail);
+                    
+                    if (lockoutEnd.HasValue && lockoutEnd.Value > DateTimeOffset.Now)
+                    {
+                        // Lưu thông tin khóa để hiển thị
+                        TempData["LockoutMessage"] = "Tài khoản của bạn đang bị khóa";
+                        TempData["LockoutReason"] = userByEmail.LockoutReason ?? "Vi phạm quy định của trang web";
+                        TempData["LockoutTime"] = (lockoutEnd.Value - DateTimeOffset.Now).ToString();
+                        TempData["LockoutEndTime"] = lockoutEnd.Value.LocalDateTime.ToString("yyyy-MM-ddTHH:mm:ss");
+                        
+                        // Đăng nhập người dùng dù họ bị khóa
+                        await _signInManager.SignInAsync(userByEmail, isPersistent: false);
+                        
+                        // Chuyển hướng đến trang Index
+                        return RedirectToPage("/Index", new { area = "" });
+                    }
+                }
+                // Nếu không tìm thấy thông tin user chi tiết thì mới chuyển hướng đến trang Lockout
                 return RedirectToPage("./Lockout");
             }
             else
