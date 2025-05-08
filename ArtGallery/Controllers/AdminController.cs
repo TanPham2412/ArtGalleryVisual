@@ -331,10 +331,10 @@ namespace ArtGallery.Controllers
                         title = t.TieuDe,
                         thumbnailUrl = t.DuongDanAnh,
                         artistName = t.MaNguoiDungNavigation.TenNguoiDung,
+                        artistId = t.MaNguoiDung,
                         category = t.MaTheLoais.FirstOrDefault() != null ? t.MaTheLoais.FirstOrDefault().TenTheLoai : "Chưa phân loại",
                         price = t.Gia,
-                        createdDate = t.NgayDang,
-                        isActive = t.TrangThai != "Đã ẩn" // Hoặc sử dụng trạng thái phù hợp từ t.TrangThai
+                        createdDate = t.NgayDang
                     })
                     .ToListAsync();
 
@@ -688,10 +688,159 @@ namespace ArtGallery.Controllers
                 return StatusCode(500, new { success = false, message = ex.Message });
             }
         }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteArtwork([FromBody] DeleteArtworkViewModel model)
+        {
+            try
+            {
+                _logger.LogInformation($"DeleteArtwork called: ArtworkId={model?.ArtworkId}, ArtistId={model?.ArtistId}");
+                
+                if (model == null || model.ArtworkId <= 0)
+                {
+                    _logger.LogWarning("Invalid delete artwork data received");
+                    return BadRequest(new { success = false, message = "Thông tin không hợp lệ" });
+                }
+
+                // Nếu ArtistId không được cung cấp, lấy từ database
+                if (string.IsNullOrEmpty(model.ArtistId))
+                {
+                    var artworkInfo = await _context.Tranhs
+                        .Where(t => t.MaTranh == model.ArtworkId)
+                        .Select(t => new { t.MaNguoiDung })
+                        .FirstOrDefaultAsync();
+                        
+                    if (artworkInfo != null)
+                        model.ArtistId = artworkInfo.MaNguoiDung;
+                }
+
+                // Sửa lại để có lý do mặc định
+                if (string.IsNullOrEmpty(model.Reason))
+                    model.Reason = "Xóa bởi quản trị viên";
+
+                var artwork = await _context.Tranhs
+                    .Include(t => t.BinhLuans)
+                    .Include(t => t.GiaoDiches)
+                    .Include(t => t.LuotThiches)
+                    .Include(t => t.LuuTranhs)
+                    .Include(t => t.NoiBats)
+                    .Include(t => t.MaTags)
+                    .Include(t => t.MaTheLoais)
+                    .FirstOrDefaultAsync(t => t.MaTranh == model.ArtworkId);
+                    
+                if (artwork == null)
+                    return NotFound(new { success = false, message = "Không tìm thấy tác phẩm" });
+
+                using var transaction = await _context.Database.BeginTransactionAsync();
+                try
+                {
+                    // Lấy tất cả mã bình luận để xóa phản hồi
+                    var commentIds = artwork.BinhLuans.Select(b => b.MaBinhLuan).ToList();
+                    
+                    // 1. Xóa phản hồi bình luận
+                    var replies = await _context.PhanHoiBinhLuans
+                        .Where(r => commentIds.Contains(r.MaBinhLuan))
+                        .ToListAsync();
+                    _context.PhanHoiBinhLuans.RemoveRange(replies);
+                    
+                    // 2. Xóa bình luận
+                    _context.BinhLuans.RemoveRange(artwork.BinhLuans);
+                    
+                    // 3. Xóa lượt thích
+                    _context.LuotThiches.RemoveRange(artwork.LuotThiches);
+                    
+                    // 4. Xóa lưu tranh
+                    _context.LuuTranhs.RemoveRange(artwork.LuuTranhs);
+                    
+                    // 5. Xóa nổi bật
+                    _context.NoiBats.RemoveRange(artwork.NoiBats);
+                    
+                    // 6. Xóa liên kết với thẻ tag (không xóa tag)
+                    artwork.MaTags.Clear();
+                    
+                    // 7. Xóa liên kết với thể loại (không xóa thể loại)
+                    artwork.MaTheLoais.Clear();
+                    
+                    // 8. Kiểm tra giao dịch (nếu có giao dịch hoàn thành, không xóa tranh)
+                    var completedTransactions = artwork.GiaoDiches
+                        .Where(g => g.TrangThai == "Đã hoàn thành" || g.TrangThai == "Đang giao hàng")
+                        .ToList();
+                        
+                    if (completedTransactions.Any())
+                    {
+                        await transaction.RollbackAsync();
+                        return Json(new { 
+                            success = false, 
+                            message = "Không thể xóa tác phẩm đã bán. Hãy cập nhật trạng thái để ẩn thay vì xóa." 
+                        });
+                    }
+                    
+                    // 9. Xóa giao dịch chưa hoàn thành
+                    var pendingTransactions = artwork.GiaoDiches
+                        .Where(g => g.TrangThai != "Đã hoàn thành" && g.TrangThai != "Đang giao hàng")
+                        .ToList();
+                    _context.GiaoDiches.RemoveRange(pendingTransactions);
+                    
+                    // 10. Xóa file ảnh gốc trên server
+                    if (!string.IsNullOrEmpty(artwork.DuongDanAnh))
+                    {
+                        var imagePath = Path.Combine(
+                            Directory.GetCurrentDirectory(), 
+                            "wwwroot", 
+                            artwork.DuongDanAnh.TrimStart('/')
+                        );
+                        
+                        if (System.IO.File.Exists(imagePath))
+                        {
+                            try {
+                                System.IO.File.Delete(imagePath);
+                            } catch (Exception ex) {
+                                _logger.LogWarning($"Không thể xóa file ảnh: {ex.Message}");
+                            }
+                        }
+                    }
+                    
+                    // 11. Gửi thông báo cho nghệ sĩ
+                    await _notificationRepository.CreateSystemNotification(
+                        model.ArtistId, 
+                        "Tác phẩm của bạn đã bị xóa",
+                        $"Tác phẩm '{artwork.TieuDe}' đã bị quản trị viên xóa với lý do: {model.Reason}",
+                        "/User/Gallery/" + model.ArtistId,
+                        "system"
+                    );
+                    
+                    // 12. Cuối cùng xóa tác phẩm
+                    _context.Tranhs.Remove(artwork);
+                    await _context.SaveChangesAsync();
+                    
+                    await transaction.CommitAsync();
+                    
+                    return Ok(new { success = true });
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    _logger.LogError(ex, "Error deleting artwork data");
+                    throw;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting artwork");
+                return StatusCode(500, new { success = false, message = ex.Message });
+            }
+        }
     }
 
     public class DeleteUserViewModel
     {
         public string UserId { get; set; }
+    }
+
+    public class DeleteArtworkViewModel
+    {
+        public int ArtworkId { get; set; }
+        public string ArtistId { get; set; }
+        public string Reason { get; set; }
     }
 }

@@ -241,7 +241,7 @@ function fetchArtworks() {
                     </td>
                     <td>${artwork.title}</td>
                     <td>${artwork.artistName}</td>
-                    <td>${artwork.category}</td>
+                    <td>${artwork.category ?? 'Chưa phân loại'}</td>
                     <td>${formatCurrency(artwork.price)}</td>
                     <td>${formatDate(artwork.createdDate)}</td>
                     <td>
@@ -249,10 +249,7 @@ function fetchArtworks() {
                             <a href="/Artwork/Display/${artwork.id}" class="btn btn-primary btn-sm" target="_blank">
                                 <i class="fas fa-eye"></i>
                             </a>
-                            <button class="btn btn-warning btn-sm btn-toggle-artwork" data-id="${artwork.id}" data-active="${artwork.isActive}">
-                                <i class="fas ${artwork.isActive ? 'fa-ban' : 'fa-check'}"></i>
-                            </button>
-                            <button class="btn btn-danger btn-sm btn-delete-artwork" data-id="${artwork.id}">
+                            <button class="btn btn-danger btn-sm btn-delete-artwork" data-id="${artwork.id}" data-artist-id="${artwork.artistId}">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </div>
@@ -628,41 +625,19 @@ function unlockUser(userId) {
 
 // Thêm sự kiện cho các nút trong bảng tác phẩm
 function addArtworkButtonsEventListeners() {
-    // Nút vô hiệu hóa/kích hoạt tác phẩm
-    document.querySelectorAll('.btn-toggle-artwork').forEach(button => {
-        button.addEventListener('click', function () {
+    // Nút xem chi tiết tác phẩm
+    document.querySelectorAll('.btn-view-artwork').forEach(button => {
+        button.addEventListener('click', function() {
             const artworkId = this.getAttribute('data-id');
-            const isActive = this.getAttribute('data-active') === 'true';
-            const action = isActive ? 'ẩn' : 'hiển thị';
-
-            if (confirm(`Bạn có chắc muốn ${action} tác phẩm này?`)) {
-                fetch('/Admin/ToggleArtworkStatus', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
-                    },
-                    body: JSON.stringify({ artworkId: artworkId, setActive: !isActive })
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert(`Đã ${action} tác phẩm thành công!`);
-                            fetchArtworks(); // Tải lại danh sách
-                        } else {
-                            alert(`Lỗi: ${data.message}`);
-                        }
-                    })
-                    .catch(error => console.error('Error toggling artwork status:', error));
-            }
+            window.open(`/Artwork/Display/${artworkId}`, '_blank');
         });
     });
 
     // Nút xóa tác phẩm
     document.querySelectorAll('.btn-delete-artwork').forEach(button => {
-        button.addEventListener('click', function () {
+        button.addEventListener('click', function() {
             const artworkId = this.getAttribute('data-id');
-
+            
             if (confirm('Bạn có chắc muốn xóa tác phẩm này? Dữ liệu không thể khôi phục!')) {
                 fetch('/Admin/DeleteArtwork', {
                     method: 'POST',
@@ -670,18 +645,22 @@ function addArtworkButtonsEventListeners() {
                         'Content-Type': 'application/json',
                         'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
                     },
-                    body: JSON.stringify({ artworkId: artworkId })
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert('Đã xóa tác phẩm thành công!');
-                            fetchArtworks(); // Tải lại danh sách
-                        } else {
-                            alert(`Lỗi: ${data.message}`);
-                        }
+                    body: JSON.stringify({
+                        ArtworkId: parseInt(artworkId),
+                        ArtistId: this.getAttribute('data-artist-id') || "",
+                        Reason: "Xóa bởi quản trị viên"
                     })
-                    .catch(error => console.error('Error deleting artwork:', error));
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Đã xóa tác phẩm thành công!');
+                        fetchArtworks(); // Tải lại danh sách
+                    } else {
+                        alert(`Lỗi: ${data.message}`);
+                    }
+                })
+                .catch(error => console.error('Error deleting artwork:', error));
             }
         });
     });

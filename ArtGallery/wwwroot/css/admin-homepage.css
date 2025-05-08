@@ -550,3 +550,8 @@ body {
   z-index: 0;
   margin-top: 5px;
 }
+
+/* Ẩn nút toggle visibility (nút màu vàng) */
+.btn-toggle-artwork {
+    display: none !important;
+}
