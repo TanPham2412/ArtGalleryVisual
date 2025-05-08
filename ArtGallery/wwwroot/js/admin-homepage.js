@@ -637,31 +637,17 @@ function addArtworkButtonsEventListeners() {
     document.querySelectorAll('.btn-delete-artwork').forEach(button => {
         button.addEventListener('click', function() {
             const artworkId = this.getAttribute('data-id');
+            const artistId = this.getAttribute('data-artist-id') || "";
             
-            if (confirm('Bạn có chắc muốn xóa tác phẩm này? Dữ liệu không thể khôi phục!')) {
-                fetch('/Admin/DeleteArtwork', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
-                    },
-                    body: JSON.stringify({
-                        ArtworkId: parseInt(artworkId),
-                        ArtistId: this.getAttribute('data-artist-id') || "",
-                        Reason: "Xóa bởi quản trị viên"
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('Đã xóa tác phẩm thành công!');
-                        fetchArtworks(); // Tải lại danh sách
-                    } else {
-                        alert(`Lỗi: ${data.message}`);
-                    }
-                })
-                .catch(error => console.error('Error deleting artwork:', error));
-            }
+            // Hiển thị modal xóa tác phẩm
+            document.getElementById('delete-artwork-id').value = artworkId;
+            document.getElementById('delete-artist-id').value = artistId;
+            document.getElementById('delete-reason').value = '';
+            
+            // Hiển thị modal
+            const deleteModal = document.getElementById('deleteArtworkModal');
+            const bootstrapModal = new bootstrap.Modal(deleteModal);
+            bootstrapModal.show();
         });
     });
 }
@@ -818,3 +804,42 @@ function debounce(func, delay) {
         timeout = setTimeout(() => func.apply(context, args), delay);
     };
 }
+
+// Thêm sự kiện cho nút xác nhận xóa tác phẩm trong document.ready
+document.addEventListener('DOMContentLoaded', function() {
+    // Các code khác...
+    
+    // Xử lý nút xác nhận xóa tác phẩm
+    document.getElementById('confirm-delete-artwork').addEventListener('click', function() {
+        const artworkId = document.getElementById('delete-artwork-id').value;
+        const artistId = document.getElementById('delete-artist-id').value;
+        const reason = document.getElementById('delete-reason').value.trim() || "Xóa bởi quản trị viên";
+        
+        fetch('/Admin/DeleteArtwork', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+            },
+            body: JSON.stringify({
+                ArtworkId: parseInt(artworkId),
+                ArtistId: artistId,
+                Reason: reason
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Đã xóa tác phẩm thành công!');
+                fetchArtworks(); // Tải lại danh sách
+            } else {
+                alert(`Lỗi: ${data.message}`);
+            }
+        })
+        .catch(error => console.error('Error deleting artwork:', error));
+        
+        // Đóng modal
+        const deleteModal = bootstrap.Modal.getInstance(document.getElementById('deleteArtworkModal'));
+        deleteModal.hide();
+    });
+});

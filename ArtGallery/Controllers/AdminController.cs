@@ -761,27 +761,10 @@ namespace ArtGallery.Controllers
                     // 7. Xóa liên kết với thể loại (không xóa thể loại)
                     artwork.MaTheLoais.Clear();
                     
-                    // 8. Kiểm tra giao dịch (nếu có giao dịch hoàn thành, không xóa tranh)
-                    var completedTransactions = artwork.GiaoDiches
-                        .Where(g => g.TrangThai == "Đã hoàn thành" || g.TrangThai == "Đang giao hàng")
-                        .ToList();
-                        
-                    if (completedTransactions.Any())
-                    {
-                        await transaction.RollbackAsync();
-                        return Json(new { 
-                            success = false, 
-                            message = "Không thể xóa tác phẩm đã bán. Hãy cập nhật trạng thái để ẩn thay vì xóa." 
-                        });
-                    }
+                    // 8. Xóa tất cả giao dịch liên quan đến tác phẩm này
+                    _context.GiaoDiches.RemoveRange(artwork.GiaoDiches);
                     
-                    // 9. Xóa giao dịch chưa hoàn thành
-                    var pendingTransactions = artwork.GiaoDiches
-                        .Where(g => g.TrangThai != "Đã hoàn thành" && g.TrangThai != "Đang giao hàng")
-                        .ToList();
-                    _context.GiaoDiches.RemoveRange(pendingTransactions);
-                    
-                    // 10. Xóa file ảnh gốc trên server
+                    // 9. Xóa file ảnh gốc trên server
                     if (!string.IsNullOrEmpty(artwork.DuongDanAnh))
                     {
                         var imagePath = Path.Combine(
@@ -800,7 +783,7 @@ namespace ArtGallery.Controllers
                         }
                     }
                     
-                    // 11. Gửi thông báo cho nghệ sĩ
+                    // 10. Gửi thông báo cho nghệ sĩ
                     await _notificationRepository.CreateSystemNotification(
                         model.ArtistId, 
                         "Tác phẩm của bạn đã bị xóa",
@@ -809,7 +792,7 @@ namespace ArtGallery.Controllers
                         "system"
                     );
                     
-                    // 12. Cuối cùng xóa tác phẩm
+                    // 11. Cuối cùng xóa tác phẩm
                     _context.Tranhs.Remove(artwork);
                     await _context.SaveChangesAsync();
                     
