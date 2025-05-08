@@ -558,7 +558,7 @@ function addUserButtonsEventListeners() {
                         'Content-Type': 'application/json',
                         'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
                     },
-                    body: JSON.stringify({ userId: userId })
+                    body: JSON.stringify(userId)
                 })
                     .then(response => response.json())
                     .then(data => {
