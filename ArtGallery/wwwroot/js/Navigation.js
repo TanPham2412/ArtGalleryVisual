@@ -434,6 +434,26 @@
         e.preventDefault();
         window.location.href = '/Messages/Index';
     });
+
+    // Kiểm tra nếu có menu admin, mở rộng dropdown
+    if ($('.admin-item').length > 0) {
+        $('#userDropdownMenu').addClass('admin-menu-expanded');
+    }
+
+    // Hiệu ứng hover cho các mục menu admin
+    $('.admin-item').hover(
+        function() {
+            $(this).find('i').css('color', '#ffffff');
+        },
+        function() {
+            $(this).find('i').css('color', '#4CAF50');
+        }
+    );
+    
+    // Thêm badge cho admin
+    if ($('.admin-item').length > 0) {
+        $('.user-profile-name').append('<span class="admin-badge">Admin</span>');
+    }
 });
 
 // Giữ hàm toggleFollow ở bên ngoài document.ready

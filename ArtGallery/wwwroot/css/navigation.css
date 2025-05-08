@@ -882,3 +882,49 @@ input[type="file"]::-webkit-file-upload-button:hover {
     width: 0;
     height: 0;
 }
+
+/* Admin menu styles - add this to the end of the file */
+.admin-item {
+    background-color: rgba(76, 175, 80, 0.05);
+    border-bottom: 1px solid #333;
+}
+
+.admin-item i {
+    color: #4CAF50;
+}
+
+.admin-item:hover {
+    background-color: rgba(76, 175, 80, 0.15) !important;
+}
+
+.dropdown-divider {
+    height: 1px;
+    background-color: #333;
+    margin: 8px 0;
+}
+
+/* Highlight admin users with badge */
+.user-profile-header .admin-badge {
+    background-color: #4CAF50;
+    color: white;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 10px;
+    margin-left: 5px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+/* Make admin dropdown wider to accommodate the longer menu items */
+.admin-menu-expanded {
+    width: 350px !important;
+}
+
+/* Highlight active admin menu item */
+.dropdown-item.admin-item.active {
+    background-color: rgba(76, 175, 80, 0.2);
+}
+
+.dropdown-item.admin-item:hover {
+    background-color: rgba(76, 175, 80, 0.15);
+}

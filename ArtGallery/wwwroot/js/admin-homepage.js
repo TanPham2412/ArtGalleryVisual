@@ -3,6 +3,30 @@
     const menuItems = document.querySelectorAll('.admin-menu li');
     const sections = document.querySelectorAll('.admin-section');
 
+    // Kiểm tra tham số tab từ URL
+    function activateTabFromUrl() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const tabParam = urlParams.get('tab');
+        
+        if (tabParam) {
+            // Bỏ active ở tất cả menu items và sections
+            menuItems.forEach(i => i.classList.remove('active'));
+            sections.forEach(s => s.classList.remove('active'));
+            
+            // Tìm menu item và section tương ứng
+            const targetMenuItem = document.querySelector(`.admin-menu li[data-target="${tabParam}"]`);
+            const targetSection = document.getElementById(tabParam);
+            
+            if (targetMenuItem && targetSection) {
+                targetMenuItem.classList.add('active');
+                targetSection.classList.add('active');
+            }
+        }
+    }
+    
+    // Kích hoạt tab từ URL khi tải trang
+    activateTabFromUrl();
+
     menuItems.forEach(item => {
         item.addEventListener('click', function () {
             const target = this.getAttribute('data-target');
@@ -14,6 +38,11 @@
             // Thêm active cho item được click và section tương ứng
             this.classList.add('active');
             document.getElementById(target).classList.add('active');
+            
+            // Cập nhật URL khi chuyển tab (không làm refresh trang)
+            const url = new URL(window.location);
+            url.searchParams.set('tab', target);
+            window.history.pushState({}, '', url);
         });
     });
 
