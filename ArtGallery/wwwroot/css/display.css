@@ -1361,3 +1361,22 @@ label.btn-attachment:hover,
     border-color: #dc3545;
     cursor: not-allowed;
 }
+
+/* Thêm vào cuối file CSS */
+body.modal-open {
+    overflow: auto !important;
+    padding-right: 0 !important;
+}
+
+.modal-backdrop {
+    z-index: 1040 !important;
+}
+
+.modal {
+    z-index: 1050 !important;
+}
+
+.modal-footer button {
+    font-size: 1.1rem;
+    padding: 10px;
+}

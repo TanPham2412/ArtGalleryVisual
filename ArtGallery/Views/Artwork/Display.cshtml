@@ -501,13 +501,13 @@
     </div>
 </div>
 
-<!-- Kiểm tra modal sticker có đúng cấu trúc -->
+<!-- Cập nhật modal sticker -->
 <div class="modal fade" id="stickerModal" tabindex="-1" aria-labelledby="stickerModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="stickerModalLabel">Chọn sticker</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="closeModalManually()"></button>
             </div>
             <div class="modal-body">
                 <ul class="nav nav-tabs" id="stickerTabs" role="tablist">
@@ -562,6 +562,9 @@
                         <div class="sticker-grid" id="vanthuong-stickers"></div>
                     </div>
                 </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary btn-lg w-100" onclick="closeModalManually()">Đóng</button>
             </div>
         </div>
     </div>
