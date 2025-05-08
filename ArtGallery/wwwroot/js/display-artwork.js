@@ -295,77 +295,99 @@ function loadStickers() {
     });
 }
 
+// Sửa lại hàm chọn sticker để tránh vấn đề với backdrop
 function selectSticker(element) {
     console.log('Sticker selected:', $(element).data('path'));
     const stickerPath = $(element).data('path');
 
-    // Đóng modal sticker
-    $('#stickerModal').modal('hide');
+    // Lưu dữ liệu trước khi đóng modal
+    const targetType = window.currentStickerTarget ? window.currentStickerTarget.type : null;
+    const commentId = window.currentStickerTarget ? window.currentStickerTarget.commentId : null;
+    
+    // Lưu thông tin sticker đã chọn vào biến global
+    window.selectedStickerPath = stickerPath;
+    
+    // Đóng modal theo cách thông thường
+    try {
+        // Tắt tất cả các modal đang mở
+        $('.modal').modal('hide');
+        
+        // Xóa tất cả backdrop
+        setTimeout(function() {
+            document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+            document.body.classList.remove('modal-open');
+            document.body.style.overflow = '';
+            document.body.style.paddingRight = '';
+            
+            // Áp dụng sticker đã chọn
+            applySelectedSticker();
+        }, 300);
+    } catch (error) {
+        console.error("Lỗi khi đóng modal:", error);
+        // Xử lý backup nếu phương thức thông thường thất bại
+        document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+        document.body.classList.remove('modal-open');
+        document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
+        
+        // Áp dụng sticker đã chọn
+        applySelectedSticker();
+    }
+}
 
-    // Kiểm tra target hiện tại
-    if (window.currentStickerTarget) {
-        if (window.currentStickerTarget.type === 'reply') {
-            // Xử lý cho phản hồi mới
-            const commentId = window.currentStickerTarget.commentId;
-            $(`#stickerInputReply-${commentId}`).val(stickerPath);
-            $(`#replyStickerPreview-${commentId} .preview-sticker`).attr('src', stickerPath);
-            $(`#replyStickerPreview-${commentId}`).removeClass('d-none');
-            $(`#replyImagePreview-${commentId}`).addClass('d-none');
-        }
-        else if (window.currentStickerTarget.type === 'editComment') {
-            // Xử lý cho sửa bình luận (giữ nguyên code cũ)
-            setTimeout(function () {
+// Tách phần xử lý áp dụng sticker thành function riêng
+function applySelectedSticker() {
+    if (!window.selectedStickerPath) return;
+    
+    const stickerPath = window.selectedStickerPath;
+    const targetType = window.currentStickerTarget ? window.currentStickerTarget.type : null;
+    const commentId = window.currentStickerTarget ? window.currentStickerTarget.commentId : null;
+    
+    if (targetType === 'reply') {
+        // Xử lý cho phản hồi mới
+        $(`#stickerInputReply-${commentId}`).val(stickerPath);
+        $(`#replyStickerPreview-${commentId} .preview-sticker`).attr('src', stickerPath);
+        $(`#replyStickerPreview-${commentId}`).removeClass('d-none');
+        $(`#replyImagePreview-${commentId}`).addClass('d-none');
+    }
+    else if (targetType === 'editComment' && window.editCommentState) {
+        // Xử lý cho sửa bình luận
+        setTimeout(function() {
+            $('#editStickerInput').val(stickerPath);
+            $('#editStickerPreview').attr('src', stickerPath);
+            $('#editStickerPreviewContainer').removeClass('d-none');
+            
+            // Mở lại modal chỉnh sửa bình luận
+            if ($('#editCommentModal').length) {
                 $('#editCommentModal').modal('show');
-
-                if (window.editCommentState) {
-                    $('#editCommentId').val(window.editCommentState.commentId);
-                    $('#editCommentContent').val(window.editCommentState.content);
-                    $('#editCommentOriginalImage').val(window.editCommentState.originalImage);
-                    $('#editCommentOriginalSticker').val(window.editCommentState.originalSticker);
-                }
-
-                $('#editStickerInput').val(stickerPath);
-                $('#editStickerPreview').attr('src', stickerPath);
-                $('#editStickerPreviewContainer').removeClass('d-none');
-                // Không ẩn ảnh khi chọn sticker
-                // $('#editImagePreviewContainer').addClass('d-none');
-                // $('#editImageInput').val('');
-            }, 500);
-        }
-        else if (window.currentStickerTarget.type === 'editReply') {
-            // Xử lý cho sửa phản hồi
-            setTimeout(function () {
-                // Mở lại modal sửa phản hồi
+            }
+        }, 400);
+    }
+    else if (targetType === 'editReply' && window.editReplyState) {
+        // Xử lý cho sửa phản hồi
+        setTimeout(function() {
+            $('#editReplyStickerInput').val(stickerPath);
+            $('#editReplyStickerPreview').attr('src', stickerPath);
+            $('#editReplyStickerPreviewContainer').removeClass('d-none');
+            
+            // Mở lại modal chỉnh sửa phản hồi
+            if ($('#editReplyModal').length) {
                 $('#editReplyModal').modal('show');
-
-                // Khôi phục nội dung trước đó
-                if (window.editReplyState) {
-                    $('#editReplyId').val(window.editReplyState.replyId);
-                    $('#editReplyContent').val(window.editReplyState.content);
-                    $('#editReplyOriginalImage').val(window.editReplyState.originalImage);
-                    $('#editReplyOriginalSticker').val(window.editReplyState.originalSticker);
-                }
-
-                // Cập nhật sticker mới
-                $('#editReplyStickerInput').val(stickerPath);
-                $('#editReplyStickerPreview').attr('src', stickerPath);
-                $('#editReplyStickerPreviewContainer').removeClass('d-none');
-                // Không ẩn ảnh khi chọn sticker
-                // $('#editReplyImagePreviewContainer').addClass('d-none');
-                // $('#editReplyImageInput').val('');
-            }, 500);
-        }
-
-        // Reset target sau khi đã chọn
-        window.currentStickerTarget = null;
-    } else {
-        // Xử lý cho bình luận mới (giữ nguyên code cũ)
+            }
+        }, 400);
+    }
+    else {
+        // Xử lý cho bình luận mới
         $('#stickerInput').val(stickerPath);
         $('#stickerPreview').attr('src', stickerPath);
         $('#stickerPreviewContainer').removeClass('d-none');
         $('#imagePreviewContainer').addClass('d-none');
         $('#imageInput').val('');
     }
+    
+    // Reset các biến global
+    window.currentStickerTarget = null;
+    window.selectedStickerPath = null;
 }
 
 // Hàm xử lý xóa tranh
@@ -1023,6 +1045,26 @@ $(document).ready(function () {
     $('#saveEditComment').click(function () {
         saveEditedComment();
     });
+
+    // Xử lý khi modal đóng
+    $(document).on('hidden.bs.modal', '.modal', function() {
+        // Xóa tất cả backdrop và reset body
+        $('.modal-backdrop').remove();
+        $('body').removeClass('modal-open');
+        $('body').css('padding-right', '');
+        $('body').attr('style', '');
+    });
+    
+    // Thêm xử lý khi ấn Esc
+    $(document).keydown(function(e) {
+        if (e.key === "Escape" && $('.modal-backdrop').length > 0) {
+            $('.modal').modal('hide');
+            $('.modal-backdrop').remove();
+            $('body').removeClass('modal-open');
+            $('body').css('padding-right', '');
+            $('body').attr('style', '');
+        }
+    });
 });
 
 function deleteReply(replyId, artworkId) {
@@ -1140,3 +1182,55 @@ function showEditReplyModal(replyId, commentId, replyContent) {
     const editReplyModal = new bootstrap.Modal(document.getElementById('editReplyModal'));
     editReplyModal.show();
 }
+
+// Thêm vào cuối file hoặc trong $(document).ready
+$(document).on('hidden.bs.modal', '.modal', function () {
+    $('.modal-backdrop').remove();
+    $('body').removeClass('modal-open');
+    $('body').css('padding-right', '');
+});
+
+function closeModalManually() {
+    $('#stickerModal').modal('hide');
+    
+    setTimeout(function() {
+        $('.modal-backdrop').remove();
+        $('body').removeClass('modal-open');
+        $('body').css('padding-right', '');
+        $('body').attr('style', '');
+    }, 100);
+}
+
+// Thêm sự kiện này vào document.ready
+$(document).ready(function() {
+    // Sửa lại cách xử lý modal
+    $(document).on('hide.bs.modal', '.modal', function() {
+        // Đánh dấu modal đang đóng để tránh xung đột
+        window.modalClosing = true;
+        
+        setTimeout(function() {
+            window.modalClosing = false;
+        }, 500);
+    });
+    
+    $(document).on('hidden.bs.modal', '.modal', function() {
+        // Đảm bảo xóa mọi backdrop sau khi modal đóng
+        document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+        document.body.classList.remove('modal-open');
+        document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
+    });
+    
+    // Phím tắt Escape để đóng modal và xóa backdrop
+    $(document).keydown(function(e) {
+        if (e.key === "Escape") {
+            $('.modal').modal('hide');
+            setTimeout(function() {
+                document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+                document.body.classList.remove('modal-open');
+                document.body.style.overflow = '';
+                document.body.style.paddingRight = '';
+            }, 300);
+        }
+    });
+});

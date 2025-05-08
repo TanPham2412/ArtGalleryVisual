@@ -523,7 +523,7 @@ body {
   filter: invert(1) grayscale(100%) brightness(200%);
 }
 
-/* Modal cần có z-index cao hơn */
+/* Đảm bảo modal hiển thị cao hơn thanh tìm kiếm */
 .modal {
   z-index: 2000 !important;
 }
@@ -544,9 +544,23 @@ body {
   z-index: 2002 !important;
 }
 
-/* Giảm z-index của table-responsive */
+/* Giảm z-index của thanh tìm kiếm */
+.search-box {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  width: 100%;
+  max-width: 300px;
+  margin-bottom: 15px;
+}
+
+/* Đảm bảo các bảng có z-index thấp hơn */
 .table-responsive {
   position: relative;
   z-index: 0;
-  margin-top: 5px;
+}
+
+/* Ẩn nút toggle visibility (nút màu vàng) */
+.btn-toggle-artwork {
+    display: none !important;
 }

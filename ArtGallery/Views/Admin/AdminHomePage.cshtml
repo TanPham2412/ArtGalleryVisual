@@ -413,11 +413,35 @@
     </div>
 </div>
 
+<!-- Modal xóa tác phẩm -->
+<div class="modal fade" id="deleteArtworkModal" tabindex="-1" aria-labelledby="deleteArtworkModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content" style="background-color: var(--dark-color);">
+            <div class="modal-header" style="border-bottom-color: var(--gray-color);">
+                <h5 class="modal-title" id="deleteArtworkModalLabel" style="color: #e0e0e0;">Xóa tác phẩm</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="delete-artwork-id">
+                <input type="hidden" id="delete-artist-id">
+                <div class="mb-3">
+                    <label for="delete-reason" class="form-label" style="color: #e0e0e0;">Lý do xóa tác phẩm</label>
+                    <textarea class="form-control" id="delete-reason" rows="3" placeholder="Nhập lý do xóa tác phẩm..." style="background-color: #2d2d2d; color: #e0e0e0; border-color: #444;"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer" style="border-top-color: var(--gray-color);">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="background-color: #444; color: #e0e0e0; border: none;">Hủy</button>
+                <button type="button" class="btn btn-danger" id="confirm-delete-artwork">Xóa tác phẩm</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="~/js/admin-homepage.js?v=4"></script>
+    <script src="~/js/admin-homepage.js?v=7"></script>
     
     <script>
         // Update Chart.js defaults for dark theme

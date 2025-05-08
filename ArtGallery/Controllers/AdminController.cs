@@ -6,6 +6,8 @@ using ArtGallery.Repositories.Interfaces;
 using ArtGallery.ViewModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System.Security.Claims;
+using System.IO;
 
 namespace ArtGallery.Controllers
 {
@@ -329,10 +331,10 @@ namespace ArtGallery.Controllers
                         title = t.TieuDe,
                         thumbnailUrl = t.DuongDanAnh,
                         artistName = t.MaNguoiDungNavigation.TenNguoiDung,
+                        artistId = t.MaNguoiDung,
                         category = t.MaTheLoais.FirstOrDefault() != null ? t.MaTheLoais.FirstOrDefault().TenTheLoai : "Chưa phân loại",
                         price = t.Gia,
-                        createdDate = t.NgayDang,
-                        isActive = t.TrangThai != "Đã ẩn" // Hoặc sử dụng trạng thái phù hợp từ t.TrangThai
+                        createdDate = t.NgayDang
                     })
                     .ToListAsync();
 
@@ -457,5 +459,371 @@ namespace ArtGallery.Controllers
                 return StatusCode(500, new { success = false, message = ex.Message });
             }
         }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteUser([FromBody] DeleteUserViewModel model)
+        {
+            try
+            {
+                if (model == null || string.IsNullOrEmpty(model.UserId))
+                    return BadRequest(new { success = false, message = "ID người dùng không hợp lệ" });
+
+                var user = await _userManager.FindByIdAsync(model.UserId);
+                if (user == null)
+                    return NotFound(new { success = false, message = "Không tìm thấy người dùng" });
+
+                if (User.FindFirstValue(ClaimTypes.NameIdentifier) == model.UserId)
+                    return BadRequest(new { success = false, message = "Không thể tự xóa tài khoản của bạn" });
+
+                using var transaction = await _context.Database.BeginTransactionAsync();
+                try
+                {
+                    // 1. Xóa dữ liệu phản hồi bình luận
+                    var userCommentIds = await _context.BinhLuans
+                        .Where(b => b.MaNguoiDung == model.UserId)
+                        .Select(b => b.MaBinhLuan)
+                        .ToListAsync();
+                    
+                    var replies = await _context.PhanHoiBinhLuans
+                        .Where(r => userCommentIds.Contains(r.MaBinhLuan) || r.MaNguoiDung == model.UserId)
+                        .ToListAsync();
+                    _context.PhanHoiBinhLuans.RemoveRange(replies);
+                    
+                    // 2. Xóa bình luận
+                    var comments = await _context.BinhLuans
+                        .Where(b => b.MaNguoiDung == model.UserId)
+                        .ToListAsync();
+                    _context.BinhLuans.RemoveRange(comments);
+                    
+                    // 3. Xóa doanh thu
+                    var revenue = await _context.DoanhThus
+                        .FirstOrDefaultAsync(d => d.MaNguoiDung == model.UserId);
+                    if (revenue != null)
+                        _context.DoanhThus.Remove(revenue);
+                    
+                    // 4. Xóa lượt thích
+                    var likes = await _context.LuotThiches
+                        .Where(l => l.MaNguoiDung == model.UserId)
+                        .ToListAsync();
+                    _context.LuotThiches.RemoveRange(likes);
+                    
+                    // 5. Xóa lưu tranh
+                    var bookmarks = await _context.LuuTranhs
+                        .Where(l => l.MaNguoiDung == model.UserId)
+                        .ToListAsync();
+                    _context.LuuTranhs.RemoveRange(bookmarks);
+                    
+                    // 6. Xóa media
+                    var media = await _context.Media
+                        .Where(m => m.MaNguoiDung == model.UserId)
+                        .ToListAsync();
+                    _context.Media.RemoveRange(media);
+                    
+                    // 7. Xóa nổi bật
+                    var features = await _context.NoiBats
+                        .Where(n => n.MaNguoiDung == model.UserId)
+                        .ToListAsync();
+                    _context.NoiBats.RemoveRange(features);
+                    
+                    // 8. Xóa theo dõi
+                    var follows = await _context.TheoDois
+                        .Where(t => t.MaNguoiTheoDoi == model.UserId || t.MaNguoiDuocTheoDoi == model.UserId)
+                        .ToListAsync();
+                    _context.TheoDois.RemoveRange(follows);
+                    
+                    // 9. Xóa thông báo
+                    var notifications = await _context.ThongBaos
+                        .Where(t => t.MaNguoiNhan == model.UserId || t.MaNguoiGui == model.UserId)
+                        .ToListAsync();
+                    _context.ThongBaos.RemoveRange(notifications);
+                    
+                    // 10. Xóa tin nhắn
+                    var messages = await _context.TinNhans
+                        .Where(t => t.MaNguoiGui == model.UserId || t.MaNguoiNhan == model.UserId)
+                        .ToListAsync();
+                    _context.TinNhans.RemoveRange(messages);
+                    
+                    // 11. Xử lý tác phẩm nghệ thuật
+                    var artworks = await _context.Tranhs
+                        .Include(t => t.BinhLuans)
+                        .ThenInclude(b => b.MaNguoiDungNavigation)
+                        .Include(t => t.GiaoDiches)
+                        .Include(t => t.LuotThiches)
+                        .Include(t => t.LuuTranhs)
+                        .Include(t => t.NoiBats)
+                        .Include(t => t.MaTags)
+                        .Include(t => t.MaTheLoais)
+                        .Where(t => t.MaNguoiDung == model.UserId)
+                        .ToListAsync();
+                    
+                    foreach (var artwork in artworks)
+                    {
+                        // 11.1 Lấy tất cả mã bình luận để xóa phản hồi
+                        var commentIds = artwork.BinhLuans.Select(b => b.MaBinhLuan).ToList();
+                        
+                        // 11.2 Xóa phản hồi bình luận
+                        var artworkReplies = await _context.PhanHoiBinhLuans
+                            .Where(r => commentIds.Contains(r.MaBinhLuan))
+                            .ToListAsync();
+                        _context.PhanHoiBinhLuans.RemoveRange(artworkReplies);
+                        
+                        // 11.3 Xóa bình luận
+                        _context.BinhLuans.RemoveRange(artwork.BinhLuans);
+                        
+                        // 11.4 Xóa lượt thích
+                        _context.LuotThiches.RemoveRange(artwork.LuotThiches);
+                        
+                        // 11.5 Xóa lưu tranh
+                        _context.LuuTranhs.RemoveRange(artwork.LuuTranhs);
+                        
+                        // 11.6 Xóa nổi bật
+                        _context.NoiBats.RemoveRange(artwork.NoiBats);
+                        
+                        // 11.7 Xóa liên kết với thẻ tag (không xóa tag)
+                        artwork.MaTags.Clear();
+                        
+                        // 11.8 Xóa liên kết với thể loại (không xóa thể loại)
+                        artwork.MaTheLoais.Clear();
+                        
+                        // 11.9 Xóa giao dịch
+                        var transactions = artwork.GiaoDiches.ToList();
+                        _context.GiaoDiches.RemoveRange(transactions);
+                        
+                        // 11.10 Xóa file ảnh gốc trên server
+                        if (!string.IsNullOrEmpty(artwork.DuongDanAnh))
+                        {
+                            var imagePath = Path.Combine(
+                                Directory.GetCurrentDirectory(), 
+                                "wwwroot", 
+                                artwork.DuongDanAnh.TrimStart('/')
+                            );
+                            
+                            if (System.IO.File.Exists(imagePath))
+                            {
+                                try {
+                                    System.IO.File.Delete(imagePath);
+                                } catch (Exception ex) {
+                                    _logger.LogWarning($"Không thể xóa file ảnh: {ex.Message}");
+                                }
+                            }
+                        }
+                    }
+                    
+                    // 11.11 Xóa tranh
+                    _context.Tranhs.RemoveRange(artworks);
+                    
+                    // 12. Xóa giao dịch mua của người dùng
+                    var purchases = await _context.GiaoDiches
+                        .Where(g => g.MaNguoiMua == model.UserId)
+                        .ToListAsync();
+                    _context.GiaoDiches.RemoveRange(purchases);
+                    
+                    // 13. Xóa người dùng từ tất cả vai trò
+                    var roles = await _userManager.GetRolesAsync(user);
+                    await _userManager.RemoveFromRolesAsync(user, roles);
+                    
+                    // 14. Xóa avatar và cover image nếu có
+                    if (!string.IsNullOrEmpty(user.AnhDaiDien))
+                    {
+                        var avatarPath = Path.Combine(
+                            Directory.GetCurrentDirectory(),
+                            "wwwroot",
+                            "images",
+                            "authors",
+                            "avatars",
+                            user.UserName,
+                            user.AnhDaiDien
+                        );
+                        
+                        if (System.IO.File.Exists(avatarPath))
+                        {
+                            try {
+                                System.IO.File.Delete(avatarPath);
+                            } catch (Exception ex) {
+                                _logger.LogWarning($"Không thể xóa avatar: {ex.Message}");
+                            }
+                        }
+                    }
+                    
+                    if (!string.IsNullOrEmpty(user.CoverImage))
+                    {
+                        var coverPath = Path.Combine(
+                            Directory.GetCurrentDirectory(),
+                            "wwwroot",
+                            "images",
+                            "authors",
+                            "covers",
+                            user.UserName,
+                            user.CoverImage
+                        );
+                        
+                        if (System.IO.File.Exists(coverPath))
+                        {
+                            try {
+                                System.IO.File.Delete(coverPath);
+                            } catch (Exception ex) {
+                                _logger.LogWarning($"Không thể xóa cover image: {ex.Message}");
+                            }
+                        }
+                    }
+                    
+                    // 15. Cuối cùng xóa người dùng
+                    await _userManager.DeleteAsync(user);
+                    
+                    // Xác nhận giao dịch
+                    await transaction.CommitAsync();
+                    
+                    return Ok(new { success = true, message = "Đã xóa người dùng và tất cả dữ liệu liên quan thành công" });
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    _logger.LogError(ex, "Error deleting user data");
+                    throw;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting user");
+                return StatusCode(500, new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteArtwork([FromBody] DeleteArtworkViewModel model)
+        {
+            try
+            {
+                _logger.LogInformation($"DeleteArtwork called: ArtworkId={model?.ArtworkId}, ArtistId={model?.ArtistId}");
+                
+                if (model == null || model.ArtworkId <= 0)
+                {
+                    _logger.LogWarning("Invalid delete artwork data received");
+                    return BadRequest(new { success = false, message = "Thông tin không hợp lệ" });
+                }
+
+                // Nếu ArtistId không được cung cấp, lấy từ database
+                if (string.IsNullOrEmpty(model.ArtistId))
+                {
+                    var artworkInfo = await _context.Tranhs
+                        .Where(t => t.MaTranh == model.ArtworkId)
+                        .Select(t => new { t.MaNguoiDung })
+                        .FirstOrDefaultAsync();
+                        
+                    if (artworkInfo != null)
+                        model.ArtistId = artworkInfo.MaNguoiDung;
+                }
+
+                // Sửa lại để có lý do mặc định
+                if (string.IsNullOrEmpty(model.Reason))
+                    model.Reason = "Xóa bởi quản trị viên";
+
+                var artwork = await _context.Tranhs
+                    .Include(t => t.BinhLuans)
+                    .Include(t => t.GiaoDiches)
+                    .Include(t => t.LuotThiches)
+                    .Include(t => t.LuuTranhs)
+                    .Include(t => t.NoiBats)
+                    .Include(t => t.MaTags)
+                    .Include(t => t.MaTheLoais)
+                    .FirstOrDefaultAsync(t => t.MaTranh == model.ArtworkId);
+                    
+                if (artwork == null)
+                    return NotFound(new { success = false, message = "Không tìm thấy tác phẩm" });
+
+                using var transaction = await _context.Database.BeginTransactionAsync();
+                try
+                {
+                    // Lấy tất cả mã bình luận để xóa phản hồi
+                    var commentIds = artwork.BinhLuans.Select(b => b.MaBinhLuan).ToList();
+                    
+                    // 1. Xóa phản hồi bình luận
+                    var replies = await _context.PhanHoiBinhLuans
+                        .Where(r => commentIds.Contains(r.MaBinhLuan))
+                        .ToListAsync();
+                    _context.PhanHoiBinhLuans.RemoveRange(replies);
+                    
+                    // 2. Xóa bình luận
+                    _context.BinhLuans.RemoveRange(artwork.BinhLuans);
+                    
+                    // 3. Xóa lượt thích
+                    _context.LuotThiches.RemoveRange(artwork.LuotThiches);
+                    
+                    // 4. Xóa lưu tranh
+                    _context.LuuTranhs.RemoveRange(artwork.LuuTranhs);
+                    
+                    // 5. Xóa nổi bật
+                    _context.NoiBats.RemoveRange(artwork.NoiBats);
+                    
+                    // 6. Xóa liên kết với thẻ tag (không xóa tag)
+                    artwork.MaTags.Clear();
+                    
+                    // 7. Xóa liên kết với thể loại (không xóa thể loại)
+                    artwork.MaTheLoais.Clear();
+                    
+                    // 8. Xóa tất cả giao dịch liên quan đến tác phẩm này
+                    _context.GiaoDiches.RemoveRange(artwork.GiaoDiches);
+                    
+                    // 9. Xóa file ảnh gốc trên server
+                    if (!string.IsNullOrEmpty(artwork.DuongDanAnh))
+                    {
+                        var imagePath = Path.Combine(
+                            Directory.GetCurrentDirectory(), 
+                            "wwwroot", 
+                            artwork.DuongDanAnh.TrimStart('/')
+                        );
+                        
+                        if (System.IO.File.Exists(imagePath))
+                        {
+                            try {
+                                System.IO.File.Delete(imagePath);
+                            } catch (Exception ex) {
+                                _logger.LogWarning($"Không thể xóa file ảnh: {ex.Message}");
+                            }
+                        }
+                    }
+                    
+                    // 10. Gửi thông báo cho nghệ sĩ
+                    await _notificationRepository.CreateSystemNotification(
+                        model.ArtistId, 
+                        "Tác phẩm của bạn đã bị xóa",
+                        $"Tác phẩm '{artwork.TieuDe}' đã bị quản trị viên xóa với lý do: {model.Reason}",
+                        "/User/Gallery/" + model.ArtistId,
+                        "system"
+                    );
+                    
+                    // 11. Cuối cùng xóa tác phẩm
+                    _context.Tranhs.Remove(artwork);
+                    await _context.SaveChangesAsync();
+                    
+                    await transaction.CommitAsync();
+                    
+                    return Ok(new { success = true });
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    _logger.LogError(ex, "Error deleting artwork data");
+                    throw;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting artwork");
+                return StatusCode(500, new { success = false, message = ex.Message });
+            }
+        }
+    }
+
+    public class DeleteUserViewModel
+    {
+        public string UserId { get; set; }
+    }
+
+    public class DeleteArtworkViewModel
+    {
+        public int ArtworkId { get; set; }
+        public string ArtistId { get; set; }
+        public string Reason { get; set; }
     }
 }
