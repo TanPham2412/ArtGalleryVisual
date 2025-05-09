@@ -505,11 +505,11 @@ function addUserButtonsEventListeners() {
                         label.style.color = '#ccc';
                     });
                 }, 100);
-            } else {
+                        } else {
                 // Mở khóa tài khoản
                 if (confirm('Bạn có chắc muốn mở khóa tài khoản người dùng này?')) {
                     unlockUser(userId);
-                }
+                        }
             }
         });
     });
@@ -575,11 +575,11 @@ function addUserButtonsEventListeners() {
 // Hàm khóa tài khoản
 function lockUser(userId, reason, days, hours, minutes, seconds) {
     fetch('/Admin/LockUser', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
-        },
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    },
         body: JSON.stringify({ 
             userId: userId, 
             reason: reason,
@@ -588,38 +588,38 @@ function lockUser(userId, reason, days, hours, minutes, seconds) {
             minutes: minutes,
             seconds: seconds
         })
-    })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
                 alert('Đã khóa tài khoản người dùng thành công!');
                 fetchUsers(); // Tải lại danh sách
-            } else {
-                alert(`Lỗi: ${data.message}`);
-            }
-        })
+                        } else {
+                            alert(`Lỗi: ${data.message}`);
+                        }
+                    })
         .catch(error => console.error('Error locking user:', error));
-}
+            }
 
 // Hàm mở khóa tài khoản
 function unlockUser(userId) {
     fetch('/Admin/UnlockUser', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
-        },
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    },
         body: JSON.stringify(userId)
-    })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
                 alert('Đã mở khóa tài khoản người dùng thành công!');
                 fetchUsers(); // Tải lại danh sách
-            } else {
-                alert(`Lỗi: ${data.message}`);
-            }
-        })
+                        } else {
+                            alert(`Lỗi: ${data.message}`);
+                        }
+                    })
         .catch(error => console.error('Error unlocking user:', error));
 }
 

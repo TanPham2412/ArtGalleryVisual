@@ -290,5 +290,16 @@ namespace ArtGallery.Repositories
                 return new List<Tranh>();
             }
         }
+
+        public async Task<List<Tranh>> GetLatestArtworks(int count)
+        {
+            return await _context.Tranhs
+                .Include(t => t.MaNguoiDungNavigation)
+                .Include(t => t.MaTags)
+                .Include(t => t.MaTheLoais)
+                .OrderByDescending(t => t.NgayDang)
+                .Take(count)
+                .ToListAsync();
+        }
     }
 }
