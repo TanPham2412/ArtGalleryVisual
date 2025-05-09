@@ -44,6 +44,7 @@ namespace ArtGallery.Controllers
             {
                 FollowingArtworks = await _homeRepository.GetRandomArtworksFromFollowing(currentUserId, 12),
                 MostLikedArtworks = await _homeRepository.GetMostLikedArtworks(12),
+                LatestArtworks = await _homeRepository.GetLatestArtworks(8),
                 ActiveCategory = "Home"
             };
 
@@ -296,6 +297,7 @@ namespace ArtGallery.Controllers
             {
                 FollowingArtworks = await _homeRepository.GetRandomArtworksFromFollowingByCategory(currentUserId, 12, name),
                 MostLikedArtworks = await _homeRepository.GetMostLikedArtworksByCategory(12, name),
+                LatestArtworks = await _homeRepository.GetLatestArtworks(8),
                 ActiveCategory = name
             };
 

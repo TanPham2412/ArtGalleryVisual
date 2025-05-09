@@ -10,6 +10,7 @@ namespace ArtGallery.Repositories.Interfaces
         Task<List<Tranh>> GetRecommendedArtworks();
         Task<List<Tranh>> GetMostLikedArtworks(int count);
         Task<List<Tranh>> GetMostLikedArtworksByCategory(int count, string category);
+        Task<List<Tranh>> GetLatestArtworks(int count);
         Task<List<dynamic>> SearchUsers(string query, string currentUserId);
         Task<(bool success, string message, int followerCount, bool isFollowing)> ToggleFollow(string currentUserId, string userId);
         Task<(bool success, string message)> AddArtwork(Tranh tranh, IFormFile imageFile, string tagsInput, List<int> selectedCategories, string currentUserId);
