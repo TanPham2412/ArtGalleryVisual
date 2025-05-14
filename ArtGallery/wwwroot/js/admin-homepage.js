@@ -900,3 +900,51 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+
+// Update Chart.js defaults for dark theme
+Chart.defaults.color = '#e0e0e0';
+Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.1)';
+
+// Khởi tạo hiệu ứng dark theme và xử lý modal
+document.addEventListener('DOMContentLoaded', function() {
+    // Khởi tạo modal
+    const lockModal = document.getElementById('lockUserModal');
+    if (lockModal) {
+        const bootstrapLockModal = new bootstrap.Modal(lockModal);
+        
+        // Xử lý hiện/ẩn ô tìm kiếm khi modal hiện/ẩn
+        lockModal.addEventListener('show.bs.modal', function() {
+            document.querySelectorAll('.search-box').forEach(box => {
+                box.style.visibility = 'hidden'; // Ẩn khi modal hiển thị
+            });
+        });
+        
+        lockModal.addEventListener('hidden.bs.modal', function() {
+            document.querySelectorAll('.search-box').forEach(box => {
+                box.style.visibility = 'visible'; // Hiện lại khi modal đóng
+            });
+        });
+    }
+    
+    // Force background color for all table cells
+    const allTableCells = document.querySelectorAll('table td, table th');
+    allTableCells.forEach(cell => {
+        cell.style.backgroundColor = 'var(--dark-color)';
+        cell.style.color = 'var(--text-color)';
+    });
+    
+    // Make sure new content added via AJAX also gets dark styling
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.addedNodes.length) {
+                const cells = document.querySelectorAll('table td, table th');
+                cells.forEach(cell => {
+                    cell.style.backgroundColor = 'var(--dark-color)';
+                    cell.style.color = 'var(--text-color)';
+                });
+            }
+        });
+    });
+    
+    observer.observe(document.body, { childList: true, subtree: true });
+});
