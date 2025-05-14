@@ -579,4 +579,91 @@ table thead th {
 .text-danger, 
 td .text-danger {
     color: #00a8ff !important;
+}
+
+/* Menu ngữ cảnh */
+.context-menu {
+    position: absolute;
+    z-index: 1000;
+    background-color: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 6px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    padding: 5px 0;
+    min-width: 150px;
+}
+
+.context-menu-item {
+    padding: 8px 15px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    color: #e0e0e0;
+    transition: all 0.2s;
+}
+
+.context-menu-item:hover {
+    background-color: #333;
+}
+
+.context-menu-item i {
+    margin-right: 8px;
+}
+
+/* Cải thiện giao diện nút trong đơn bán hàng */
+.btn-xacnhan, .btn-huy {
+    border-radius: 20px;
+    padding: 5px 12px;
+    font-size: 12px;
+    margin-left: 5px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.btn-xacnhan {
+    background: linear-gradient(to right, #28a745, #218838);
+    border: none;
+}
+
+.btn-xacnhan:hover {
+    background: linear-gradient(to right, #218838, #1e7e34);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(40, 167, 69, 0.4);
+}
+
+.btn-huy {
+    background: linear-gradient(to right, #dc3545, #c82333);
+    border: none;
+}
+
+.btn-huy:hover {
+    background: linear-gradient(to right, #c82333, #bd2130);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(220, 53, 69, 0.4);
+}
+
+/* Cải thiện hiển thị trạng thái đơn hàng */
+.order-status-group {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.badge {
+    border-radius: 20px;
+    padding: 8px 14px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.table tr.selected {
+    background-color: rgba(0, 168, 255, 0.1) !important;
+}
+
+.table tr.selected:hover {
+    background-color: rgba(0, 168, 255, 0.15) !important;
 } 

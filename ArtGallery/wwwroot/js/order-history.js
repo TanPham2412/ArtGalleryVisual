@@ -595,7 +595,7 @@ $(document).ready(function() {
                                 });
                             }
                         },
-                        error: function() {
+                        error: function(xhr) {
                             Swal.fire({
                                 title: 'Lỗi!',
                                 text: 'Có lỗi xảy ra, vui lòng thử lại sau.',
