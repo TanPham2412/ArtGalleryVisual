@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using ArtGallery.Models;
-using ArtGallery.ViewModels;
+using ArtGallery.Areas.Identity.Pages.Account;
 
 namespace ArtGallery.Controllers
 {
@@ -40,7 +40,7 @@ namespace ArtGallery.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(LoginViewModel model)
+        public async Task<IActionResult> Login(LoginModel.InputModel model)
         {
             if (ModelState.IsValid)
             {

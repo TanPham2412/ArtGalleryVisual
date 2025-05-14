@@ -5,6 +5,7 @@ using ArtGallery.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using ArtGallery.ViewModels;
 
 namespace ArtGallery.Controllers
 {

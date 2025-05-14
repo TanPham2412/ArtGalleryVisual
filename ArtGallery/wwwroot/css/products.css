@@ -617,3 +617,35 @@ body {
         grid-template-columns: 1fr;
     }
 }
+
+/* Thêm vào cuối file */
+.product-sold-out-btn {
+    background: linear-gradient(to right, #dc3545, #bd2130);
+    color: white;
+    cursor: not-allowed;
+    border-radius: 30px;
+    padding: 8px 15px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: none;
+    text-align: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.product-sold-out-btn i {
+    margin-right: 5px;
+}
+
+.product-sold-out-btn:hover {
+    background: linear-gradient(to right, #bd2130, #a71d2a);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(220, 53, 69, 0.3);
+}
+
+/* Thêm style để làm nổi bật sản phẩm hết hàng */
+.product-item-details .product-item-meta.out-of-stock {
+    color: #dc3545;
+    font-weight: bold;
+}

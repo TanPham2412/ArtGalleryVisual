@@ -1176,3 +1176,66 @@ footer,
 .sticker-category .sticker-item.selected .sticker-img {
     transform: scale(1.2);
 }
+
+.footer, footer, .site-footer, .footer-section, .footer-container {
+    display: none !important;
+}
+
+::-webkit-scrollbar {
+    width: 0;
+    display: none;
+}
+
+.chat-messages, .conversation-list, body {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* Đảm bảo container tin nhắn chiếm đủ không gian */
+.message-container {
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+body {
+    overflow: hidden;
+}
+
+/* Điều chỉnh chiều cao của layout */
+#layout-wrapper, .main-content {
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+#imagePreviewContainer {
+    position: relative;
+    margin: 8px 0;
+    max-width: 200px;
+    display: block;
+}
+
+    #imagePreviewContainer.d-none {
+        display: none !important;
+    }
+
+#imagePreview {
+    max-width: 100%;
+    max-height: 150px;
+    border-radius: 8px;
+}
+
+.btn-remove-preview {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: rgba(0, 0, 0, 0.5);
+    border: none;
+    color: white;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}

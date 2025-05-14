@@ -437,57 +437,111 @@
     </div>
 </div>
 
+<!-- Modal chi tiết đơn hàng -->
+<div class="modal fade" id="orderDetailModal" tabindex="-1" aria-labelledby="orderDetailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="orderDetailModalLabel">Chi tiết đơn hàng #<span id="detail-order-id"></span></h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0">
+                <!-- Thông tin đơn hàng -->
+                <div class="row g-0">
+                    <div class="col-md-6 order-detail-col">
+                        <div class="detail-section">
+                            <h5>Thông tin đơn hàng</h5>
+                            <div class="detail-content">
+                                <div class="detail-row">
+                                    <span class="detail-label">Mã đơn hàng:</span>
+                                    <span class="detail-value" id="detail-order-id-text"></span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Ngày đặt hàng:</span>
+                                    <span class="detail-value" id="detail-order-date"></span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Trạng thái:</span>
+                                    <span class="detail-value" id="detail-order-status"></span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Phương thức thanh toán:</span>
+                                    <span class="detail-value" id="detail-payment-method"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Thông tin khách hàng -->
+                    <div class="col-md-6 order-detail-col">
+                        <div class="detail-section">
+                            <h5>Thông tin khách hàng</h5>
+                            <div class="detail-content">
+                                <div class="detail-row">
+                                    <span class="detail-label">Khách hàng:</span>
+                                    <span class="detail-value" id="detail-customer-name"></span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Email:</span>
+                                    <span class="detail-value" id="detail-customer-email"></span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Số điện thoại:</span>
+                                    <span class="detail-value" id="detail-customer-phone"></span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Địa chỉ nhận hàng:</span>
+                                    <span class="detail-value" id="detail-shipping-address"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Thông tin sản phẩm -->
+                <div class="product-section">
+                    <h5>Sản phẩm</h5>
+                    <div class="product-container">
+                        <div class="product-image">
+                            <img id="detail-artwork-image" src="" alt="Artwork">
+                        </div>
+                        <div class="product-info">
+                            <h6 id="detail-artwork-title"></h6>
+                            <div class="info-row">
+                                <span class="info-label">Nghệ sĩ:</span>
+                                <span class="info-value" id="detail-artist-name"></span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Đơn giá:</span>
+                                <span class="info-value" id="detail-artwork-price"></span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Số lượng:</span>
+                                <span class="info-value" id="detail-quantity"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tổng thanh toán -->
+                <div class="total-section">
+                    <span>Tổng thanh toán</span>
+                    <span class="total-amount" id="detail-total-amount"></span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary" id="btn-print-order">
+                    <i class="fas fa-print me-2"></i>In đơn hàng
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="~/js/admin-homepage.js?v=7"></script>
-    
-    <script>
-        // Update Chart.js defaults for dark theme
-        Chart.defaults.color = '#e0e0e0';
-        Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.1)';
-        
-        // Apply dark theme to all table elements
-        document.addEventListener('DOMContentLoaded', function() {
-            // Khởi tạo modal
-            const lockModal = document.getElementById('lockUserModal');
-            const bootstrapLockModal = new bootstrap.Modal(lockModal);
-            
-            // Xử lý hiện/ẩn ô tìm kiếm khi modal hiện/ẩn
-            lockModal.addEventListener('show.bs.modal', function() {
-                document.querySelectorAll('.search-box').forEach(box => {
-                    box.style.visibility = 'hidden'; // Ẩn khi modal hiển thị
-                });
-            });
-            
-            lockModal.addEventListener('hidden.bs.modal', function() {
-                document.querySelectorAll('.search-box').forEach(box => {
-                    box.style.visibility = 'visible'; // Hiện lại khi modal đóng
-                });
-            });
-            
-            // Force background color for all table cells
-            const allTableCells = document.querySelectorAll('table td, table th');
-            allTableCells.forEach(cell => {
-                cell.style.backgroundColor = 'var(--dark-color)';
-                cell.style.color = 'var(--text-color)';
-            });
-            
-            // Make sure new content added via AJAX also gets dark styling
-            const observer = new MutationObserver(function(mutations) {
-                mutations.forEach(function(mutation) {
-                    if (mutation.addedNodes.length) {
-                        const cells = document.querySelectorAll('table td, table th');
-                        cells.forEach(cell => {
-                            cell.style.backgroundColor = 'var(--dark-color)';
-                            cell.style.color = 'var(--text-color)';
-                        });
-                    }
-                });
-            });
-            
-            observer.observe(document.body, { childList: true, subtree: true });
-        });
-    </script>
+    <script src="~/js/admin-homepage.js?v=8"></script>
 }

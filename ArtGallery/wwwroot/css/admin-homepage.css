@@ -564,3 +564,279 @@ body {
 .btn-toggle-artwork {
     display: none !important;
 }
+
+/* Style cho modal chi tiết đơn hàng */
+.order-detail-section {
+    background-color: var(--dark-color);
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    border: 1px solid var(--gray-color);
+}
+
+.order-detail-section h5 {
+    border-bottom: 1px solid var(--gray-color);
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+    font-size: 18px;
+}
+
+.order-detail-section .table {
+    margin-bottom: 0;
+}
+
+.order-detail-section .table td {
+    padding: 8px 0;
+    border: none;
+    vertical-align: middle;
+}
+
+#orderDetailModal .modal-content {
+    background-color: #1e1e1e;
+    border: none;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+#orderDetailModal .modal-header {
+    background-color: #121212;
+    border-bottom: 1px solid #2d2d2d;
+    padding: 15px 20px;
+}
+
+#orderDetailModal .modal-title {
+    color: #fff;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+#orderDetailModal .modal-footer {
+    background-color: #121212;
+    border-top: 1px solid #2d2d2d;
+    padding: 15px 20px;
+}
+
+.order-detail-col {
+    padding: 0;
+}
+
+.detail-section {
+    padding: 20px;
+    height: 100%;
+}
+
+.detail-section h5 {
+    color: #00a8ff;
+    font-size: 16px;
+    margin-bottom: 15px;
+    font-weight: 600;
+    border-bottom: 1px solid #2d2d2d;
+    padding-bottom: 10px;
+}
+
+.detail-content {
+    padding-left: 10px;
+}
+
+.detail-row {
+    margin-bottom: 10px;
+    display: flex;
+}
+
+.detail-label {
+    color: #888;
+    width: 45%;
+    font-size: 14px;
+}
+
+.detail-value {
+    color: #e0e0e0;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.product-section {
+    background-color: #121212;
+    padding: 20px;
+    margin-top: 1px;
+}
+
+.product-section h5 {
+    color: #00a8ff;
+    font-size: 16px;
+    margin-bottom: 15px;
+    font-weight: 600;
+    border-bottom: 1px solid #2d2d2d;
+    padding-bottom: 10px;
+}
+
+.product-container {
+    display: flex;
+    background-color: rgba(45, 45, 45, 0.5);
+    border-radius: 8px;
+    padding: 15px;
+}
+
+.product-image {
+    width: 80px;
+    height: 80px;
+    margin-right: 15px;
+    border-radius: 6px;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.product-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.product-info {
+    flex: 1;
+}
+
+.product-info h6 {
+    color: #fff;
+    font-size: 16px;
+    margin-bottom: 10px;
+}
+
+.info-row {
+    display: flex;
+    margin-bottom: 5px;
+}
+
+.info-label {
+    color: #888;
+    width: 80px;
+    font-size: 14px;
+}
+
+.info-value {
+    color: #e0e0e0;
+    font-size: 14px;
+}
+
+.total-section {
+    background-color: #121212;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid #2d2d2d;
+}
+
+.total-section span:first-child {
+    color: #888;
+    font-size: 15px;
+}
+
+.total-amount {
+    color: #00a8ff;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+#orderDetailModal .btn-secondary {
+    background-color: #2d2d2d;
+    border: none;
+}
+
+#orderDetailModal .btn-primary {
+    background-color: #00a8ff;
+    border: none;
+}
+
+#orderDetailModal .btn-primary:hover {
+    background-color: #0097e6;
+}
+
+#orderDetailModal .col-md-6:first-child .detail-section {
+    border-right: 1px solid #2d2d2d;
+}
+
+@media (max-width: 767px) {
+    #orderDetailModal .col-md-6:first-child .detail-section {
+        border-right: none;
+        border-bottom: 1px solid #2d2d2d;
+    }
+}
+
+/* Ẩn thanh lăn chuột trong modal chi tiết đơn hàng */
+#orderDetailModal .modal-content {
+    overflow: hidden;
+}
+
+#orderDetailModal .modal-body {
+    overflow-y: auto;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+}
+
+#orderDetailModal .modal-body::-webkit-scrollbar {
+    display: none; /* Chrome, Safari and Opera */
+}
+
+.detail-section, .product-section {
+    overflow: hidden;
+}
+
+.detail-content {
+    overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    max-height: 300px;
+}
+
+.detail-content::-webkit-scrollbar {
+    display: none;
+}
+
+.detail-value {
+    word-break: break-word;
+    overflow-wrap: break-word;
+}
+
+/* Ẩn tất cả thanh lăn chuột trong trang admin */
+body, .admin-container, .admin-sidebar, .admin-content,
+.table-responsive, .card-body, .detail-content,
+#orderDetailModal .modal-body, .modal-content {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+}
+
+body::-webkit-scrollbar, 
+.admin-container::-webkit-scrollbar,
+.admin-sidebar::-webkit-scrollbar,
+.admin-content::-webkit-scrollbar,
+.table-responsive::-webkit-scrollbar,
+.card-body::-webkit-scrollbar,
+.detail-content::-webkit-scrollbar,
+#orderDetailModal .modal-body::-webkit-scrollbar,
+.modal-content::-webkit-scrollbar {
+    display: none; /* Chrome, Safari and Opera */
+}
+
+/* Đảm bảo các thành phần scrollable vẫn giữ chức năng cuộn */
+.admin-container, .admin-sidebar, .admin-content {
+    overflow: auto;
+}
+
+/* Ẩn nút răng cưa (cài đặt) trong cột Thao tác */
+.action-buttons .dropdown-toggle,
+.action-buttons .btn-secondary,
+.action-buttons .dropdown,
+.btn[data-bs-toggle="dropdown"],
+table td .btn-secondary {
+    display: none !important;
+}
+
+/* Đảm bảo nút con mắt vẫn hiển thị */
+.action-buttons .btn-primary,
+.action-buttons .btn-view-order,
+.action-buttons .btn-view-user,
+.action-buttons .btn-view-artwork,
+table td .btn-view-order {
+    display: inline-flex !important;
+}

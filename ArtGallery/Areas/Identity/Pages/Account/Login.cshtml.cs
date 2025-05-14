@@ -147,6 +147,30 @@ namespace ArtGallery.Areas.Identity.Pages.Account
                 if (result.IsLockedOut)
                 {
                     _logger.LogWarning("Tài khoản bị khóa.");
+                    
+                    // Lấy thông tin user
+                    var user = await _userManager.FindByNameAsync(Input.Email) ?? 
+                              await _userManager.FindByEmailAsync(Input.Email);
+                              
+                    if (user != null)
+                    {
+                        var lockoutEnd = await _userManager.GetLockoutEndDateAsync(user);
+                        
+                        if (lockoutEnd.HasValue && lockoutEnd.Value > DateTimeOffset.Now)
+                        {
+                            // Lưu thông tin khóa để hiển thị giống như trong ExternalLogin
+                            TempData["LockoutMessage"] = "Tài khoản của bạn đang bị khóa";
+                            TempData["LockoutReason"] = user.LockoutReason ?? "Vi phạm quy định của trang web";
+                            TempData["LockoutEndTime"] = lockoutEnd.Value.LocalDateTime.ToString("yyyy-MM-ddTHH:mm:ss");
+                            
+                            // Đăng nhập người dùng dù họ bị khóa
+                            await _signInManager.SignInAsync(user, isPersistent: false);
+                            
+                            // Chuyển hướng đến trang Index
+                            return LocalRedirect(Url.Content("~/"));
+                        }
+                    }
+                    
                     return RedirectToPage("./Lockout");
                 }
                 else
