@@ -12,9 +12,15 @@
     <div class="admin-sidebar">
         <div class="admin-profile">
             <div class="admin-avatar">
-                <img src="@(User.FindFirst("AvatarPath")?.Value ?? "/images/default-avatar.png")" alt="Admin">
+                <img src="@(ViewBag.AdminAvatar ?? "/images/default-avatar.png")" 
+                     alt="Admin"
+                     onerror="this.onerror=null; this.src='/images/default-avatar.png';">
+                
+                <div style="display:none;">
+                    Đường dẫn ảnh: @(ViewBag.AdminAvatar ?? "không có")
+                </div>
             </div>
-            <h4>@(User.Identity?.Name)</h4>
+            <h4>Admin123</h4>
             <span class="admin-role">Quản trị viên</span>
         </div>
 

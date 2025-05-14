@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Security.Claims;
 using System.IO;
+using System.Linq;
 
 namespace ArtGallery.Controllers
 {
@@ -35,6 +36,32 @@ namespace ArtGallery.Controllers
         {
             var users = await _context.NguoiDungs.ToListAsync();
             return View("AdminHomePage");
+        }
+
+        public IActionResult AdminHomePage()
+        {
+            try
+            {
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (userId != null)
+                {
+                    var admin = _userManager.FindByIdAsync(userId).Result;
+                    if (admin != null)
+                    {
+                        // Sử dụng phương thức mở rộng GetAvatarPath() giống _NavigationPartial
+                        ViewBag.AdminAvatar = admin.GetAvatarPath();
+                        ViewBag.AdminName = admin.TenNguoiDung;
+                    }
+                }
+                
+                return View();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading admin user");
+                ViewBag.AdminAvatar = "/images/default-avatar.png";
+                return View();
+            }
         }
 
         [HttpGet]
