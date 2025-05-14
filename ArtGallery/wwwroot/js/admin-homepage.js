@@ -294,21 +294,9 @@ function fetchOrders() {
                     </td>
                     <td>
                         <div class="action-buttons">
-                            <button class="btn btn-primary btn-sm btn-view-order" data-id="${order.orderId}">
+                            <button class="btn btn-info btn-sm btn-view-order" data-id="${order.orderId}" data-title="Xem chi tiết">
                                 <i class="fas fa-eye"></i>
                             </button>
-                            ${order.status !== 'Đã hoàn thành' && order.status !== 'Đã hủy' ?
-                        `<div class="dropdown d-inline">
-                                    <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                        <i class="fas fa-cog"></i>
-                                    </button>
-                                    <ul class="dropdown-menu">
-                                        <li><a class="dropdown-item btn-update-status" data-id="${order.orderId}" data-status="Đã xác nhận" href="#">Xác nhận</a></li>
-                                        <li><a class="dropdown-item btn-update-status" data-id="${order.orderId}" data-status="Đã hoàn thành" href="#">Hoàn thành</a></li>
-                                        <li><a class="dropdown-item btn-update-status" data-id="${order.orderId}" data-status="Đã hủy" href="#">Hủy</a></li>
-                                    </ul>
-                                </div>`
-                        : ''}
                         </div>
                     </td>
                 `;
