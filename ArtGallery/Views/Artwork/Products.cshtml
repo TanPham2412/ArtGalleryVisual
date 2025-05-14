@@ -124,7 +124,7 @@
     else
     {
         <div class="product-grid">
-            @foreach (var item in Model.Where(p => p.SoLuongTon > 0))
+            @foreach (var item in Model)
             {
                 <div class="product-item">
                     <div class="product-item-image">
@@ -163,11 +163,17 @@
                             <a asp-action="Display" asp-route-id="@item.MaTranh" class="btn product-view-btn">
                                 <i class="fas fa-eye"></i> Chi tiết
                             </a>
-                            @if (currentUserId != item.MaNguoiDung)
+                            @if (item.SoLuongTon > 0 && currentUserId != item.MaNguoiDung)
                             {
                                 <a asp-controller="Order" asp-action="Display" asp-route-id="@item.MaTranh" class="btn product-buy-btn">
                                     <i class="fas fa-shopping-cart"></i> Mua ngay
                                 </a>
+                            }
+                            @if (item.SoLuongTon == 0)
+                            {
+                                <span class="btn product-sold-out-btn">
+                                    <i class="fas fa-times-circle"></i> Đã hết hàng
+                                </span>
                             }
                         </div>
                     </div>
