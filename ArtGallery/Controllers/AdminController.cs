@@ -863,6 +863,180 @@ namespace ArtGallery.Controllers
                 return StatusCode(500, new { success = false, message = ex.Message });
             }
         }
+
+        [HttpGet]
+        public async Task<IActionResult> GetRevenueStats()
+        {
+            try
+            {
+                int currentYear = DateTime.Now.Year;
+                var labels = new List<string>();
+                var values = new List<decimal>();
+
+                for (int i = 1; i <= 12; i++)
+                {
+                    labels.Add("Tháng " + i);
+                    values.Add(0);
+                }
+
+                var completedTransactions = await _context.GiaoDiches
+                    .Where(g => g.TrangThai == "Đã hoàn thành")
+                    .ToListAsync();
+
+                foreach (var transaction in completedTransactions)
+                {
+                    if (transaction.NgayMua?.Year == currentYear)
+                    {
+                        int monthIndex = transaction.NgayMua.Value.Month - 1;
+                        values[monthIndex] += transaction.SoTien;
+                    }
+                }
+
+                return Json(new { labels, values });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting revenue stats");
+                return StatusCode(500, new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetUserStats()
+        {
+            try
+            {
+                int currentYear = DateTime.Now.Year;
+                var labels = new List<string>();
+                var values = new List<int>();
+
+                // Tạo chuỗi nhãn cho 12 tháng
+                for (int i = 1; i <= 12; i++)
+                {
+                    labels.Add("Tháng " + i);
+                    values.Add(0); // Khởi tạo giá trị 0 cho mỗi tháng
+                }
+
+                // Lấy tất cả người dùng
+                var users = await _context.NguoiDungs.ToListAsync();
+
+                // Lọc và đếm theo tháng
+                foreach (var user in users)
+                {
+                    if (user.NgayDangKy != null && user.NgayDangKy.Year == currentYear)
+                    {
+                        int monthIndex = user.NgayDangKy.Month - 1; // Chỉ số bắt đầu từ 0
+                        values[monthIndex]++;
+                    }
+                }
+
+                return Json(new { labels, values });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting user stats");
+                return StatusCode(500, new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetCategoryStats()
+        {
+            try
+            {
+                var labels = new List<string>();
+                var values = new List<int>();
+
+                // Lấy tất cả tranh có thể loại
+                var artworksWithCategories = await _context.Tranhs
+                    .Include(t => t.MaTheLoais)
+                    .ToListAsync();
+                    
+                // Lấy tất cả thể loại
+                var allCategories = await _context.TheLoais.ToListAsync();
+                
+                // Đếm số lượng tranh cho mỗi thể loại
+                var categoryCounts = new Dictionary<int, int>();
+                
+                foreach (var artwork in artworksWithCategories)
+                {
+                    if (artwork.MaTheLoais != null && artwork.MaTheLoais.Any())
+                    {
+                        foreach (var category in artwork.MaTheLoais)
+                        {
+                            if (!categoryCounts.ContainsKey(category.MaTheLoai))
+                                categoryCounts[category.MaTheLoai] = 0;
+                            
+                            categoryCounts[category.MaTheLoai]++;
+                        }
+                    }
+                }
+                
+                // Đếm tranh chưa phân loại
+                int uncategorizedCount = artworksWithCategories.Count(a => a.MaTheLoais == null || !a.MaTheLoais.Any());
+                
+                // Thêm dữ liệu vào biểu đồ
+                foreach (var category in allCategories)
+                {
+                    if (categoryCounts.ContainsKey(category.MaTheLoai))
+                    {
+                        labels.Add(category.TenTheLoai);
+                        values.Add(categoryCounts[category.MaTheLoai]);
+                    }
+                }
+                
+                if (uncategorizedCount > 0)
+                {
+                    labels.Add("Chưa phân loại");
+                    values.Add(uncategorizedCount);
+                }
+
+                return Json(new { labels, values });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting category stats");
+                return StatusCode(500, new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetArtworkStats()
+        {
+            try
+            {
+                int currentYear = DateTime.Now.Year;
+                var labels = new List<string>();
+                var values = new List<int>();
+
+                // Tạo chuỗi nhãn cho 12 tháng
+                for (int i = 1; i <= 12; i++)
+                {
+                    labels.Add("Tháng " + i);
+                    values.Add(0);
+                }
+
+                // Lấy tất cả tranh
+                var artworks = await _context.Tranhs.ToListAsync();
+
+                // Lọc và đếm theo tháng
+                foreach (var artwork in artworks)
+                {
+                    if (artwork.NgayDang?.Year == currentYear)
+                    {
+                        int monthIndex = artwork.NgayDang.Value.Month - 1;
+                        values[monthIndex]++;
+                    }
+                }
+
+                return Json(new { labels, values });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting artwork stats");
+                return StatusCode(500, new { success = false, message = ex.Message });
+            }
+        }
     }
 
     public class DeleteUserViewModel
