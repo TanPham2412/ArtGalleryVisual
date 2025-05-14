@@ -822,3 +822,21 @@ body::-webkit-scrollbar,
 .admin-container, .admin-sidebar, .admin-content {
     overflow: auto;
 }
+
+/* Ẩn nút răng cưa (cài đặt) trong cột Thao tác */
+.action-buttons .dropdown-toggle,
+.action-buttons .btn-secondary,
+.action-buttons .dropdown,
+.btn[data-bs-toggle="dropdown"],
+table td .btn-secondary {
+    display: none !important;
+}
+
+/* Đảm bảo nút con mắt vẫn hiển thị */
+.action-buttons .btn-primary,
+.action-buttons .btn-view-order,
+.action-buttons .btn-view-user,
+.action-buttons .btn-view-artwork,
+table td .btn-view-order {
+    display: inline-flex !important;
+}

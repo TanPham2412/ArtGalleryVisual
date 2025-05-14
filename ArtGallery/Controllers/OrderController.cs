@@ -840,5 +840,51 @@ namespace ArtGallery.Controllers
             return View(); // OrderCOD.cshtml
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetOrderDetail(int id)
+        {
+            try
+            {
+                var order = await _context.GiaoDiches
+                    .Include(g => g.MaNguoiMuaNavigation)
+                    .Include(g => g.MaTranhNavigation)
+                        .ThenInclude(t => t.MaNguoiDungNavigation)
+                    .FirstOrDefaultAsync(g => g.MaGiaoDich == id);
+                
+                if (order == null)
+                    return NotFound(new { success = false, message = "Không tìm thấy đơn hàng" });
+                
+                var result = new
+                {
+                    success = true,
+                    orderId = order.MaGiaoDich,
+                    orderDate = order.NgayMua,
+                    status = order.TrangThai,
+                    paymentMethod = order.PhuongThucThanhToan,
+                    
+                    // Thông tin khách hàng
+                    customerName = order.MaNguoiMuaNavigation.TenNguoiDung,
+                    customerEmail = order.MaNguoiMuaNavigation.Email,
+                    customerPhone = order.MaNguoiMuaNavigation.PhoneNumber,
+                    shippingAddress = order.MaNguoiMuaNavigation.DiaChi,
+                    
+                    // Thông tin sản phẩm
+                    artworkId = order.MaTranh,
+                    artworkTitle = order.MaTranhNavigation.TieuDe,
+                    artworkImage = order.MaTranhNavigation.DuongDanAnh,
+                    artistName = order.MaTranhNavigation.MaNguoiDungNavigation.TenNguoiDung,
+                    artworkPrice = order.MaTranhNavigation.Gia,
+                    quantity = order.SoLuong,
+                    totalAmount = order.SoTien
+                };
+                
+                return Json(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = ex.Message });
+            }
+        }
+
     }
 }

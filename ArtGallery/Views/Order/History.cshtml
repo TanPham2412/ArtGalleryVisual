@@ -335,6 +335,108 @@
     </div>
 </div>
 
+<!-- Modal chi tiết đơn hàng -->
+<div class="modal fade" id="orderDetailModal" tabindex="-1" aria-labelledby="orderDetailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="orderDetailModalLabel">Chi tiết đơn hàng #<span id="detail-order-id"></span></h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0">
+                <!-- Thông tin đơn hàng -->
+                <div class="row g-0">
+                    <div class="col-md-6 order-detail-col">
+                        <div class="detail-section">
+                            <h5>Thông tin đơn hàng</h5>
+                            <div class="detail-content">
+                                <div class="detail-row">
+                                    <span class="detail-label">Mã đơn hàng:</span>
+                                    <span class="detail-value" id="detail-order-id-text"></span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Ngày đặt hàng:</span>
+                                    <span class="detail-value" id="detail-order-date"></span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Trạng thái:</span>
+                                    <span class="detail-value" id="detail-order-status"></span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Phương thức thanh toán:</span>
+                                    <span class="detail-value" id="detail-payment-method"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Thông tin khách hàng -->
+                    <div class="col-md-6 order-detail-col">
+                        <div class="detail-section">
+                            <h5>Thông tin khách hàng</h5>
+                            <div class="detail-content">
+                                <div class="detail-row">
+                                    <span class="detail-label">Khách hàng:</span>
+                                    <span class="detail-value" id="detail-customer-name"></span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Email:</span>
+                                    <span class="detail-value" id="detail-customer-email"></span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Số điện thoại:</span>
+                                    <span class="detail-value" id="detail-customer-phone"></span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Địa chỉ nhận hàng:</span>
+                                    <span class="detail-value" id="detail-shipping-address"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Thông tin sản phẩm -->
+                <div class="product-section">
+                    <h5>Sản phẩm</h5>
+                    <div class="product-container">
+                        <div class="product-image">
+                            <img id="detail-artwork-image" src="" alt="Artwork">
+                        </div>
+                        <div class="product-info">
+                            <h6 id="detail-artwork-title"></h6>
+                            <div class="info-row">
+                                <span class="info-label">Nghệ sĩ:</span>
+                                <span class="info-value" id="detail-artist-name"></span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Đơn giá:</span>
+                                <span class="info-value" id="detail-artwork-price"></span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Số lượng:</span>
+                                <span class="info-value" id="detail-quantity"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tổng thanh toán -->
+                <div class="total-section">
+                    <span>Tổng thanh toán</span>
+                    <span class="total-amount" id="detail-total-amount"></span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary" id="btn-print-order">
+                    <i class="fas fa-print me-2"></i>In đơn hàng
+                </button>
+            </div>
+</div> 
+    </div>
+</div>
+
 <div id="contextMenu" class="context-menu" style="display: none;">
     <div class="context-menu-item" id="cancelOrder">
         <i class="fas fa-times-circle"></i> Hủy đặt hàng

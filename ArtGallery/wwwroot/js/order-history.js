@@ -659,4 +659,188 @@ $(document).ready(function() {
             });
         }
     });
+
+    // Thêm sự kiện khi click vào hàng trong bảng đơn bán hàng để hiển thị chi tiết đơn hàng
+    $("#selling .table tbody tr").on("click", function() {
+        var orderId = $(this).find("td:first").text();
+        showOrderDetail(orderId, true);
+    });
+
+    // Thêm sự kiện khi click vào hàng trong bảng lịch sử đặt hàng
+    $("#history .table tbody tr").on("click", function() {
+        var orderId = $(this).find("td:first").text();
+        showOrderDetail(orderId, false);
+    });
+
+    function showOrderDetail(orderId, showPrintButton) {
+        // Gọi API lấy chi tiết đơn hàng
+        $.ajax({
+            url: `/Order/GetOrderDetail/${orderId}`,
+            type: 'GET',
+            success: function(data) {
+                if (data.success) {
+                    // Đổ dữ liệu vào modal
+                    document.getElementById('detail-order-id').textContent = data.orderId;
+                    document.getElementById('detail-order-id-text').textContent = data.orderId;
+                    document.getElementById('detail-order-date').textContent = formatDate(data.orderDate);
+                    document.getElementById('detail-order-status').textContent = data.status;
+                    document.getElementById('detail-payment-method').textContent = data.paymentMethod;
+                    
+                    document.getElementById('detail-customer-name').textContent = data.customerName;
+                    document.getElementById('detail-customer-email').textContent = data.customerEmail;
+                    document.getElementById('detail-customer-phone').textContent = data.customerPhone || 'Không có';
+                    document.getElementById('detail-shipping-address').textContent = data.shippingAddress || 'Không có';
+                    
+                    document.getElementById('detail-artwork-image').src = data.artworkImage;
+                    document.getElementById('detail-artwork-title').textContent = data.artworkTitle;
+                    document.getElementById('detail-artist-name').textContent = data.artistName;
+                    document.getElementById('detail-artwork-price').textContent = formatCurrency(data.artworkPrice);
+                    document.getElementById('detail-quantity').textContent = data.quantity;
+                    document.getElementById('detail-total-amount').textContent = formatCurrency(data.totalAmount);
+                    
+                    // Ẩn/hiện nút in đơn hàng tùy theo tham số
+                    const printButton = document.getElementById('btn-print-order');
+                    if (printButton) {
+                        printButton.style.display = showPrintButton ? 'inline-block' : 'none';
+                    }
+                    
+                    // Hiển thị modal
+                    const orderDetailModal = new bootstrap.Modal(document.getElementById('orderDetailModal'));
+                    orderDetailModal.show();
+                } else {
+                    Swal.fire({
+                        title: 'Lỗi!',
+                        text: data.message || 'Không thể tải chi tiết đơn hàng',
+                        icon: 'error'
+                    });
+                }
+            },
+            error: function() {
+                Swal.fire({
+                    title: 'Lỗi!',
+                    text: 'Có lỗi xảy ra khi tải chi tiết đơn hàng',
+                    icon: 'error'
+                });
+            }
+        });
+    }
+
+    // Xử lý nút in đơn hàng
+    document.getElementById('btn-print-order')?.addEventListener('click', function() {
+        const orderId = document.getElementById('detail-order-id').textContent;
+        const printWindow = window.open('', '_blank');
+        
+        const printContent = `
+        <html>
+        <head>
+            <title>Đơn hàng #${orderId}</title>
+            <style>
+                body { font-family: Arial, sans-serif; line-height: 1.6; }
+                .container { max-width: 800px; margin: 0 auto; padding: 20px; }
+                .header { text-align: center; margin-bottom: 30px; }
+                .section { margin-bottom: 20px; }
+                .row { display: flex; margin-bottom: 20px; }
+                .col { flex: 1; padding: 0 10px; }
+                .product { display: flex; margin-bottom: 15px; }
+                .product-image { width: 100px; margin-right: 15px; }
+                .product-info { flex: 1; }
+                .total { font-size: 18px; font-weight: bold; text-align: right; }
+                table { width: 100%; border-collapse: collapse; }
+                table, th, td { border: 1px solid #ddd; }
+                th, td { padding: 8px; text-align: left; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1>PiaoYue Art Gallery</h1>
+                    <h2>Đơn hàng #${orderId}</h2>
+                </div>
+                
+                <div class="row">
+                    <div class="col">
+                        <div class="section">
+                            <h3>Thông tin đơn hàng</h3>
+                            <p><strong>Mã đơn hàng:</strong> ${orderId}</p>
+                            <p><strong>Ngày đặt hàng:</strong> ${document.getElementById('detail-order-date').textContent}</p>
+                            <p><strong>Trạng thái:</strong> ${document.getElementById('detail-order-status').textContent}</p>
+                            <p><strong>Phương thức thanh toán:</strong> ${document.getElementById('detail-payment-method').textContent}</p>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="section">
+                            <h3>Thông tin khách hàng</h3>
+                            <p><strong>Khách hàng:</strong> ${document.getElementById('detail-customer-name').textContent}</p>
+                            <p><strong>Email:</strong> ${document.getElementById('detail-customer-email').textContent}</p>
+                            <p><strong>Số điện thoại:</strong> ${document.getElementById('detail-customer-phone').textContent}</p>
+                            <p><strong>Địa chỉ nhận hàng:</strong> ${document.getElementById('detail-shipping-address').textContent}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h3>Sản phẩm</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Sản phẩm</th>
+                                <th>Nghệ sĩ</th>
+                                <th>Đơn giá</th>
+                                <th>Số lượng</th>
+                                <th>Thành tiền</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>${document.getElementById('detail-artwork-title').textContent}</td>
+                                <td>${document.getElementById('detail-artist-name').textContent}</td>
+                                <td>${document.getElementById('detail-artwork-price').textContent}</td>
+                                <td>${document.getElementById('detail-quantity').textContent}</td>
+                                <td>${document.getElementById('detail-total-amount').textContent}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="section total">
+                    <p>Tổng thanh toán: ${document.getElementById('detail-total-amount').textContent}</p>
+                </div>
+                
+                <div class="section" style="text-align: center; margin-top: 50px;">
+                    <p>Cảm ơn quý khách đã mua hàng tại PiaoYue Art Gallery!</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        `;
+        
+        printWindow.document.open();
+        printWindow.document.write(printContent);
+        printWindow.document.close();
+        
+        // Đợi nội dung tải xong rồi in
+        printWindow.onload = function() {
+            printWindow.print();
+        };
+    });
+
+    // Hàm định dạng ngày tháng
+    function formatDate(dateString) {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('vi-VN', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    }
+
+    // Hàm định dạng tiền tệ
+    function formatCurrency(amount) {
+        return new Intl.NumberFormat('vi-VN', {
+            style: 'currency',
+            currency: 'VND'
+        }).format(amount);
+    }
 }); 
