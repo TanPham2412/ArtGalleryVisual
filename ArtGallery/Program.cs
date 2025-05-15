@@ -151,6 +151,13 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+// Thêm định tuyến rõ ràng cho Area Identity
+app.MapControllerRoute(
+    name: "areaRoute",
+    pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
+
+// Đảm bảo MapRazorPages được gọi (đã có)
 app.MapRazorPages();
 
 using (var scope = app.Services.CreateScope())
