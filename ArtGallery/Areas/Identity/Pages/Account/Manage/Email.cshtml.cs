@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
+using System.Linq;
 
 namespace ArtGallery.Areas.Identity.Pages.Account.Manage
 {
@@ -16,16 +17,16 @@ namespace ArtGallery.Areas.Identity.Pages.Account.Manage
     {
         private readonly UserManager<NguoiDung> _userManager;
         private readonly SignInManager<NguoiDung> _signInManager;
-        private readonly IEmailSender _emailSender;
+        private readonly EmailService _emailService;
 
         public EmailModel(
             UserManager<NguoiDung> userManager,
             SignInManager<NguoiDung> signInManager,
-            IEmailSender emailSender)
+            EmailService emailService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
-            _emailSender = emailSender;
+            _emailService = emailService;
         }
 
         [Display(Name = "Email hiện tại")]
@@ -38,6 +39,8 @@ namespace ArtGallery.Areas.Identity.Pages.Account.Manage
 
         [BindProperty]
         public InputModel Input { get; set; }
+
+        public bool IsExternalAccount { get; set; }
 
         public class InputModel
         {
@@ -58,6 +61,9 @@ namespace ArtGallery.Areas.Identity.Pages.Account.Manage
             };
 
             IsEmailConfirmed = await _userManager.IsEmailConfirmedAsync(user);
+            
+            var logins = await _userManager.GetLoginsAsync(user);
+            IsExternalAccount = logins.Any(l => l.LoginProvider.Equals("Google", StringComparison.OrdinalIgnoreCase));
         }
 
         public async Task<IActionResult> OnGetAsync()
@@ -66,6 +72,15 @@ namespace ArtGallery.Areas.Identity.Pages.Account.Manage
             if (user == null)
             {
                 return NotFound($"Không thể tải thông tin người dùng với ID '{_userManager.GetUserId(User)}'.");
+            }
+
+            if (TempData["EmailConfirmSuccess"] != null && (bool)TempData["EmailConfirmSuccess"])
+            {
+                StatusMessage = "Email của bạn đã được thay đổi thành công.";
+                if (TempData["NewEmail"] != null)
+                {
+                    user = await _userManager.FindByIdAsync(user.Id);
+                }
             }
 
             await LoadAsync(user);
@@ -97,13 +112,22 @@ namespace ArtGallery.Areas.Identity.Pages.Account.Manage
                     pageHandler: null,
                     values: new { userId = userId, email = Input.NewEmail, code = code },
                     protocol: Request.Scheme);
-                await _emailSender.SendEmailAsync(
-                    Input.NewEmail,
-                    "Xác nhận email của bạn",
-                    $"Vui lòng xác nhận địa chỉ email của bạn bằng cách <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>nhấp vào đây</a>.");
+                
+                try
+                {
+                    await _emailService.SendEmailConfirmationAsync(
+                        Input.NewEmail,
+                        user.TenNguoiDung ?? user.UserName,
+                        callbackUrl);
 
-                StatusMessage = "Đã gửi liên kết xác nhận thay đổi email. Vui lòng kiểm tra email của bạn.";
-                return RedirectToPage();
+                    StatusMessage = "Đã gửi liên kết xác nhận thay đổi email. Vui lòng kiểm tra email của bạn.";
+                    return RedirectToPage();
+                }
+                catch (Exception ex)
+                {
+                    StatusMessage = $"Lỗi khi gửi email: {ex.Message}";
+                    return RedirectToPage();
+                }
             }
 
             StatusMessage = "Email của bạn không thay đổi.";
@@ -133,13 +157,22 @@ namespace ArtGallery.Areas.Identity.Pages.Account.Manage
                 pageHandler: null,
                 values: new { area = "Identity", userId = userId, code = code },
                 protocol: Request.Scheme);
-            await _emailSender.SendEmailAsync(
-                email,
-                "Xác nhận email của bạn",
-                $"Vui lòng xác nhận tài khoản của bạn bằng cách <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>nhấp vào đây</a>.");
+            
+            try
+            {
+                await _emailService.SendEmailVerificationAsync(
+                    email,
+                    user.TenNguoiDung ?? user.UserName,
+                    callbackUrl);
 
-            StatusMessage = "Đã gửi email xác nhận. Vui lòng kiểm tra email của bạn.";
-            return RedirectToPage();
+                StatusMessage = "Đã gửi email xác nhận. Vui lòng kiểm tra email của bạn.";
+                return RedirectToPage();
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"Lỗi khi gửi email: {ex.Message}";
+                return RedirectToPage();
+            }
         }
     }
 } 
