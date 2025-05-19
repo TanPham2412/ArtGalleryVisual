@@ -55,7 +55,21 @@
                         </div>
                         
                         <div class="row mt-4">
-                            @if (isInCart)
+                            @if (ViewBag.IsArtistLocked == true)
+                            {
+                                <div class="col-12">
+                                    <div class="alert alert-danger">
+                                        <i class="fas fa-lock me-2"></i>Tài khoản nghệ sĩ đang bị tạm khóa
+                                    </div>
+                                    <div class="alert alert-warning">
+                                        <i class="fas fa-exclamation-circle me-2"></i>Không thể đặt hàng từ nghệ sĩ này vì tài khoản đang bị khóa đến @(((DateTimeOffset)ViewBag.ArtistLockoutEnd).LocalDateTime.ToString("dd/MM/yyyy HH:mm"))
+                                    </div>
+                                    <a href="/Order/History" class="btn btn-secondary btn-lg w-100">
+                                        <i class="fas fa-arrow-left me-2"></i>Quay lại
+                                    </a>
+                                </div>
+                            }
+                            else if (isInCart)
                             {
                                 <div class="col-6">
                                     <button type="button" id="btnRemoveFromCart" class="btn btn-danger btn-lg w-100" data-order-id="@existingOrder.MaGiaoDich">
