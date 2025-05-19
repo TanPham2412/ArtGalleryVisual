@@ -3,41 +3,83 @@
 @{
     ViewData["Title"] = "Quản lý Email";
     ViewData["ActivePage"] = ManageNavPages.Email;
+    // Kiểm tra thủ công nếu chưa có thuộc tính IsExternalAccount 
+    bool isExternalAccount = (ViewData["IsExternalAccount"] as bool?) ?? false;
 }
-
-<h3>@ViewData["Title"]</h3>
+<link rel="stylesheet" href="~/css/manage-account.css" />
+<h3 class="manage-title">@ViewData["Title"]</h3>
 <partial name="_StatusMessage" for="StatusMessage" />
 <div class="row">
     <div class="col-md-3">
         <partial name="_ManageNav" />
     </div>
     <div class="col-md-9">
-        <form id="email-form" method="post">
-            <div asp-validation-summary="All" class="text-danger"></div>
-            <div class="form-group mb-3">
-                <label asp-for="Email" class="form-label"></label>
-                @if (Model.IsEmailConfirmed)
-                {
-                    <div class="input-group">
-                        <input asp-for="Email" class="form-control" disabled />
-                        <span class="input-group-text bg-success text-white">
-                            <i class="fas fa-check"></i>
-                        </span>
+        @if (Model.IsExternalAccount)
+        {
+            <div class="alert alert-info">
+                <div class="d-flex align-items-center mb-3">
+                    <i class="fab fa-google me-3" style="font-size: 2rem;"></i>
+                    <div>
+                        <h5 class="mb-1">Tài khoản Google</h5>
+                        <p class="mb-0">Bạn đang sử dụng tài khoản Google để đăng nhập.</p>
                     </div>
-                }
-                else
-                {
-                    <input asp-for="Email" class="form-control" disabled />
-                    <button id="email-verification" type="submit" asp-page-handler="SendVerificationEmail" class="btn btn-link">Gửi email xác thực</button>
-                }
+                </div>
+                <p>Email của bạn được quản lý bởi Google. Để thay đổi địa chỉ email, vui lòng truy cập tài khoản Google của bạn.</p>
+                <div class="mt-3">
+                    <a href="https://myaccount.google.com/email" target="_blank" class="btn btn-outline-primary">
+                        <i class="fas fa-external-link-alt me-2"></i>Đi đến cài đặt Google
+                    </a>
+                </div>
             </div>
-            <div class="form-group mb-3">
-                <label asp-for="Input.NewEmail" class="form-label"></label>
-                <input asp-for="Input.NewEmail" class="form-control" autocomplete="email" />
-                <span asp-validation-for="Input.NewEmail" class="text-danger"></span>
+            <div class="form-group mb-3 mt-4">
+                <label class="form-label">Email hiện tại</label>
+                <div class="input-group">
+                    <input value="@Model.Email" class="form-control" disabled />
+                    <span class="input-group-text bg-success text-white" title="Email đã xác thực">
+                        <i class="fas fa-check"></i>
+                    </span>
+                </div>
+                <small class="text-muted mt-2">Email được xác thực bởi Google</small>
             </div>
-            <button id="change-email-button" type="submit" asp-page-handler="ChangeEmail" class="btn btn-primary">Thay đổi email</button>
-        </form>
+        }
+        else
+        {
+            <form id="email-form" method="post">
+                <div asp-validation-summary="All" class="text-danger"></div>
+                <div class="form-group mb-3">
+                    <label asp-for="Email" class="form-label"></label>
+                    @if (Model.IsEmailConfirmed)
+                    {
+                        <div class="input-group">
+                            <input asp-for="Email" class="form-control" disabled />
+                            <span class="input-group-text bg-success text-white" title="Email đã xác thực">
+                                <i class="fas fa-check"></i>
+                            </span>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="input-group">
+                            <input asp-for="Email" class="form-control" disabled />
+                            <span class="input-group-text bg-warning text-white" title="Email chưa xác thực">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </span>
+                        </div>
+                        <button id="email-verification" type="submit" asp-page-handler="SendVerificationEmail" class="btn btn-link mt-2">
+                            <i class="fas fa-paper-plane me-2"></i>Gửi email xác thực
+                        </button>
+                    }
+                </div>
+                <div class="form-group mb-3">
+                    <label asp-for="Input.NewEmail" class="form-label"></label>
+                    <input asp-for="Input.NewEmail" class="form-control" autocomplete="email" />
+                    <span asp-validation-for="Input.NewEmail" class="text-danger"></span>
+                </div>
+                <button id="change-email-button" type="submit" asp-page-handler="ChangeEmail" class="btn btn-primary">
+                    <i class="fas fa-envelope me-2"></i>Thay đổi email
+                </button>
+            </form>
+        }
     </div>
 </div>
 

@@ -53,6 +53,15 @@ namespace ArtGallery.Controllers
                 return NotFound();
             }
 
+            // Kiểm tra thông tin của nghệ sĩ (người bán)
+            var artistUser = await _context.NguoiDungs.FirstOrDefaultAsync(u => u.Id == artwork.MaNguoiDung);
+            if (artistUser != null)
+            {
+                ViewBag.IsArtistLocked = artistUser.LockoutEnabled && artistUser.LockoutEnd != null && artistUser.LockoutEnd > DateTimeOffset.UtcNow;
+                ViewBag.ArtistLockoutEnd = artistUser.LockoutEnd;
+                ViewBag.ArtistLockoutReason = artistUser.LockoutReason;
+            }
+
             // Gán giá trị cho ViewBag
             ViewBag.Artwork = artwork;
 

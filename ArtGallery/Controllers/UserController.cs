@@ -63,6 +63,10 @@ namespace ArtGallery.Controllers
                 ViewBag.IsOwnProfile = User.Identity.IsAuthenticated && 
                                       (await _userManager.GetUserAsync(User))?.Id == id;
 
+                ViewBag.IsLocked = user.LockoutEnabled && user.LockoutEnd != null && user.LockoutEnd > DateTimeOffset.Now;
+                ViewBag.LockoutEnd = user.LockoutEnd;
+                ViewBag.LockoutReason = user.LockoutReason;
+
                 if (User.Identity.IsAuthenticated)
                 {
                     var currentUserId = _userManager.GetUserId(User);

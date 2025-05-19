@@ -17,6 +17,12 @@
     <div class="profile-header">
         <!-- Cover Image Section -->
         <div class="profile-cover-photo">
+            @if (ViewBag.IsLocked == true)
+            {
+                <div class="account-locked-banner" onclick="openAccountLockedModal()">
+                    <i class="fas fa-lock"></i> Tài khoản đang bị tạm khóa
+                </div>
+            }
             @if (!string.IsNullOrEmpty(Model.CoverImage))
             {
                 <img src="/images/authors/coverimages/@Model.UserName/@Model.CoverImage" alt="Cover Image">
@@ -497,6 +503,32 @@
     </div>
 </div>
 
+<!-- Thêm modal thông báo tài khoản bị khóa -->
+<div id="accountLockedModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3><i class="fas fa-lock"></i> Tài khoản đã bị tạm khóa</h3>
+            <span class="close" onclick="closeAccountLockedModal()">&times;</span>
+        </div>
+        <div class="modal-body">
+            <div class="lock-warning">
+                <p>Tài khoản này hiện đang bị tạm khóa.</p>
+                @if (!string.IsNullOrEmpty(ViewBag.LockoutReason))
+                {
+                    <p><strong>Lý do:</strong> @ViewBag.LockoutReason</p>
+                }
+                @if (ViewBag.LockoutEnd != null)
+                {
+                    <p><strong>Thời gian mở khóa:</strong> @(((DateTimeOffset)ViewBag.LockoutEnd).LocalDateTime.ToString("dd/MM/yyyy HH:mm:ss"))</p>
+                }
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn-primary" onclick="closeAccountLockedModal()">Đã hiểu</button>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script src="~/js/profile.js"></script>
     <script src="~/js/featured-artworks.js"></script>
@@ -525,6 +557,14 @@
                     openViewAllInfoModal();
                 };
             }
+
+            // Thêm code kiểm tra và hiển thị modal tài khoản bị khóa
+            @if (ViewBag.IsLocked == true)
+            {
+                <text>
+                    openAccountLockedModal();
+                </text>
+            }
         });
 
         // Thêm hiệu ứng lấp lánh vào các phần tử featured-item
@@ -538,5 +578,14 @@
                 item.appendChild(sparkle);
             }
         });
+
+        // Hàm mở/đóng modal
+        function openAccountLockedModal() {
+            document.getElementById('accountLockedModal').style.display = 'block';
+        }
+
+        function closeAccountLockedModal() {
+            document.getElementById('accountLockedModal').style.display = 'none';
+        }
     </script>
 }  

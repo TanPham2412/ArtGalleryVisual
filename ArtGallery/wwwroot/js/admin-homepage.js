@@ -173,9 +173,6 @@ function fetchUsers() {
                             <button class="btn ${user.isActive ? 'btn-warning' : 'btn-success'} btn-toggle-user" data-id="${user.id}" data-active="${user.isActive}">
                                 <i class="fas ${user.isActive ? 'fa-ban' : 'fa-check'}"></i>
                             </button>
-                            <button class="btn btn-danger btn-delete-user" data-id="${user.id}">
-                                <i class="fas fa-trash"></i>
-                            </button>
                         </div>
                     </td>
                 `;
@@ -493,11 +490,11 @@ function addUserButtonsEventListeners() {
                         label.style.color = '#ccc';
                     });
                 }, 100);
-                        } else {
+            } else {
                 // Mở khóa tài khoản
                 if (confirm('Bạn có chắc muốn mở khóa tài khoản người dùng này?')) {
                     unlockUser(userId);
-                        }
+                }
             }
         });
     });
@@ -529,34 +526,6 @@ function addUserButtonsEventListeners() {
         // Đóng modal
         const lockModal = new bootstrap.Modal(document.getElementById('lockUserModal'));
         lockModal.hide();
-    });
-
-    // Nút xóa người dùng
-    document.querySelectorAll('.btn-delete-user').forEach(button => {
-        button.addEventListener('click', function () {
-            const userId = this.getAttribute('data-id');
-
-            if (confirm('Bạn có chắc muốn xóa người dùng này? Dữ liệu không thể khôi phục!')) {
-                fetch('/Admin/DeleteUser', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
-                    },
-                    body: JSON.stringify(userId)
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert('Đã xóa người dùng thành công!');
-                            fetchUsers(); // Tải lại danh sách
-                        } else {
-                            alert(`Lỗi: ${data.message}`);
-                        }
-                    })
-                    .catch(error => console.error('Error deleting user:', error));
-            }
-        });
     });
 }
 

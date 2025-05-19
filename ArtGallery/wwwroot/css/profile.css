@@ -2319,3 +2319,150 @@ body.modal-open {
 #addFeaturedModal .modal-content::-webkit-scrollbar {
     display: none;
 }
+
+/* Thêm CSS cho modal thông báo khóa tài khoản */
+.lock-warning {
+    padding: 15px;
+    background-color: rgba(255, 0, 0, 0.1);
+    border-left: 5px solid #d9534f;
+    border-radius: 4px;
+    margin-bottom: 20px;
+}
+
+.lock-warning p {
+    margin-bottom: 10px;
+    color: #d9534f;
+}
+
+.lock-warning strong {
+    color: #d9534f;
+    font-weight: bold;
+}
+
+/* Thêm CSS cho banner thông báo khóa tài khoản */
+.account-locked-banner {
+    background-color: #d9534f;
+    color: white;
+    padding: 8px 15px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 10;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    animation: pulse-warning 2s infinite;
+}
+
+.account-locked-banner:hover {
+    background-color: #c9302c;
+}
+
+.account-locked-banner i {
+    font-size: 18px;
+}
+
+@keyframes pulse-warning {
+    0% {
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+    50% {
+        box-shadow: 0 2px 15px rgba(213, 83, 79, 0.6);
+    }
+    100% {
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+}
+
+/* Modal tài khoản đã bị tạm khóa */
+#accountLockedModal .modal-content {
+    width: 400px;
+    max-width: 90%;
+    border-radius: 15px;
+    background: #1a1a1a;
+    border: 1px solid #333;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 15px rgba(213, 83, 79, 0.4);
+    overflow: hidden;
+}
+
+#accountLockedModal .modal-header {
+    padding: 20px;
+    border-bottom: 1px solid #333;
+    background: linear-gradient(to right, #1a1a1a, #2d1d1d);
+}
+
+#accountLockedModal .modal-header h3 {
+    font-size: 18px;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#accountLockedModal .modal-header h3 i {
+    color: #d9534f;
+}
+
+#accountLockedModal .close {
+    font-size: 22px;
+    color: #aaa;
+    transition: all 0.3s;
+}
+
+#accountLockedModal .close:hover {
+    color: #fff;
+    transform: rotate(90deg);
+}
+
+#accountLockedModal .modal-body {
+    padding: 20px;
+}
+
+#accountLockedModal .lock-warning {
+    padding: 20px;
+    background: rgba(213, 83, 79, 0.1);
+    border-left: 4px solid #d9534f;
+    border-radius: 5px;
+    margin-bottom: 0;
+}
+
+#accountLockedModal .lock-warning p {
+    margin-bottom: 15px;
+    color: #fff;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+#accountLockedModal .lock-warning strong {
+    color: #d9534f;
+    font-weight: 600;
+    margin-right: 5px;
+}
+
+#accountLockedModal .modal-footer {
+    padding: 15px 20px;
+    border-top: 1px solid #333;
+    text-align: right;
+}
+
+#accountLockedModal .btn-primary {
+    background: #d9534f;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 30px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+#accountLockedModal .btn-primary:hover {
+    background: #c9302c;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(213, 83, 79, 0.3);
+}

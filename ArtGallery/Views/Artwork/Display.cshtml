@@ -115,7 +115,25 @@
                 <div class="action-buttons">
                     @if (!isOwner)
                     {
-                        @if (Model.SoLuongTon > 0)
+                        @if (ViewBag.IsCurrentUserLocked == true)
+                        {
+                            <button class="btn btn-outline-danger btn-lg w-100 mb-3" disabled>
+                                <i class="fas fa-lock me-2"></i>Tài khoản tạm khóa
+                            </button>
+                            <div class="alert alert-warning mb-3">
+                                <i class="fas fa-exclamation-circle me-2"></i>Tài khoản của bạn đang bị tạm khóa. Vui lòng thử lại sau @(((DateTimeOffset)ViewBag.CurrentUserLockoutEnd).LocalDateTime.ToString("dd/MM/yyyy HH:mm"))
+                            </div>
+                        }
+                        else if (ViewBag.IsArtistLocked == true)
+                        {
+                            <button class="btn btn-outline-danger btn-lg w-100 mb-3" disabled>
+                                <i class="fas fa-lock me-2"></i>Tài khoản nghệ sĩ bị khóa
+                            </button>
+                            <div class="alert alert-warning mb-3">
+                                <i class="fas fa-exclamation-circle me-2"></i>Tài khoản của nghệ sĩ này hiện đang bị khóa. Không thể đặt hàng lúc này.
+                            </div>
+                        }
+                        else if (Model.SoLuongTon > 0)
                         {
                             <a asp-controller="Order" asp-action="Display" asp-route-id="@Model.MaTranh" class="btn btn-outline-primary btn-lg w-100 mb-3">
                                 <i class="fas fa-shopping-cart me-2"></i>Đặt hàng ngay

@@ -56,6 +56,24 @@ namespace ArtGallery.Controllers
                 ViewBag.Replies = repliesByCommentId;
             }
             
+            // Kiểm tra tài khoản người dùng đang đăng nhập
+            var currentUser = await _context.NguoiDungs.FirstOrDefaultAsync(u => u.Id == User.FindFirstValue(ClaimTypes.NameIdentifier));
+            if (currentUser != null)
+            {
+                ViewBag.IsCurrentUserLocked = currentUser.LockoutEnabled && currentUser.LockoutEnd != null && currentUser.LockoutEnd > DateTimeOffset.UtcNow;
+                ViewBag.CurrentUserLockoutEnd = currentUser.LockoutEnd;
+                ViewBag.CurrentUserLockoutReason = currentUser.LockoutReason;
+            }
+
+            // Kiểm tra tài khoản của người bán (tác giả)
+            var artist = await _context.NguoiDungs.FirstOrDefaultAsync(u => u.Id == result.artwork.MaNguoiDung);
+            if (artist != null)
+            {
+                ViewBag.IsArtistLocked = artist.LockoutEnabled && artist.LockoutEnd != null && artist.LockoutEnd > DateTimeOffset.UtcNow;
+                ViewBag.ArtistLockoutEnd = artist.LockoutEnd;
+                ViewBag.ArtistLockoutReason = artist.LockoutReason;
+            }
+            
             return View(result.artwork);
         }
 

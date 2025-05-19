@@ -921,3 +921,8 @@ body::-webkit-scrollbar-thumb,
 .action-buttons .dropdown-toggle {
   display: none !important;
 }
+
+/* Thêm CSS để ẩn nút xóa người dùng */
+.btn-delete-user {
+    display: none !important;
+}

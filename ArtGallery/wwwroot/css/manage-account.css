@@ -1,0 +1,433 @@
+/* CSS cho trang quản lý tài khoản */
+
+/* ArtGallery - Manage Account Theme */
+:root {
+    --primary-color: #00a8ff;
+    --secondary-color: #9c27b0;
+    --bg-dark: #121212;
+    --bg-card: #1e1e1e;
+    --text-light: #ffffff;
+    --text-secondary: #b0b0b0;
+    --border-color: #333;
+    --nav-active: linear-gradient(45deg, #00a8ff, #9c27b0);
+}
+
+/* Layout */
+.manage-container {
+    max-width: 1200px;
+    margin: 30px auto;
+    padding: 0 15px;
+}
+
+.manage-card {
+    background: rgba(30, 30, 30, 0.85);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+    margin-bottom: 30px;
+}
+
+.manage-header {
+    padding: 25px 30px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.manage-title {
+    font-size: 26px;
+    font-weight: 700;
+    margin: 0;
+    background: linear-gradient(to right, #00a8ff, #9c27b0);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: inline-block;
+}
+
+.manage-body {
+    padding: 30px;
+    position: relative;
+    z-index: 1;
+}
+
+/* Điều chỉnh row và columns */
+.manage-body .row {
+    display: flex;
+    flex-wrap: wrap;
+    margin-right: -15px;
+    margin-left: -15px;
+}
+
+.manage-body .col-md-3 {
+    position: relative;
+    width: 25%;
+    padding-right: 15px;
+    padding-left: 15px;
+}
+
+.manage-body .col-md-9 {
+    position: relative;
+    width: 75%;
+    padding-right: 15px;
+    padding-left: 15px;
+}
+
+/* Form container */
+#profile-form, 
+#email-form,
+#change-password-form {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Fix navigation */
+.account-nav {
+    position: relative;
+    z-index: 2;
+    height: 100%;
+    min-width: 220px;
+}
+
+/* Mobile responsive fixes */
+@media (max-width: 767px) {
+    .manage-body .col-md-3,
+    .manage-body .col-md-9 {
+        width: 100%;
+    }
+    
+    .account-nav {
+        margin-bottom: 20px;
+    }
+    
+    #profile-form, 
+    #email-form,
+    #change-password-form {
+        padding: 15px;
+    }
+    
+    .manage-body {
+        padding: 20px 15px;
+    }
+}
+
+/* Cố định label để tránh bị che */
+.form-label, .form-group {
+    position: relative;
+    z-index: 1;
+}
+
+/* Đảm bảo header và field không bị che */
+h3.manage-title {
+    margin-bottom: 25px;
+    position: relative;
+    z-index: 1;
+}
+
+/* Điều chỉnh z-index cho các phần tử */
+.alert, 
+.validation-summary-errors,
+.form-control,
+.input-group {
+    position: relative;
+    z-index: 1;
+}
+
+/* Navigation */
+.account-nav {
+    border-radius: 12px;
+    overflow: hidden;
+    background: rgba(0, 0, 0, 0.2);
+    margin-bottom: 20px;
+}
+
+.account-nav .nav-item {
+    width: 100%;
+}
+
+.account-nav .nav-link {
+    padding: 14px 20px;
+    color: var(--text-light);
+    border-radius: 0;
+    border-left: 3px solid transparent;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    font-weight: 500;
+}
+
+.account-nav .nav-link i {
+    margin-right: 12px;
+    font-size: 18px;
+    min-width: 24px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.account-nav .nav-link:hover {
+    background: rgba(0, 168, 255, 0.1);
+    color: var(--primary-color);
+}
+
+.account-nav .nav-link:hover i {
+    transform: translateX(2px);
+}
+
+.account-nav .nav-link.active {
+    background: var(--nav-active);
+    color: #fff;
+    border-left: 3px solid #fff;
+}
+
+/* Form Elements */
+.form-group {
+    margin-bottom: 24px;
+}
+
+.form-label {
+    font-weight: 500;
+    margin-bottom: 10px;
+    color: var(--text-light);
+    font-size: 15px;
+}
+
+.form-control {
+    background-color: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-light);
+    border-radius: 8px;
+    padding: 12px 16px;
+    transition: all 0.3s;
+    font-size: 15px;
+}
+
+.form-control:focus {
+    background-color: rgba(0, 0, 0, 0.3);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.25rem rgba(0, 168, 255, 0.25);
+    color: var(--text-light);
+}
+
+.form-control:disabled {
+    background-color: rgba(0, 0, 0, 0.3);
+    color: var(--text-secondary);
+}
+
+.input-group-text {
+    background-color: rgba(0, 0, 0, 0.3);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: var(--text-light);
+}
+
+/* Avatar Preview */
+.avatar-container {
+    margin-bottom: 20px;
+}
+
+.avatar-preview {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    overflow: hidden;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+    border: 4px solid rgba(156, 39, 176, 0.3);
+    position: relative;
+}
+
+.avatar-preview::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, rgba(0, 168, 255, 0.2), rgba(156, 39, 176, 0.2));
+    pointer-events: none;
+}
+
+.avatar-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.file-upload-wrapper {
+    position: relative;
+    margin-top: 15px;
+}
+
+.file-upload-wrapper input[type="file"] {
+    color: transparent;
+}
+
+.file-upload-wrapper::before {
+    content: 'Chọn ảnh';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    padding: 0 15px;
+    background-color: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: var(--text-light);
+    pointer-events: none;
+}
+
+/* Buttons */
+.btn {
+    padding: 11px 22px;
+    font-weight: 500;
+    font-size: 15px;
+    transition: all 0.3s;
+    border-radius: 30px;
+}
+
+.btn-primary {
+    background: var(--nav-active);
+    border: none;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+    box-shadow: 0 6px 20px rgba(0, 168, 255, 0.3);
+}
+
+.btn-primary::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, #9c27b0, #00a8ff);
+    opacity: 0;
+    transition: opacity 0.3s;
+    z-index: -1;
+}
+
+.btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 168, 255, 0.4);
+}
+
+.btn-primary:hover::after {
+    opacity: 1;
+}
+
+.btn-link {
+    color: var(--primary-color);
+    text-decoration: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    transition: all 0.3s;
+}
+
+.btn-link:hover {
+    background-color: rgba(0, 168, 255, 0.1);
+    color: var(--primary-color);
+}
+
+/* Alert Messages */
+.alert {
+    border: none;
+    border-radius: 10px;
+    position: relative;
+    padding: 16px 20px;
+    padding-left: 60px;
+    margin-bottom: 25px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+}
+
+.alert::before {
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+    position: absolute;
+    left: 20px;
+    top: 16px;
+    font-size: 22px;
+}
+
+.alert-success {
+    background: linear-gradient(135deg, rgba(0, 168, 255, 0.1), rgba(0, 204, 102, 0.1));
+    color: #0c0;
+}
+
+.alert-success::before {
+    content: '\f00c';
+    color: #0c0;
+}
+
+.alert-danger {
+    background: linear-gradient(135deg, rgba(255, 68, 68, 0.1), rgba(255, 0, 68, 0.1));
+    color: #f44;
+}
+
+.alert-danger::before {
+    content: '\f071';
+    color: #f44;
+}
+
+/* Validation */
+.validation-summary-errors {
+    margin-bottom: 20px;
+}
+
+.validation-summary-errors ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.validation-summary-errors li {
+    color: #ff4d4d;
+    padding: 10px 15px;
+    background: rgba(255, 77, 77, 0.1);
+    border-radius: 6px;
+    margin-bottom: 5px;
+}
+
+.text-danger {
+    color: #ff4d4d !important;
+    font-size: 14px;
+    margin-top: 5px;
+    display: block;
+}
+
+/* Responsive */
+@media (max-width: 767px) {
+    .account-nav {
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        white-space: nowrap;
+        margin-bottom: 30px;
+    }
+    
+    .account-nav .nav-item {
+        flex: 0 0 auto;
+        width: auto;
+    }
+    
+    .account-nav .nav-link {
+        padding: 10px 16px;
+        border-left: none;
+        border-bottom: 3px solid transparent;
+    }
+    
+    .account-nav .nav-link.active {
+        border-left: none;
+        border-bottom: 3px solid #fff;
+    }
+    
+    .row {
+        flex-direction: column;
+    }
+    
+    .col-md-3, .col-md-9 {
+        width: 100%;
+    }
+} 

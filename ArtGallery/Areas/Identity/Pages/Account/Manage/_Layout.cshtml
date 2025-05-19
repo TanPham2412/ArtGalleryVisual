@@ -2,11 +2,14 @@
     Layout = "/Views/Shared/_Layout.cshtml";
 }
 
-<div class="container mt-4">
-    <h2>Quản lý tài khoản</h2>
-    <hr />
-    <div class="row">
-        <div class="col-md-12">
+<link rel="stylesheet" href="~/css/manage-account.css" />
+
+<div class="manage-container">
+    <div class="manage-card">
+        <div class="manage-header">
+            <h2 class="manage-title">Quản lý tài khoản</h2>
+        </div>
+        <div class="manage-body">
             @RenderBody()
         </div>
     </div>
@@ -14,4 +17,4 @@
 
 @section Scripts {
     @RenderSection("Scripts", required: false)
-} 
+}
