@@ -115,7 +115,7 @@ public class EmailService
                         
                         <h3>Thông tin đơn hàng:</h3>
                         <div class='order-info'>
-                            {orderInfo}
+                {orderInfo}
                         </div>
                         
                         <p>Đơn hàng của bạn đang được xử lý. Chúng tôi sẽ thông báo cho bạn khi đơn hàng được gửi đi.</p>
@@ -366,13 +366,13 @@ public class EmailService
     {
         try
         {
-            using var smtp = new SmtpClient();
+        using var smtp = new SmtpClient();
             await smtp.ConnectAsync(_emailSettings.Host, _emailSettings.Port, 
                 _emailSettings.EnableSSL ? MailKit.Security.SecureSocketOptions.StartTls : MailKit.Security.SecureSocketOptions.Auto);
-            await smtp.AuthenticateAsync(_emailSettings.FromEmail, _emailSettings.AppPassword);
-            await smtp.SendAsync(email);
-            await smtp.DisconnectAsync(true);
-        }
+        await smtp.AuthenticateAsync(_emailSettings.FromEmail, _emailSettings.AppPassword);
+        await smtp.SendAsync(email);
+        await smtp.DisconnectAsync(true);
+    }
         catch (Exception ex)
         {
             // Log lỗi ở đây
