@@ -4,7 +4,6 @@
     ViewData["Title"] = "Đăng ký";
     Layout = null;
 }
-
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -12,7 +11,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Đăng ký - PiaoYue Art Gallery</title>
     <link rel="stylesheet" href="~/css/login1_register.css?v=2">
-    <script src="~/js/login_register.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
@@ -67,13 +65,14 @@
                     <span asp-validation-for="Input.ConfirmPassword" class="validation-message"></span>
                 </div>
 
-                <!-- Điều khoản --> 
-                <div class="terms-group">
-                    <label class="terms-label">
-                        <input type="checkbox" required>
-                        <span>Tôi đồng ý với điều khoản & điều kiện</span>
-                    </label>
-                </div>
+                @* <!-- Điều khoản --> *@
+                @* <div class="terms-group"> *@
+                @*     <div class="terms-label"> *@
+                @*         @Html.CheckBoxFor(m => m.Input.AgreeToTerms, new { id = "agreeTerms" }) *@
+                @*         <label for="agreeTerms">Tôi đồng ý với điều khoản & điều kiện</label> *@
+                @*     </div> *@
+                @*     <span asp-validation-for="Input.AgreeToTerms" class="validation-message"></span> *@
+                @* </div> *@
 
                 <!-- Xác nhận -->
                 <button type="submit" class="next-button">Đăng ký</button>
@@ -107,6 +106,7 @@
                 </form>
             }
 
+
             <!-- Footer -->
             <div class="register-footer">
                 <p>
@@ -119,7 +119,6 @@
             </div>
         </div>
     </div>
-
     <!-- Scripts -->
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/js/login_register.js"></script>

@@ -31,3 +31,14 @@ function togglePassword(button) {
         icon.classList.add('fa-eye');
     }
 }
+
+    document.getElementById('registerForm').addEventListener('submit', function(e) {
+    const agreeCheckbox = document.querySelector('input[name="Input.AgreeToTerms"][type="checkbox"]');
+
+    if (!agreeCheckbox.checked) {
+        e.preventDefault();
+    alert('Vui lòng đồng ý với điều khoản & điều kiện');
+    return false;
+    }
+});
+

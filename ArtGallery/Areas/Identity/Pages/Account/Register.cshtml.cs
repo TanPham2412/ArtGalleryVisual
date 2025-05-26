@@ -93,10 +93,10 @@ namespace ArtGallery.Areas.Identity.Pages.Account
             [Compare("Password", ErrorMessage = "Mật khẩu và xác nhận mật khẩu không khớp.")]
             public string ConfirmPassword { get; set; }
             
-            [Required(ErrorMessage = "Vui lòng đồng ý với điều khoản & điều kiện")]
-            [Range(typeof(bool), "true", "true", ErrorMessage = "Vui lòng đồng ý với điều khoản & điều kiện")]
-            [Display(Name = "Tôi đồng ý với điều khoản & điều kiện")]
-            public bool AgreeToTerms { get; set; }
+            //[Required(ErrorMessage = "Vui lòng đồng ý với điều khoản & điều kiện")]
+            //[Range(typeof(bool), "true", "true", ErrorMessage = "Vui lòng đồng ý với điều khoản & điều kiện")]
+            //[Display(Name = "Tôi đồng ý với điều khoản & điều kiện")]
+            //public bool AgreeToTerms { get; set; }
         }
 
 
@@ -108,9 +108,29 @@ namespace ArtGallery.Areas.Identity.Pages.Account
 
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
+            _logger.LogInformation("=== BẮT ĐẦU XỬ LÝ ĐĂNG KÝ ===");
+            _logger.LogInformation("UserName: {UserName}, Email: {Email}", Input?.UserName, Input?.Email);
+
             returnUrl = "/Home/LoginRegister";
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
-            if (ModelState.IsValid)
+
+            // Kiểm tra ModelState
+            if (!ModelState.IsValid)
+            {
+                _logger.LogWarning("ModelState không hợp lệ:");
+                foreach (var modelState in ModelState)
+                {
+                    foreach (var error in modelState.Value.Errors)
+                    {
+                        _logger.LogWarning("Lỗi {Key}: {Error}", modelState.Key, error.ErrorMessage);
+                    }
+                }
+                return Page();
+            }
+
+            _logger.LogInformation("ModelState hợp lệ, bắt đầu tạo user");
+
+            try
             {
                 var user = CreateUser();
                 user.UserName = Input.UserName;
@@ -118,26 +138,39 @@ namespace ArtGallery.Areas.Identity.Pages.Account
                 user.Email = Input.Email;
                 user.NgayTao = DateTime.Now;
 
+                _logger.LogInformation("Đã tạo user object, bắt đầu set thông tin");
+
                 await _userStore.SetUserNameAsync(user, Input.UserName, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
+
+                _logger.LogInformation("Bắt đầu tạo user trong database");
                 var result = await _userManager.CreateAsync(user, Input.Password);
 
                 if (result.Succeeded)
                 {
-                    _logger.LogInformation("User created a new account with password.");
-
+                    _logger.LogInformation("✅ Tạo user thành công!");
                     await _signInManager.SignInAsync(user, isPersistent: false);
+                    _logger.LogInformation("✅ Đăng nhập thành công, chuyển hướng");
                     return Redirect("/Home/LoginRegister");
                 }
+
+                _logger.LogError("❌ Tạo user thất bại:");
                 foreach (var error in result.Errors)
                 {
+                    _logger.LogError("Lỗi {Code}: {Description}", error.Code, error.Description);
                     ModelState.AddModelError(string.Empty, error.Description);
                 }
             }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "❌ Exception khi tạo user");
+                ModelState.AddModelError(string.Empty, "Có lỗi xảy ra trong quá trình đăng ký");
+            }
 
-            // If we got this far, something failed, redisplay form
+            _logger.LogInformation("=== KẾT THÚC XỬ LÝ ĐĂNG KÝ ===");
             return Page();
         }
+
 
         private NguoiDung CreateUser()
         {
