@@ -78,14 +78,6 @@ git clone https://github.com/TanPham2412/ArtGalleryVisual.git
 - `ThongBao.cs`: Hệ thống thông báo
 - `VNPAY`: Tích hợp thanh toán
 
-## 👨‍💻 Đóng góp
-Chúng tôi rất hoan nghênh đóng góp từ cộng đồng. Nếu bạn muốn đóng góp:
-1. Fork repository
-2. Tạo branch mới (`git checkout -b feature/amazing-feature`)
-3. Commit thay đổi (`git commit -m 'Add some amazing feature'`)
-4. Push lên branch (`git push origin feature/amazing-feature`)
-5. Mở Pull Request
-
 ## 📊 RepoBeats Analytics
 <p align="center">
     <img src="https://repobeats.axiom.co/api/embed/d2fd449cf12eb010947325731445c985db76b96f.svg" alt="RepoBeats analytics" />
