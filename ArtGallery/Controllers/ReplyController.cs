@@ -216,7 +216,8 @@ namespace ArtGallery.Controllers
                         date = reply.NgayPhanHoi,
                         imagePath = reply.DuongDanAnh,
                         sticker = reply.Sticker,
-                        isEdited = reply.DaChinhSua
+                        isEdited = reply.DaChinhSua,
+                        artworkId = artworkId  // Thêm artworkId vào dữ liệu phản hồi
                     };
                     
                     // Gửi thông tin phản hồi đã cập nhật qua SignalR

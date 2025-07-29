@@ -290,16 +290,61 @@ function initializeCommentHub(artworkId) {
         console.log('%c[SignalR] ReplyDeleted được gọi', 'background: #F44336; color: white; padding: 2px 5px; border-radius: 3px;');
         console.log('Xóa phản hồi với ID:', replyId, 'từ bình luận ID:', commentId);
         
-        // Tìm phản hồi trong DOM
-        const replyElement = document.getElementById(`reply-${replyId}`);
+        // Tìm phản hồi trong DOM bằng ID
+        let replyElement = document.getElementById(`reply-${replyId}`);
+        console.log('Tìm phản hồi bằng ID:', replyElement ? 'Tìm thấy' : 'Không tìm thấy');
+        
+        // Nếu không tìm thấy bằng ID, thử tìm bằng data-reply-id
+        if (!replyElement) {
+            console.log('Không tìm thấy phản hồi bằng ID, thử tìm bằng data-reply-id');
+            const replyElements = document.querySelectorAll(`.reply-item[data-reply-id="${replyId}"]`);
+            console.log('Số phần tử tìm thấy bằng data-reply-id:', replyElements.length);
+            
+            if (replyElements.length > 0) {
+                replyElement = replyElements[0];
+                console.log('Đã tìm thấy phản hồi bằng data-reply-id:', replyElement);
+            } else {
+                // Thử tìm kiếm bằng cách duyệt qua tất cả các phần tử reply-item
+                console.log('Thử tìm kiếm bằng cách duyệt qua tất cả các phần tử reply-item');
+                const allReplyItems = document.querySelectorAll('.reply-item');
+                console.log('Tổng số phần tử reply-item:', allReplyItems.length);
+                
+                for (const item of allReplyItems) {
+                    console.log('Kiểm tra phần tử:', item.id, 'Dataset:', item.dataset);
+                    if (item.dataset.replyId === replyId.toString()) {
+                        replyElement = item;
+                        console.log('Đã tìm thấy phản hồi qua dataset.replyId:', replyElement);
+                        break;
+                    }
+                }
+            }
+        }
+        
         if (replyElement) {
             console.log('Đã tìm thấy phản hồi trong DOM, đang xóa...');
+            console.log('Thông tin phản hồi:', {
+                id: replyElement.id,
+                dataset: replyElement.dataset,
+                classList: Array.from(replyElement.classList)
+            });
+            
+            // Lấy commentId từ dataset nếu không có commentId được truyền vào
+            if (!commentId && replyElement.dataset.commentId) {
+                commentId = replyElement.dataset.commentId;
+                console.log('Sử dụng commentId từ dataset:', commentId);
+            }
+            
             // Xóa phản hồi khỏi DOM với hiệu ứng fade out
             $(replyElement).fadeOut(300, function () {
                 $(this).remove();
                 console.log('Đã xóa phản hồi khỏi DOM');
-                // Cập nhật số lượng phản hồi
-                updateReplyCount(commentId, -1);
+                // Cập nhật số lượng phản hồi nếu có commentId
+                if (commentId) {
+                    console.log('Cập nhật số lượng phản hồi cho bình luận ID:', commentId);
+                    updateReplyCount(commentId, -1);
+                } else {
+                    console.warn('Không có commentId để cập nhật số lượng phản hồi');
+                }
             });
         } else {
             console.error(`Không tìm thấy phản hồi với ID ${replyId} trong DOM`);
@@ -307,12 +352,28 @@ function initializeCommentHub(artworkId) {
             const allReplies = document.querySelectorAll('.reply-item');
             console.log('Tất cả các phản hồi hiện có:', allReplies.length);
             allReplies.forEach(reply => {
-                console.log('ID phản hồi:', reply.id);
+                console.log('ID phản hồi:', reply.id, 'Dataset:', reply.dataset);
+            });
+            
+            // Thử tìm kiếm trong tất cả các container replies-container
+            const allContainers = document.querySelectorAll('.replies-container');
+            console.log('Tất cả các container phản hồi:', allContainers.length);
+            allContainers.forEach(container => {
+                console.log('Container ID:', container.id);
+                if (container.id.startsWith('replies-container-')) {
+                    const containerCommentId = container.id.replace('replies-container-', '');
+                    console.log('Container cho bình luận ID:', containerCommentId);
+                    // Nếu commentId được truyền vào khớp với container này, cập nhật số lượng phản hồi
+                    if (commentId && containerCommentId === commentId.toString()) {
+                        console.log('Cập nhật số lượng phản hồi cho container này');
+                        updateReplyCount(commentId, -1);
+                    }
+                }
             });
         }
-    });
-
-    // Xử lý sự kiện bình luận được chỉnh sửa
+      });
+ 
+      // Xử lý sự kiện bình luận được chỉnh sửa
     commentConnection.on('CommentEdited', function (commentId, updatedComment) {
         // Cập nhật nội dung bình luận
         $(`#comment-content-${commentId}`).html(updatedComment.content);
@@ -353,6 +414,9 @@ function initializeCommentHub(artworkId) {
 
     // Xử lý sự kiện phản hồi được chỉnh sửa
     commentConnection.on('ReplyEdited', function (replyId, updatedReply) {
+        console.log('%c[SignalR] ReplyEdited được gọi', 'background: #2196F3; color: white; padding: 2px 5px; border-radius: 3px;');
+        console.log('Cập nhật phản hồi với ID:', replyId, 'Dữ liệu cập nhật:', updatedReply);
+        
         // Cập nhật nội dung phản hồi
         $(`#reply-${replyId} .reply-text`).html(updatedReply.content);
         
@@ -406,7 +470,24 @@ function initializeCommentHub(artworkId) {
         
         // Đảm bảo các nút sửa và xóa vẫn hoạt động
         $(`#reply-${replyId} .btn-edit-reply`).attr('onclick', `editReply(${replyId}, ${updatedReply.commentId})`);
-        $(`#reply-${replyId} .btn-delete-reply`).attr('onclick', `deleteReply(${replyId}, ${updatedReply.artworkId})`);
+        
+        // Kiểm tra xem artworkId có tồn tại trong updatedReply không
+        if (updatedReply.artworkId) {
+            console.log('Cập nhật nút xóa với artworkId:', updatedReply.artworkId);
+            $(`#reply-${replyId} .btn-delete-reply`).attr('onclick', `deleteReply(${replyId}, ${updatedReply.artworkId})`);
+            
+            // Cập nhật dataset của phần tử phản hồi
+            const replyElement = document.getElementById(`reply-${replyId}`);
+            if (replyElement) {
+                replyElement.dataset.replyId = replyId;
+                replyElement.dataset.commentId = updatedReply.commentId;
+                replyElement.dataset.artworkId = updatedReply.artworkId;
+                console.log('Đã cập nhật dataset cho phản hồi:', replyElement.dataset);
+            }
+        } else {
+            console.warn('Không tìm thấy artworkId trong dữ liệu phản hồi đã cập nhật');
+            // Giữ nguyên onclick hiện tại nếu không có artworkId
+        }
     });
 
     // Xử lý sự kiện kết nối/ngắt kết nối

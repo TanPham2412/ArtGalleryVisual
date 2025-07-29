@@ -1087,9 +1087,26 @@ function deleteReply(replyId, artworkId) {
     console.log('replyId:', replyId, 'artworkId:', artworkId);
     
     if (confirm('Bạn có chắc chắn muốn xóa phản hồi này?')) {
-        // Kiểm tra xem phản hồi có tồn tại trong DOM không
-        const replyElement = document.getElementById(`reply-${replyId}`);
+        // Tìm phản hồi trong DOM bằng ID
+        let replyElement = document.getElementById(`reply-${replyId}`);
+        
+        // Nếu không tìm thấy bằng ID, thử tìm bằng data-reply-id
+        if (!replyElement) {
+            console.log('Không tìm thấy phản hồi bằng ID, thử tìm bằng data-reply-id');
+            const replyElements = document.querySelectorAll(`.reply-item[data-reply-id="${replyId}"]`);
+            if (replyElements.length > 0) {
+                replyElement = replyElements[0];
+                console.log('Đã tìm thấy phản hồi bằng data-reply-id:', replyElement);
+            }
+        }
+        
         console.log('Phần tử phản hồi trong DOM:', replyElement);
+        
+        // Nếu không có artworkId được truyền vào, thử lấy từ dataset của phần tử
+        if (!artworkId && replyElement && replyElement.dataset.artworkId) {
+            artworkId = replyElement.dataset.artworkId;
+            console.log('Sử dụng artworkId từ dataset:', artworkId);
+        }
         
         $.ajax({
             url: '/Reply/DeleteReply',
@@ -1108,24 +1125,56 @@ function deleteReply(replyId, artworkId) {
                     // Hiển thị thông báo thành công
                     alert(response.message);
                     
-                    // Kiểm tra lại xem phản hồi có tồn tại trong DOM không sau khi server xử lý
-                    const replyElementAfter = document.getElementById(`reply-${replyId}`);
+                    // Tìm lại phần tử phản hồi sau khi server xử lý
+                    let replyElementAfter = document.getElementById(`reply-${replyId}`);
+                    
+                    // Nếu không tìm thấy bằng ID, thử tìm bằng data-reply-id
+                    if (!replyElementAfter) {
+                        const replyElements = document.querySelectorAll(`.reply-item[data-reply-id="${replyId}"]`);
+                        if (replyElements.length > 0) {
+                            replyElementAfter = replyElements[0];
+                        }
+                    }
+                    
                     console.log('Phần tử phản hồi trong DOM sau khi server xử lý:', replyElementAfter);
                     
                     // Nếu phản hồi vẫn tồn tại trong DOM và không có sự kiện SignalR, xóa nó trực tiếp
                     // Đây là giải pháp tạm thời để đảm bảo phản hồi được xóa ngay cả khi SignalR không hoạt động
                     if (replyElementAfter) {
-                        console.log('Xóa phản hồi trực tiếp từ DOM vì SignalR có thể không hoạt động cho phản hồi mới');
+                        console.log('Xóa phản hồi trực tiếp từ DOM vì SignalR có thể không hoạt động cho phản hồi mới hoặc đã chỉnh sửa');
                         setTimeout(function() {
-                            const finalCheck = document.getElementById(`reply-${replyId}`);
+                            // Tìm lại phần tử một lần nữa sau 1 giây
+                            let finalCheck = document.getElementById(`reply-${replyId}`);
+                            
+                            // Nếu không tìm thấy bằng ID, thử tìm bằng data-reply-id
+                            if (!finalCheck) {
+                                const replyElements = document.querySelectorAll(`.reply-item[data-reply-id="${replyId}"]`);
+                                if (replyElements.length > 0) {
+                                    finalCheck = replyElements[0];
+                                }
+                            }
+                            
                             if (finalCheck) {
                                 console.log('Phản hồi vẫn tồn tại sau 1 giây, xóa trực tiếp');
                                 $(finalCheck).fadeOut(300, function() {
+                                    // Lấy commentId từ dataset hoặc từ container gần nhất
+                                    let commentId;
+                                    if (finalCheck.dataset.commentId) {
+                                        commentId = finalCheck.dataset.commentId;
+                                    } else {
+                                        const container = finalCheck.closest('.replies-container');
+                                        if (container) {
+                                            commentId = container.id.replace('replies-container-', '');
+                                        }
+                                    }
+                                    
                                     $(this).remove();
-                                    // Cập nhật số lượng phản hồi
-                                    const commentId = finalCheck.closest('.replies-container').id.replace('replies-container-', '');
-                                    console.log('Cập nhật số lượng phản hồi cho bình luận ID:', commentId);
-                                    updateReplyCount(commentId, -1);
+                                    
+                                    // Cập nhật số lượng phản hồi nếu có commentId
+                                    if (commentId) {
+                                        console.log('Cập nhật số lượng phản hồi cho bình luận ID:', commentId);
+                                        updateReplyCount(commentId, -1);
+                                    }
                                 });
                             }
                         }, 1000); // Đợi 1 giây để xem SignalR có xử lý không
