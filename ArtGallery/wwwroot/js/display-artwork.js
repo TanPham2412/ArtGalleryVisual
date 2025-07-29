@@ -755,8 +755,23 @@ $('#saveEditReply').click(function () {
         success: function (response) {
             if (response.success) {
                 $('#editReplyModal').modal('hide');
-                // Cập nhật UI phản hồi hoặc tải lại trang
-                location.reload();
+                // Không cần tải lại trang vì SignalR sẽ cập nhật UI
+                // Hiển thị thông báo thành công
+                const toastHTML = `
+                    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+                        <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                            <div class="toast-header">
+                                <strong class="me-auto">Thông báo</strong>
+                                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                            </div>
+                            <div class="toast-body">
+                                ${response.message}
+                            </div>
+                        </div>
+                    </div>`;
+
+                $('body').append(toastHTML);
+                $('.toast').toast('show');
             } else {
                 alert('Có lỗi xảy ra: ' + response.message);
             }
@@ -1213,6 +1228,29 @@ function showEditReplyModal(replyId, commentId, replyContent) {
 
     const editReplyModal = new bootstrap.Modal(document.getElementById('editReplyModal'));
     editReplyModal.show();
+}
+
+// Hàm editReply để xử lý sự kiện khi nhấn nút sửa phản hồi
+function editReply(replyId, commentId) {
+    // Lấy thông tin phản hồi từ server trước khi hiển thị modal
+    $.ajax({
+        url: '/Reply/GetReplyInfo',
+        type: 'GET',
+        data: { replyId: replyId },
+        success: function (response) {
+            if (response.success) {
+                showEditReplyModal(replyId, commentId, response.content || '');
+            } else {
+                alert('Không thể tải thông tin phản hồi');
+            }
+        },
+        error: function () {
+            // Fallback nếu không lấy được thông tin chi tiết
+            // Lấy nội dung phản hồi từ DOM
+            const replyContent = $(`#reply-${replyId} .reply-text`).text();
+            showEditReplyModal(replyId, commentId, replyContent);
+        }
+    });
 }
 
 // Thêm vào cuối file hoặc trong $(document).ready

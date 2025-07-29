@@ -295,40 +295,59 @@ function initializeCommentHub(artworkId) {
     // Xử lý sự kiện phản hồi được chỉnh sửa
     commentConnection.on('ReplyEdited', function (replyId, updatedReply) {
         // Cập nhật nội dung phản hồi
-        $(`#reply-content-${replyId}`).html(updatedReply.content);
+        $(`#reply-${replyId} .reply-text`).html(updatedReply.content);
         
-        // Cập nhật ảnh nếu có
+        // Xử lý cập nhật ảnh
+        const replyBubble = $(`#reply-${replyId} .reply-content .reply-bubble`);
+        const mediaContainer = $(`#reply-${replyId} .reply-media-container`);
+        
+        // Nếu không có media container, tạo mới
+        if (mediaContainer.length === 0) {
+            replyBubble.prepend(`<div class="reply-media-container"></div>`);
+        }
+        
+        // Xử lý ảnh
         if (updatedReply.imagePath) {
-            if ($(`#reply-image-${replyId}`).length) {
+            // Nếu đã có container ảnh, cập nhật src
+            if ($(`#reply-image-container-${replyId}`).length) {
                 $(`#reply-image-${replyId}`).attr('src', updatedReply.imagePath);
                 $(`#reply-image-container-${replyId}`).removeClass('d-none');
             } else {
+                // Nếu chưa có, tạo mới
                 const imageHtml = `<div id="reply-image-container-${replyId}" class="reply-image-container">
                     <img id="reply-image-${replyId}" src="${updatedReply.imagePath}" class="reply-image zoomable-image" alt="Reply image" onclick="openImageModal('${updatedReply.imagePath}')">
                 </div>`;
-                $(`#reply-content-${replyId}`).after(imageHtml);
+                $(`#reply-${replyId} .reply-media-container`).append(imageHtml);
             }
         } else {
-            $(`#reply-image-container-${replyId}`).addClass('d-none');
+            // Nếu không có ảnh, ẩn hoặc xóa container ảnh
+            $(`#reply-image-container-${replyId}`).remove();
         }
         
-        // Cập nhật sticker nếu có
+        // Xử lý sticker
         if (updatedReply.sticker) {
-            if ($(`#reply-sticker-${replyId}`).length) {
+            // Nếu đã có container sticker, cập nhật src
+            if ($(`#reply-sticker-container-${replyId}`).length) {
                 $(`#reply-sticker-${replyId}`).attr('src', updatedReply.sticker);
                 $(`#reply-sticker-container-${replyId}`).removeClass('d-none');
             } else {
+                // Nếu chưa có, tạo mới
                 const stickerHtml = `<div id="reply-sticker-container-${replyId}" class="sticker-container">
                     <img id="reply-sticker-${replyId}" src="${updatedReply.sticker}" class="reply-sticker" alt="Sticker">
                 </div>`;
-                $(`#reply-content-${replyId}`).after(stickerHtml);
+                $(`#reply-${replyId} .reply-media-container`).append(stickerHtml);
             }
         } else {
-            $(`#reply-sticker-container-${replyId}`).addClass('d-none');
+            // Nếu không có sticker, ẩn hoặc xóa container sticker
+            $(`#reply-sticker-container-${replyId}`).remove();
         }
         
         // Hiển thị trạng thái đã chỉnh sửa
         $(`#reply-edited-${replyId}`).removeClass('d-none');
+        
+        // Đảm bảo các nút sửa và xóa vẫn hoạt động
+        $(`#reply-${replyId} .btn-edit-reply`).attr('onclick', `editReply(${replyId}, ${updatedReply.commentId})`);
+        $(`#reply-${replyId} .btn-delete-reply`).attr('onclick', `deleteReply(${replyId}, ${updatedReply.artworkId})`);
     });
 
     // Xử lý sự kiện kết nối/ngắt kết nối
@@ -567,7 +586,8 @@ function createReplyHtml(reply) {
         </div>`;
     }
     
-    let editedHtml = reply.isEdited ? '<span id="reply-edited-${reply.id}" class="edited-marker">(đã chỉnh sửa)</span>' : '<span id="reply-edited-${reply.id}" class="edited-marker d-none">(đã chỉnh sửa)</span>';
+    // Hiển thị trạng thái đã chỉnh sửa
+    let editedHtml = reply.isEdited ? `<span id="reply-edited-${reply.id}" class="edited-marker">(đã chỉnh sửa)</span>` : `<span id="reply-edited-${reply.id}" class="edited-marker d-none">(đã chỉnh sửa)</span>`;
     
     // Tạo HTML cho các nút hành động (chỉnh sửa, xóa)
     // Lưu ý: Cần kiểm tra quyền người dùng ở phía server
@@ -593,8 +613,8 @@ function createReplyHtml(reply) {
             <div class="reply-content">
                 <div class="reply-bubble">
                     <div class="reply-media-container">
-                        ${stickerHtml}
                         ${imageHtml}
+                        ${stickerHtml}
                     </div>
                     <h6 class="reply-username">
                         ${reply.userName}
@@ -680,70 +700,6 @@ function checkConnectionState() {
         return commentConnection.state;
     }
     return 'disconnected';
-}
-
-// Hàm xử lý sự kiện chỉnh sửa phản hồi
-function editReply(replyId, commentId) {
-    console.log('Chỉnh sửa phản hồi:', replyId, 'của bình luận:', commentId);
-    
-    // Lấy nội dung hiện tại của phản hồi
-    const replyContent = document.querySelector(`#reply-${replyId} .reply-text`).textContent;
-    
-    // Lấy ID tác phẩm từ input hidden
-    const artworkId = document.getElementById('artwork-id').value;
-    
-    // Gọi hàm hiển thị modal chỉnh sửa phản hồi
-    showEditReplyModal(replyId, commentId, replyContent);
-}
-
-// Hàm hiển thị modal chỉnh sửa phản hồi
-function showEditReplyModal(replyId, commentId, replyContent) {
-    // Lấy thông tin phản hồi từ server trước khi hiển thị modal
-    $.ajax({
-        url: '/Reply/GetReplyInfo',
-        type: 'GET',
-        data: { replyId: replyId },
-        success: function (response) {
-            if (response.success) {
-                $('#editReplyId').val(replyId);
-                $('#editReplyContent').val(response.content || replyContent);
-                $('#editCommentId').val(commentId);
-                $('#editArtworkId').val($('#artwork-id').val());
-
-                // Lưu thông tin gốc để xử lý khi không có thay đổi
-                $('#editReplyOriginalImage').val(response.imagePath || '');
-                $('#editReplyOriginalSticker').val(response.sticker || '');
-
-                // Hiển thị ảnh và sticker nếu có
-                if (response.imagePath) {
-                    $('#editReplyImagePreview').attr('src', response.imagePath);
-                    $('#editReplyImagePreviewContainer').removeClass('d-none');
-                } else {
-                    $('#editReplyImagePreviewContainer').addClass('d-none');
-                }
-
-                if (response.sticker) {
-                    $('#editReplyStickerPreview').attr('src', response.sticker);
-                    $('#editReplyStickerPreviewContainer').removeClass('d-none');
-                } else {
-                    $('#editReplyStickerPreviewContainer').addClass('d-none');
-                }
-
-                // Hiển thị modal
-                $('#editReplyModal').modal('show');
-            } else {
-                alert('Không thể tải thông tin phản hồi');
-            }
-        },
-        error: function () {
-            // Fallback nếu không lấy được thông tin chi tiết
-            $('#editReplyId').val(replyId);
-            $('#editReplyContent').val(replyContent);
-            $('#editCommentId').val(commentId);
-            $('#editArtworkId').val($('#artwork-id').val());
-            $('#editReplyModal').modal('show');
-        }
-    });
 }
 
 // Đóng kết nối khi rời khỏi trang
