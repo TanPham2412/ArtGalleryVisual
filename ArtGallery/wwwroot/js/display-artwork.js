@@ -1083,7 +1083,14 @@ $(document).ready(function () {
 });
 
 function deleteReply(replyId, artworkId) {
+    console.log('%c[deleteReply] Bắt đầu xóa phản hồi', 'background: #FF9800; color: white; padding: 2px 5px; border-radius: 3px;');
+    console.log('replyId:', replyId, 'artworkId:', artworkId);
+    
     if (confirm('Bạn có chắc chắn muốn xóa phản hồi này?')) {
+        // Kiểm tra xem phản hồi có tồn tại trong DOM không
+        const replyElement = document.getElementById(`reply-${replyId}`);
+        console.log('Phần tử phản hồi trong DOM:', replyElement);
+        
         $.ajax({
             url: '/Reply/DeleteReply',
             type: 'POST',
@@ -1095,19 +1102,43 @@ function deleteReply(replyId, artworkId) {
                 'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
             },
             success: function (response) {
+                console.log('%c[deleteReply] Phản hồi từ server:', 'background: #4CAF50; color: white; padding: 2px 5px; border-radius: 3px;', response);
+                
                 if (response.success) {
                     // Hiển thị thông báo thành công
                     alert(response.message);
-                    // Xóa phần tử khỏi DOM hoặc tải lại trang
-                    $(`#reply-${replyId}`).fadeOut(300, function () {
-                        $(this).remove();
-                    });
+                    
+                    // Kiểm tra lại xem phản hồi có tồn tại trong DOM không sau khi server xử lý
+                    const replyElementAfter = document.getElementById(`reply-${replyId}`);
+                    console.log('Phần tử phản hồi trong DOM sau khi server xử lý:', replyElementAfter);
+                    
+                    // Nếu phản hồi vẫn tồn tại trong DOM và không có sự kiện SignalR, xóa nó trực tiếp
+                    // Đây là giải pháp tạm thời để đảm bảo phản hồi được xóa ngay cả khi SignalR không hoạt động
+                    if (replyElementAfter) {
+                        console.log('Xóa phản hồi trực tiếp từ DOM vì SignalR có thể không hoạt động cho phản hồi mới');
+                        setTimeout(function() {
+                            const finalCheck = document.getElementById(`reply-${replyId}`);
+                            if (finalCheck) {
+                                console.log('Phản hồi vẫn tồn tại sau 1 giây, xóa trực tiếp');
+                                $(finalCheck).fadeOut(300, function() {
+                                    $(this).remove();
+                                    // Cập nhật số lượng phản hồi
+                                    const commentId = finalCheck.closest('.replies-container').id.replace('replies-container-', '');
+                                    console.log('Cập nhật số lượng phản hồi cho bình luận ID:', commentId);
+                                    updateReplyCount(commentId, -1);
+                                });
+                            }
+                        }, 1000); // Đợi 1 giây để xem SignalR có xử lý không
+                    }
                 } else {
                     // Hiển thị thông báo lỗi
                     alert(response.message);
                 }
             },
-            error: function () {
+            error: function (xhr, status, error) {
+                console.error('Lỗi AJAX khi xóa phản hồi:', error);
+                console.error('Trạng thái:', status);
+                console.error('Phản hồi:', xhr.responseText);
                 alert('Có lỗi xảy ra khi kết nối đến máy chủ');
             }
         });

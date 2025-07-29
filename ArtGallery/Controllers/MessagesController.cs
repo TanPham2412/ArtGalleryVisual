@@ -212,12 +212,13 @@ namespace ArtGallery.Controllers
             return Json(messages);
         }
 
-        // API lấy ID người dùng hiện tại
+        // API lấy ID người dùng hiện tại và vai trò admin
         [HttpGet]
-        public IActionResult GetCurrentUserId()
+        public async Task<IActionResult> GetCurrentUserId()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            return Json(new { userId });
+            var isAdmin = User.IsInRole("Admin");
+            return Json(new { userId, isAdmin });
         }
 
         // API tìm kiếm cuộc trò chuyện

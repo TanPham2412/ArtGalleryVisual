@@ -3,9 +3,33 @@
 // Biến lưu trữ kết nối SignalR
 let commentConnection;
 
+// Biến lưu trữ thông tin người dùng hiện tại
+let currentUserId = '';
+let isAdmin = false;
+
+// Lấy thông tin người dùng hiện tại
+function getCurrentUserId() {
+    $.ajax({
+        url: '/Messages/GetCurrentUserId',
+        type: 'GET',
+        async: false,
+        success: function(data) {
+            currentUserId = data.userId;
+            isAdmin = data.isAdmin || false;
+            console.log('Đã lấy thông tin người dùng:', { currentUserId, isAdmin });
+        },
+        error: function(error) {
+            console.error('Lỗi khi lấy thông tin người dùng:', error);
+        }
+    });
+}
+
 // Khởi tạo kết nối SignalR
 function initializeCommentHub(artworkId) {
     console.log('Bắt đầu khởi tạo kết nối SignalR với artworkId:', artworkId);
+    
+    // Lấy ID người dùng hiện tại
+    getCurrentUserId();
     
     // Tạo kết nối đến CommentHub
     commentConnection = new signalR.HubConnectionBuilder()
@@ -174,9 +198,18 @@ function initializeCommentHub(artworkId) {
                     console.error('Không tìm thấy avatar img element');
                 }
                 
+                // Đảm bảo rằng phản hồi có ID đúng trong DOM
+                replyElement.id = `reply-${reply.id}`;
+                console.log('Đã đặt ID cho phản hồi:', replyElement.id);
+                
                 // Thêm vào cuối danh sách phản hồi
                 repliesContainer.appendChild(replyElement);
                 console.log('Đã thêm phản hồi mới vào DOM với ID:', reply.id);
+                
+                // Lưu thông tin phản hồi vào dataset để dễ dàng truy cập sau này
+                replyElement.dataset.replyId = reply.id;
+                replyElement.dataset.commentId = commentId;
+                replyElement.dataset.artworkId = reply.artworkId;
                 
                 // Làm nổi bật phản hồi mới
                 replyElement.classList.add('new-reply-highlight');
@@ -209,6 +242,15 @@ function initializeCommentHub(artworkId) {
                     const replyElement = tempDiv.firstElementChild;
                     
                     if (replyElement) {
+                        // Đảm bảo rằng phản hồi có ID đúng trong DOM
+                        replyElement.id = `reply-${reply.id}`;
+                        console.log('Đã đặt ID cho phản hồi trong container mới:', replyElement.id);
+                        
+                        // Lưu thông tin phản hồi vào dataset
+                        replyElement.dataset.replyId = reply.id;
+                        replyElement.dataset.commentId = commentId;
+                        replyElement.dataset.artworkId = reply.artworkId;
+                        
                         newRepliesContainer.appendChild(replyElement);
                         console.log('Đã thêm phản hồi vào container mới tạo');
                         
@@ -245,12 +287,29 @@ function initializeCommentHub(artworkId) {
 
     // Xử lý sự kiện phản hồi bị xóa
     commentConnection.on('ReplyDeleted', function (replyId, commentId) {
-        // Xóa phản hồi khỏi DOM
-        $(`#reply-${replyId}`).fadeOut(300, function () {
-            $(this).remove();
-            // Cập nhật số lượng phản hồi
-            updateReplyCount(commentId, -1);
-        });
+        console.log('%c[SignalR] ReplyDeleted được gọi', 'background: #F44336; color: white; padding: 2px 5px; border-radius: 3px;');
+        console.log('Xóa phản hồi với ID:', replyId, 'từ bình luận ID:', commentId);
+        
+        // Tìm phản hồi trong DOM
+        const replyElement = document.getElementById(`reply-${replyId}`);
+        if (replyElement) {
+            console.log('Đã tìm thấy phản hồi trong DOM, đang xóa...');
+            // Xóa phản hồi khỏi DOM với hiệu ứng fade out
+            $(replyElement).fadeOut(300, function () {
+                $(this).remove();
+                console.log('Đã xóa phản hồi khỏi DOM');
+                // Cập nhật số lượng phản hồi
+                updateReplyCount(commentId, -1);
+            });
+        } else {
+            console.error(`Không tìm thấy phản hồi với ID ${replyId} trong DOM`);
+            // Tìm kiếm phản hồi trong tất cả các container có thể
+            const allReplies = document.querySelectorAll('.reply-item');
+            console.log('Tất cả các phản hồi hiện có:', allReplies.length);
+            allReplies.forEach(reply => {
+                console.log('ID phản hồi:', reply.id);
+            });
+        }
     });
 
     // Xử lý sự kiện bình luận được chỉnh sửa
@@ -570,6 +629,8 @@ function createCommentHtml(comment) {
 
 // Tạo HTML cho phản hồi mới
 function createReplyHtml(reply) {
+    console.log('Tạo HTML cho phản hồi với ID:', reply.id);
+    
     let imageHtml = '';
     if (reply.imagePath) {
         imageHtml = `
@@ -590,22 +651,29 @@ function createReplyHtml(reply) {
     let editedHtml = reply.isEdited ? `<span id="reply-edited-${reply.id}" class="edited-marker">(đã chỉnh sửa)</span>` : `<span id="reply-edited-${reply.id}" class="edited-marker d-none">(đã chỉnh sửa)</span>`;
     
     // Tạo HTML cho các nút hành động (chỉnh sửa, xóa)
-    // Lưu ý: Cần kiểm tra quyền người dùng ở phía server
-    const actionButtons = `
-    <div class="reply-admin-actions mt-1">
-        <button class="btn-edit-reply" onclick="editReply(${reply.id}, ${reply.commentId})">
-            <i class="fas fa-edit me-1"></i>Sửa
-        </button>
-        <button class="btn-delete-reply" onclick="deleteReply(${reply.id}, ${reply.artworkId})">
-            <i class="fas fa-trash-alt me-1"></i>Xóa
-        </button>
-    </div>`;
+    // Kiểm tra quyền người dùng dựa trên ID người dùng hiện tại
+    let actionButtons = '';
+    console.log('Kiểm tra quyền hiển thị nút sửa/xóa:', { currentUserId, replyUserId: reply.userId, isAdmin });
+    if (currentUserId && (currentUserId === reply.userId || isAdmin)) {
+        actionButtons = `
+        <div class="reply-admin-actions mt-1">
+            <button class="btn-edit-reply" onclick="editReply(${reply.id}, ${reply.commentId})">
+                <i class="fas fa-edit me-1"></i>Sửa
+            </button>
+            <button class="btn-delete-reply" onclick="deleteReply(${reply.id}, ${reply.artworkId})">
+                <i class="fas fa-trash-alt me-1"></i>Xóa
+            </button>
+        </div>`;
+    }
     
     // Đảm bảo có đường dẫn avatar hợp lệ
     const avatarSrc = reply.userAvatar && reply.userAvatar.trim() !== '' ? reply.userAvatar : '/images/default-avatar.png';
     
-    return `
-    <div id="reply-${reply.id}" class="reply-item">
+    // Đảm bảo rằng artworkId được truyền vào nút xóa
+    console.log('ArtworkId cho phản hồi:', reply.artworkId);
+    
+    const replyHtml = `
+    <div id="reply-${reply.id}" class="reply-item" data-reply-id="${reply.id}" data-comment-id="${reply.commentId}" data-artwork-id="${reply.artworkId}">
         <div class="d-flex align-items-start">
             <div class="reply-avatar">
                 <img src="${avatarSrc}" alt="${reply.userName}" class="reply-user-avatar" style="transition: none; animation: none;" onerror="this.src='/images/default-avatar.png'; console.log('Avatar fallback loaded');" />
@@ -629,6 +697,9 @@ function createReplyHtml(reply) {
             </div>
         </div>
     </div>`;
+    
+    console.log('HTML đã tạo cho phản hồi ID', reply.id, ':', replyHtml.substring(0, 150) + '...');
+    return replyHtml;
 }
 
 // Định dạng ngày giờ

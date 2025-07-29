@@ -277,7 +277,7 @@ namespace ArtGallery.Controllers
                     await _context.SaveChangesAsync();
                     
                     // Thông báo xóa phản hồi qua SignalR
-                    await _commentHubContext.Clients.Group($"artwork_{artworkId}").SendAsync("ReplyDeleted", replyId);
+                    await _commentHubContext.Clients.Group($"artwork_{artworkId}").SendAsync("ReplyDeleted", replyId, commentId);
                     
                     return Json(new { success = true, message = "Đã xóa phản hồi thành công" });
                 }

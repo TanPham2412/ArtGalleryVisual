@@ -648,7 +648,8 @@ namespace ArtGallery.Controllers
                     date = reply.NgayPhanHoi,
                     imagePath = reply.DuongDanAnh,
                     sticker = reply.Sticker,
-                    isEdited = reply.DaChinhSua
+                    isEdited = reply.DaChinhSua,
+                    artworkId = MaTranh  // Thêm artworkId vào dữ liệu phản hồi
                 };
                 
                 // Gửi thông tin phản hồi mới qua SignalR
@@ -919,8 +920,12 @@ namespace ArtGallery.Controllers
                 // Chỉ admin hoặc người viết phản hồi mới có quyền xóa
                 if (isAdmin || reply.MaNguoiDung == currentUserId)
                 {
+                    var commentId = reply.MaBinhLuan;
                     _context.PhanHoiBinhLuans.Remove(reply);
                     await _context.SaveChangesAsync();
+                    
+                    // Thông báo xóa phản hồi qua SignalR
+                    await _commentHubContext.Clients.Group($"artwork_{artworkId}").SendAsync("ReplyDeleted", replyId, commentId);
                     
                     return Json(new { success = true, message = "Đã xóa phản hồi thành công" });
                 }

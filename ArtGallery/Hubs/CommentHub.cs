@@ -42,9 +42,10 @@ namespace ArtGallery.Hubs
         /// </summary>
         /// <param name="artworkId">ID của tác phẩm</param>
         /// <param name="replyId">ID của phản hồi bị xóa</param>
-        public async Task NotifyReplyDeleted(int artworkId, int replyId)
+        /// <param name="commentId">ID của bình luận chứa phản hồi</param>
+        public async Task NotifyReplyDeleted(int artworkId, int replyId, int commentId)
         {
-            await Clients.Group($"artwork_{artworkId}").SendAsync("ReplyDeleted", replyId);
+            await Clients.Group($"artwork_{artworkId}").SendAsync("ReplyDeleted", replyId, commentId);
         }
 
         /// <summary>
