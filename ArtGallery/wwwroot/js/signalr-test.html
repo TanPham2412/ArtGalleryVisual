@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kiểm tra kết nối SignalR</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Kiểm tra kết nối SignalR</h1>
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5>Trạng thái kết nối</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="artwork-id" class="form-label">ID Tác phẩm:</label>
+                    <input type="number" class="form-control" id="artwork-id" value="1">
+                </div>
+                <div class="mb-3">
+                    <button id="connect-btn" class="btn btn-primary">Kết nối</button>
+                    <button id="disconnect-btn" class="btn btn-danger" disabled>Ngắt kết nối</button>
+                </div>
+                <div class="alert alert-info" id="connection-status">
+                    Chưa kết nối
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5>Nhật ký sự kiện</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <button id="clear-log-btn" class="btn btn-secondary">Xóa nhật ký</button>
+                </div>
+                <div class="border p-3 bg-light" style="height: 300px; overflow-y: auto;">
+                    <pre id="event-log"></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.1/signalr.min.js"></script>
+    <script>
+        // Biến lưu trữ kết nối SignalR
+        let connection;
+
+        // Hàm ghi nhật ký
+        function log(message) {
+            const now = new Date().toLocaleTimeString();
+            const logEntry = `[${now}] ${message}`;
+            $('#event-log').append(logEntry + '\n');
+            // Cuộn xuống dưới
+            const logContainer = $('#event-log').parent();
+            logContainer.scrollTop(logContainer[0].scrollHeight);
+        }
+
+        // Kết nối đến SignalR hub
+        $('#connect-btn').click(function() {
+            const artworkId = $('#artwork-id').val();
+            if (!artworkId) {
+                alert('Vui lòng nhập ID tác phẩm');
+                return;
+            }
+
+            // Tạo kết nối
+            connection = new signalR.HubConnectionBuilder()
+                .withUrl('/commentHub')
+                .withAutomaticReconnect()
+                .build();
+
+            // Xử lý sự kiện nhận bình luận mới
+            connection.on('ReceiveComment', function(comment) {
+                log(`Nhận bình luận mới: ${JSON.stringify(comment)}`);
+            });
+
+            // Xử lý sự kiện nhận phản hồi mới
+            connection.on('ReceiveReply', function(commentId, reply) {
+                log(`Nhận phản hồi mới cho bình luận #${commentId}: ${JSON.stringify(reply)}`);
+            });
+
+            // Xử lý sự kiện bình luận bị xóa
+            connection.on('CommentDeleted', function(commentId) {
+                log(`Bình luận #${commentId} đã bị xóa`);
+            });
+
+            // Xử lý sự kiện phản hồi bị xóa
+            connection.on('ReplyDeleted', function(replyId, commentId) {
+                log(`Phản hồi #${replyId} của bình luận #${commentId} đã bị xóa`);
+            });
+
+            // Xử lý sự kiện bình luận được chỉnh sửa
+            connection.on('CommentEdited', function(commentId, updatedComment) {
+                log(`Bình luận #${commentId} đã được chỉnh sửa: ${JSON.stringify(updatedComment)}`);
+            });
+
+            // Xử lý sự kiện phản hồi được chỉnh sửa
+            connection.on('ReplyEdited', function(replyId, updatedReply) {
+                log(`Phản hồi #${replyId} đã được chỉnh sửa: ${JSON.stringify(updatedReply)}`);
+            });
+
+            // Bắt đầu kết nối
+            $('#connection-status').text('Đang kết nối...');
+            connection.start().then(function() {
+                log('Kết nối SignalR thành công!');
+                $('#connection-status').removeClass('alert-info alert-danger').addClass('alert-success');
+                $('#connection-status').text('Đã kết nối thành công');
+                
+                // Tham gia nhóm của tác phẩm
+                connection.invoke('JoinGroup', `artwork_${artworkId}`).then(function() {
+                    log(`Đã tham gia nhóm artwork_${artworkId}`);
+                }).catch(function(err) {
+                    log(`Lỗi khi tham gia nhóm: ${err.toString()}`);
+                });
+                
+                // Cập nhật trạng thái nút
+                $('#connect-btn').prop('disabled', true);
+                $('#disconnect-btn').prop('disabled', false);
+                $('#artwork-id').prop('disabled', true);
+            }).catch(function(err) {
+                log(`Lỗi kết nối SignalR: ${err.toString()}`);
+                $('#connection-status').removeClass('alert-info alert-success').addClass('alert-danger');
+                $('#connection-status').text(`Lỗi kết nối: ${err.toString()}`);
+            });
+        });
+
+        // Ngắt kết nối
+        $('#disconnect-btn').click(function() {
+            if (connection) {
+                const artworkId = $('#artwork-id').val();
+                
+                // Rời khỏi nhóm trước khi ngắt kết nối
+                connection.invoke('LeaveGroup', `artwork_${artworkId}`).then(function() {
+                    log(`Đã rời khỏi nhóm artwork_${artworkId}`);
+                    
+                    // Ngắt kết nối
+                    connection.stop().then(function() {
+                        log('Đã ngắt kết nối SignalR');
+                        $('#connection-status').removeClass('alert-success alert-danger').addClass('alert-info');
+                        $('#connection-status').text('Đã ngắt kết nối');
+                        
+                        // Cập nhật trạng thái nút
+                        $('#connect-btn').prop('disabled', false);
+                        $('#disconnect-btn').prop('disabled', true);
+                        $('#artwork-id').prop('disabled', false);
+                    }).catch(function(err) {
+                        log(`Lỗi khi ngắt kết nối: ${err.toString()}`);
+                    });
+                }).catch(function(err) {
+                    log(`Lỗi khi rời khỏi nhóm: ${err.toString()}`);
+                    
+                    // Vẫn cố gắng ngắt kết nối
+                    connection.stop();
+                    $('#connection-status').removeClass('alert-success alert-danger').addClass('alert-info');
+                    $('#connection-status').text('Đã ngắt kết nối');
+                    
+                    // Cập nhật trạng thái nút
+                    $('#connect-btn').prop('disabled', false);
+                    $('#disconnect-btn').prop('disabled', true);
+                    $('#artwork-id').prop('disabled', false);
+                });
+            }
+        });
+
+        // Xóa nhật ký
+        $('#clear-log-btn').click(function() {
+            $('#event-log').empty();
+        });
+    </script>
+</body>
+</html>

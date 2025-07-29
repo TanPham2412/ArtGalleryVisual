@@ -11,6 +11,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using ArtGallery.Services.VNPAY;
+using ArtGallery.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -105,6 +106,9 @@ builder.Services.AddScoped<IVnPayService, VnPayService>();
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 builder.Services.AddTransient<EmailService>();
 
+// Đăng ký dịch vụ SignalR
+builder.Services.AddSignalR();
+
 
 // Thêm vào phần cấu hình dịch vụ
 builder.Services.AddSession(options =>
@@ -176,5 +180,8 @@ using (var scope = app.Services.CreateScope())
 
 // Đảm bảo thêm dòng này vào phần cấu hình middleware
 app.UseSession();
+
+// Thêm SignalR endpoint
+app.MapHub<CommentHub>("/commentHub");
 
 app.Run();

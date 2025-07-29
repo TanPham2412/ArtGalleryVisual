@@ -1,4 +1,4 @@
-﻿/* Layout */
+/* Layout */
 body {
     background-color: #121212 !important;
     color: #e0e0e0 !important;
@@ -98,6 +98,30 @@ body {
 
 .follow-btn.following .following-text {
     display: inline;
+}
+
+/* Hiệu ứng làm nổi bật bình luận và phản hồi mới */
+.new-comment-highlight,
+.new-reply-highlight {
+    animation: highlightNew 3s ease-in-out;
+}
+
+@keyframes highlightNew {
+    0% {
+        background-color: rgba(0, 168, 255, 0.3);
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0, 168, 255, 0.4);
+    }
+    70% {
+        background-color: rgba(0, 168, 255, 0.1);
+        transform: translateY(0);
+        box-shadow: 0 2px 5px rgba(0, 168, 255, 0.2);
+    }
+    100% {
+        background-color: transparent;
+        transform: translateY(0);
+        box-shadow: none;
+    }
 }
 
 /* Art Info Section */

@@ -1,4 +1,4 @@
-﻿// Hàm xử lý yêu thích
+// Hàm xử lý yêu thích
 function toggleLike(button, artworkId) {
     $.ajax({
         url: '/Artwork/ToggleLike',
@@ -1161,14 +1161,46 @@ document.addEventListener('DOMContentLoaded', function () {
                 return false;
             }
 
-            // Lưu vị trí scroll
-            const scrollPosition = window.scrollY || window.pageYOffset;
-            localStorage.setItem('scrollPosition', scrollPosition);
-
-            // Submit form nếu dữ liệu hợp lệ
-            form.submit();
+            // Lấy dữ liệu từ form
+            const formData = new FormData(form);
+            const commentId = form.querySelector('input[name="MaBinhLuan"]').value;
+            const artworkId = form.querySelector('input[name="MaTranh"]').value;
+            
+            // Gửi dữ liệu bằng AJAX
+            $.ajax({
+                url: '/Artwork/AddReply',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    if (response.success) {
+                        // Ẩn form phản hồi sau khi gửi thành công
+                        hideReplyForm(commentId);
+                        
+                        // Xóa nội dung form
+                        form.querySelector('.reply-input').value = '';
+                        if (imageInput) imageInput.value = '';
+                        form.querySelector('.stickerInputReply').value = '';
+                        
+                        // Ẩn preview nếu có
+                        const imagePreview = document.getElementById(`replyImagePreview-${commentId}`);
+                        const stickerPreview = document.getElementById(`replyStickerPreview-${commentId}`);
+                        if (imagePreview) imagePreview.classList.add('d-none');
+                        if (stickerPreview) stickerPreview.classList.add('d-none');
+                        
+                        // Không cần làm gì thêm vì SignalR sẽ nhận sự kiện và hiển thị phản hồi mới
+                    } else {
+                        alert('Có lỗi xảy ra khi gửi phản hồi: ' + response.message);
+                    }
+                },
+                error: function() {
+                    alert('Có lỗi xảy ra khi gửi phản hồi');
+                }
+            });
         });
     });
+
 });
 
 // Thêm vào cuối file nếu cần
