@@ -154,17 +154,38 @@ function initializeCommentHub(artworkId) {
                     return;
                 }
                 
+                // Kiểm tra xem avatar có được tạo đúng không
+                const avatarImg = replyElement.querySelector('.reply-user-avatar');
+                console.log('Avatar img element:', avatarImg);
+                if (avatarImg) {
+                    console.log('Avatar src:', avatarImg.src);
+                    console.log('Avatar alt:', avatarImg.alt);
+                    
+                    // Ngăn chặn chớp nháy bằng cách thiết lập style trực tiếp
+                    avatarImg.style.transition = 'none';
+                    avatarImg.style.animation = 'none';
+                    
+                    // Xử lý lỗi khi tải avatar
+                    avatarImg.onerror = function() {
+                        console.error('Lỗi khi tải avatar, sử dụng ảnh mặc định');
+                        this.src = '/images/default-avatar.png';
+                    };
+                } else {
+                    console.error('Không tìm thấy avatar img element');
+                }
+                
                 // Thêm vào cuối danh sách phản hồi
                 repliesContainer.appendChild(replyElement);
                 console.log('Đã thêm phản hồi mới vào DOM với ID:', reply.id);
                 
                 // Làm nổi bật phản hồi mới
                 replyElement.classList.add('new-reply-highlight');
-                // Cuộn đến phản hồi mới
-                replyElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 setTimeout(() => {
                     replyElement.classList.remove('new-reply-highlight');
                 }, 3000);
+                
+                // Cuộn đến phản hồi mới
+                replyElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 
                 // Cập nhật số lượng phản hồi
                 updateReplyCount(commentId, 1);
@@ -243,8 +264,8 @@ function initializeCommentHub(artworkId) {
                 $(`#comment-image-${commentId}`).attr('src', updatedComment.imagePath);
                 $(`#comment-image-container-${commentId}`).removeClass('d-none');
             } else {
-                const imageHtml = `<div id="comment-image-container-${commentId}" class="comment-image-container mt-2">
-                    <img id="comment-image-${commentId}" src="${updatedComment.imagePath}" class="img-fluid rounded" alt="Comment image">
+                const imageHtml = `<div id="comment-image-container-${commentId}" class="comment-image-container">
+                    <img id="comment-image-${commentId}" src="${updatedComment.imagePath}" class="img-fluid rounded zoomable-image" alt="Comment image" onclick="openImageModal('${updatedComment.imagePath}')">
                 </div>`;
                 $(`#comment-content-${commentId}`).after(imageHtml);
             }
@@ -258,8 +279,8 @@ function initializeCommentHub(artworkId) {
                 $(`#comment-sticker-${commentId}`).attr('src', updatedComment.sticker);
                 $(`#comment-sticker-container-${commentId}`).removeClass('d-none');
             } else {
-                const stickerHtml = `<div id="comment-sticker-container-${commentId}" class="comment-sticker-container mt-2">
-                    <img id="comment-sticker-${commentId}" src="${updatedComment.sticker}" class="img-fluid sticker" alt="Sticker">
+                const stickerHtml = `<div id="comment-sticker-container-${commentId}" class="sticker-container">
+                    <img id="comment-sticker-${commentId}" src="${updatedComment.sticker}" class="comment-sticker" alt="Sticker">
                 </div>`;
                 $(`#comment-content-${commentId}`).after(stickerHtml);
             }
@@ -282,8 +303,8 @@ function initializeCommentHub(artworkId) {
                 $(`#reply-image-${replyId}`).attr('src', updatedReply.imagePath);
                 $(`#reply-image-container-${replyId}`).removeClass('d-none');
             } else {
-                const imageHtml = `<div id="reply-image-container-${replyId}" class="reply-image-container mt-2">
-                    <img id="reply-image-${replyId}" src="${updatedReply.imagePath}" class="img-fluid rounded" alt="Reply image">
+                const imageHtml = `<div id="reply-image-container-${replyId}" class="reply-image-container">
+                    <img id="reply-image-${replyId}" src="${updatedReply.imagePath}" class="reply-image zoomable-image" alt="Reply image" onclick="openImageModal('${updatedReply.imagePath}')">
                 </div>`;
                 $(`#reply-content-${replyId}`).after(imageHtml);
             }
@@ -297,8 +318,8 @@ function initializeCommentHub(artworkId) {
                 $(`#reply-sticker-${replyId}`).attr('src', updatedReply.sticker);
                 $(`#reply-sticker-container-${replyId}`).removeClass('d-none');
             } else {
-                const stickerHtml = `<div id="reply-sticker-container-${replyId}" class="reply-sticker-container mt-2">
-                    <img id="reply-sticker-${replyId}" src="${updatedReply.sticker}" class="img-fluid sticker" alt="Sticker">
+                const stickerHtml = `<div id="reply-sticker-container-${replyId}" class="sticker-container">
+                    <img id="reply-sticker-${replyId}" src="${updatedReply.sticker}" class="reply-sticker" alt="Sticker">
                 </div>`;
                 $(`#reply-content-${replyId}`).after(stickerHtml);
             }
@@ -533,51 +554,58 @@ function createReplyHtml(reply) {
     let imageHtml = '';
     if (reply.imagePath) {
         imageHtml = `
-        <div id="reply-image-container-${reply.id}" class="reply-image-container mt-2">
-            <img id="reply-image-${reply.id}" src="${reply.imagePath}" class="img-fluid rounded" alt="Reply image">
+        <div id="reply-image-container-${reply.id}" class="reply-image-container">
+            <img id="reply-image-${reply.id}" src="${reply.imagePath}" class="reply-image zoomable-image" alt="Reply image" onclick="openImageModal('${reply.imagePath}')">
         </div>`;
     }
     
     let stickerHtml = '';
     if (reply.sticker) {
         stickerHtml = `
-        <div id="reply-sticker-container-${reply.id}" class="reply-sticker-container mt-2">
-            <img id="reply-sticker-${reply.id}" src="${reply.sticker}" class="img-fluid sticker" alt="Sticker">
+        <div id="reply-sticker-container-${reply.id}" class="sticker-container">
+            <img id="reply-sticker-${reply.id}" src="${reply.sticker}" class="reply-sticker" alt="Sticker">
         </div>`;
     }
     
-    let editedHtml = reply.isEdited ? '<span id="reply-edited-${reply.id}" class="text-muted small">(Đã chỉnh sửa)</span>' : '<span id="reply-edited-${reply.id}" class="text-muted small d-none">(Đã chỉnh sửa)</span>';
+    let editedHtml = reply.isEdited ? '<span id="reply-edited-${reply.id}" class="edited-marker">(đã chỉnh sửa)</span>' : '<span id="reply-edited-${reply.id}" class="edited-marker d-none">(đã chỉnh sửa)</span>';
     
     // Tạo HTML cho các nút hành động (chỉnh sửa, xóa)
     // Lưu ý: Cần kiểm tra quyền người dùng ở phía server
     const actionButtons = `
-    <div class="reply-actions mt-2">
-        <button type="button" class="btn btn-sm btn-outline-secondary me-2" onclick="editReply(${reply.id}, ${reply.commentId})">
-            <i class="fas fa-edit"></i> Sửa
+    <div class="reply-admin-actions mt-1">
+        <button class="btn-edit-reply" onclick="editReply(${reply.id}, ${reply.commentId})">
+            <i class="fas fa-edit me-1"></i>Sửa
         </button>
-        <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteReply(${reply.id}, ${reply.artworkId})">
-            <i class="fas fa-trash"></i> Xóa
+        <button class="btn-delete-reply" onclick="deleteReply(${reply.id}, ${reply.artworkId})">
+            <i class="fas fa-trash-alt me-1"></i>Xóa
         </button>
     </div>`;
     
+    // Đảm bảo có đường dẫn avatar hợp lệ
+    const avatarSrc = reply.userAvatar && reply.userAvatar.trim() !== '' ? reply.userAvatar : '/images/default-avatar.png';
+    
     return `
-    <div id="reply-${reply.id}" class="reply-item mt-3">
-        <div class="d-flex">
-            <div class="flex-shrink-0">
-                <img src="${reply.userAvatar}" class="rounded-circle" width="40" height="40" alt="${reply.userName}">
+    <div id="reply-${reply.id}" class="reply-item">
+        <div class="d-flex align-items-start">
+            <div class="reply-avatar">
+                <img src="${avatarSrc}" alt="${reply.userName}" class="reply-user-avatar" style="transition: none; animation: none;" onerror="this.src='/images/default-avatar.png'; console.log('Avatar fallback loaded');" />
             </div>
-            <div class="flex-grow-1 ms-3">
-                <div class="d-flex justify-content-between align-items-center">
-                    <h6 class="mb-0">${reply.userName}</h6>
-                    <small class="text-muted">${formatDate(reply.date)}</small>
+            <div class="reply-content">
+                <div class="reply-bubble">
+                    <div class="reply-media-container">
+                        ${stickerHtml}
+                        ${imageHtml}
+                    </div>
+                    <h6 class="reply-username">
+                        ${reply.userName}
+                        ${editedHtml}
+                    </h6>
+                    <p class="reply-text mb-0">${reply.content}</p>
+                    ${actionButtons}
                 </div>
-                <div id="reply-content-${reply.id}" class="mt-2">${reply.content}</div>
-                ${imageHtml}
-                ${stickerHtml}
-                <div class="d-flex align-items-center mt-1">
-                    ${editedHtml}
+                <div class="reply-meta">
+                    <span class="reply-time">${formatDate(reply.date)}</span>
                 </div>
-                ${actionButtons}
             </div>
         </div>
     </div>`;
@@ -652,6 +680,70 @@ function checkConnectionState() {
         return commentConnection.state;
     }
     return 'disconnected';
+}
+
+// Hàm xử lý sự kiện chỉnh sửa phản hồi
+function editReply(replyId, commentId) {
+    console.log('Chỉnh sửa phản hồi:', replyId, 'của bình luận:', commentId);
+    
+    // Lấy nội dung hiện tại của phản hồi
+    const replyContent = document.querySelector(`#reply-${replyId} .reply-text`).textContent;
+    
+    // Lấy ID tác phẩm từ input hidden
+    const artworkId = document.getElementById('artwork-id').value;
+    
+    // Gọi hàm hiển thị modal chỉnh sửa phản hồi
+    showEditReplyModal(replyId, commentId, replyContent);
+}
+
+// Hàm hiển thị modal chỉnh sửa phản hồi
+function showEditReplyModal(replyId, commentId, replyContent) {
+    // Lấy thông tin phản hồi từ server trước khi hiển thị modal
+    $.ajax({
+        url: '/Reply/GetReplyInfo',
+        type: 'GET',
+        data: { replyId: replyId },
+        success: function (response) {
+            if (response.success) {
+                $('#editReplyId').val(replyId);
+                $('#editReplyContent').val(response.content || replyContent);
+                $('#editCommentId').val(commentId);
+                $('#editArtworkId').val($('#artwork-id').val());
+
+                // Lưu thông tin gốc để xử lý khi không có thay đổi
+                $('#editReplyOriginalImage').val(response.imagePath || '');
+                $('#editReplyOriginalSticker').val(response.sticker || '');
+
+                // Hiển thị ảnh và sticker nếu có
+                if (response.imagePath) {
+                    $('#editReplyImagePreview').attr('src', response.imagePath);
+                    $('#editReplyImagePreviewContainer').removeClass('d-none');
+                } else {
+                    $('#editReplyImagePreviewContainer').addClass('d-none');
+                }
+
+                if (response.sticker) {
+                    $('#editReplyStickerPreview').attr('src', response.sticker);
+                    $('#editReplyStickerPreviewContainer').removeClass('d-none');
+                } else {
+                    $('#editReplyStickerPreviewContainer').addClass('d-none');
+                }
+
+                // Hiển thị modal
+                $('#editReplyModal').modal('show');
+            } else {
+                alert('Không thể tải thông tin phản hồi');
+            }
+        },
+        error: function () {
+            // Fallback nếu không lấy được thông tin chi tiết
+            $('#editReplyId').val(replyId);
+            $('#editReplyContent').val(replyContent);
+            $('#editCommentId').val(commentId);
+            $('#editArtworkId').val($('#artwork-id').val());
+            $('#editReplyModal').modal('show');
+        }
+    });
 }
 
 // Đóng kết nối khi rời khỏi trang

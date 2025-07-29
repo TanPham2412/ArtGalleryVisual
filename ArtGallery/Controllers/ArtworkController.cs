@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using ArtGallery.Models;
 using ArtGallery.Repositories.Interfaces;
 using System.Security.Claims;
@@ -567,7 +567,7 @@ namespace ArtGallery.Controllers
                     content = comment.NoiDung,
                     userId = comment.MaNguoiDung,
                     userName = user?.TenNguoiDung ?? "Người dùng",
-                    userAvatar = user?.AnhDaiDien ?? "/images/default-avatar.png",
+                    userAvatar = user != null ? user.GetAvatarPath() : "/images/default-avatar.png",
                     date = comment.NgayBinhLuan,
                     rating = comment.Rating,
                     imagePath = comment.DuongDanAnh,
@@ -644,7 +644,7 @@ namespace ArtGallery.Controllers
                     content = reply.NoiDung,
                     userId = reply.MaNguoiDung,
                     userName = user?.TenNguoiDung ?? "Người dùng",
-                    userAvatar = user?.AnhDaiDien ?? "/images/default-avatar.png",
+                    userAvatar = user != null ? user.GetAvatarPath() : "/images/default-avatar.png",
                     date = reply.NgayPhanHoi,
                     imagePath = reply.DuongDanAnh,
                     sticker = reply.Sticker,
