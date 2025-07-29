@@ -1,4 +1,4 @@
-﻿/* Layout */
+/* Layout */
 body {
     background-color: #121212 !important;
     color: #e0e0e0 !important;
@@ -98,6 +98,36 @@ body {
 
 .follow-btn.following .following-text {
     display: inline;
+}
+
+/* Hiệu ứng làm nổi bật bình luận và phản hồi mới */
+.new-comment-highlight,
+.new-reply-highlight {
+    animation: highlightNew 3s ease-in-out;
+}
+
+/* Ngăn chặn hiệu ứng chớp nháy cho avatar */
+.reply-user-avatar {
+    transition: none !important;
+    animation: none !important;
+}
+
+@keyframes highlightNew {
+    0% {
+        background-color: rgba(0, 168, 255, 0.3);
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0, 168, 255, 0.4);
+    }
+    70% {
+        background-color: rgba(0, 168, 255, 0.1);
+        transform: translateY(0);
+        box-shadow: 0 2px 5px rgba(0, 168, 255, 0.2);
+    }
+    100% {
+        background-color: transparent;
+        transform: translateY(0);
+        box-shadow: none;
+    }
 }
 
 /* Art Info Section */
@@ -667,8 +697,10 @@ body.no-scroll {
 
 .reply-avatar {
     width: 32px;
+    height: 32px;
     min-width: 32px;
     margin-right: 8px;
+    /* Xóa border-radius và object-fit vì đây là div chứa img */
 }
 
 .reply-user-avatar {
@@ -748,13 +780,7 @@ input[placeholder="Viết phản hồi..."]:focus {
     margin-bottom: 8px;
 }
 
-.reply-avatar {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    margin-right: 8px;
-    object-fit: cover;
-}
+/* Định nghĩa .reply-avatar đã được hợp nhất ở trên */
 
 .reply-content {
     flex: 1;

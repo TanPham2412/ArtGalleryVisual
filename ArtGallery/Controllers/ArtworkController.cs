@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using ArtGallery.Models;
 using ArtGallery.Repositories.Interfaces;
 using System.Security.Claims;
@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Authorization;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using System.IO;
+using Microsoft.AspNetCore.SignalR;
+using ArtGallery.Hubs;
 
 namespace ArtGallery.Controllers
 {
@@ -14,12 +16,14 @@ namespace ArtGallery.Controllers
         private readonly IArtworkRepository _artworkRepository;
         private readonly ILogger<ArtworkController> _logger;
         private readonly ArtGalleryContext _context;
+        private readonly IHubContext<CommentHub> _commentHubContext;
 
-        public ArtworkController(IArtworkRepository artworkRepository, ILogger<ArtworkController> logger, ArtGalleryContext context)
+        public ArtworkController(IArtworkRepository artworkRepository, ILogger<ArtworkController> logger, ArtGalleryContext context, IHubContext<CommentHub> commentHubContext)
         {
             _artworkRepository = artworkRepository;
             _logger = logger;
             _context = context;
+            _commentHubContext = commentHubContext;
         }
 
         public async Task<IActionResult> Display(int id)
@@ -554,6 +558,27 @@ namespace ArtGallery.Controllers
                 _context.BinhLuans.Add(comment);
                 await _context.SaveChangesAsync();
                 
+                // Lấy thông tin người dùng để gửi qua SignalR
+                var user = await _context.NguoiDungs.FirstOrDefaultAsync(u => u.Id == comment.MaNguoiDung);
+                
+                // Tạo đối tượng bình luận để gửi qua SignalR
+                var commentData = new {
+                    id = comment.MaBinhLuan,
+                    content = comment.NoiDung,
+                    userId = comment.MaNguoiDung,
+                    userName = user?.TenNguoiDung ?? "Người dùng",
+                    userAvatar = user != null ? user.GetAvatarPath() : "/images/default-avatar.png",
+                    date = comment.NgayBinhLuan,
+                    rating = comment.Rating,
+                    imagePath = comment.DuongDanAnh,
+                    sticker = comment.Sticker,
+                    isHidden = comment.IsHidden,
+                    isEdited = comment.DaChinhSua
+                };
+                
+                // Gửi bình luận mới qua SignalR
+                await _commentHubContext.Clients.Group($"artwork_{model.MaTranh}").SendAsync("ReceiveComment", commentData);
+                
                 TempData["SuccessMessage"] = "Bình luận của bạn đã được gửi thành công!";
                 return RedirectToAction("Display", new { id = model.MaTranh, scrollToComments = true });
             }
@@ -572,8 +597,7 @@ namespace ArtGallery.Controllers
         {
             if (string.IsNullOrEmpty(NoiDung) && ReplyImage == null && string.IsNullOrEmpty(Sticker))
             {
-                TempData["ErrorMessage"] = "Vui lòng nhập nội dung, chọn ảnh hoặc sticker";
-                return RedirectToAction("Display", new { id = MaTranh });
+                return Json(new { success = false, message = "Vui lòng nhập nội dung, chọn ảnh hoặc sticker" });
             }
             
             try
@@ -610,14 +634,33 @@ namespace ArtGallery.Controllers
                 _context.PhanHoiBinhLuans.Add(reply);
                 await _context.SaveChangesAsync();
                 
-                TempData["SuccessMessage"] = "Phản hồi của bạn đã được gửi thành công!";
-                return RedirectToAction("Display", new { id = MaTranh });
+                // Lấy thông tin người dùng để gửi qua SignalR
+                var user = await _context.NguoiDungs.FirstOrDefaultAsync(u => u.Id == currentUserId);
+                
+                // Tạo đối tượng phản hồi để gửi qua SignalR
+                var replyData = new {
+                    id = reply.MaPhanHoi,
+                    commentId = reply.MaBinhLuan,
+                    content = reply.NoiDung,
+                    userId = reply.MaNguoiDung,
+                    userName = user?.TenNguoiDung ?? "Người dùng",
+                    userAvatar = user != null ? user.GetAvatarPath() : "/images/default-avatar.png",
+                    date = reply.NgayPhanHoi,
+                    imagePath = reply.DuongDanAnh,
+                    sticker = reply.Sticker,
+                    isEdited = reply.DaChinhSua,
+                    artworkId = MaTranh  // Thêm artworkId vào dữ liệu phản hồi
+                };
+                
+                // Gửi thông tin phản hồi mới qua SignalR
+                await _commentHubContext.Clients.Group($"artwork_{MaTranh}").SendAsync("ReceiveReply", MaBinhLuan, replyData);
+                
+                return Json(new { success = true, message = "Phản hồi của bạn đã được gửi thành công!", data = replyData });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Lỗi khi thêm phản hồi bình luận");
-                TempData["ErrorMessage"] = "Có lỗi xảy ra khi gửi phản hồi";
-                return RedirectToAction("Display", new { id = MaTranh });
+                return Json(new { success = false, message = "Có lỗi xảy ra khi gửi phản hồi" });
             }
         }
 
@@ -648,6 +691,9 @@ namespace ArtGallery.Controllers
                     _context.PhanHoiBinhLuans.RemoveRange(replies);
                     _context.BinhLuans.Remove(comment);
                     await _context.SaveChangesAsync();
+                    
+                    // Thông báo xóa bình luận qua SignalR
+                    await _commentHubContext.Clients.Group($"artwork_{artworkId}").SendAsync("CommentDeleted", commentId);
                     
                     return Json(new { success = true, message = "Đã xóa bình luận thành công" });
                 }
@@ -765,6 +811,27 @@ namespace ArtGallery.Controllers
                     
                     await _context.SaveChangesAsync();
                     
+                    // Lấy thông tin người dùng để gửi qua SignalR
+                    var user = await _context.NguoiDungs.FirstOrDefaultAsync(u => u.Id == comment.MaNguoiDung);
+                    
+                    // Tạo đối tượng bình luận đã cập nhật để gửi qua SignalR
+                    var updatedComment = new {
+                        id = comment.MaBinhLuan,
+                        content = comment.NoiDung,
+                        userId = comment.MaNguoiDung,
+                        userName = user?.TenNguoiDung ?? "Người dùng",
+                        userAvatar = user?.AnhDaiDien ?? "/images/default-avatar.png",
+                        date = comment.NgayBinhLuan,
+                        rating = comment.Rating,
+                        imagePath = comment.DuongDanAnh,
+                        sticker = comment.Sticker,
+                        isHidden = comment.IsHidden,
+                        isEdited = comment.DaChinhSua
+                    };
+                    
+                    // Gửi thông tin bình luận đã cập nhật qua SignalR
+                    await _commentHubContext.Clients.Group($"artwork_{artworkId}").SendAsync("CommentEdited", commentId, updatedComment);
+                    
                     return Json(new { 
                         success = true, 
                         message = "Đã cập nhật bình luận thành công",
@@ -853,8 +920,12 @@ namespace ArtGallery.Controllers
                 // Chỉ admin hoặc người viết phản hồi mới có quyền xóa
                 if (isAdmin || reply.MaNguoiDung == currentUserId)
                 {
+                    var commentId = reply.MaBinhLuan;
                     _context.PhanHoiBinhLuans.Remove(reply);
                     await _context.SaveChangesAsync();
+                    
+                    // Thông báo xóa phản hồi qua SignalR
+                    await _commentHubContext.Clients.Group($"artwork_{artworkId}").SendAsync("ReplyDeleted", replyId, commentId);
                     
                     return Json(new { success = true, message = "Đã xóa phản hồi thành công" });
                 }

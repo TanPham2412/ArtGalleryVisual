@@ -1,4 +1,4 @@
-﻿// Hàm xử lý yêu thích
+// Hàm xử lý yêu thích
 function toggleLike(button, artworkId) {
     $.ajax({
         url: '/Artwork/ToggleLike',
@@ -755,8 +755,23 @@ $('#saveEditReply').click(function () {
         success: function (response) {
             if (response.success) {
                 $('#editReplyModal').modal('hide');
-                // Cập nhật UI phản hồi hoặc tải lại trang
-                location.reload();
+                // Không cần tải lại trang vì SignalR sẽ cập nhật UI
+                // Hiển thị thông báo thành công
+                const toastHTML = `
+                    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+                        <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                            <div class="toast-header">
+                                <strong class="me-auto">Thông báo</strong>
+                                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                            </div>
+                            <div class="toast-body">
+                                ${response.message}
+                            </div>
+                        </div>
+                    </div>`;
+
+                $('body').append(toastHTML);
+                $('.toast').toast('show');
             } else {
                 alert('Có lỗi xảy ra: ' + response.message);
             }
@@ -1068,7 +1083,31 @@ $(document).ready(function () {
 });
 
 function deleteReply(replyId, artworkId) {
+    console.log('%c[deleteReply] Bắt đầu xóa phản hồi', 'background: #FF9800; color: white; padding: 2px 5px; border-radius: 3px;');
+    console.log('replyId:', replyId, 'artworkId:', artworkId);
+    
     if (confirm('Bạn có chắc chắn muốn xóa phản hồi này?')) {
+        // Tìm phản hồi trong DOM bằng ID
+        let replyElement = document.getElementById(`reply-${replyId}`);
+        
+        // Nếu không tìm thấy bằng ID, thử tìm bằng data-reply-id
+        if (!replyElement) {
+            console.log('Không tìm thấy phản hồi bằng ID, thử tìm bằng data-reply-id');
+            const replyElements = document.querySelectorAll(`.reply-item[data-reply-id="${replyId}"]`);
+            if (replyElements.length > 0) {
+                replyElement = replyElements[0];
+                console.log('Đã tìm thấy phản hồi bằng data-reply-id:', replyElement);
+            }
+        }
+        
+        console.log('Phần tử phản hồi trong DOM:', replyElement);
+        
+        // Nếu không có artworkId được truyền vào, thử lấy từ dataset của phần tử
+        if (!artworkId && replyElement && replyElement.dataset.artworkId) {
+            artworkId = replyElement.dataset.artworkId;
+            console.log('Sử dụng artworkId từ dataset:', artworkId);
+        }
+        
         $.ajax({
             url: '/Reply/DeleteReply',
             type: 'POST',
@@ -1080,19 +1119,75 @@ function deleteReply(replyId, artworkId) {
                 'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
             },
             success: function (response) {
+                console.log('%c[deleteReply] Phản hồi từ server:', 'background: #4CAF50; color: white; padding: 2px 5px; border-radius: 3px;', response);
+                
                 if (response.success) {
                     // Hiển thị thông báo thành công
                     alert(response.message);
-                    // Xóa phần tử khỏi DOM hoặc tải lại trang
-                    $(`#reply-${replyId}`).fadeOut(300, function () {
-                        $(this).remove();
-                    });
+                    
+                    // Tìm lại phần tử phản hồi sau khi server xử lý
+                    let replyElementAfter = document.getElementById(`reply-${replyId}`);
+                    
+                    // Nếu không tìm thấy bằng ID, thử tìm bằng data-reply-id
+                    if (!replyElementAfter) {
+                        const replyElements = document.querySelectorAll(`.reply-item[data-reply-id="${replyId}"]`);
+                        if (replyElements.length > 0) {
+                            replyElementAfter = replyElements[0];
+                        }
+                    }
+                    
+                    console.log('Phần tử phản hồi trong DOM sau khi server xử lý:', replyElementAfter);
+                    
+                    // Nếu phản hồi vẫn tồn tại trong DOM và không có sự kiện SignalR, xóa nó trực tiếp
+                    // Đây là giải pháp tạm thời để đảm bảo phản hồi được xóa ngay cả khi SignalR không hoạt động
+                    if (replyElementAfter) {
+                        console.log('Xóa phản hồi trực tiếp từ DOM vì SignalR có thể không hoạt động cho phản hồi mới hoặc đã chỉnh sửa');
+                        setTimeout(function() {
+                            // Tìm lại phần tử một lần nữa sau 1 giây
+                            let finalCheck = document.getElementById(`reply-${replyId}`);
+                            
+                            // Nếu không tìm thấy bằng ID, thử tìm bằng data-reply-id
+                            if (!finalCheck) {
+                                const replyElements = document.querySelectorAll(`.reply-item[data-reply-id="${replyId}"]`);
+                                if (replyElements.length > 0) {
+                                    finalCheck = replyElements[0];
+                                }
+                            }
+                            
+                            if (finalCheck) {
+                                console.log('Phản hồi vẫn tồn tại sau 1 giây, xóa trực tiếp');
+                                $(finalCheck).fadeOut(300, function() {
+                                    // Lấy commentId từ dataset hoặc từ container gần nhất
+                                    let commentId;
+                                    if (finalCheck.dataset.commentId) {
+                                        commentId = finalCheck.dataset.commentId;
+                                    } else {
+                                        const container = finalCheck.closest('.replies-container');
+                                        if (container) {
+                                            commentId = container.id.replace('replies-container-', '');
+                                        }
+                                    }
+                                    
+                                    $(this).remove();
+                                    
+                                    // Cập nhật số lượng phản hồi nếu có commentId
+                                    if (commentId) {
+                                        console.log('Cập nhật số lượng phản hồi cho bình luận ID:', commentId);
+                                        updateReplyCount(commentId, -1);
+                                    }
+                                });
+                            }
+                        }, 1000); // Đợi 1 giây để xem SignalR có xử lý không
+                    }
                 } else {
                     // Hiển thị thông báo lỗi
                     alert(response.message);
                 }
             },
-            error: function () {
+            error: function (xhr, status, error) {
+                console.error('Lỗi AJAX khi xóa phản hồi:', error);
+                console.error('Trạng thái:', status);
+                console.error('Phản hồi:', xhr.responseText);
                 alert('Có lỗi xảy ra khi kết nối đến máy chủ');
             }
         });
@@ -1161,14 +1256,46 @@ document.addEventListener('DOMContentLoaded', function () {
                 return false;
             }
 
-            // Lưu vị trí scroll
-            const scrollPosition = window.scrollY || window.pageYOffset;
-            localStorage.setItem('scrollPosition', scrollPosition);
-
-            // Submit form nếu dữ liệu hợp lệ
-            form.submit();
+            // Lấy dữ liệu từ form
+            const formData = new FormData(form);
+            const commentId = form.querySelector('input[name="MaBinhLuan"]').value;
+            const artworkId = form.querySelector('input[name="MaTranh"]').value;
+            
+            // Gửi dữ liệu bằng AJAX
+            $.ajax({
+                url: '/Artwork/AddReply',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    if (response.success) {
+                        // Ẩn form phản hồi sau khi gửi thành công
+                        hideReplyForm(commentId);
+                        
+                        // Xóa nội dung form
+                        form.querySelector('.reply-input').value = '';
+                        if (imageInput) imageInput.value = '';
+                        form.querySelector('.stickerInputReply').value = '';
+                        
+                        // Ẩn preview nếu có
+                        const imagePreview = document.getElementById(`replyImagePreview-${commentId}`);
+                        const stickerPreview = document.getElementById(`replyStickerPreview-${commentId}`);
+                        if (imagePreview) imagePreview.classList.add('d-none');
+                        if (stickerPreview) stickerPreview.classList.add('d-none');
+                        
+                        // Không cần làm gì thêm vì SignalR sẽ nhận sự kiện và hiển thị phản hồi mới
+                    } else {
+                        alert('Có lỗi xảy ra khi gửi phản hồi: ' + response.message);
+                    }
+                },
+                error: function() {
+                    alert('Có lỗi xảy ra khi gửi phản hồi');
+                }
+            });
         });
     });
+
 });
 
 // Thêm vào cuối file nếu cần
@@ -1181,6 +1308,29 @@ function showEditReplyModal(replyId, commentId, replyContent) {
 
     const editReplyModal = new bootstrap.Modal(document.getElementById('editReplyModal'));
     editReplyModal.show();
+}
+
+// Hàm editReply để xử lý sự kiện khi nhấn nút sửa phản hồi
+function editReply(replyId, commentId) {
+    // Lấy thông tin phản hồi từ server trước khi hiển thị modal
+    $.ajax({
+        url: '/Reply/GetReplyInfo',
+        type: 'GET',
+        data: { replyId: replyId },
+        success: function (response) {
+            if (response.success) {
+                showEditReplyModal(replyId, commentId, response.content || '');
+            } else {
+                alert('Không thể tải thông tin phản hồi');
+            }
+        },
+        error: function () {
+            // Fallback nếu không lấy được thông tin chi tiết
+            // Lấy nội dung phản hồi từ DOM
+            const replyContent = $(`#reply-${replyId} .reply-text`).text();
+            showEditReplyModal(replyId, commentId, replyContent);
+        }
+    });
 }
 
 // Thêm vào cuối file hoặc trong $(document).ready

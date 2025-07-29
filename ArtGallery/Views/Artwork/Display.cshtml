@@ -203,6 +203,7 @@
                     <div class="comment-form-container mb-4">
                         <form id="commentForm" asp-action="AddComment" asp-controller="Artwork" method="post" enctype="multipart/form-data">
                             <input type="hidden" name="MaTranh" value="@Model.MaTranh" />
+                            <input type="hidden" id="artwork-id" value="@Model.MaTranh" />
 
                             <div class="rating-selection mb-3">
                                 <label class="form-label">Đánh giá của bạn:</label>
@@ -345,6 +346,7 @@
                                 <!-- Form phản hồi (ẩn ban đầu) -->
                                 <div class="reply-form-container mt-2" id="replyForm-@comment.MaBinhLuan" style="display:none;">
                                     <form class="reply-form" asp-action="AddReply" asp-controller="Artwork" method="post" enctype="multipart/form-data">
+                                        @Html.AntiForgeryToken()
                                         <input type="hidden" name="MaBinhLuan" value="@comment.MaBinhLuan" />
                                         <input type="hidden" name="MaTranh" value="@Model.MaTranh" />
                                         <div class="d-flex">
@@ -700,7 +702,13 @@
     <!-- Đảm bảo đã include các thư viện cần thiết -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
+    
+    <!-- Tham chiếu đến SignalR -->
+    <script src="~/lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
+    
+    <!-- Tham chiếu đến file signalr-comment.js -->
+    <script src="~/js/signalr-comment.js"></script>
+    
     <!-- Tham chiếu đến file display-artwork.js -->
     <script src="~/js/display-artwork.js"></script>
 }
