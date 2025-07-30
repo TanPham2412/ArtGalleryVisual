@@ -375,41 +375,47 @@ function initializeCommentHub(artworkId) {
  
       // Xử lý sự kiện bình luận được chỉnh sửa
     commentConnection.on('CommentEdited', function (commentId, updatedComment) {
+        console.log('%c[SignalR] CommentEdited được gọi', 'background: #4CAF50; color: white; padding: 2px 5px; border-radius: 3px;');
+        console.log('CommentEdited được gọi với ID:', commentId, 'Dữ liệu cập nhật:', updatedComment);
+        console.log('Trạng thái chỉnh sửa của bình luận:', updatedComment.isEdited ? 'Đã chỉnh sửa' : 'Chưa chỉnh sửa');
+        
         // Cập nhật nội dung bình luận
         $(`#comment-content-${commentId}`).html(updatedComment.content);
         
-        // Cập nhật ảnh nếu có
-        if (updatedComment.imagePath) {
-            if ($(`#comment-image-${commentId}`).length) {
-                $(`#comment-image-${commentId}`).attr('src', updatedComment.imagePath);
-                $(`#comment-image-container-${commentId}`).removeClass('d-none');
-            } else {
-                const imageHtml = `<div id="comment-image-container-${commentId}" class="comment-image-container">
-                    <img id="comment-image-${commentId}" src="${updatedComment.imagePath}" class="img-fluid rounded zoomable-image" alt="Comment image" onclick="openImageModal('${updatedComment.imagePath}')">
-                </div>`;
-                $(`#comment-content-${commentId}`).after(imageHtml);
-            }
-        } else {
-            $(`#comment-image-container-${commentId}`).addClass('d-none');
+        // Xóa tất cả media container cũ để tránh hiển thị trùng lặp
+        $(`#comment-${commentId} .comment-content .comment-media-container`).remove();
+        
+        // Tạo mới container media
+        const mediaContainer = $('<div class="comment-media-container"></div>');
+        $(`#comment-${commentId} .comment-content`).prepend(mediaContainer);
+        
+        // Cập nhật sticker nếu có (thêm sticker trước ảnh để đảm bảo thứ tự hiển thị đúng)
+        if (updatedComment.sticker) {
+            const stickerHtml = `<div id="comment-sticker-container-${commentId}" class="sticker-container">
+                <img id="comment-sticker-${commentId}" src="${updatedComment.sticker}" class="comment-sticker" alt="Sticker">
+            </div>`;
+            mediaContainer.append(stickerHtml);
         }
         
-        // Cập nhật sticker nếu có
-        if (updatedComment.sticker) {
-            if ($(`#comment-sticker-${commentId}`).length) {
-                $(`#comment-sticker-${commentId}`).attr('src', updatedComment.sticker);
-                $(`#comment-sticker-container-${commentId}`).removeClass('d-none');
-            } else {
-                const stickerHtml = `<div id="comment-sticker-container-${commentId}" class="sticker-container">
-                    <img id="comment-sticker-${commentId}" src="${updatedComment.sticker}" class="comment-sticker" alt="Sticker">
-                </div>`;
-                $(`#comment-content-${commentId}`).after(stickerHtml);
-            }
-        } else {
-            $(`#comment-sticker-container-${commentId}`).addClass('d-none');
+        // Cập nhật ảnh nếu có
+        if (updatedComment.imagePath) {
+            const imageHtml = `<div id="comment-image-container-${commentId}" class="comment-image-container">
+                <img id="comment-image-${commentId}" src="${updatedComment.imagePath}" class="comment-image zoomable-image" alt="Comment image" onclick="openImageModal('${updatedComment.imagePath}')">
+            </div>`;
+            mediaContainer.append(imageHtml);
         }
         
         // Hiển thị trạng thái đã chỉnh sửa
-        $(`#comment-edited-${commentId}`).removeClass('d-none');
+        console.log(`Hiển thị trạng thái đã chỉnh sửa cho bình luận #${commentId}`);
+        console.log(`Tìm phần tử: #comment-edited-${commentId}`);
+        const editedElement = $(`#comment-edited-${commentId}`);
+        console.log('Phần tử tìm thấy:', editedElement.length > 0 ? 'Có' : 'Không');
+        if (editedElement.length > 0) {
+            editedElement.removeClass('d-none');
+            console.log('Đã xóa class d-none');
+        } else {
+            console.log('Không tìm thấy phần tử để hiển thị trạng thái đã chỉnh sửa');
+        }
     });
 
     // Xử lý sự kiện phản hồi được chỉnh sửa
@@ -422,51 +428,41 @@ function initializeCommentHub(artworkId) {
         
         // Xử lý cập nhật ảnh
         const replyBubble = $(`#reply-${replyId} .reply-content .reply-bubble`);
-        const mediaContainer = $(`#reply-${replyId} .reply-media-container`);
         
-        // Nếu không có media container, tạo mới
-        if (mediaContainer.length === 0) {
-            replyBubble.prepend(`<div class="reply-media-container"></div>`);
+        // Xóa tất cả media container cũ để tránh hiển thị trùng lặp
+        $(`#reply-${replyId} .reply-media-container`).remove();
+        
+        // Tạo mới container media
+        const mediaContainer = $('<div class="reply-media-container"></div>');
+        replyBubble.prepend(mediaContainer);
+        
+        // Xử lý sticker (thêm sticker trước ảnh để đảm bảo thứ tự hiển thị đúng)
+        if (updatedReply.sticker) {
+            const stickerHtml = `<div id="reply-sticker-container-${replyId}" class="sticker-container">
+                <img id="reply-sticker-${replyId}" src="${updatedReply.sticker}" class="reply-sticker" alt="Sticker">
+            </div>`;
+            mediaContainer.append(stickerHtml);
         }
         
         // Xử lý ảnh
         if (updatedReply.imagePath) {
-            // Nếu đã có container ảnh, cập nhật src
-            if ($(`#reply-image-container-${replyId}`).length) {
-                $(`#reply-image-${replyId}`).attr('src', updatedReply.imagePath);
-                $(`#reply-image-container-${replyId}`).removeClass('d-none');
-            } else {
-                // Nếu chưa có, tạo mới
-                const imageHtml = `<div id="reply-image-container-${replyId}" class="reply-image-container">
-                    <img id="reply-image-${replyId}" src="${updatedReply.imagePath}" class="reply-image zoomable-image" alt="Reply image" onclick="openImageModal('${updatedReply.imagePath}')">
-                </div>`;
-                $(`#reply-${replyId} .reply-media-container`).append(imageHtml);
-            }
-        } else {
-            // Nếu không có ảnh, ẩn hoặc xóa container ảnh
-            $(`#reply-image-container-${replyId}`).remove();
-        }
-        
-        // Xử lý sticker
-        if (updatedReply.sticker) {
-            // Nếu đã có container sticker, cập nhật src
-            if ($(`#reply-sticker-container-${replyId}`).length) {
-                $(`#reply-sticker-${replyId}`).attr('src', updatedReply.sticker);
-                $(`#reply-sticker-container-${replyId}`).removeClass('d-none');
-            } else {
-                // Nếu chưa có, tạo mới
-                const stickerHtml = `<div id="reply-sticker-container-${replyId}" class="sticker-container">
-                    <img id="reply-sticker-${replyId}" src="${updatedReply.sticker}" class="reply-sticker" alt="Sticker">
-                </div>`;
-                $(`#reply-${replyId} .reply-media-container`).append(stickerHtml);
-            }
-        } else {
-            // Nếu không có sticker, ẩn hoặc xóa container sticker
-            $(`#reply-sticker-container-${replyId}`).remove();
+            const imageHtml = `<div id="reply-image-container-${replyId}" class="reply-image-container">
+                <img id="reply-image-${replyId}" src="${updatedReply.imagePath}" class="reply-image zoomable-image" alt="Reply image" onclick="openImageModal('${updatedReply.imagePath}')">
+            </div>`;
+            mediaContainer.append(imageHtml);
         }
         
         // Hiển thị trạng thái đã chỉnh sửa
-        $(`#reply-edited-${replyId}`).removeClass('d-none');
+        console.log(`Hiển thị trạng thái đã chỉnh sửa cho phản hồi #${replyId}`);
+        console.log(`Tìm phần tử: #reply-edited-${replyId}`);
+        const editedElement = $(`#reply-edited-${replyId}`);
+        console.log('Phần tử tìm thấy:', editedElement.length > 0 ? 'Có' : 'Không');
+        if (editedElement.length > 0) {
+            editedElement.removeClass('d-none');
+            console.log('Đã xóa class d-none');
+        } else {
+            console.log('Không tìm thấy phần tử để hiển thị trạng thái đã chỉnh sửa');
+        }
         
         // Đảm bảo các nút sửa và xóa vẫn hoạt động
         $(`#reply-${replyId} .btn-edit-reply`).attr('onclick', `editReply(${replyId}, ${updatedReply.commentId})`);
@@ -652,24 +648,26 @@ function createCommentHtml(comment) {
         ratingHtml += '</div>';
     }
 
-    let imageHtml = '';
-    if (comment.imagePath) {
-        imageHtml = `
-            <div class="comment-image-container">
-                <img src="${comment.imagePath}" alt="Comment image" class="img-fluid rounded zoomable-image" 
-                     onclick="openImageModal('${comment.imagePath}')" />
+    let mediaHtml = '<div class="comment-media-container">';
+    
+    if (comment.sticker) {
+        mediaHtml += `
+            <div id="comment-sticker-container-${comment.id}" class="sticker-container">
+                <img id="comment-sticker-${comment.id}" src="${comment.sticker}" alt="Sticker" class="comment-sticker" />
             </div>
         `;
     }
 
-    let stickerHtml = '';
-    if (comment.sticker) {
-        stickerHtml = `
-            <div class="sticker-container">
-                <img src="${comment.sticker}" alt="Sticker" class="comment-sticker" />
+    if (comment.imagePath) {
+        mediaHtml += `
+            <div id="comment-image-container-${comment.id}" class="comment-image-container">
+                <img id="comment-image-${comment.id}" src="${comment.imagePath}" alt="Comment image" class="comment-image zoomable-image" 
+                     onclick="openImageModal('${comment.imagePath}')" />
             </div>
         `;
     }
+    
+    mediaHtml += '</div>';
 
     // Tạo HTML cho bình luận
     return `
@@ -680,7 +678,7 @@ function createCommentHtml(comment) {
                     <div class="commenter-info">
                         <h5 class="commenter-name">
                             ${comment.userName}
-                            ${comment.isEdited ? '<span class="edited-marker">(đã chỉnh sửa)</span>' : ''}
+                            ${comment.isEdited ? `<span id="comment-edited-${comment.id}" class="edited-marker">(đã chỉnh sửa)</span>` : `<span id="comment-edited-${comment.id}" class="edited-marker d-none">(đã chỉnh sửa)</span>`}
                         </h5>
                         <div class="comment-date">${formatDate(comment.date)}</div>
                     </div>
@@ -688,9 +686,8 @@ function createCommentHtml(comment) {
                 ${ratingHtml}
             </div>
             <div class="comment-content">
-                <p id="comment-content-${comment.id}">${comment.content}</p>
-                ${imageHtml}
-                ${stickerHtml}
+                ${mediaHtml}
+                <div class="comment-text" id="comment-content-${comment.id}">${comment.content}</div>
             </div>
             <div class="comment-actions">
                 <button class="btn-reply" onclick="showReplyForm(${comment.id})">
@@ -730,6 +727,7 @@ function createReplyHtml(reply) {
     
     // Hiển thị trạng thái đã chỉnh sửa
     let editedHtml = reply.isEdited ? `<span id="reply-edited-${reply.id}" class="edited-marker">(đã chỉnh sửa)</span>` : `<span id="reply-edited-${reply.id}" class="edited-marker d-none">(đã chỉnh sửa)</span>`;
+    console.log('Trạng thái chỉnh sửa của phản hồi:', reply.isEdited ? 'Đã chỉnh sửa' : 'Chưa chỉnh sửa');
     
     // Tạo HTML cho các nút hành động (chỉnh sửa, xóa)
     // Kiểm tra quyền người dùng dựa trên ID người dùng hiện tại
@@ -762,8 +760,8 @@ function createReplyHtml(reply) {
             <div class="reply-content">
                 <div class="reply-bubble">
                     <div class="reply-media-container">
-                        ${imageHtml}
                         ${stickerHtml}
+                        ${imageHtml}
                     </div>
                     <h6 class="reply-username">
                         ${reply.userName}

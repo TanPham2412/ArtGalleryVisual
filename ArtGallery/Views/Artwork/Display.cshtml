@@ -331,10 +331,10 @@
                                                 <button class="btn-edit-comment" onclick="showEditCommentModal(@comment.MaBinhLuan, '@comment.NoiDung')">
                                                     <i class="fas fa-edit me-1"></i>Sửa
                                                 </button>
-                                                <button class="btn-toggle-hide" onclick="toggleHideComment(@comment.MaBinhLuan, @Model.MaTranh)">
+                                                @* <button class="btn-toggle-hide" onclick="toggleHideComment(@comment.MaBinhLuan, @Model.MaTranh)">
                                                     <i class="fas @(comment.IsHidden ? "fa-eye" : "fa-eye-slash") me-1"></i>
                                                     @(comment.IsHidden ? "Hiện" : "Ẩn")
-                                                </button>
+                                                </button> *@
                                                 <button class="btn-delete-comment" onclick="deleteComment(@comment.MaBinhLuan, @Model.MaTranh)">
                                                     <i class="fas fa-trash-alt me-1"></i>Xóa
                                                 </button>
