@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace ArtGallery.Models;
@@ -24,6 +24,8 @@ public partial class BinhLuan
     public bool IsHidden { get; set; } = false;
 
     public bool DaChinhSua { get; set; } = false;
+    
+    public DateTime? ThoiGianChinhSua { get; set; }
 
     public virtual NguoiDung MaNguoiDungNavigation { get; set; } = null!;
 

@@ -62,9 +62,21 @@ namespace ArtGallery.Controllers
                     return Json(new { success = false, message = "Bạn không có quyền sửa phản hồi này" });
                 }
 
+                // Lưu lịch sử chỉnh sửa phản hồi
+                var lichSuChinhSua = new LichSuChinhSuaPhanHoi
+                {
+                    MaPhanHoi = reply.MaPhanHoi,
+                    NoiDungCu = reply.NoiDung,
+                    NoiDungMoi = content,
+                    NgayChinhSua = DateTime.Now,
+                    DuongDanAnhCu = reply.DuongDanAnh,
+                    StickerCu = reply.Sticker
+                };
+                
                 // Cập nhật nội dung
                 reply.NoiDung = content;
                 reply.DaChinhSua = true;
+                reply.ThoiGianChinhSua = DateTime.Now; // Cập nhật thời gian chỉnh sửa
 
                 // Xử lý ảnh mới nếu có
                 if (image != null)
@@ -95,15 +107,21 @@ namespace ArtGallery.Controllers
                     }
 
                     reply.DuongDanAnh = "/uploads/replies/" + uniqueFileName;
+                    lichSuChinhSua.DuongDanAnhMoi = reply.DuongDanAnh;
                 }
                 else
                 {
                     // Giữ nguyên ảnh cũ nếu không có ảnh mới
                     reply.DuongDanAnh = originalImage;
+                    lichSuChinhSua.DuongDanAnhMoi = originalImage;
                 }
 
                 // Cập nhật sticker
                 reply.Sticker = sticker;
+                lichSuChinhSua.StickerMoi = sticker;
+                
+                // Thêm lịch sử chỉnh sửa vào database
+                _context.LichSuChinhSuaPhanHois.Add(lichSuChinhSua);
 
                 // Lưu thay đổi
                 await _context.SaveChangesAsync();
@@ -187,12 +205,25 @@ namespace ArtGallery.Controllers
                 // Chỉ admin hoặc người viết phản hồi mới có quyền sửa
                 if (isAdmin || reply.MaNguoiDung == currentUserId)
                 {
+                    // Lưu lịch sử chỉnh sửa phản hồi
+                    var lichSuChinhSua = new LichSuChinhSuaPhanHoi
+                    {
+                        MaPhanHoi = reply.MaPhanHoi,
+                        NoiDungCu = reply.NoiDung,
+                        NoiDungMoi = editedContent,
+                        NgayChinhSua = DateTime.Now,
+                        DuongDanAnhCu = reply.DuongDanAnh,
+                        StickerCu = reply.Sticker
+                    };
+                    
                     // Cập nhật nội dung phản hồi
                     reply.NoiDung = editedContent;
                     reply.DaChinhSua = true; // Đánh dấu đã chỉnh sửa
+                    reply.ThoiGianChinhSua = DateTime.Now; // Cập nhật thời gian chỉnh sửa
                     
                     // Cập nhật sticker nếu có
                     reply.Sticker = sticker;
+                    lichSuChinhSua.StickerMoi = sticker;
                     
                     // Xử lý upload ảnh mới nếu có
                     if (replyImage != null && replyImage.Length > 0)
@@ -210,12 +241,21 @@ namespace ArtGallery.Controllers
                         }
                         
                         reply.DuongDanAnh = "/images/comments/" + uniqueFileName;
+                        lichSuChinhSua.DuongDanAnhMoi = reply.DuongDanAnh;
                     }
                     else if (!keepOriginalImage)
                     {
                         // Xóa ảnh nếu người dùng đã xóa và không upload ảnh mới
                         reply.DuongDanAnh = null;
+                        lichSuChinhSua.DuongDanAnhMoi = null;
                     }
+                    else
+                    {
+                        lichSuChinhSua.DuongDanAnhMoi = reply.DuongDanAnh;
+                    }
+                    
+                    // Thêm lịch sử chỉnh sửa vào database
+                    _context.LichSuChinhSuaPhanHois.Add(lichSuChinhSua);
                     
                     await _context.SaveChangesAsync();
                     

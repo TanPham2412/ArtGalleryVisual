@@ -9,6 +9,9 @@ using Microsoft.EntityFrameworkCore;
 using System.IO;
 using Microsoft.AspNetCore.SignalR;
 using ArtGallery.Hubs;
+using System.Threading.Tasks;
+using System;
+using ArtGallery.Data;
 
 namespace ArtGallery.Controllers
 {
@@ -804,12 +807,27 @@ namespace ArtGallery.Controllers
                 // Chỉ admin hoặc người viết bình luận mới có quyền sửa
                 if (isAdmin || comment.MaNguoiDung == currentUserId)
                 {
+                    // Lưu lịch sử chỉnh sửa bình luận
+                    var lichSuChinhSua = new LichSuChinhSuaBinhLuan
+                    {
+                        MaBinhLuan = comment.MaBinhLuan,
+                        NoiDungCu = comment.NoiDung,
+                        NoiDungMoi = editedContent,
+                        NgayChinhSua = DateTime.Now,
+                        DuongDanAnhCu = comment.DuongDanAnh,
+                        StickerCu = comment.Sticker,
+                        RatingCu = comment.Rating,
+                        RatingMoi = comment.Rating // Rating không thay đổi khi chỉnh sửa
+                    };
+                    
                     // Cập nhật nội dung bình luận
                     comment.NoiDung = editedContent;
                     comment.DaChinhSua = true; // Đánh dấu đã chỉnh sửa
+                    comment.ThoiGianChinhSua = DateTime.Now; // Cập nhật thời gian chỉnh sửa
                     
                     // Cập nhật sticker nếu có
                     comment.Sticker = sticker;
+                    lichSuChinhSua.StickerMoi = sticker;
                     
                     // Xử lý upload ảnh mới nếu có
                     if (commentImage != null && commentImage.Length > 0)
@@ -833,13 +851,22 @@ namespace ArtGallery.Controllers
                         }
                         
                         comment.DuongDanAnh = "/images/comments/" + uniqueFileName;
+                        lichSuChinhSua.DuongDanAnhMoi = comment.DuongDanAnh;
                         _logger.LogInformation($"Đã lưu ảnh mới tại: {comment.DuongDanAnh}");
                     }
                     else if (!keepOriginalImage)
                     {
                         // Xóa ảnh nếu người dùng đã xóa và không upload ảnh mới
                         comment.DuongDanAnh = null;
+                        lichSuChinhSua.DuongDanAnhMoi = null;
                     }
+                    else
+                    {
+                        lichSuChinhSua.DuongDanAnhMoi = comment.DuongDanAnh;
+                    }
+                    
+                    // Thêm lịch sử chỉnh sửa vào database
+                    _context.LichSuChinhSuaBinhLuans.Add(lichSuChinhSua);
                     
                     await _context.SaveChangesAsync();
                     
@@ -909,9 +936,27 @@ namespace ArtGallery.Controllers
                 // Chỉ admin hoặc người viết phản hồi mới có quyền sửa
                 if (isAdmin || reply.MaNguoiDung == currentUserId)
                 {
+                    // Lưu lịch sử chỉnh sửa phản hồi
+                    var lichSuChinhSua = new LichSuChinhSuaPhanHoi
+                    {
+                        MaPhanHoi = reply.MaPhanHoi,
+                        NoiDungCu = reply.NoiDung,
+                        NoiDungMoi = editedContent,
+                        NgayChinhSua = DateTime.Now,
+                        DuongDanAnhCu = reply.DuongDanAnh,
+                        StickerCu = reply.Sticker,
+                        DuongDanAnhMoi = reply.DuongDanAnh,
+                        StickerMoi = reply.Sticker
+                    };
+                    
                     // Cập nhật nội dung phản hồi
                     reply.NoiDung = editedContent;
                     reply.DaChinhSua = true; // Đánh dấu đã chỉnh sửa
+                    reply.ThoiGianChinhSua = DateTime.Now; // Cập nhật thời gian chỉnh sửa
+                    
+                    // Thêm lịch sử chỉnh sửa vào database
+                    _context.LichSuChinhSuaPhanHois.Add(lichSuChinhSua);
+                    
                     await _context.SaveChangesAsync();
                     
                     return Json(new { 

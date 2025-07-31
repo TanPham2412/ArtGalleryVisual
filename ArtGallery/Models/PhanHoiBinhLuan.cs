@@ -19,8 +19,10 @@ public partial class PhanHoiBinhLuan
     public string? Sticker { get; set; }
     
     public bool DaChinhSua { get; set; } = false;
+    
+    public DateTime? ThoiGianChinhSua { get; set; }
 
     public virtual NguoiDung MaNguoiDungNavigation { get; set; } = null!;
 
     public virtual BinhLuan MaBinhLuanNavigation { get; set; } = null!;
-} 
+}
