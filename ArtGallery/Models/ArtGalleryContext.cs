@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -46,6 +46,10 @@ public partial class ArtGalleryContext : IdentityDbContext<NguoiDung, IdentityRo
     public virtual DbSet<PhanHoiBinhLuan> PhanHoiBinhLuans { get; set; }
 
     public virtual DbSet<TinNhan> TinNhans { get; set; }
+    
+    public virtual DbSet<LichSuChinhSuaBinhLuan> LichSuChinhSuaBinhLuans { get; set; }
+    
+    public virtual DbSet<LichSuChinhSuaPhanHoi> LichSuChinhSuaPhanHois { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -88,6 +92,9 @@ public partial class ArtGalleryContext : IdentityDbContext<NguoiDung, IdentityRo
             entity.Property(e => e.DaChinhSua)
                 .HasColumnName("da_chinh_sua")
                 .HasDefaultValue(false);
+            entity.Property(e => e.ThoiGianChinhSua)
+                .HasColumnType("datetime")
+                .HasColumnName("thoi_gian_chinh_sua");
 
             entity.HasOne(d => d.MaNguoiDungNavigation).WithMany(p => p.BinhLuans)
                 .HasForeignKey(d => d.MaNguoiDung)
@@ -449,8 +456,11 @@ public partial class ArtGalleryContext : IdentityDbContext<NguoiDung, IdentityRo
             entity.Property(e => e.DuongDanAnh).HasColumnName("duong_dan_anh");
             entity.Property(e => e.Sticker).HasColumnName("sticker");
             entity.Property(e => e.DaChinhSua)
-        .HasColumnName("da_chinh_sua")
-        .HasDefaultValue(false);
+                .HasColumnName("da_chinh_sua")
+                .HasDefaultValue(false);
+            entity.Property(e => e.ThoiGianChinhSua)
+                .HasColumnType("datetime")
+                .HasColumnName("thoi_gian_chinh_sua");
 
             entity.HasOne(d => d.MaBinhLuanNavigation)
                 .WithMany()
@@ -500,7 +510,60 @@ public partial class ArtGalleryContext : IdentityDbContext<NguoiDung, IdentityRo
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__tin_nhan__ma_nguoi_nhan");
         });
-
+        
+        modelBuilder.Entity<LichSuChinhSuaBinhLuan>(entity =>
+        {
+            entity.HasKey(e => e.MaLichSu).HasName("PK__lich_su_chinh_sua_binh_luan__ID");
+            
+            entity.ToTable("lich_su_chinh_sua_binh_luan");
+            
+            entity.Property(e => e.MaLichSu).HasColumnName("ma_lich_su");
+            entity.Property(e => e.MaBinhLuan).HasColumnName("ma_binh_luan");
+            entity.Property(e => e.NoiDungCu).HasColumnName("noi_dung_cu");
+            entity.Property(e => e.NoiDungMoi).HasColumnName("noi_dung_moi");
+            entity.Property(e => e.NgayChinhSua)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("ngay_chinh_sua");
+            entity.Property(e => e.DuongDanAnhCu).HasColumnName("duong_dan_anh_cu");
+            entity.Property(e => e.DuongDanAnhMoi).HasColumnName("duong_dan_anh_moi");
+            entity.Property(e => e.StickerCu).HasColumnName("sticker_cu");
+            entity.Property(e => e.StickerMoi).HasColumnName("sticker_moi");
+            entity.Property(e => e.RatingCu).HasColumnName("rating_cu").HasDefaultValue(0);
+            entity.Property(e => e.RatingMoi).HasColumnName("rating_moi").HasDefaultValue(0);
+            
+            entity.HasOne(d => d.MaBinhLuanNavigation)
+                .WithMany()
+                .HasForeignKey(d => d.MaBinhLuan)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__lich_su_chinh_sua__ma_binh_luan");
+        });
+        
+        modelBuilder.Entity<LichSuChinhSuaPhanHoi>(entity =>
+        {
+            entity.HasKey(e => e.MaLichSu).HasName("PK__lich_su_chinh_sua_phan_hoi__ID");
+            
+            entity.ToTable("lich_su_chinh_sua_phan_hoi");
+            
+            entity.Property(e => e.MaLichSu).HasColumnName("ma_lich_su");
+            entity.Property(e => e.MaPhanHoi).HasColumnName("ma_phan_hoi");
+            entity.Property(e => e.NoiDungCu).HasColumnName("noi_dung_cu");
+            entity.Property(e => e.NoiDungMoi).HasColumnName("noi_dung_moi");
+            entity.Property(e => e.NgayChinhSua)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("ngay_chinh_sua");
+            entity.Property(e => e.DuongDanAnhCu).HasColumnName("duong_dan_anh_cu");
+            entity.Property(e => e.DuongDanAnhMoi).HasColumnName("duong_dan_anh_moi");
+            entity.Property(e => e.StickerCu).HasColumnName("sticker_cu");
+            entity.Property(e => e.StickerMoi).HasColumnName("sticker_moi");
+            
+            entity.HasOne(d => d.MaPhanHoiNavigation)
+                .WithMany()
+                .HasForeignKey(d => d.MaPhanHoi)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__lich_su_chinh_sua__ma_phan_hoi");
+        });
 
         OnModelCreatingPartial(modelBuilder);
     }
