@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using ArtGallery.Models;
 using ArtGallery.Repositories.Interfaces;
+using ArtGallery.Services;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using System.Linq;
@@ -17,13 +18,15 @@ namespace ArtGallery.Controllers
         private readonly ILogger<ArtworkController> _logger;
         private readonly ArtGalleryContext _context;
         private readonly IHubContext<CommentHub> _commentHubContext;
+        private readonly IContentModerationService _contentModerationService;
 
-        public ArtworkController(IArtworkRepository artworkRepository, ILogger<ArtworkController> logger, ArtGalleryContext context, IHubContext<CommentHub> commentHubContext)
+        public ArtworkController(IArtworkRepository artworkRepository, ILogger<ArtworkController> logger, ArtGalleryContext context, IHubContext<CommentHub> commentHubContext, IContentModerationService contentModerationService)
         {
             _artworkRepository = artworkRepository;
             _logger = logger;
             _context = context;
             _commentHubContext = commentHubContext;
+            _contentModerationService = contentModerationService;
         }
 
         public async Task<IActionResult> Display(int id)
@@ -511,20 +514,31 @@ namespace ArtGallery.Controllers
         [HttpPost]
         [Authorize]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AddComment(BinhLuan model, int Rating, IFormFile CommentImage, string Sticker)
+        public async Task<JsonResult> AddComment(BinhLuan model, int Rating, IFormFile CommentImage, string Sticker)
         {
             // Thêm log để kiểm tra
             _logger.LogInformation($"AddComment: Ảnh đã upload: {CommentImage?.FileName}, Kích thước: {CommentImage?.Length}");
             
             if (model == null || (string.IsNullOrEmpty(model.NoiDung) && CommentImage == null && string.IsNullOrEmpty(Sticker)))
             {
-                TempData["ErrorMessage"] = "Vui lòng nhập nội dung, chọn ảnh hoặc sticker";
-                return RedirectToAction("Display", new { id = model.MaTranh, scrollToComments = true });
+                return new JsonResult(new { success = false, message = "Vui lòng nhập nội dung, chọn ảnh hoặc sticker" });
+            }
+            
+            // Lấy ID người dùng hiện tại
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            
+            // Kiểm duyệt nội dung và kiểm tra spam
+            if (!string.IsNullOrEmpty(model.NoiDung))
+            {
+                var validationResult = await _contentModerationService.ValidateCommentSpamAsync(model.NoiDung, model.MaTranh, currentUserId);
+                if (!validationResult.isValid)
+                {
+                    return new JsonResult(new { success = false, message = validationResult.errorMessage });
+                }
             }
             
             try
             {
-                var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 
                 var comment = new BinhLuan
                 {
@@ -579,25 +593,33 @@ namespace ArtGallery.Controllers
                 // Gửi bình luận mới qua SignalR
                 await _commentHubContext.Clients.Group($"artwork_{model.MaTranh}").SendAsync("ReceiveComment", commentData);
                 
-                TempData["SuccessMessage"] = "Bình luận của bạn đã được gửi thành công!";
-                return RedirectToAction("Display", new { id = model.MaTranh, scrollToComments = true });
+                return new JsonResult(new { success = true, message = "Bình luận của bạn đã được gửi thành công!", data = commentData });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Lỗi khi thêm bình luận");
-                TempData["ErrorMessage"] = "Có lỗi xảy ra khi gửi bình luận";
-                return RedirectToAction("Display", new { id = model.MaTranh, scrollToComments = true });
+                return new JsonResult(new { success = false, message = "Có lỗi xảy ra khi gửi bình luận" });
             }
         }
 
         [HttpPost]
         [Authorize]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AddReply(int MaBinhLuan, int MaTranh, string NoiDung, IFormFile ReplyImage, string Sticker)
+        public async Task<JsonResult> AddReply(int MaBinhLuan, int MaTranh, string NoiDung, IFormFile ReplyImage, string Sticker)
         {
             if (string.IsNullOrEmpty(NoiDung) && ReplyImage == null && string.IsNullOrEmpty(Sticker))
             {
-                return Json(new { success = false, message = "Vui lòng nhập nội dung, chọn ảnh hoặc sticker" });
+                return new JsonResult(new { success = false, message = "Vui lòng nhập nội dung, chọn ảnh hoặc sticker" });
+            }
+            
+            // Kiểm duyệt nội dung
+            if (!string.IsNullOrEmpty(NoiDung))
+            {
+                var validationResult = _contentModerationService.ValidateContent(NoiDung);
+                if (!validationResult.isValid)
+                {
+                    return new JsonResult(new { success = false, message = validationResult.errorMessage });
+                }
             }
             
             try
@@ -655,12 +677,12 @@ namespace ArtGallery.Controllers
                 // Gửi thông tin phản hồi mới qua SignalR
                 await _commentHubContext.Clients.Group($"artwork_{MaTranh}").SendAsync("ReceiveReply", MaBinhLuan, replyData);
                 
-                return Json(new { success = true, message = "Phản hồi của bạn đã được gửi thành công!", data = replyData });
+                return new JsonResult(new { success = true, message = "Phản hồi của bạn đã được gửi thành công!", data = replyData });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Lỗi khi thêm phản hồi bình luận");
-                return Json(new { success = false, message = "Có lỗi xảy ra khi gửi phản hồi" });
+                return new JsonResult(new { success = false, message = "Có lỗi xảy ra khi gửi phản hồi" });
             }
         }
 
@@ -768,6 +790,16 @@ namespace ArtGallery.Controllers
                 
                 var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 var isAdmin = User.IsInRole("Admin");
+                
+                // Kiểm duyệt nội dung và kiểm tra spam
+                if (!string.IsNullOrWhiteSpace(editedContent))
+                {
+                    var validationResult = await _contentModerationService.ValidateCommentSpamAsync(editedContent, artworkId, currentUserId);
+                    if (!validationResult.isValid)
+                    {
+                        return Json(new { success = false, message = validationResult.errorMessage });
+                    }
+                }
                 
                 // Chỉ admin hoặc người viết bình luận mới có quyền sửa
                 if (isAdmin || comment.MaNguoiDung == currentUserId)

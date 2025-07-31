@@ -1207,6 +1207,222 @@ function restoreScrollPosition() {
     }
 }
 
+// Hiển thị modal thông báo nội dung nhạy cảm
+function showSensitiveContentModal(title, message) {
+    // Xóa modal cũ nếu tồn tại
+    let oldModal = document.getElementById('sensitiveContentModal');
+    if (oldModal) {
+        oldModal.remove();
+    }
+    
+    // Xóa backdrop cũ nếu tồn tại
+    const oldBackdrop = document.querySelector('.modal-backdrop');
+    if (oldBackdrop) {
+        oldBackdrop.remove();
+    }
+    
+    // Tạo modal mới với HTML đơn giản hơn (không có nút đóng và nút X)
+    const modalHtml = `
+    <div class="modal-custom" id="sensitiveContentModal">
+        <div class="modal-custom-backdrop" id="sensitiveModalBackdrop"></div>
+        <div class="modal-custom-dialog">
+            <div class="modal-custom-content">
+                <div class="modal-custom-header bg-warning">
+                    <h5 class="modal-custom-title" id="sensitiveContentModalLabel">Cảnh báo</h5>
+                </div>
+                <div class="modal-custom-body" id="sensitiveContentMessage"></div>
+            </div>
+        </div>
+    </div>`;
+    
+    // Thêm CSS cho modal tùy chỉnh nếu chưa có
+    if (!document.getElementById('custom-modal-styles')) {
+        const modalStyles = `
+        <style id="custom-modal-styles">
+            .modal-custom {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 1050;
+            }
+            .modal-custom-backdrop {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.5);
+                z-index: 1040;
+            }
+            .modal-custom-dialog {
+                position: relative;
+                width: 500px;
+                max-width: 90%;
+                margin: 1.75rem auto;
+                z-index: 1050;
+            }
+            .modal-custom-content {
+                position: relative;
+                display: flex;
+                flex-direction: column;
+                background-color: #fff;
+                border-radius: 0.3rem;
+                box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.5);
+            }
+            .modal-custom-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 1rem;
+                border-bottom: 1px solid #dee2e6;
+                border-top-left-radius: 0.3rem;
+                border-top-right-radius: 0.3rem;
+            }
+            .bg-warning {
+                background-color: #ffc107;
+            }
+            .modal-custom-title {
+                margin: 0;
+                line-height: 1.5;
+            }
+            .btn-close-custom {
+                background: transparent;
+                border: 0;
+                font-size: 1.5rem;
+                font-weight: 700;
+                line-height: 1;
+                color: #000;
+                opacity: 0.5;
+                cursor: pointer;
+            }
+            .btn-close-custom:hover {
+                opacity: 1;
+            }
+            .modal-custom-body {
+                position: relative;
+                flex: 1 1 auto;
+                padding: 1rem;
+            }
+            .modal-custom-footer {
+                display: flex;
+                justify-content: flex-end;
+                padding: 1rem;
+                border-top: 1px solid #dee2e6;
+                border-bottom-left-radius: 0.3rem;
+                border-bottom-right-radius: 0.3rem;
+            }
+            .btn {
+                display: inline-block;
+                font-weight: 400;
+                text-align: center;
+                vertical-align: middle;
+                cursor: pointer;
+                padding: 0.375rem 0.75rem;
+                font-size: 1rem;
+                line-height: 1.5;
+                border-radius: 0.25rem;
+                transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+            }
+            .btn-secondary {
+                color: #fff;
+                background-color: #6c757d;
+                border-color: #6c757d;
+            }
+            .btn-secondary:hover {
+                color: #fff;
+                background-color: #5a6268;
+                border-color: #545b62;
+            }
+        </style>`;
+        document.head.insertAdjacentHTML('beforeend', modalStyles);
+    }
+    
+    // Thêm modal vào body
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    
+    // Lấy tham chiếu đến modal mới
+    const sensitiveModal = document.getElementById('sensitiveContentModal');
+    const backdrop = document.getElementById('sensitiveModalBackdrop');
+    
+    // Cập nhật nội dung modal
+    document.getElementById('sensitiveContentModalLabel').textContent = title;
+    document.getElementById('sensitiveContentMessage').textContent = message;
+    
+    // Thêm sự kiện đóng modal khi nhấp vào backdrop
+    backdrop.addEventListener('click', function() {
+        closeCustomModal();
+    });
+    
+    // Thêm sự kiện đóng modal khi nhấn phím Escape
+    document.addEventListener('keydown', function escapeHandler(event) {
+        if (event.key === 'Escape') {
+            closeCustomModal();
+            document.removeEventListener('keydown', escapeHandler);
+        }
+    });
+    
+    // Thêm sự kiện đóng modal sau 5 giây
+    setTimeout(function() {
+        closeCustomModal();
+    }, 5000);
+    
+    // Hàm đóng modal tùy chỉnh
+    function closeCustomModal() {
+        if (sensitiveModal) {
+            sensitiveModal.remove();
+        }
+    }
+}
+
+// Hàm đóng modal (giữ lại để tương thích với code cũ)
+function closeModal(modal) {
+    if (!modal) return;
+    
+    // Kiểm tra xem có phải là modal tùy chỉnh không
+    if (modal.classList.contains('modal-custom')) {
+        modal.remove();
+        return;
+    }
+    
+    // Xử lý cho modal Bootstrap
+    if (modal._bootstrapModal) {
+        try {
+            modal._bootstrapModal.hide();
+            return;
+        } catch (error) {
+            console.error('Lỗi khi đóng modal với Bootstrap:', error);
+        }
+    }
+    
+    // Fallback cho modal Bootstrap
+    modal.classList.remove('show');
+    modal.style.display = 'none';
+    modal.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('modal-open');
+    
+    // Xóa backdrop
+    const backdrop = document.querySelector('.modal-backdrop');
+    if (backdrop) {
+        backdrop.remove();
+    }
+}
+
+// Thêm sự kiện cho các modal khác
+document.addEventListener('click', function(event) {
+    const sensitiveModal = document.getElementById('sensitiveContentModal');
+    if (sensitiveModal && sensitiveModal.classList.contains('show')) {
+        // Kiểm tra xem người dùng có nhấp vào bên ngoài modal không
+        if (event.target === sensitiveModal) {
+            closeModal(sensitiveModal);
+        }
+    }
+});
+
 // Kiểm tra form trước khi submit
 document.addEventListener('DOMContentLoaded', function () {
     // Kiểm tra form bình luận chính
@@ -1215,6 +1431,7 @@ document.addEventListener('DOMContentLoaded', function () {
         commentForm.addEventListener('submit', function (e) {
             // Ngăn form submit ngay lập tức để kiểm tra
             e.preventDefault();
+            e.stopPropagation();
 
             const content = document.getElementById('commentContent').value.trim();
             const imageInput = document.getElementById('imageInput');
@@ -1229,8 +1446,44 @@ document.addEventListener('DOMContentLoaded', function () {
             const scrollPosition = window.scrollY || window.pageYOffset;
             localStorage.setItem('scrollPosition', scrollPosition);
 
-            // Cho phép form submit nếu dữ liệu hợp lệ
-            commentForm.submit();
+            // Gửi dữ liệu bằng AJAX thay vì submit form trực tiếp
+            const formData = new FormData(commentForm);
+            
+            // Ghi log để debug
+            console.log('Sending AJAX request to /Artwork/AddComment');
+            
+            $.ajax({
+                url: '/Artwork/AddComment',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    console.log('Response received:', response);
+                    if (response.success) {
+                        // Nếu thành công, chuyển hướng đến trang hiển thị
+                        window.location.href = `/Artwork/Display/${formData.get('MaTranh')}?scrollToComments=true`;
+                    } else {
+                        // Kiểm tra nếu là lỗi từ ngữ nhạy cảm
+                        if (response.message && response.message.includes('từ ngữ nhạy cảm')) {
+                            showSensitiveContentModal('Cảnh báo nội dung', response.message);
+                        } else if (response.message && response.message.includes('spam')) {
+                            showSensitiveContentModal('Cảnh báo spam', response.message);
+                        } else {
+                            alert('Có lỗi xảy ra khi gửi bình luận: ' + response.message);
+                        }
+                    }
+                    return false;
+                },
+                error: function(xhr, status, error) {
+                    console.error('AJAX Error:', xhr.status, xhr.statusText);
+                    console.error('Response Text:', xhr.responseText);
+                    alert('Có lỗi xảy ra khi gửi bình luận: ' + error);
+                    return false;
+                }
+            });
+            
+            return false; // Ngăn form submit theo cách thông thường
         });
     }
 
@@ -1286,7 +1539,14 @@ document.addEventListener('DOMContentLoaded', function () {
                         
                         // Không cần làm gì thêm vì SignalR sẽ nhận sự kiện và hiển thị phản hồi mới
                     } else {
-                        alert('Có lỗi xảy ra khi gửi phản hồi: ' + response.message);
+                        // Kiểm tra nếu là lỗi từ ngữ nhạy cảm
+                        if (response.message && response.message.includes('từ ngữ nhạy cảm')) {
+                            showSensitiveContentModal('Cảnh báo nội dung', response.message);
+                        } else if (response.message && response.message.includes('spam')) {
+                            showSensitiveContentModal('Cảnh báo spam', response.message);
+                        } else {
+                            alert('Có lỗi xảy ra khi gửi phản hồi: ' + response.message);
+                        }
                     }
                 },
                 error: function() {

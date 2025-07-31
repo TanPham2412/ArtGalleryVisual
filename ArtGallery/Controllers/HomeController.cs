@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using ArtGallery.ViewModels;
+using ArtGallery.Services;
 
 namespace ArtGallery.Controllers
 {
@@ -20,14 +21,16 @@ namespace ArtGallery.Controllers
         private readonly SignInManager<NguoiDung> _signInManager;
         private readonly UserManager<NguoiDung> _userManager;
         private readonly ArtGalleryContext _context;
+        private readonly IContentModerationService _contentModerationService;
 
-        public HomeController(IHomeRepository homeRepository, ILogger<HomeController> logger, SignInManager<NguoiDung> signInManager, UserManager<NguoiDung> userManager, ArtGalleryContext context)
+        public HomeController(IHomeRepository homeRepository, ILogger<HomeController> logger, SignInManager<NguoiDung> signInManager, UserManager<NguoiDung> userManager, ArtGalleryContext context, IContentModerationService contentModerationService)
         {
             _homeRepository = homeRepository;
             _logger = logger;
             _signInManager = signInManager;
             _userManager = userManager;
             _context = context;
+            _contentModerationService = contentModerationService;
         }
 
         public async Task<IActionResult> Index()
@@ -332,6 +335,24 @@ namespace ArtGallery.Controllers
                 _logger.LogError(ex, $"Lỗi khi lấy danh sách tranh theo thể loại '{category}'");
                 return Json(new { success = false, message = "Có lỗi xảy ra khi lọc tranh theo thể loại" });
             }
+        }
+        
+        [HttpGet]
+        public IActionResult TestContentModeration()
+        {
+            return View();
+        }
+        
+        [HttpPost]
+        public IActionResult TestContentModeration(string content)
+        {
+            if (string.IsNullOrEmpty(content))
+            {
+                return Json(new { isValid = false, errorMessage = "Vui lòng nhập nội dung để kiểm tra" });
+            }
+            
+            var validationResult = _contentModerationService.ValidateContent(content);
+            return Json(new { isValid = validationResult.isValid, errorMessage = validationResult.errorMessage });
         }
     }
 }
