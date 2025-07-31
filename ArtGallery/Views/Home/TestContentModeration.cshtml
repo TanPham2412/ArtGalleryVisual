@@ -1,0 +1,73 @@
+@{
+    ViewData["Title"] = "Kiểm tra kiểm duyệt nội dung";
+}
+
+<div class="container mt-5">
+    <h2>Kiểm tra kiểm duyệt nội dung</h2>
+    
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Nhập nội dung để kiểm tra</h4>
+                </div>
+                <div class="card-body">
+                    <form id="testForm">
+                        <div class="form-group">
+                            <label for="content">Nội dung:</label>
+                            <textarea id="content" class="form-control" rows="5"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary mt-3">Kiểm tra</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Kết quả kiểm tra</h4>
+                </div>
+                <div class="card-body">
+                    <div id="result" class="alert" style="display: none;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $("#testForm").submit(function(e) {
+                e.preventDefault();
+                
+                var content = $("#content").val();
+                
+                $.ajax({
+                    url: '@Url.Action("TestContentModeration", "Home")',
+                    type: 'POST',
+                    data: { content: content },
+                    success: function(response) {
+                        var resultDiv = $("#result");
+                        resultDiv.show();
+                        
+                        if (response.isValid) {
+                            resultDiv.removeClass("alert-danger").addClass("alert-success");
+                            resultDiv.html("<strong>Nội dung hợp lệ!</strong>");
+                        } else {
+                            resultDiv.removeClass("alert-success").addClass("alert-danger");
+                            resultDiv.html("<strong>Nội dung không hợp lệ:</strong> " + response.errorMessage);
+                        }
+                    },
+                    error: function() {
+                        var resultDiv = $("#result");
+                        resultDiv.show();
+                        resultDiv.removeClass("alert-success").addClass("alert-danger");
+                        resultDiv.html("<strong>Lỗi:</strong> Không thể kết nối đến máy chủ.");
+                    }
+                });
+            });
+        });
+    </script>
+}

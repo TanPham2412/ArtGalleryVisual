@@ -1,5 +1,6 @@
 using ArtGallery.Data;
 using ArtGallery.Models;
+using ArtGallery.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -22,13 +23,15 @@ namespace ArtGallery.Controllers
         private readonly IWebHostEnvironment _hostEnvironment;
         private readonly ILogger<ReplyController> _logger;
         private readonly IHubContext<CommentHub> _commentHubContext;
+        private readonly IContentModerationService _contentModerationService;
 
-        public ReplyController(ArtGalleryContext context, IWebHostEnvironment hostEnvironment, ILogger<ReplyController> logger, IHubContext<CommentHub> commentHubContext)
+        public ReplyController(ArtGalleryContext context, IWebHostEnvironment hostEnvironment, ILogger<ReplyController> logger, IHubContext<CommentHub> commentHubContext, IContentModerationService contentModerationService)
         {
             _context = context;
             _hostEnvironment = hostEnvironment;
             _logger = logger;
             _commentHubContext = commentHubContext;
+            _contentModerationService = contentModerationService;
         }
 
         [HttpPost]
@@ -36,6 +39,16 @@ namespace ArtGallery.Controllers
         {
             try
             {
+                // Kiểm duyệt nội dung
+                if (!string.IsNullOrEmpty(content))
+                {
+                    var validationResult = _contentModerationService.ValidateContent(content);
+                    if (!validationResult.isValid)
+                    {
+                        return Json(new { success = false, message = validationResult.errorMessage });
+                    }
+                }
+                
                 var reply = await _context.PhanHoiBinhLuans.FindAsync(replyId);
                 
                 if (reply == null)
@@ -150,6 +163,16 @@ namespace ArtGallery.Controllers
                 if (string.IsNullOrWhiteSpace(editedContent) && replyImage == null && string.IsNullOrEmpty(sticker))
                 {
                     return Json(new { success = false, message = "Vui lòng nhập nội dung, chọn ảnh hoặc sticker" });
+                }
+                
+                // Kiểm duyệt nội dung
+                if (!string.IsNullOrEmpty(editedContent))
+                {
+                    var validationResult = _contentModerationService.ValidateContent(editedContent);
+                    if (!validationResult.isValid)
+                    {
+                        return Json(new { success = false, message = validationResult.errorMessage });
+                    }
                 }
                 
                 var reply = await _context.PhanHoiBinhLuans.FindAsync(replyId);
