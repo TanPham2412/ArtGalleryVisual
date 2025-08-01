@@ -104,6 +104,12 @@ function toggleReplyForm(commentId) {
     }
 }
 
+// Hàm showReplyForm để tương thích với signalr-comment.js
+function showReplyForm(commentId) {
+    // Gọi lại hàm toggleReplyForm để đảm bảo tương thích
+    toggleReplyForm(commentId);
+}
+
 function hideReplyForm(commentId) {
     const replyForm = document.getElementById(`replyForm-${commentId}`);
     if (replyForm) {
