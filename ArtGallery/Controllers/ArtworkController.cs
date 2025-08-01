@@ -216,14 +216,23 @@ namespace ArtGallery.Controllers
                 var commentIds = artwork.BinhLuans.Select(b => b.MaBinhLuan).ToList();
                 
                 // 1. Xóa phản hồi bình luận
+                var historyReplies = await _context.LichSuChinhSuaPhanHois
+                    .Where(r => commentIds.Contains(r.MaPhanHoi))
+                    .ToListAsync();
+                _context.LichSuChinhSuaPhanHois.RemoveRange(historyReplies);
+
                 var replies = await _context.PhanHoiBinhLuans
                     .Where(r => commentIds.Contains(r.MaBinhLuan))
                     .ToListAsync();
                 _context.PhanHoiBinhLuans.RemoveRange(replies);
-                
+
                 // 2. Xóa bình luận
+                var historyComments = await _context.LichSuChinhSuaBinhLuans
+                    .Where(r => commentIds.Contains(r.MaBinhLuan))
+                    .ToListAsync();
+                _context.LichSuChinhSuaBinhLuans.RemoveRange(historyComments);
+
                 _context.BinhLuans.RemoveRange(artwork.BinhLuans);
-                
                 // 3. Xóa lượt thích
                 _context.LuotThiches.RemoveRange(artwork.LuotThiches);
                 
@@ -708,12 +717,30 @@ namespace ArtGallery.Controllers
                 // Chỉ admin hoặc người viết bình luận mới có quyền xóa
                 if (isAdmin || comment.MaNguoiDung == currentUserId)
                 {
-                    // Trước khi xóa bình luận, xóa tất cả các phản hồi liên quan
+                    // Xóa lịch sử chỉnh sửa bình luận trước
+                    var commentHistory = await _context.LichSuChinhSuaBinhLuans
+                        .Where(h => h.MaBinhLuan == commentId)
+                        .ToListAsync();
+                    _context.LichSuChinhSuaBinhLuans.RemoveRange(commentHistory);
+                    
+                    // Lấy danh sách phản hồi để xóa
                     var replies = await _context.PhanHoiBinhLuans
                         .Where(r => r.MaBinhLuan == commentId)
                         .ToListAsync();
-                        
+                    
+                    // Xóa lịch sử chỉnh sửa của từng phản hồi
+                    foreach (var reply in replies)
+                    {
+                        var replyHistory = await _context.LichSuChinhSuaPhanHois
+                            .Where(h => h.MaPhanHoi == reply.MaPhanHoi)
+                            .ToListAsync();
+                        _context.LichSuChinhSuaPhanHois.RemoveRange(replyHistory);
+                    }
+                    
+                    // Xóa các phản hồi
                     _context.PhanHoiBinhLuans.RemoveRange(replies);
+                    
+                    // Xóa bình luận
                     _context.BinhLuans.Remove(comment);
                     await _context.SaveChangesAsync();
                     
@@ -998,6 +1025,14 @@ namespace ArtGallery.Controllers
                 if (isAdmin || reply.MaNguoiDung == currentUserId)
                 {
                     var commentId = reply.MaBinhLuan;
+                    
+                    // Xóa lịch sử chỉnh sửa phản hồi trước
+                    var replyHistory = await _context.LichSuChinhSuaPhanHois
+                        .Where(h => h.MaPhanHoi == replyId)
+                        .ToListAsync();
+                    _context.LichSuChinhSuaPhanHois.RemoveRange(replyHistory);
+                    
+                    // Xóa phản hồi
                     _context.PhanHoiBinhLuans.Remove(reply);
                     await _context.SaveChangesAsync();
                     
