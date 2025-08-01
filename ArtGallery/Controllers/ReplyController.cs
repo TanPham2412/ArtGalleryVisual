@@ -325,6 +325,17 @@ namespace ArtGallery.Controllers
                 // Chỉ admin hoặc người viết phản hồi mới có quyền xóa
                 if (isAdmin || reply.MaNguoiDung == currentUserId)
                 {
+                    // Xóa lịch sử chỉnh sửa phản hồi trước
+                    var lichSuChinhSua = await _context.LichSuChinhSuaPhanHois
+                        .Where(ls => ls.MaPhanHoi == replyId)
+                        .ToListAsync();
+                    
+                    if (lichSuChinhSua.Any())
+                    {
+                        _logger.LogInformation($"Xóa {lichSuChinhSua.Count} bản ghi lịch sử chỉnh sửa của phản hồi {replyId}");
+                        _context.LichSuChinhSuaPhanHois.RemoveRange(lichSuChinhSua);
+                    }
+                    
                     // Xóa file ảnh nếu có
                     if (!string.IsNullOrEmpty(reply.DuongDanAnh))
                     {

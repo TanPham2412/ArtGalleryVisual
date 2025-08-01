@@ -690,16 +690,17 @@ function createCommentHtml(comment) {
                 <div class="comment-text" id="comment-content-${comment.id}">${comment.content}</div>
             </div>
             <div class="comment-actions">
-                <button class="btn-reply" onclick="showReplyForm(${comment.id})">
-                    <i class="fas fa-reply me-1"></i>Trả lời
+                <button class="btn-reply" onclick="toggleReplyForm(${comment.id})">
+                    <i class="fas fa-reply me-1"></i>Phản hồi
                 </button>
                 <span class="reply-count" id="reply-count-${comment.id}">0</span>
             </div>
             <div class="replies-container" id="replies-container-${comment.id}">
                 <!-- Replies will be added here -->
             </div>
-            <div class="reply-form-container" id="reply-form-${comment.id}" style="display: none;">
-                <!-- Reply form will be added here -->
+            <div class="reply-form-container" id="replyForm-${comment.id}" style="display: none;">
+                <!-- Form phản hồi sẽ được tạo từ Display.cshtml -->
+                ${createReplyFormHtml(comment.id)}
             </div>
         </div>
     `;
@@ -807,6 +808,68 @@ function updateReplyCount(commentId, change) {
     }
 }
 
+// Tạo HTML cho form phản hồi
+function createReplyFormHtml(commentId) {
+    // Lấy ID tác phẩm từ input hidden
+    const artworkIdElement = document.getElementById('artwork-id');
+    if (!artworkIdElement) {
+        console.error('Không tìm thấy phần tử artwork-id');
+        return '';
+    }
+    
+    const artworkId = artworkIdElement.value;
+    
+    // Lấy avatar người dùng hiện tại
+    let userAvatar = '/images/default-avatar.png';
+    const currentUserAvatarElement = document.querySelector('.user-avatar img, .avatar-img');
+    if (currentUserAvatarElement) {
+        userAvatar = currentUserAvatarElement.src;
+    }
+    
+    // Tạo HTML cho form phản hồi dựa trên cấu trúc trong Display.cshtml
+    return `
+        <form class="reply-form" action="/Artwork/AddReply" method="post" enctype="multipart/form-data" onsubmit="submitReplyForm(event, this, ${commentId})">
+            <input type="hidden" name="__RequestVerificationToken" value="${document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''}" />
+            <input type="hidden" name="MaBinhLuan" value="${commentId}" />
+            <input type="hidden" name="MaTranh" value="${artworkId}" />
+            <div class="d-flex">
+                <div class="reply-avatar">
+                    <img src="${userAvatar}" alt="Avatar" class="reply-user-avatar" />
+                </div>
+                <div class="reply-input-container">
+                    <textarea class="form-control reply-input" name="NoiDung" placeholder="Viết phản hồi..." rows="1"></textarea>
+                    <div class="reply-attachment-options mt-1">
+                        <button type="button" class="btn-reply-attachment" onclick="openReplyImageSelector(${commentId})">
+                            <i class="fas fa-image"></i>
+                        </button>
+                        <button type="button" class="btn-reply-attachment" onclick="openReplyStickerSelector(${commentId})">
+                            <i class="fas fa-smile"></i>
+                        </button>
+                        <div id="replyImagePreview-${commentId}" class="reply-preview d-none">
+                            <img class="img-fluid rounded preview-img" />
+                            <button type="button" class="btn-remove-preview" onclick="removeReplyImage(${commentId})">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div id="replyStickerPreview-${commentId}" class="reply-preview d-none">
+                            <img class="img-fluid preview-sticker" />
+                            <button type="button" class="btn-remove-preview" onclick="removeReplySticker(${commentId})">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <input type="hidden" name="Sticker" class="stickerInputReply" id="stickerInputReply-${commentId}" />
+                    <input type="file" class="d-none imageInputReply" id="imageInputReply-${commentId}" name="ReplyImage" accept="image/*" />
+                    <div class="reply-actions mt-2">
+                        <button type="button" class="btn-cancel-reply" onclick="hideReplyForm(${commentId})">Hủy</button>
+                        <button type="submit" class="btn-submit-reply">Gửi</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    `;
+}
+
 // Khởi tạo khi trang được tải
 document.addEventListener('DOMContentLoaded', function () {
     console.log('DOMContentLoaded - Đang khởi tạo SignalR');
@@ -858,3 +921,59 @@ window.addEventListener('beforeunload', function () {
         commentConnection.stop();
     }
 });
+
+// Hàm xử lý gửi form phản hồi bằng AJAX
+function submitReplyForm(event, form, commentId) {
+    // Ngăn chặn hành vi mặc định của form
+    event.preventDefault();
+    
+    // Kiểm tra dữ liệu đầu vào
+    const replyInput = form.querySelector('textarea[name="NoiDung"]').value.trim();
+    const imageInput = form.querySelector('input[name="ReplyImage"]');
+    const stickerInput = form.querySelector('input[name="Sticker"]').value;
+    
+    if (replyInput === '' && (!imageInput || !imageInput.files.length) && !stickerInput) {
+        alert('Vui lòng nhập nội dung, chọn ảnh hoặc sticker');
+        return false;
+    }
+    
+    // Tạo FormData từ form
+    const formData = new FormData(form);
+    
+    // Gửi dữ liệu bằng AJAX
+    $.ajax({
+        url: '/Artwork/AddReply',
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function(response) {
+            if (response.success) {
+                // Ẩn form phản hồi sau khi gửi thành công
+                hideReplyForm(commentId);
+                
+                // Xóa nội dung form
+                form.querySelector('textarea[name="NoiDung"]').value = '';
+                if (imageInput) imageInput.value = '';
+                form.querySelector('input[name="Sticker"]').value = '';
+                
+                // Ẩn preview nếu có
+                const imagePreview = document.getElementById(`replyImagePreview-${commentId}`);
+                const stickerPreview = document.getElementById(`replyStickerPreview-${commentId}`);
+                if (imagePreview) imagePreview.classList.add('d-none');
+                if (stickerPreview) stickerPreview.classList.add('d-none');
+                
+                // Không cần làm gì thêm vì SignalR sẽ nhận sự kiện và hiển thị phản hồi mới
+            } else {
+                // Hiển thị thông báo lỗi
+                alert(response.message || 'Có lỗi xảy ra khi gửi phản hồi');
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('Lỗi khi gửi phản hồi:', error);
+            alert('Có lỗi xảy ra khi gửi phản hồi. Vui lòng thử lại sau.');
+        }
+    });
+    
+    return false;
+}
